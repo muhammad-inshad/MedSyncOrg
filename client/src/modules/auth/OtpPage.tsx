@@ -134,7 +134,7 @@ const OtpPage = () => {
         console.log(role)
         let result;
         if (role === 'patient' || role === 'admin') {
-          console.log(signupData)
+          console.log("iiiiiiiiiidddddddddddddddddddddddddddddddddddddddddd")
           result = await api.post('/auth/signup', signupData);
 
           if (result.data.success) {

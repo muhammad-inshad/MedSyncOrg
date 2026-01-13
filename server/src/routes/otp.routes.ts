@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {userContainer} from '../di/auth.di.ts';
 
+
 const {authController, otpController} = userContainer();
 const router = Router();
 

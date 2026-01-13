@@ -1,6 +1,6 @@
-import { SuperAdminController } from "../controllers/superAdmin.controller.ts";
-import { SuperAdminService } from "../services/superAdmin.service.ts";
-import { SuperAdminRepository } from "../repositories/superAdmin.repository.ts";
+import { SuperAdminController } from "../modules/superAdmin/controller/superAdmin.controller.ts";
+import { SuperAdminService } from "../modules/superAdmin/service/superAdmin.service.ts";
+import { SuperAdminRepository } from "../modules/superAdmin/repository/superAdmin.repository.ts";
 import { TokenService } from "../services/token.service.ts";
 
 export const superAdminContainer = () => {

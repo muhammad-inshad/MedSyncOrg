@@ -10,7 +10,8 @@ export const PATIENTROUTES = {
 
 
 export const COMMON={
-  REVIEWPENDING:'/reviewpending'
+  REVIEWPENDING:'/reviewpending',
+  FORGETPASSWORD:'/forgot-password'
 }
 
 export const  ADMINROUTES={

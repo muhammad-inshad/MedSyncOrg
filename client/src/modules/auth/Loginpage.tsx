@@ -46,6 +46,7 @@ const LogIn = () => {
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
+  const isSuperAdmin=role!=="Superadmin"
   const isPatient = role === "patient"
   const {
     register,
@@ -91,7 +92,7 @@ const LogIn = () => {
   };
 
   const handleGoogleLogIn = () => {
-    window.location.href = `${BACKEND_URL}/api/auth/google?role=${role}`;
+    window.location.href = `${BACKEND_URL}/auth/google?role=${role}`;
   };
 
   return (
@@ -146,13 +147,14 @@ const LogIn = () => {
             )}
           </div>
 
-          {/* Forgot Password Links */}
+          {isSuperAdmin&&(
           <div className="flex justify-center gap-8 text-sm">
-            <button type="button" className="text-red-500 hover:underline">
+            <button type="button"  onClick={() => navigate(`/forgot-password?role=${role}`)} className="text-red-500 hover:underline">
               Forgot Password?
             </button>
 
           </div>
+          )}
 
           {/* Submit Button */}
           <button

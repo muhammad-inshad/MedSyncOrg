@@ -1,8 +1,9 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { PATIENTROUTES } from "@/constants/routes/routes";
+import { COMMON, PATIENTROUTES } from "@/constants/routes/routes";
 import LogIn from "@/modules/auth/Loginpage";
 import SignUp from "@/modules/auth/PatientSignupPage";
 import OtpPage from "@/modules/auth/OtpPage";
+import Forgetpassword from "@/modules/auth/Forgetpassword";
 
 const AppRoutes = () => {
   return (
@@ -18,6 +19,7 @@ const AppRoutes = () => {
       <Route path={PATIENTROUTES.LOGIN} element={<LogIn />} />
       <Route path={PATIENTROUTES.SIGNUP} element={<SignUp/>}/>
       <Route path={PATIENTROUTES.OTP} element={<OtpPage/>}/>
+      <Route path={COMMON.FORGETPASSWORD} element={<Forgetpassword/>}/>
     </Routes>
   );
 };

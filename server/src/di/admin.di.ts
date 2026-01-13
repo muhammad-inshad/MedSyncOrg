@@ -1,6 +1,6 @@
-import { AdminController } from "../controllers/admin.controller.ts";
-import { AdminService } from "../services/admin.service.ts";
-import { AdminRepository } from "../repositories/admin.repository.ts";
+import { AdminController } from "../modules/admin/controller/admin.controller.ts";
+import { AdminService } from "../modules/admin/service/admin.service.ts";
+import { AdminRepository } from "../modules/admin/repositories/admin.repository.ts";
 import { TokenService } from "../services/token.service.ts";
 
 export const adminContainer = () => {
