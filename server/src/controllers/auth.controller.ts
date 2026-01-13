@@ -82,8 +82,23 @@ class AuthController {
     });
   }
 }
+ async resetPassword(req:Request,res:Response){
+ try {
+    const restData: LoginDTO = req.body;
+    const result = await this.authService.restPassword(restData);
 
-
+    return res.status(200).json({
+      success: true,
+      message: result.message
+    });
+  } catch (error: any) {
+    console.error("Reset Password Error:", error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || "Internal Server Error"
+    });
+  }
+ }
 }
 
 export default AuthController;

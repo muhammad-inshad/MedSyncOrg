@@ -14,5 +14,7 @@ export class UserRepository {
   async createUser(data: SignupDTO & { password: string }): Promise<IPatient> {
     return Patient.create(data);
   }
-  
+  async updatePassword(email: string, passwordHash: string): Promise<void> {
+    await Patient.updateOne({ email }, { $set: { password: passwordHash } });
+  }
 }

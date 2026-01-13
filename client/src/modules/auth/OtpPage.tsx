@@ -12,7 +12,7 @@ const OtpPage = () => {
   const searchParams = new URLSearchParams(location.search);
   const role = searchParams.get('role');
   const signupData = location.state?.signupData;
-
+  const purpose = location.state?.purpose;
 
   if (!signupData) {
     return <Navigate to={PATIENTROUTES.SIGNUP} replace />;
@@ -130,13 +130,21 @@ const OtpPage = () => {
       });
 
       if (response.data.success) {
-        toast.success('OTP Verified! Creating your account...');
         console.log(role)
         let result;
-        if (role === 'patient' || role === 'admin') {
-          console.log("iiiiiiiiiidddddddddddddddddddddddddddddddddddddddddd")
+        if(purpose){
+          
+          toast.success('OTP Verified! Please set your new password.');
+    navigate('/reset-password', {
+      state: { 
+        email: signupData.email,
+        role: role 
+      }
+    });
+        }
+        else if (role === 'patient' || role === 'admin') {
           result = await api.post('/auth/signup', signupData);
-
+            toast.success('OTP Verified! Creating your account...');
           if (result.data.success) {
             toast.success('Account created successfully!');
             navigate(`/login/${role}`, { replace: true });

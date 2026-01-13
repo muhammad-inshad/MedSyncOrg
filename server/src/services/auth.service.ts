@@ -25,6 +25,18 @@ export class AuthService {
       password: hashedPassword,
     });
   }
+  async restPassword( restData: LoginDTO){
+    const { email, password } = restData;
+    const user = await this.userRepo.findByEmail(email);
+    if (!user) {
+      throw { status: 400, message: "User not found" };
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    await this.userRepo.updatePassword(email, hashedPassword);
+
+    return { success: true, message: "Password updated successfully" };
+  }
   async login(
     loginData: LoginDTO
   ): Promise<{ user: any; accessToken: string; refreshToken: string }> {

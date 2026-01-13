@@ -61,7 +61,6 @@ console.log(otp)
 
       const email = signupData.email;
       const stored = otpStore.get(email);
-
       if (!stored) {
         return res.status(400).json({
           success: false,

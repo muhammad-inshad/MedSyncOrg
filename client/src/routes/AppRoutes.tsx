@@ -4,6 +4,7 @@ import LogIn from "@/modules/auth/Loginpage";
 import SignUp from "@/modules/auth/PatientSignupPage";
 import OtpPage from "@/modules/auth/OtpPage";
 import Forgetpassword from "@/modules/auth/Forgetpassword";
+import ResetPassword from "@/modules/auth/ResetPassword";
 
 const AppRoutes = () => {
   return (
@@ -20,6 +21,7 @@ const AppRoutes = () => {
       <Route path={PATIENTROUTES.SIGNUP} element={<SignUp/>}/>
       <Route path={PATIENTROUTES.OTP} element={<OtpPage/>}/>
       <Route path={COMMON.FORGETPASSWORD} element={<Forgetpassword/>}/>
+      <Route path={COMMON.RESETPASSWORD} element={<ResetPassword/>}/>
     </Routes>
   );
 };
