@@ -1,25 +1,25 @@
-
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import api from '@/lib/api'; 
+import api from '@/lib/api';
+import axios from 'axios';
+
+
 export const initializeAuth = createAsyncThunk(
   'auth/initializeAuth',
-  async (_, { rejectWithValue }) => {
-    const token = localStorage.getItem('accessToken');
-    
-    if (!token) {
-      return rejectWithValue('No token found');
-    }
-
+  async (role: string, { rejectWithValue }) => {
     try {
-     
-      const response = await api.get('/patient/getme');  
+      const response = await api.get(`/api/${role}/getme`);
+      const userData = response.data.user || response.data.data;
       return {
-         user: response.data.data, 
-        profileData: response.data.data,
+        user: { ...userData, role:role } ,
+        profileData: userData,
       };
-    } catch (error: any) {
-      localStorage.removeItem('token');
-      return rejectWithValue(error.response?.data?.message || 'Session expired');
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        return rejectWithValue(
+          error.response?.data?.message || 'Session expired'
+        );
+      }
+      return rejectWithValue('An unexpected error occurred');
     }
   }
 );

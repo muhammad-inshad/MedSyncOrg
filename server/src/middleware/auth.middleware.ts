@@ -12,30 +12,24 @@ export const protect = (
   next: NextFunction
 ): void => {
   try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    const token = req.cookies.accessToken;
+    if (!token) {
       res.status(401).json({
         success: false,
-        message: "No token provided",
+        message: "Authentication required. Please log in.",
       });
       return;
     }
-
-    const token = authHeader.split(" ")[1];
-
     const decoded = jwt.verify(
       token,
       process.env.JWT_ACCESS_SECRET as string
     ) as JwtPayload;
-
     req.user = decoded;
     next();
   } catch (error) {
-  
     res.status(401).json({
       success: false,
-      message: "Invalid or expired token",
+      message: "Session expired or invalid token",
     });
   }
 };

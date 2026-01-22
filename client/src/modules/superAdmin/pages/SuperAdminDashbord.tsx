@@ -1,6 +1,6 @@
 
 import {  Building2,Hospital, TrendingUp, AlertCircle } from 'lucide-react';
-import SuperAdminsidebar from '@/layouts/SuperAdminsidebar';
+import SuperAdminsidebar from '@/modules/superAdmin/components/SuperAdminsidebar';
 export default function SuperAdminDashboard() {
     
   const stats = [
@@ -207,7 +207,7 @@ export default function SuperAdminDashboard() {
               {activities.map((activity, index) => (
                 <div key={index} className="grid grid-cols-12 gap-3 items-center py-4">
                   <div className="col-span-4 flex items-center gap-2">
-                    <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center shrink-0">
                       <Hospital className="w-4 h-4 text-blue-600" />
                     </div>
                     <span className="text-xs font-medium text-gray-900 leading-tight">{activity.description}</span>

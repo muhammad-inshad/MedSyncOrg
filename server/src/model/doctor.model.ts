@@ -21,7 +21,7 @@ export interface IDoctor extends Document {
   reviewCount: number;
 
   isActive: boolean;
-  isSelected: boolean;
+  isAccountVerified: boolean;
   walletBalance: number;
 
   availableSlots: string[];
@@ -31,13 +31,12 @@ export interface IDoctor extends Document {
     end: string;   
   };
 
-  // UPDATED: Match frontend exactly
   payment: {
     type: "commission" | "fixed";
     commissionPercentage?: number;
     fixedSalary?: number;
     payoutCycle: "weekly" | "monthly";
-    patientsPerDayLimit: number;  // NEW: required from frontend
+    patientsPerDayLimit: number;  
   };
 
   createdAt: Date;
@@ -100,16 +99,14 @@ const doctorSchema = new Schema<IDoctor>(
     hospital_id: {
       type: Schema.Types.ObjectId,
       ref: "Hospital",
-      required: true,
+      required: false,
     },
 
-    //Medical license image URL (from frontend 'license')
     licence: {
       type: String,
       required: [true, 'Medical license is required'],
     },
 
-    // Profile image URL (from frontend 'profileImage')
     profileImage: {
       type: String,
       required: [true, 'Profile image is required'],
@@ -117,7 +114,7 @@ const doctorSchema = new Schema<IDoctor>(
 
     about: {
       type: String,
-      required: [true, 'About is required'],  //  Made required
+      required: [true, 'About is required'],  
     },
 
     rating: {
@@ -134,10 +131,10 @@ const doctorSchema = new Schema<IDoctor>(
 
     isActive: {
       type: Boolean,
-      default: true,
+      default: false,
     },
 
-    isSelected: {
+    isAccountVerified: {
       type: Boolean,
       default: false,
     },
@@ -155,11 +152,11 @@ const doctorSchema = new Schema<IDoctor>(
     consultationTime: {
       start: {
         type: String,
-        required: [true, 'Start time is required'],
+        required:false,
       },
       end: {
         type: String,
-        required: [true, 'End time is required'],
+        required:false,
       },
     },
 
@@ -167,7 +164,7 @@ const doctorSchema = new Schema<IDoctor>(
       type: {
         type: String,
         enum: ["commission", "fixed"],
-        required: [true, 'Salary type is required'],
+        required:false,
       },
 
       commissionPercentage: {
@@ -183,13 +180,12 @@ const doctorSchema = new Schema<IDoctor>(
       payoutCycle: {
         type: String,
         enum: ["weekly", "monthly"],
-        required: [true, 'Payout cycle is required'],
+        required:false,
       },
 
-      // NEW: From frontend patientsPerDay
       patientsPerDayLimit: {
         type: Number,
-        required: [true, 'Patients per day is required'],
+        required: false,
       },
     },
   },

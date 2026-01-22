@@ -12,4 +12,23 @@ export interface LoginDTO {
   role: 'patient' | 'admin' | 'doctor';
 }
 
+export interface SendOtpDTO {
+  email: string;
+}
 
+export interface VerifyOtpDTO {
+  email: string;
+  otp: string;
+  signupData?: SignupDTO; 
+}
+
+export interface ResetPasswordDTO {
+  email: string;
+  newPassword: string;
+}
+
+export interface UpdateProfileDTO {
+  name?: string;
+  phone?: number;
+  avatar?: string; 
+}

@@ -11,7 +11,7 @@ export interface IAdmin extends Document {
   email: string;
   phone: string;
 
-  since: number; // hospital build year
+  since: number; 
   pincode: string;
   about?: string;
   licence?: string;
@@ -55,7 +55,7 @@ const AdminSchema = new Schema<IAdmin>(
 
     isActive: {
       type: Boolean,
-      default: true,
+      default: false,
     },
 
     autoDisabled: {

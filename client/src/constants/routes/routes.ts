@@ -1,3 +1,4 @@
+
 export const PATIENTROUTES = {
   ROOT: "/",
   LOGIN: "/login/:role",
@@ -16,15 +17,18 @@ export const COMMON={
 }
 
 export const  ADMINROUTES={
-  ADMINSIGNUP:"/admin/signup"
+  ADMINSIGNUP:"/admin/signup",
+  ADMINDASHBOARD:"/admin/dashboard"
+}
+
+export const DOCTORS={
+  DOCTORDASHBOARD:"/doctor/dashboard"
 }
 
 export const SUPERADMINROUTES={
   DASHBOARD:'/superadmin/dashboard',
   HOSPITALS: '/superadmin/hospitals',
-  DOCTORS: '/superadmin/doctors',
-  PATIENTS: '/superadmin/patients',
-  DEPARTMENTS: '/superadmin/departments',
+  EDITHOSPITAL:"/superadmin/edit-hospital",
   SUBSCRIPTIONS: '/superadmin/subscriptions',
   KYC: '/superadmin/kyc',
   CHAT: '/superadmin/chat'

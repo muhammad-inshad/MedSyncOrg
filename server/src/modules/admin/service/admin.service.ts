@@ -1,29 +1,19 @@
 import { AdminRepository } from "../repositories/admin.repository.ts";
-import { TokenService } from "../../../services/token.service.ts";
+import { TokenService } from "../../auth/services/token.service.ts";
 import type { Request } from "express";
+import { LoginDTO } from "../../../dto/auth/signup.dto.ts";
+import { IAdmin } from "../../../model/admin.model.ts";
 import bcrypt from "bcrypt";
 import { uploadBufferToCloudinary } from "../../../utils/cloudinaryUpload.ts";
 
 export class AdminService {
-  private adminRepo: AdminRepository;
-  private tokenService: TokenService;
+  constructor(
+    private readonly adminRepo: AdminRepository,
+    private readonly tokenService: TokenService
+  ) { }
 
-  constructor(adminRepo: AdminRepository, tokenService: TokenService) {
-    this.adminRepo = adminRepo;
-    this.tokenService = tokenService;
-  }
-
-  async signup(req: Request) {
-    const {
-      hospitalName,
-      address,
-      email,
-      phone,
-      password,
-      since,
-      pincode,
-      about,
-    } = req.body;
+  async signup(adminData: Partial<IAdmin>, files: { logo?: any; licence?: any }) {
+    const { email, password, hospitalName } = adminData;
 
     if (!email || !password || !hospitalName) {
       throw { status: 400, message: "Required fields missing" };
@@ -31,84 +21,86 @@ export class AdminService {
 
     const existingAdmin = await this.adminRepo.findByEmail(email);
     if (existingAdmin) {
-      throw { status: 409, message: "Admin already exists" };
+      throw { status: 409, message: "Admin/Hospital already exists" };
     }
-
-    const files = req.files as {
-      logo?: Express.Multer.File[];
-      licence?: Express.Multer.File[];
-    };
-
     let logoUrl = "";
     let licenceUrl = "";
 
-    if (files?.logo?.[0]) {
-      logoUrl = await uploadBufferToCloudinary(
-        files.logo[0].buffer,
-        "admin/logo"
-      );
+    if (files.logo) {
+      logoUrl = await uploadBufferToCloudinary(files.logo.buffer, "admin/logo");
     }
 
-    if (files?.licence?.[0]) {
-      licenceUrl = await uploadBufferToCloudinary(
-        files.licence[0].buffer,
-        "admin/licence"
-      );
+    if (files.licence) {
+      licenceUrl = await uploadBufferToCloudinary(files.licence.buffer, "admin/licence");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const admin = await this.adminRepo.createAdmin({
-      hospitalName,
-      address,
-      email,
-      phone,
+      ...adminData,
       password: hashedPassword,
-      since,
-      pincode,
-      about,
       logo: logoUrl,
       licence: licenceUrl,
+      isActive: true,
     });
+     const adminObject = admin.toObject();
+    const { password: _, __v, ...adminWithoutPassword } = adminObject;
 
     return {
-      success: true,
-      message: "Admin registered successfully",
-      data: {
-        id: admin._id,
-        email: admin.email,
-        hospitalName: admin.hospitalName,
-      },
+      admin:adminWithoutPassword,
     };
   }
- 
-  async loginAdmin(loginData:any)  :Promise<{ user: any; accessToken: string; refreshToken: string }> {
-      const admin = await this.adminRepo.findByEmail(loginData.email);
-       if(!admin){
-           throw { status: 400, message: "Invalid email or password" };
-       }
-      
-        const isPasswordMatch = await bcrypt.compare(
-             loginData.password,
-             admin.password
-           );
-  
-           if (!isPasswordMatch) {
-        throw { status: 400, message: "Invalid email or password" };
-      }
-       const accessToken = this.tokenService.generateAccessToken(
-        admin._id.toString(),
-        admin.email,
-        loginData.role
-      );
-  
-      const refreshToken = this.tokenService.generateRefreshToken(
-        admin._id.toString(),
-        admin.email,
-        loginData.role
-      );
-  
-      const { password, ...safeUser } = admin.toObject();
-      return { user: safeUser, accessToken, refreshToken };
-      }
+  async loginAdmin(loginData: LoginDTO): Promise<{ user: any; accessToken: string; refreshToken: string }> {
+    const admin = await this.adminRepo.findByEmail(loginData.email);
+
+    if (!admin) {
+      throw { status: 400, message: "Invalid email or password" };
+    }
+
+    // if (!admin.isActive) {
+    //   throw { status: 403, message: "Your hospital account is deactivated. Contact support." };
+    // }
+
+    const isPasswordMatch = await bcrypt.compare(loginData.password, admin.password);
+
+    if (!isPasswordMatch) {
+      throw { status: 400, message: "Invalid email or password" };
+    }
+
+    const accessToken = this.tokenService.generateAccessToken({
+      userId: admin._id.toString(),
+      email: admin.email,
+      role: loginData.role
+    });
+
+    const refreshToken = this.tokenService.generateRefreshToken({
+      userId: admin._id.toString(),
+      email: admin.email,
+      role: loginData.role
+    });
+
+    const adminObj = admin.toObject();
+    const { password, ...safeUser } = adminObj;
+
+    return { user: safeUser, accessToken, refreshToken };
+  }
+
+  async getAdminProfile(adminID: string){
+    try {
+     const admin = await this.adminRepo.findById(adminID);
+        if (!admin) {
+            throw { status: 404, message: "admin not found" };
+        }
+        return {
+            ...admin,
+            role: "admin"
+        };
+  }
+  catch(error: any){
+     throw { 
+      status: error.status || 500, 
+      message: error.message || "Error fetching admin profile" 
+    };
+  }
+}
 }

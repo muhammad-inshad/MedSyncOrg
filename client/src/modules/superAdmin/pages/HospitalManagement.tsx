@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, Edit2, Circle } from 'lucide-react';
-import SuperAdminSidebar from '@/layouts/SuperAdminsidebar';
+import SuperAdminSidebar from '@/modules/superAdmin/components/SuperAdminsidebar';
 import api from '../../../lib/api';
+import { useNavigate } from "react-router-dom";
+import type { IAdmin } from '@/interfaces/IAdmin';
 
 const HospitalManagement = () => {
   const [activeTab, setActiveTab] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [hospitals, setHospitals] = useState<any[]>([]);
+  const [hospitals, setHospitals] = useState<IAdmin[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchHospitals = async () => {
       try {
-        const response = await api.get('/Superadmin/hospitalManagement');
+        const response = await api.get('/api/superadmin/hospitalManagement');
         setHospitals(response.data.hospitals || []);
       } catch (error) {
         console.error('Failed to fetch hospitals:', error);
@@ -23,15 +26,42 @@ const HospitalManagement = () => {
 
     fetchHospitals();
   }, []);
-
-  // Determine displayed status
-  const getDisplayStatus = (hospital: any): string => {
+  const getDisplayStatus = (hospital: IAdmin): string => {
     if (!hospital.isActive) return 'Inactive';
     if (hospital.subscription?.status === 'expired') return 'Inactive';
     if (hospital.subscription?.status === 'cancelled') return 'Inactive';
     if (hospital.subscription?.status === 'active') return 'Active';
     return 'Pending';
   };
+
+  const toggleToActive = async (id: string, currentStatus: boolean) => {
+    try {
+      console.log(id,!currentStatus)
+      const response = await api.patch('/api/superadmin/setActive', {
+        id,
+        isActive: !currentStatus
+      });
+
+      if (response.status === 200) {
+        setHospitals((prevHospitals) =>
+          prevHospitals.map((hospital) =>
+            hospital._id === id ? { ...hospital, isActive: !currentStatus } : hospital
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Failed to toggle status:', error);
+      alert('Failed to update hospital status');
+    }
+  };
+
+  const handleEdit = (hospital:unknown) => {
+  navigate("/admin/edit-hospital", {
+    state: { hospital }
+  });
+};
+
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -103,11 +133,10 @@ const HospitalManagement = () => {
                     <button
                       key={tab}
                       onClick={() => setActiveTab(tab)}
-                      className={`px-5 py-2 rounded-md font-medium transition-colors ${
-                        activeTab === tab
+                      className={`px-5 py-2 rounded-md font-medium transition-colors ${activeTab === tab
                           ? 'bg-slate-700 text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                        }`}
                     >
                       {tab}
                     </button>
@@ -172,7 +201,7 @@ const HospitalManagement = () => {
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
                               {/* Hospital Logo from Cloudinary */}
-                              <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
+                              <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0 border border-gray-200">
                                 {hospital.logo ? (
                                   <img
                                     src={hospital.logo}
@@ -185,14 +214,14 @@ const HospitalManagement = () => {
                                     }}
                                   />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-3xl bg-gradient-to-br from-blue-50 to-blue-100">
+                                  <div className="w-full h-full flex items-center justify-center text-3xl bg-linear-to-br from-blue-50 to-blue-100">
                                     🏥
                                   </div>
                                 )}
                               </div>
 
                               <div className="min-w-0">
-                                <div className="font-medium text-gray-900 truncate max-w-[220px]">
+                                <div className="font-medium text-gray-900 truncate max-w-55">
                                   {hospital.hospitalName || 'Unnamed Hospital'}
                                 </div>
                                 <div className="text-xs text-gray-500">
@@ -233,23 +262,18 @@ const HospitalManagement = () => {
 
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              {status === 'Active' ? (
-                                <button
-                                  className="w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 text-red-700 flex items-center justify-center transition-colors"
-                                  title="Block Hospital"
-                                >
-                                  <Circle className="w-4 h-4 fill-red-600" />
-                                </button>
-                              ) : (
-                                <button
-                                  className="w-8 h-8 rounded-full bg-green-100 hover:bg-green-200 text-green-700 flex items-center justify-center transition-colors"
-                                  title="Activate Hospital"
-                                >
-                                  <Circle className="w-4 h-4 fill-green-600" />
-                                </button>
-                              )}
-
                               <button
+                                onClick={() => toggleToActive(hospital._id, !!hospital.isActive)}
+                                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${hospital.isActive
+                                    ? "bg-red-100 hover:bg-red-200 text-red-700"
+                                    : "bg-green-100 hover:bg-green-200 text-green-700"
+                                  }`}
+                                title={hospital.isActive ? "Block Hospital" : "Activate Hospital"}
+                              >
+                                <Circle className={`w-4 h-4 ${hospital.isActive ? "fill-red-600" : "fill-green-600"}`} />
+                              </button>
+
+                              <button onClick={()=>handleEdit(hospital)}
                                 className="text-blue-600 hover:text-blue-800 transition-colors"
                                 title="Edit Hospital"
                               >

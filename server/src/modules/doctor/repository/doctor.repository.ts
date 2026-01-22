@@ -1,12 +1,18 @@
-import { DoctorModel } from "../../../model/doctor.model.ts";
-import type { IDoctor } from "../../../model/doctor.model.ts";
+import { Model } from "mongoose";
+import type { IDoctor } from "../../../model/doctor.model";
 
 export class DoctorRepository {
-  async createDoctor(data: Partial<IDoctor>) {
-    return DoctorModel.create(data);
+  constructor(private readonly model: Model<IDoctor>) {}
+
+  async createDoctor(data: Partial<IDoctor>): Promise<IDoctor> {
+    return await this.model.create(data);
   }
 
-  async findByEmail(email: string) {
-    return DoctorModel.findOne({ email }).select("+password");
+  async findByEmail(email: string): Promise<IDoctor | null> {
+    return await this.model.findOne({ email }).select("+password").exec();
+  }
+
+  async findById(id: string): Promise<IDoctor | null> {
+    return await this.model.findById(id).exec();
   }
 }

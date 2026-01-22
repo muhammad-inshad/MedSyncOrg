@@ -1,37 +1,24 @@
 import type { Request, Response } from "express";
-import { UserRepository } from "../../../repositories/user.repository.ts";
+import { PatientService } from "../service/Patient.service";
 
 class PatientController {
-  private userRepo: UserRepository;
+  constructor(private readonly patientService: PatientService) {}
 
-  constructor(userRepo: UserRepository) {
-    this.userRepo = userRepo;
-  }
-
-  async getMe(req: Request, res: Response) {
+  getMe = async (req: Request, res: Response) => {
     try {
       const userId = (req as any).user.userId;
-
-      const patient = await this.userRepo.findById(userId);
-
-      if (!patient) {
-        return res.status(404).json({
-          success: false,
-          message: "Patient not found",
-        });
-      }
-
+      const patient = await this.patientService.getProfile(userId);
       return res.status(200).json({
         success: true,
         data: patient,
       });
-    } catch {
-      return res.status(500).json({
+    } catch (error: any) {
+      return res.status(error.status || 500).json({
         success: false,
-        message: "Failed to fetch patient",
+        message: error.message || "Failed to fetch patient",
       });
     }
-  }
+  };
 }
 
 export default PatientController;

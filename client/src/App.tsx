@@ -1,8 +1,9 @@
-import AppRoutes from "./routes/AppRoutes";
-import SuperAdminRoutes from "./routes/SuperAdminRoutes";
-import PatientRouts from "./routes/PatientRouts";
-import AdminRoutes from "./routes/AdminRoutes";
-import CommenRoute from "./modules/shared/CommenRoute";
+import AppRoutes from "./modules/auth/routes/AppRoutes.tsx";
+import SuperAdminRoutes from "./modules/superAdmin/routes/SuperAdminRoutes.tsx";
+import PatientRouts from "./modules/patient/routes/PatientRoutes.tsx";
+import AdminRoutes from "./modules/admin/routes/AdminRoutes.tsx";
+import CommenRoute from "./modules/shared/CommonRoute.tsx";
+import DoctorRoutes from "./modules/doctor/routes/DoctorRoutes.tsx";
 const App = () => {
   return (
     <>
@@ -11,6 +12,7 @@ const App = () => {
        <SuperAdminRoutes/>
       <CommenRoute/>
       <AdminRoutes/>
+      <DoctorRoutes/>
     </>
   );
 };
