@@ -4,6 +4,7 @@ import SuperAdminSidebar from '@/modules/superAdmin/components/SuperAdminsidebar
 import api from '../../../lib/api';
 import { useNavigate } from "react-router-dom";
 import type { IAdmin } from '@/interfaces/IAdmin';
+import { SUPERADMINROUTES } from '@/constants/routes/routes';
 
 const HospitalManagement = () => {
   const [activeTab, setActiveTab] = useState('All');
@@ -55,12 +56,15 @@ const HospitalManagement = () => {
     }
   };
 
-  const handleEdit = (hospital:unknown) => {
-  navigate("/admin/edit-hospital", {
+  const handleEdit = (hospital: IAdmin) => {
+  navigate(SUPERADMINROUTES.EDITHOSPITAL, {
     state: { hospital }
   });
 };
 
+const hadileAddhospital=()=>{
+  navigate(SUPERADMINROUTES.ADDHOSPITAL)
+}
 
 
   const getStatusColor = (status: string) => {
@@ -115,7 +119,7 @@ const HospitalManagement = () => {
               </p>
             </div>
 
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors">
+            <button onClick={hadileAddhospital} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors">
               <Circle className="w-4 h-4 fill-current" />
               Add New Hospital
             </button>

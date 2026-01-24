@@ -10,4 +10,6 @@ router.post("/RegistorDoctor", upload.fields([
     (req, res) => doctorcontroller.RegistorDoctor(req, res));
 
 router.get("/getme",(req,res)=>doctorcontroller.getme(req,res))
+
+router.patch("/doctorEdit/:id",(req,res)=>doctorcontroller.doctorEdit(req,res))
 export default router

@@ -21,3 +21,17 @@ export const uploadBufferToCloudinary = (
     readable.pipe(stream);
   });
 };
+
+export const extractPublicId = (url: string): string => {
+  try {
+    const parts = url.split('/');
+    const uploadIndex = parts.indexOf('upload');
+    if (uploadIndex === -1) return '';
+    const pathParts = parts.slice(uploadIndex + 2);
+    const fullPath = pathParts.join('/');
+    return fullPath.split('.')[0];
+  } catch (error) {
+    console.error("Error extracting public ID:", error);
+    return '';
+  }
+};

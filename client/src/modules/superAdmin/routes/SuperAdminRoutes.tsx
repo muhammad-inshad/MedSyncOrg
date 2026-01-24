@@ -4,6 +4,7 @@ import SuperAdminDashboard from '../pages/SuperAdminDashbord'
 import { Route, Routes } from 'react-router-dom'
 import ProtectedRoute from './ProtectedRoute'
 import EditHospital from '../components/EditHospital'
+import SuperAdminAddHospital from '../components/SuperAdminAddHospital'
 
 const SuperAdminRoutes = () => {
   return (
@@ -12,6 +13,7 @@ const SuperAdminRoutes = () => {
         <Route path={SUPERADMINROUTES.DASHBOARD} element={<SuperAdminDashboard/>}/>
         <Route path={SUPERADMINROUTES.HOSPITALS} element={<HospitalManagement/>}/>
         <Route path={SUPERADMINROUTES.EDITHOSPITAL} element={<EditHospital/>}/>
+        <Route path={SUPERADMINROUTES.ADDHOSPITAL} element={<SuperAdminAddHospital/>}/>
         </Route>
     </Routes>
   )

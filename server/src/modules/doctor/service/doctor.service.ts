@@ -2,6 +2,8 @@ import { DoctorRepository } from "../repository/doctor.repository.ts";
 import { uploadBufferToCloudinary } from "../../../utils/cloudinaryUpload.ts";
 import { Types } from "mongoose";
 import bcrypt from "bcrypt";
+import cloudinary from "../../../config/cloudinary";
+import { extractPublicId } from "../../../utils/cloudinaryUpload";
 import { TokenService } from "../../auth/services/token.service.ts";
 import { IDoctor } from "../../../model/doctor.model.ts";
 
@@ -108,4 +110,32 @@ export class DoctorService {
             role: "doctor"
         };
     }
+  async updateDoctorProfile(id: string, updateData: any) {
+    const existingDoctor = await this.doctorRepo.findById(id);
+    if (!existingDoctor) throw { status: 404, message: "Doctor not found" };
+    if (updateData.profileImage && updateData.profileImage.startsWith('data:image')) {
+      if (existingDoctor.profileImage) {
+        await cloudinary.uploader.destroy(existingDoctor.profileImage);
+      }
+      const res = await cloudinary.uploader.upload(updateData.profileImage, {
+        folder: 'doctors/profiles'
+      });
+      updateData.profileImage = res.secure_url;
+      updateData.profileImagePublicId = res.public_id;
+    }
+
+    if (updateData.licenseImage && updateData.licenseImage.startsWith('data:image')) {
+      if (existingDoctor.licence) {
+        await cloudinary.uploader.destroy(existingDoctor.licence);
+      }
+      const res = await cloudinary.uploader.upload(updateData.licenseImage, {
+        folder: 'doctors/licenses'
+      });
+      updateData.licence = res.secure_url;
+      updateData.licensePublicId = res.public_id;
+      delete updateData.licenseImage; 
+    }
+
+    return await this.doctorRepo.update(id, updateData);
+  }
 }

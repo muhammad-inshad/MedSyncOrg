@@ -18,7 +18,10 @@ export const COMMON={
 
 export const  ADMINROUTES={
   ADMINSIGNUP:"/admin/signup",
-  ADMINDASHBOARD:"/admin/dashboard"
+  ADMINDASHBOARD:"/admin/dashboard",
+  ADMINDOCTORMANGEMENT:"/admin/doctormangement",
+  ADMINDOCTOREDIT:"/admin/doctorEdit",
+  ADMINDOCTORADD:"/admin/doctoradd"
 }
 
 export const DOCTORS={
@@ -29,6 +32,7 @@ export const SUPERADMINROUTES={
   DASHBOARD:'/superadmin/dashboard',
   HOSPITALS: '/superadmin/hospitals',
   EDITHOSPITAL:"/superadmin/edit-hospital",
+  ADDHOSPITAL:"/superadmin/addhospital",
   SUBSCRIPTIONS: '/superadmin/subscriptions',
   KYC: '/superadmin/kyc',
   CHAT: '/superadmin/chat'

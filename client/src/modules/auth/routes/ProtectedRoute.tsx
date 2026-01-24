@@ -33,10 +33,11 @@ const ProtectedRoute = () => {
   }
   if (isAuthenticated && user) {
       const role=user.role.toLowerCase()
+   
       if(role==="superadmin")return <Navigate to={SUPERADMINROUTES.DASHBOARD} replace/>
-      if (role === "doctor") return <Navigate to={DOCTORS.DOCTORDASHBOARD} replace />;
-      if (role === "admin") return <Navigate to={ADMINROUTES.ADMINDASHBOARD} replace />;
-      if (role === "patient") return <Navigate to={PATIENTROUTES.SELECTHOSPITAL} replace />;
+      if (user.role === "doctor") return <Navigate to={DOCTORS.DOCTORDASHBOARD} replace />;
+      if (user.role === "admin") return <Navigate to={ADMINROUTES.ADMINDASHBOARD} replace />;
+      if (user.role === "patient") return <Navigate to={PATIENTROUTES.SELECTHOSPITAL} replace />;
     }
   
   return <Outlet />;

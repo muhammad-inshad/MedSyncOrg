@@ -15,4 +15,11 @@ export class DoctorRepository {
   async findById(id: string): Promise<IDoctor | null> {
     return await this.model.findById(id).exec();
   }
+  async update(id: string, data: any) {
+    return await this.model.findByIdAndUpdate(
+      id,
+      { $set: data },
+      { new: true, runValidators: true }
+    );
+  }
 }

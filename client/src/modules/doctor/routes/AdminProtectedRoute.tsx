@@ -47,7 +47,6 @@ const AdminProtectedRoute = () => {
   if (isActive === false && location.pathname !== COMMON.REVIEWPENDING) {
   return <Navigate to={COMMON.REVIEWPENDING} replace />;
 }
-
     if(user?.role === "doctor"){
     if (isActive === true && location.pathname === COMMON.REVIEWPENDING) {
       return <Navigate to={DOCTORS.DOCTORDASHBOARD} replace />;
