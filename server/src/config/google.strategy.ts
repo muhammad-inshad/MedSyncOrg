@@ -1,36 +1,32 @@
-// import passport from "passport";
-// import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-// import { UserRepository } from "../repositories/user.repository";
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Patient } from '../model/Patient.model'; // Adjust based on your role logic
 
-// passport.use(
-//   new GoogleStrategy(
-//     {
-//       clientID: process.env.GOOGLE_CLIENT_ID!,
-//       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-//       callbackURL: "/api/auth/google/callback",
-//     },
-//     async (_accessToken, _refreshToken, profile, done) => {
-//       try {
-//         const userRepo = new UserRepository();
+passport.use(new GoogleStrategy({
+    clientID: process.env.GOOGLE_CLIENT_ID!,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    callbackURL: "http://localhost:5000/api/auth/google/callback",
+    passReqToCallback: true
+  },
+  async (req, accessToken, refreshToken, profile, done) => {
+    try {
+      const role = req.query.state as string; 
+      const email = profile.emails?.[0].value;
 
-//         const email = profile.emails?.[0].value;
-//         if (!email) return done(new Error("No email from Google"));
+      let user = await Patient.findOne({ email }); 
+      
+      if (!user) {
+        user = await Patient.create({
+          email,
+          name: profile.displayName,
+          isGoogleAuth: true,
+          role: role || 'patient'
+        });
+      }
 
-//         let user = await userRepo.findByEmail(email);
-
-//         if (!user) {
-//           user = await userRepo.create({
-//             email,
-//             name: profile.displayName,
-//             googleId: profile.id,
-//             provider: "google",
-//           });
-//         }
-
-//         return done(null, user);
-//       } catch (err) {
-//         return done(err, null);
-//       }
-//     }
-//   )
-// );
+      return done(null, user);
+    } catch (error) {
+      return done(error as Error, undefined);
+    }
+  }
+));

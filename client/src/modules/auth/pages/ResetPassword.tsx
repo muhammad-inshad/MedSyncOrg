@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {  Eye, EyeOff } from 'lucide-react';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -14,7 +14,12 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
-
+   useEffect(() => {
+    const reset = localStorage.getItem("resetpassword");
+    if (!reset) {
+      navigate("/");
+    }
+  }, [navigate]);
   if (!email) return <Navigate to="/forgot-password" replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,9 +37,11 @@ const ResetPassword = () => {
       await api.post('/api/auth/reset-password', {
         email,
         password: password,
+        role:role
       });
 
       toast.success('Password reset successfully!');
+       localStorage.removeItem('resetpassword');
       navigate(`/login/${role || 'patient'}`);
     } catch (error: unknown) {
       let errorMessage = 'An unexpected error occurred';

@@ -2,14 +2,18 @@ import bcrypt from "bcrypt";
 import type { LoginDTO, SignupDTO } from "../../../dto/auth/signup.dto.ts";
 import { UserRepository } from "../repositories/user.repository.ts";
 import type { IPatient } from "../../../model/Patient.model.ts";
-import { ITokenService } from "../interfaces/auth.types.ts"; 
+import { ITokenService } from "../interfaces/auth.types.ts";
+import { AdminRepository } from "../../admin/repositories/admin.repository.ts";
+import { DoctorRepository } from "../../doctor/repository/doctor.repository.ts";
 
 export class AuthService {
 
   constructor(
     private readonly userRepo: UserRepository,
-    private readonly tokenService: ITokenService 
-  ) {}
+    private readonly tokenService: ITokenService,
+    private readonly adminRepo:AdminRepository,
+    private readonly doctorRepo:DoctorRepository
+  ) { }
 
   async signup(signupData: SignupDTO): Promise<IPatient> {
     const existingUser = await this.userRepo.findByEmail(signupData.email);
@@ -31,10 +35,10 @@ export class AuthService {
       throw { status: 400, message: "Invalid email or password" };
     }
 
-    const payload = { 
-      userId: user._id.toString(), 
-      email: user.email, 
-      role: loginData.role 
+    const payload = {
+      userId: user._id.toString(),
+      email: user.email,
+      role: loginData.role
     };
 
     const accessToken = this.tokenService.generateAccessToken(payload);
@@ -45,13 +49,20 @@ export class AuthService {
     return { user: safeUser, accessToken, refreshToken };
   }
 
-  async resetPassword(resetData: LoginDTO) {
-    const user = await this.userRepo.findByEmail(resetData.email);
-    if (!user) throw { status: 400, message: "User not found" };
-
-    const hashedPassword = await bcrypt.hash(resetData.password, 10);
-    await this.userRepo.updatePassword(resetData.email, hashedPassword);
-
+  async resetPassword(email: string, password: string, role: string) {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    let repo;
+    if (role === "doctor") {
+      repo = this.doctorRepo;
+    } else if (role === "patient") {
+      repo = this.userRepo;
+    } else if (role === "admin") {
+      repo = this.adminRepo;
+    }
+    if (!repo) throw { status: 400, message: "Invalid role provided" };
+    const user = await repo.findByEmail(email);
+    if (!user) throw { status: 404, message: `${role} not found` };
+    await repo.updatePassword(email, hashedPassword);
     return { success: true, message: "Password updated successfully" };
   }
 

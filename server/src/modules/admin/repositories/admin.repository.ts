@@ -14,6 +14,14 @@ export class AdminRepository {
     return await admin.save();
   }
 
+  async updatePassword(email: string, hashedPassword: string): Promise<IAdmin | null> {
+    return await this.model.findOneAndUpdate(
+      { email: email.trim().toLowerCase() },
+      { $set: { password: hashedPassword } },
+      { new: true }
+    ).exec();
+  }
+
   async findById(id: string): Promise<IAdmin | null> {
     return await this.model.findById(id).exec();
   }

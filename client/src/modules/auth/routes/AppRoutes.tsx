@@ -6,6 +6,7 @@ import OtpPage from "../pages/OtpPage";
 import Forgetpassword from "@/modules/auth/pages/Forgetpassword";
 import ResetPassword from "@/modules/auth/pages/ResetPassword";
 import ProtectedRoute from "./ProtectedRoute";
+import GoogleCallback from "../pages/GoogleCallback";
 const AppRoutes = () => {
   return (
     <Routes>
@@ -23,7 +24,9 @@ const AppRoutes = () => {
         <Route path={PATIENTROUTES.OTP} element={<OtpPage/>}/>
         <Route path={COMMON.FORGETPASSWORD} element={<Forgetpassword/>}/>
         <Route path={COMMON.RESETPASSWORD} element={<ResetPassword/>}/>
+        <Route path="/api/auth/google-success" element={<GoogleCallback />} />
       </Route>
+      
     </Routes>
   );
 };

@@ -1,29 +1,55 @@
 import { generateOtp } from "../../../utils/otp/otp.util";
 import { OtpData } from "../../../utils/otp/otp.Store";
 import { EmailService } from "./email.service";
+import { UserRepository } from "../repositories/user.repository.ts";
+import { AdminRepository } from "../../admin/repositories/admin.repository.ts";
+import { DoctorRepository } from "../../doctor/repository/doctor.repository.ts";
 
 export class OtpService {
   constructor(
+    private readonly userRepo: UserRepository,
     private readonly store: Map<string, OtpData>,
-    private readonly emailService: EmailService 
+    private readonly emailService: EmailService,
+    private readonly adminRepo: AdminRepository, 
+    private readonly doctorRepo: DoctorRepository
   ) {}
 
-  async sendOtp(email: string) {
-    const otp = generateOtp();
+  async sendOtp(email: string, purpose: string, role: string) {
     const cleanEmail = email.trim().toLowerCase();
+
+    if (purpose === "forgot-password" || purpose === "chackit") {
+      let existingUser = null;
+
+      if (role === "doctor") {
+        existingUser = await this.doctorRepo.findByEmail(cleanEmail);
+      } else if (role === "patient") {
+        existingUser = await this.userRepo.findByEmail(cleanEmail);
+      } else if (role === "admin") {
+        existingUser = await this.adminRepo.findByEmail(cleanEmail);
+      }
+
+      if (!existingUser) {
+        throw { status: 404, message: `No ${role} found with this email address` };
+      }
+    }
+
+    const otp = generateOtp();
+    console.log(`OTP for ${cleanEmail}: ${otp}`); 
+
     this.store.set(cleanEmail, {
       otp,
-      expiresAt: Date.now() + 5 * 60 * 1000,
+      expiresAt: Date.now() +  60 * 1000, 
     });
+
     return await this.emailService.sendOtpEmail(cleanEmail, otp);
   }
-  verifyOtp(email: string, userOtp: string): { success: boolean; message: string } {
-    const cleanEmail = email.trim().toLowerCase(); 
 
+  verifyOtp(email: string, userOtp: string): { success: boolean; message: string } {
+    const cleanEmail = email.trim().toLowerCase();
     const stored = this.store.get(cleanEmail);
 
     if (!stored) {
-      return { success: false, message: "No OTP found for this email" };
+      return { success: false, message: "No OTP request found for this email" };
     }
 
     if (stored.expiresAt < Date.now()) {
@@ -32,9 +58,8 @@ export class OtpService {
     }
 
     if (stored.otp !== userOtp) {
-      return { success: false, message: "Invalid OTP" };
+      return { success: false, message: "Invalid OTP code" };
     }
-
     this.store.delete(cleanEmail);
     return { success: true, message: "Verified" };
   }

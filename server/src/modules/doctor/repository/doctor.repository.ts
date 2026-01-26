@@ -22,4 +22,12 @@ export class DoctorRepository {
       { new: true, runValidators: true }
     );
   }
+
+  async updatePassword(email: string, hashedPassword: string): Promise<IDoctor | null> {
+    return await this.model.findOneAndUpdate(
+      { email: email.trim().toLowerCase() },
+      { $set: { password: hashedPassword } },
+      { new: true }
+    ).exec();
+  }
 }

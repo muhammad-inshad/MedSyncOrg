@@ -80,7 +80,8 @@ class AuthController {
 
   resetPassword = async (req: Request, res: Response) => {
     try {
-      const result = await this.authService.resetPassword(req.body);
+      const {email,password,role}=req.body
+      const result = await this.authService.resetPassword(email,password,role);
       return res.status(200).json({ success: true, message: result.message });
     } catch (error: any) {
       return res.status(error.status || 500).json({

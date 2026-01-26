@@ -47,12 +47,13 @@ const SignUp = () => {
         setIsLoading(true);
         console.log(data)
         try {
+              localStorage.setItem('otpPageAllowed', 'true');
             await api.post("/api/auth/send-otp", {
-                email: data.email,
+                email: data.email,froget:"notchack"
             });
-
+          
             toast.success("OTP sent to your email");
-
+               
             navigate("/otp?role=patient", {
                 state: {
                     signupData: data,
@@ -197,7 +198,7 @@ const SignUp = () => {
                 {/* Login Link */}
                 <p className="text-center mt-6 text-gray-600">
                     Already have an account?{' '}
-                    <a href="/login" className="text-blue-600 font-medium">
+                    <a href="/" className="text-blue-600 font-medium">
                         Login
                     </a>
                 </p>

@@ -4,19 +4,21 @@ import api from '../../../lib/api';
 import toast from 'react-hot-toast';
 import { PATIENTROUTES } from '../../../constants/routes/routes';
 import axios from 'axios';
+
 const OtpPage = () => {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const location = useLocation();
-  const [timer, setTimer] = useState(300);
+  const [timer, setTimer] = useState(60);
   const [isTimerExpired, setIsTimerExpired] = useState(false);
   const navigate = useNavigate();
+
   const searchParams = new URLSearchParams(location.search);
   const role = searchParams.get('role');
   const signupData = location.state?.signupData;
   const purpose = location.state?.purpose;
 
-    const handleConfirm = async () => {
+  const handleConfirm = async () => {
     if (isTimerExpired) {
       toast.error('OTP has expired! Please resend OTP.');
       return;
@@ -35,26 +37,21 @@ const OtpPage = () => {
       });
 
       if (response.data.success) {
-        console.log("hiii",role)
-        let result;
-        if(purpose){
-          
+        if (purpose) {
           toast.success('OTP Verified! Please set your new password.');
-    navigate('/reset-password', {
-      state: { 
-        email: signupData.email,
-        role: role 
-      }
-    });
-        }
-        else if (role === 'patient' || role === 'admin') {
-          result = await api.post('/api/auth/signup', signupData);
-            toast.success('OTP Verified! Creating your account...');
+            localStorage.removeItem('otpPageAllowed');
+           localStorage.setItem("resetpassword", "true");
+          navigate('/reset-password', {
+            state: { email: signupData.email, role },
+          });
+        } else if (role === 'patient' || role === 'admin') {
+          const result = await api.post('/api/auth/signup', signupData);
+          toast.success('OTP Verified! Creating your account...');
+            localStorage.removeItem('otpPageAllowed');
           if (result.data.success) {
             toast.success('Account created successfully!');
             navigate(`/login/${role}`, { replace: true });
-          }
-          else {
+          } else {
             toast.error(result.data.message || 'Failed to create account');
           }
         } else {
@@ -64,22 +61,30 @@ const OtpPage = () => {
         toast.error('Invalid OTP. Please try again.');
       }
     } catch (error: unknown) {
-    let errorMessage = 'An unexpected error occurred';
-    if (axios.isAxiosError(error)) {
+      let errorMessage = 'An unexpected error occurred';
+      if (axios.isAxiosError(error)) {
         errorMessage = error.response?.data?.message || error.message;
-    } else if (error instanceof Error) {
+      } else if (error instanceof Error) {
         errorMessage = error.message;
+      }
+      toast.error(errorMessage);
     }
-    toast.error(errorMessage); 
-} 
   };
+
+  useEffect(() => {
+  const isAllowed = localStorage.getItem('otpPageAllowed');
+
+  if (!isAllowed) {
+    navigate(PATIENTROUTES.SIGNUP, { replace: true });
+  }
+}, [navigate]);
 
   const handleResend = async () => {
     try {
-      await api.post('/auth/send-otp', { email: signupData.email });
+      await api.post('/api/auth/send-otp', { email: signupData.email });
 
       setOtp(['', '', '', '', '', '']);
-      setTimer(300);
+      setTimer(60);
       setIsTimerExpired(false);
       inputRefs.current[0]?.focus();
       toast.success('OTP resent successfully!');
@@ -89,7 +94,7 @@ const OtpPage = () => {
     }
   };
 
-    useEffect(() => {
+  useEffect(() => {
     if (timer > 0) {
       const interval = setInterval(() => {
         setTimer((prev) => {
@@ -106,7 +111,6 @@ const OtpPage = () => {
     }
   }, [timer]);
 
-  
   useEffect(() => {
     if (otp.join('').length === 6 && !isTimerExpired) {
       handleConfirm();
@@ -125,7 +129,6 @@ const OtpPage = () => {
 
   const handleChange = (index: number, value: string) => {
     if (isTimerExpired) return;
-
     if (value && isNaN(Number(value))) return;
 
     const newValue = value.slice(-1);
@@ -140,7 +143,6 @@ const OtpPage = () => {
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     if (isTimerExpired) return;
-
     if (e.key === 'Backspace' && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
@@ -154,7 +156,6 @@ const OtpPage = () => {
     e.target.select();
   };
 
-
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     if (isTimerExpired) {
       e.preventDefault();
@@ -162,20 +163,14 @@ const OtpPage = () => {
     }
 
     e.preventDefault();
-
-    const pastedData = e.clipboardData
-      .getData('text')
-      .replace(/\D/g, '')
-      .slice(0, 6);
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
 
     if (pastedData.length === 0) return;
 
     const newOtp = [...otp];
-
     for (let i = 0; i < 6; i++) {
       newOtp[i] = pastedData[i] || '';
     }
-
     setOtp(newOtp);
 
     const nextFocusIndex = pastedData.length < 6 ? pastedData.length : 5;
@@ -183,11 +178,8 @@ const OtpPage = () => {
     inputRefs.current[nextFocusIndex]?.select();
   };
 
-
-
   return (
     <div className="min-h-screen bg-white flex flex-col items-center pt-16 px-4">
-
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-blue-600">MedSync</h1>
       </div>
@@ -215,8 +207,9 @@ const OtpPage = () => {
               key={index}
               ref={(el) => {
                 inputRefs.current[index] = el;
-
               }}
+              // Alternative short syntax (also correct):
+              // ref={el => inputRefs.current[index] = el}
               type="text"
               inputMode="numeric"
               maxLength={1}
@@ -226,32 +219,38 @@ const OtpPage = () => {
               onFocus={handleFocus}
               {...(index === 0 ? { onPaste: handlePaste } : {})}
               disabled={isTimerExpired}
-              className={`w-14 h-14 text-center text-2xl font-medium border-2 rounded-xl focus:outline-none bg-gray-50 transition-all ${isTimerExpired
-                ? 'border-red-300 bg-red-50 cursor-not-allowed opacity-60'
-                : 'border-gray-300 focus:border-blue-600'
-                }`}
+              className={`w-14 h-14 text-center text-2xl font-medium border-2 rounded-xl focus:outline-none bg-gray-50 transition-all ${
+                isTimerExpired
+                  ? 'border-red-300 bg-red-50 cursor-not-allowed opacity-60'
+                  : 'border-gray-300 focus:border-blue-600'
+              }`}
               placeholder="0"
             />
           ))}
         </div>
 
-
         <button
           onClick={handleConfirm}
           disabled={isTimerExpired}
-          className={`w-full max-w-xs mx-auto block font-medium py-3.5 rounded-full mb-4 shadow-md transition-all ${isTimerExpired
-            ? 'bg-gray-400 text-white cursor-not-allowed'
-            : 'bg-blue-600 hover:bg-blue-700 text-white'
-            }`}
+          className={`w-full max-w-xs mx-auto block font-medium py-3.5 rounded-full mb-4 shadow-md transition-all ${
+            isTimerExpired
+              ? 'bg-gray-400 text-white cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-700 text-white'
+          }`}
         >
           Confirm
         </button>
 
         <button
           onClick={handleResend}
-          className="w-full max-w-xs mx-auto block bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3.5 rounded-full transition-all shadow-md"
+          disabled={!isTimerExpired}
+          className={`w-full max-w-xs mx-auto block font-medium py-3.5 rounded-full transition-all shadow-md ${
+            !isTimerExpired
+              ? 'bg-gray-300 text-gray-400 cursor-not-allowed'
+              : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+          }`}
         >
-          Resend OTP
+          {!isTimerExpired ? `Resend in ${formatTime(timer)}` : 'Resend OTP'}
         </button>
       </div>
     </div>

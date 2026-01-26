@@ -29,19 +29,9 @@ export interface IPatient extends Document {
 const patientSchema = new Schema<IPatient>(
   {
     name: { type: String, required: true },
-
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-
-    phone: { type: Number, required: true },
-
-    password: { type: String, required: true },
-
+    email: { type: String, required: true, unique: true },
+    phone: { type: Number, required: false },
+    password: { type: String, required: false },
     isGoogleAuth: { type: Boolean, default: false },
 
     fatherName: { type: String },

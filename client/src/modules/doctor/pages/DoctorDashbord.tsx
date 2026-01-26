@@ -1,6 +1,6 @@
-import  { useState } from 'react';
+import { useState } from 'react';
 import { Search, Bell, Settings, User, MessageSquare, FileText, Phone } from 'lucide-react';
-
+import DoctorDashbord from '../../../assets/images/DoctorDashbord.png'
 const DoctorDashboard = () => {
   const [appointments] = useState([
     { id: 1, name: 'John Smith', time: '9:00 AM', status: 'Confirmed' },
@@ -11,8 +11,8 @@ const DoctorDashboard = () => {
 
   const [earningsData] = useState([120, 150, 130, 180, 280, 310, 290]);
 
-  const getStatusColor = (status:unknown) => {
-    switch(status) {
+  const getStatusColor = (status: unknown) => {
+    switch (status) {
       case 'Confirmed': return 'text-green-600';
       case 'Pending': return 'text-yellow-600';
       case 'Canceled': return 'text-red-600';
@@ -31,7 +31,7 @@ const DoctorDashboard = () => {
               <div className="flex items-center space-x-2">
                 <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
                   <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z"/>
+                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z" />
                   </svg>
                 </div>
                 <span className="text-xl font-semibold text-gray-800">MedSync</span>
@@ -40,7 +40,7 @@ const DoctorDashboard = () => {
                 <a href="#" className="text-gray-900 font-medium">Home</a>
               </nav>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -64,10 +64,13 @@ const DoctorDashboard = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" >
         {/* Hero Section */}
-        <div className="bg-linear-to- from-gray-200 to-gray-300 rounded-xl overflow-hidden mb-8 relative">
-          <div className="absolute inset-0 bg-black opacity-10"></div>
+        <div
+          className="rounded-xl overflow-hidden mb-8 relative bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${DoctorDashbord})` }}
+        >
+          <div className="absolute inset-0 bg-black opacity-10" ></div>
           <div className="relative px-8 py-16">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">Doctor Dashboard</h1>
             <p className="text-gray-700 mb-6 max-w-md">

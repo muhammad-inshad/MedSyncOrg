@@ -24,13 +24,16 @@ const ForgotPassword = () => {
     }
 
     try {
-      await api.post('/auth/send-otp', {
+      console.log(role)
+      await api.post('/api/auth/send-otp', {
         email: email.trim(),
+        froget:"chackit",
+        role:role,
         purpose: 'forgot-password',
       });
 
       toast.success('OTP sent to your email');
-
+      localStorage.setItem('otpPageAllowed', 'true');
       navigate(`/otp?role=${role}`, {
         state: {
           signupData: { email: email.trim() },
