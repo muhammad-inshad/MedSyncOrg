@@ -51,15 +51,19 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     }): Promise<{ data: T[]; total: number; totalPages: number }> {
         const { page, limit, filter = {}, search, searchFields = [] } = options;
         const skip = (page - 1) * limit;
-
+        console.log(page)
         const queryFilter: any = { ...filter };
-
         if (search && searchFields.length > 0) {
-            queryFilter.$or = searchFields.map(field => ({
-                [field]: { $regex: search, $options: "i" }
-            }));
+            const trimmedSearch = search.trim();
+            const regexCondition = { $regex: trimmedSearch, $options: "i" };
+            const isObjectId = /^[0-9a-fA-F]{24}$/.test(trimmedSearch);
+            queryFilter.$or = searchFields.map(field => {
+                if (field === '_id') {
+                    return isObjectId ? { _id: trimmedSearch } : null;
+                }
+                return { [field]: regexCondition };
+            }).filter(Boolean);
         }
-
         const [data, total] = await Promise.all([
             this.model.find(queryFilter).sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
             this.model.countDocuments(queryFilter).exec()

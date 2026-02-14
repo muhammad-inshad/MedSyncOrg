@@ -126,7 +126,7 @@ export class DoctorService {
 
         if (updateData.profileImageFile) {
             if (existingDoctor.profileImage) {
-                // await cloudinary.uploader.destroy(extractPublicId(existingDoctor.profileImage));
+                await cloudinary.uploader.destroy(extractPublicId(existingDoctor.profileImage));
             }
             const profileImageUrl = await uploadBufferToCloudinary(
                 updateData.profileImageFile.buffer,
@@ -135,7 +135,7 @@ export class DoctorService {
             updateData.profileImage = profileImageUrl;
             delete updateData.profileImageFile;
         } else if (updateData.profileImage && updateData.profileImage.startsWith('data:image')) {
-            // Fallback for base64 if still used
+    
             const res = await cloudinary.uploader.upload(updateData.profileImage, {
                 folder: 'doctors/profiles'
             });

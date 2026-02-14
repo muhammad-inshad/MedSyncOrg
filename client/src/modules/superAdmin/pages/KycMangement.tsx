@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Building2 } from 'lucide-react';
 import Pagination from '@/components/Pagination';
 import SuperAdminSidebar from '../components/SuperAdminsidebar';
-import api from '../../../lib/api'; // Your axios instance
+import api from '../../../lib/api';
 import toast from 'react-hot-toast';
 
 interface KYCApplication {
@@ -68,8 +68,12 @@ const KycManagement = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setCurrentPage(1); // Reset to first page on search/filter change
-    }, 500);
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+      } else {
+        fetchApplications(1);
+      }
+    }, 600);
     return () => clearTimeout(timer);
   }, [searchQuery, filter]);
 

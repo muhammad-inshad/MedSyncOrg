@@ -8,7 +8,7 @@ import { showToast } from '@/utils/toastUtils';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Pagination from '@/components/Pagination';
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 5;
 
 const DoctorManagement = () => {
   const [doctors, setDoctors] = useState<IDoctor[]>([]);
@@ -17,6 +17,7 @@ const DoctorManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalConfig, setModalConfig] = useState<{ id: string, name: string, status: boolean } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'Revision'>('all');
   const [totalPages, setTotalPages] = useState(0);
   const navigate = useNavigate();
 
@@ -34,7 +35,7 @@ const DoctorManagement = () => {
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, filter]);
 
   const fetchDoctors = async (page: number) => {
     try {
@@ -43,7 +44,8 @@ const DoctorManagement = () => {
         params: {
           page,
           limit: ITEMS_PER_PAGE,
-          search: searchQuery
+          search: searchQuery,
+          filter: filter
         }
       });
       const { data, totalPages } = response.data;
@@ -170,6 +172,24 @@ const DoctorManagement = () => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 mb-10 overflow-hidden">
+          <div className="flex border-b border-slate-100 overflow-x-auto no-scrollbar">
+            {(['all', 'Revision', 'pending', 'rejected', 'approved'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setFilter(tab)}
+                className={`px-8 py-4 text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap ${filter === tab
+                  ? 'border-b-2 border-blue-600 text-blue-600 bg-blue-50/30'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                  }`}
+              >
+                {tab === 'all' ? 'All Staff' : tab === 'Revision' ? 'Needs Revision' : tab}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Table Section */}

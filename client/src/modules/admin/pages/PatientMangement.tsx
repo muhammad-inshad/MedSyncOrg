@@ -9,7 +9,7 @@ import { showToast } from '@/utils/toastUtils';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import Pagination from '@/components/Pagination';
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 5;
 
 const PatientMangement = () => {
   const [patients, setPatients] = useState<IPatient[]>([]);
@@ -26,15 +26,15 @@ const PatientMangement = () => {
   }, [currentPage]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (currentPage !== 1) {
-        setCurrentPage(1);
-      } else {
-        fetchPatients(1);
-      }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+  const timer = setTimeout(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      fetchPatients(1);
+    }
+  }, 500);
+  return () => clearTimeout(timer);
+}, [searchQuery]);
 
   const fetchPatients = async (page: number) => {
     try {
@@ -259,7 +259,6 @@ const PatientMangement = () => {
             </div>
           )}
 
-          {/* Pagination */}
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

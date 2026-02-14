@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import type { IAdmin } from '@/interfaces/IAdmin';
 import { SUPERADMIN_ROUTES } from '@/constants/frontend/superAdmin/superAdmin.routes';
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 5;
 
 const HospitalManagement = () => {
   const [activeTab, setActiveTab] = useState('All');

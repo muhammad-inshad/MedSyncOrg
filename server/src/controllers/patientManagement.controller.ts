@@ -1,5 +1,5 @@
 import type { Request,Response } from "express";
-import { patientManagementService } from "../service/patientManagement.service";
+import { patientManagementService } from "../services/patientManagement.service";
 export class PatientManagementController{
      private patientservice:patientManagementService;
 

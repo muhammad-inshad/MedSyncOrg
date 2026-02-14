@@ -15,7 +15,6 @@ export class Superadminkyc {
             if (filterStr && filterStr !== 'all') {
                 filter = { reviewStatus: filterStr };
             }
-
             const result = await this.service.hospitals({ page, limit, search, filter });
 
             return res.status(200).json({

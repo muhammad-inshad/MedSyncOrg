@@ -18,13 +18,14 @@ export class PatientService {
         return patientObj;
     }
 
-    async getAllPatient(options: { page: number; limit: number; search?: string }) {
-        const { page, limit, search } = options;
+    async getAllPatient(options: { page: number; limit: number; search?: string; filter?: object }) {
+        const { page, limit, search, filter } = options;
         return await this.userRepo.findWithPagination({
             page,
             limit,
             search,
-            searchFields: ["name", "email", "phone"]
+            searchFields: ["name", "email", "qualification", "department"],
+            filter
         });
     }
 

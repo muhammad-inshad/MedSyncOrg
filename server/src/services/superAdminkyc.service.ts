@@ -5,11 +5,12 @@ export class SuperadminkycService {
 
     async hospitals(options: { page: number; limit: number; search?: string; filter?: object }) {
         const { page, limit, search, filter } = options;
+        console.log(search, "----------------")
         return await this.repo.findWithPagination({
             page,
             limit,
             search,
-            searchFields: ["hospitalName", "email", "registrationNumber"],
+            searchFields: ["hospitalName", "email"],
             filter
         });
     }
@@ -17,6 +18,7 @@ export class SuperadminkycService {
     async updateHospitalStatus(id: string, status: string, reason?: string) {
         const updateData: any = {
             reviewStatus: status,
+            isActive: status === 'approved',
         };
 
         if (reason) {
