@@ -1,0 +1,40 @@
+import type { Request,Response } from "express";
+import { patientManagementService } from "../service/patientManagement.service";
+export class PatientManagementController{
+     private patientservice:patientManagementService;
+
+    constructor(patientservice: patientManagementService) { 
+    this.patientservice = patientservice;
+  }
+
+  async patientToggle(req: Request, res: Response) {
+    try {
+         const { id } = req.params;
+        const updatePatient=await this.patientservice.togglePatientStatus(id)
+        return res.status(200).json({
+            success:true,
+              message: `Doctor ${updatePatient?.isActive ? 'activated' : 'deactivated'} successfully`,
+              data:updatePatient 
+        })
+    } catch (error:any) {
+        return res.status(error.message === "Doctor not found" ? 404 : 500).json({
+      success: false,
+      message: error.message || "Internal Server Error"
+    });
+    }
+  }
+
+  async patientAdd(req:Request,res:Response){
+    try {
+     const patientData=req.body
+     const file=req.file
+     if (!file) {
+      return res.status(400).json({ message: "Profile image is required" });
+    }
+     const result=await this.patientservice.createPatient(patientData,file)
+     return res.status(201).json(result)
+    } catch (error:any) {
+      return res.status(500).json({message:error.message||"Internal sever error"})
+    }
+  }
+}
