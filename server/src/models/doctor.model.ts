@@ -24,7 +24,7 @@ export interface IDoctor extends Document {
   isAccountVerified: boolean;
   walletBalance: number;
 
-  reviewStatus: "pending" | "approved" | "Revision" | "rejected";
+  reviewStatus: "pending" | "approved" | "revision" | "rejected";
   reapplyDate?: Date;
   rejectionReason?: string;
 
@@ -150,7 +150,7 @@ const doctorSchema = new Schema<IDoctor>(
 
     reviewStatus: {
       type: String,
-      enum: ["pending", "approved", "Revision", "rejected"],
+      enum: ["pending", "approved", "revision", "rejected"],
       default: "pending",
     },
 

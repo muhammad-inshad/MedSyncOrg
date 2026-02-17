@@ -8,6 +8,7 @@ import { SUPERADMIN_ROUTES } from '@/constants/frontend/superAdmin/superAdmin.ro
 import { COMMON_ROUTES } from '@/constants/frontend/common/common.routes';
 import toast from 'react-hot-toast';
 import SuperAdminSidebar from './SuperAdminsidebar';
+import AdminSidbar from '@/modules/admin/components/AdminSidbar';
 
 interface FormData {
   hospitalName: string;
@@ -39,6 +40,11 @@ const EditHospital = () => {
   const navigate = useNavigate();
   const hospital = location.state?.hospital as IAdmin;
   const fromReview = location.state?.fromReview as boolean;
+  const searchParams = new URLSearchParams(location.search);
+  const queryRole = searchParams.get('role');
+  const userRole = queryRole || localStorage.getItem('role');
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     hospitalName: '',
     logo: '',
@@ -208,7 +214,7 @@ const EditHospital = () => {
     setIsLoading(true);
     console.log('first')
     try {
-      const response = await api.put(`/api/admin/hospitals/${hospitalId}`, formData);
+      const response = await api.patch(`/api/admin/hospitals/${hospitalId}`, formData);
       if (response.status === 200 || response.status === 204) {
         toast.success('Hospital information updated successfully!');
         if (fromReview) {
@@ -233,8 +239,12 @@ const EditHospital = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <SuperAdminSidebar />
-      <div className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      {userRole === 'superadmin' ? (
+        <SuperAdminSidebar />
+      ) : userRole === 'admin' && !fromReview ? (
+        <AdminSidbar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      ) : null}
+      <div className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4 overflow-y-auto">
         <div className="max-w-4xl mx-auto">
           {/* Back Button */}
           <button

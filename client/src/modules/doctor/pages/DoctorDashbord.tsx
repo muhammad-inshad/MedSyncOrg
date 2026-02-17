@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { Search, Bell, Settings, User, MessageSquare, FileText, Phone } from 'lucide-react';
+import { Search, Bell, Settings, User, MessageSquare, FileText, Phone, LogOut } from 'lucide-react';
 import DoctorDashbord from '../../../assets/images/DoctorDashbord.png'
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
+import { Link, useNavigate } from 'react-router-dom';
+import { DOCTOR_ROUTES } from '@/constants/frontend/doctor/doctor.routes';
 const DoctorDashboard = () => {
+  const navigate = useNavigate();
   const [appointments] = useState([
     { id: 1, name: 'John Smith', time: '9:00 AM', status: 'Confirmed' },
     { id: 2, name: 'Emily Jones', time: '9:30 AM', status: 'Confirmed' },
@@ -23,17 +26,17 @@ const DoctorDashboard = () => {
   };
 
   const handleLogout = async () => {
-  try {
-   
-    await api.post('/api/auth/logout'); 
-   
-    localStorage.removeItem('role');
-    toast.success("logout success")
-    window.location.href = '/login/doctor';
-  } catch (error) {
-    console.error("Logout failed", error);
-  }
-};
+    try {
+
+      await api.post('/api/auth/logout');
+
+      localStorage.removeItem('role');
+      toast.success("logout success")
+      window.location.href = '/login/doctor';
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
 
   const maxEarning = Math.max(...earningsData);
 
@@ -52,7 +55,8 @@ const DoctorDashboard = () => {
                 <span className="text-xl font-semibold text-gray-800">MedSync</span>
               </div>
               <nav className="hidden md:flex space-x-8">
-                <a href="#" className="text-gray-900 font-medium">Home</a>
+                <Link to={DOCTOR_ROUTES.DOCTORDASHBOARD} className="text-gray-900 font-medium">Home</Link>
+                <Link to={DOCTOR_ROUTES.DOCTORPROFILE} className="text-gray-500 hover:text-gray-900 font-medium transition-colors">Profile</Link>
               </nav>
             </div>
 
@@ -70,9 +74,16 @@ const DoctorDashboard = () => {
               </button>
               <Bell className="w-6 h-6 text-gray-600 cursor-pointer" />
               <Settings className="w-6 h-6 text-gray-600 cursor-pointer" />
-              <div onClick={handleLogout} className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer">
+              <div onClick={() => navigate(DOCTOR_ROUTES.DOCTORPROFILE)} className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-400 transition-colors">
                 <User className="w-6 h-6 text-gray-600" />
               </div>
+              <button
+                onClick={handleLogout}
+                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                title="Logout"
+              >
+                <LogOut className="w-6 h-6" />
+              </button>
             </div>
           </div>
         </div>

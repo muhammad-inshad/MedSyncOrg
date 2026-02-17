@@ -12,11 +12,12 @@ export class DoctorManagementController {
 
   async editHospital(req: Request, res: Response) {
     try {
+
       const { id } = req.params;
       const updateData = req.body;
       console.log(updateData)
       const result = await this._doctorManagementService.updateHospital(id, updateData);
-console.log(result)
+      console.log(result)
       return res.status(StatusCode.OK).json({
         success: true,
         message: MESSAGES.ADMIN.UPDATE_SUCCESS,
@@ -33,10 +34,15 @@ console.log(result)
       const limit = parseInt(req.query.limit as string) || 8;
       const search = req.query.search as string;
       const filterStr = req.query.filter as string;
-      let filter = {};
+      const isKyc = req.query.isKyc === 'true';
+      let filter: any = {};
 
       if (filterStr && filterStr !== 'all') {
         filter = { reviewStatus: filterStr };
+      } else if (isKyc) {
+        filter = { reviewStatus: { $in: ['pending', 'revision', 'rejected'] } };
+      } else {
+        filter = { reviewStatus: 'approved' };
       }
 
       const result = await this._doctorManagementService.getAllDoctors({ page, limit, search, filter });

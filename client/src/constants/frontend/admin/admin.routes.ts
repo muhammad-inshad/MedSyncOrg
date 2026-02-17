@@ -7,5 +7,6 @@ export const ADMIN_ROUTES = {
     ADMINDOCTORADD: "/admin/doctoradd",
     ADMINPATIENT: "/admin/patientmangement",
     ADMINPATIENTADD: "/admin/patientAdd",
-    ADMINPATIENTEDIT: "/admin/patientEdit"
+    ADMINPATIENTEDIT: "/admin/patientEdit",
+    ADMINEDIT:"/admin/edit",
 };

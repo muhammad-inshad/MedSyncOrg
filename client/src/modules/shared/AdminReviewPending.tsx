@@ -7,12 +7,12 @@ import { logout } from '@/store/auth/authSlice';
 import type { RootState } from '@/store/store';
 import type { IAdmin } from '@/interfaces/IAdmin';
 import { DOCTOR_ROUTES } from '@/constants/frontend/doctor/doctor.routes';
-import { COMMON_ROUTES } from '@/constants/frontend/common/common.routes';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { initializeAuth } from '@/store/auth/authThunks';
 
 import type { BaseUser, ProfileData } from '@/store/auth/auth.type';
+import { ADMIN_ROUTES } from '@/constants/frontend/admin/admin.routes';
 
 interface InitializeAuthPayload {
   user: BaseUser;
@@ -29,6 +29,7 @@ const AdminReviewPending: React.FC = () => {
   const userData = (user as (BaseUser & { _doc?: BaseUser }))?._doc ?? user;
 
   const status = userData?.reviewStatus;
+  console.log(status)
   const rejectionReason = userData?.rejectionReason;
 
   const handleLogout = () => {
@@ -50,9 +51,8 @@ const AdminReviewPending: React.FC = () => {
 
       console.log("Current role:", role, "Fresh status:", freshStatus);
 
-      if (freshStatus === 'Revision') {
-        const destination = role === 'doctor' ? DOCTOR_ROUTES.DOCTOREDITPROFILE : COMMON_ROUTES.ADMINEDITPROFILE;
-        console.log("Navigating to:", destination);
+      if (freshStatus === 'revision') {
+        const destination = role === 'doctor' ? DOCTOR_ROUTES.DOCTOREDITPROFILE : ADMIN_ROUTES.ADMINEDIT;
         navigate(destination, {
           state: { hospital, fromReview: true }
         });
@@ -84,7 +84,7 @@ const AdminReviewPending: React.FC = () => {
   const isDoctor = userRole === 'doctor';
 
   const isRejected = status === 'rejected';
-  const isRevision = status === 'Revision';
+  const isRevision = status === 'revision';
   const isPending = status === 'pending';
 
   return (
@@ -153,13 +153,13 @@ const AdminReviewPending: React.FC = () => {
               </button>
             )}
 
-              <button
-                onClick={() => window.location.reload()}
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg transition-all active:scale-95"
-              >
-                <RefreshCcw className="w-5 h-5" /> Refresh Status
-              </button>
-       
+            <button
+              onClick={() => window.location.reload()}
+              className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg transition-all active:scale-95"
+            >
+              <RefreshCcw className="w-5 h-5" /> Refresh Status
+            </button>
+
 
             <button className="px-8 py-4 border-2 border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-all">
               Contact Support

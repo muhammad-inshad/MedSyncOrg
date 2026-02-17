@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Search, Edit2, Circle, AlertTriangle, CheckCircle, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 import Pagination from '@/components/Pagination';
 import SuperAdminSidebar from '@/modules/superAdmin/components/SuperAdminsidebar';
 import api from '../../../lib/api';
@@ -79,6 +80,7 @@ const HospitalManagement = () => {
     try {
       setIsToggling(true);
       const { id, status } = confirmTarget;
+
       const response = await api.patch('/api/superadmin/setActive', {
         id,
         isActive: !status
@@ -92,10 +94,12 @@ const HospitalManagement = () => {
         );
         setShowConfirmModal(false);
         setConfirmTarget(null);
+        toast.success('Hospital status updated successfully');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to toggle status:', error);
-      alert('Failed to update hospital status');
+      const errorMessage = error.response?.data?.message || 'Failed to update hospital status';
+      toast.error(errorMessage);
     } finally {
       setIsToggling(false);
     }

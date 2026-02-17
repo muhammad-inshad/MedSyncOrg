@@ -45,7 +45,7 @@ const CommonProtector = () => {
   if (status !== "approved") {
     const isDoctor = savedRole === "doctor";
     const onAllowedPage = location.pathname === COMMON_ROUTES.REVIEWPENDING ||
-      (!isDoctor && location.pathname === COMMON_ROUTES.ADMINEDITPROFILE) ||
+      (!isDoctor && (location.pathname === COMMON_ROUTES.ADMINEDITPROFILE || location.pathname === ADMIN_ROUTES.ADMINEDIT)) ||
       (isDoctor && location.pathname === DOCTOR_ROUTES.DOCTOREDITPROFILE);
 
     if (!onAllowedPage) {

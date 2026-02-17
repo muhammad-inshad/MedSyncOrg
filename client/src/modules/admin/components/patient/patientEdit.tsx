@@ -16,7 +16,7 @@ type PatientFormData = {
   dateOfBirth: string;
   address: string;
   bloodGroup: string;
-  image: string | null; 
+  image: string | null;
   isActive: boolean;
 };
 
@@ -150,7 +150,7 @@ const PatientEdit = () => {
 
       if (response.status === 200) {
         toast.success('Patient updated successfully!');
-        navigate(ADMIN_ROUTES.ADMINPATIENT,{ replace: true });
+        navigate(ADMIN_ROUTES.ADMINPATIENT, { replace: true });
       }
     } catch (error) {
       console.error('Error updating patient:', error);

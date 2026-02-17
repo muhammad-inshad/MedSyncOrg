@@ -23,7 +23,7 @@ export interface IDoctor {
 
   isActive: boolean;
   isAccountVerified: boolean;
-  reviewStatus?: "pending" | "approved" | "Revision" | "rejected";
+  reviewStatus?: "pending" | "approved" | "revision" | "rejected";
   reapplyDate?: string;
   rejectionReason?: string;
   walletBalance: number;

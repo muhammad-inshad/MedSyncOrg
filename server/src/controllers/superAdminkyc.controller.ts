@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SuperadminkycService } from "../services/superAdminkyc.service";
+import { SuperadminkycService } from "../services/superAdminkyc.service.ts";
 
 export class Superadminkyc {
     constructor(private readonly service: SuperadminkycService) { }
@@ -14,6 +14,8 @@ export class Superadminkyc {
 
             if (filterStr && filterStr !== 'all') {
                 filter = { reviewStatus: filterStr };
+            } else {
+                filter = { reviewStatus: { $in: ['pending', 'revision', 'rejected'] } };
             }
             const result = await this.service.hospitals({ page, limit, search, filter });
 

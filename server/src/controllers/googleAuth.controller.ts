@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { TokenService } from '../services/token.service';
-import { IPatient } from '../models/Patient.model';
+import { TokenService } from '../services/token.service.ts';
+import { IPatient } from '../models/Patient.model.ts';
 interface AuthRequest extends Request {
   user?: IPatient;
 }

@@ -13,6 +13,7 @@ import PatientEdit from '../components/patient/patientEdit'
 import AdminLayout from "../components/AdminLayout"
 
 
+
 const AdminRoutes = () => {
   return (
     <Routes>

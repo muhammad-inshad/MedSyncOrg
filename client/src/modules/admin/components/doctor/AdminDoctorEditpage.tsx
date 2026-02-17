@@ -15,7 +15,6 @@ import {
   Info,
   Clock,
   CreditCard,
-  ShieldCheck,
   ChevronLeft
 } from 'lucide-react';
 import api from '../../../../lib/api';
@@ -126,7 +125,6 @@ const AdminDoctorEditpage: React.FC = () => {
         formData.append(key, String(pendingData[key as keyof AdminDoctorEditFormData]));
       });
 
-      // Nested objects
       formData.append('consultationTime', JSON.stringify(pendingData.consultationTime));
       formData.append('payment', JSON.stringify(pendingData.payment));
 
@@ -137,7 +135,7 @@ const AdminDoctorEditpage: React.FC = () => {
         formData.append('license', licenseImageFile);
       }
 
-      const response = await api.put(`/api/admin/doctorEdit/${doctor._id}`, formData, {
+      const response = await api.patch(`/api/doctor/doctorEdit/${doctor._id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -261,37 +259,6 @@ const AdminDoctorEditpage: React.FC = () => {
                 </p>
               </div>
 
-              {/* Status & Verification Card */}
-              <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 px-1">Permissions</h3>
-                <div className="space-y-4">
-                  <label className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-100 cursor-pointer group hover:bg-white hover:border-blue-200 transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white rounded-xl shadow-sm">
-                        <ShieldCheck className={`w-4 h-4 ${watch('isActive') ? 'text-emerald-500' : 'text-slate-400'}`} />
-                      </div>
-                      <span className="text-sm font-bold text-slate-700">Active Status</span>
-                    </div>
-                    <div className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" {...register('isActive')} className="sr-only peer" />
-                      <div className="w-10 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-100 cursor-pointer group hover:bg-white hover:border-blue-200 transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-white rounded-xl shadow-sm">
-                        <Award className={`w-4 h-4 ${watch('isAccountVerified') ? 'text-blue-500' : 'text-slate-400'}`} />
-                      </div>
-                      <span className="text-sm font-bold text-slate-700">Verified Badge</span>
-                    </div>
-                    <div className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" {...register('isAccountVerified')} className="sr-only peer" />
-                      <div className="w-10 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
-                    </div>
-                  </label>
-                </div>
-              </div>
 
               {/* Medical License Card */}
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">

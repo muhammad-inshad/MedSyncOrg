@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import type { SignupDTO, LoginDTO } from "../dto/auth/signup.dto";
-import { AuthService } from "../services/auth.service";
+import type { SignupDTO, LoginDTO } from "../dto/auth/signup.dto.ts";
+import { AuthService } from "../services/auth.service.ts";
 
 class AuthController {
   constructor(private readonly authService: AuthService) { }
@@ -46,7 +46,11 @@ class AuthController {
       return res.status(200).json({
         success: true,
         message: "Login successful",
-        user: { ...result.user, role: loginData.role },
+        data: {
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+          user: { ...result.user, role: loginData.role }
+        }
       });
     } catch (error: any) {
       return res.status(error.status || 401).json({
@@ -58,10 +62,26 @@ class AuthController {
 
   refresh = async (req: Request, res: Response) => {
     try {
-      const refreshToken = req.cookies?.refreshToken;
+      // Get refresh token from cookies, body, or Authorization header
+      let refreshToken = req.cookies?.refreshToken;
+
+      if (!refreshToken) {
+        // Try to get from request body
+        refreshToken = req.body?.refreshToken;
+      }
+
+      if (!refreshToken) {
+        // Try to get from Authorization header with 'Refresh ' prefix
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith("Refresh ")) {
+          refreshToken = authHeader.substring(8); // Remove "Refresh " prefix
+        }
+      }
+
       if (!refreshToken) {
         return res.status(401).json({ success: false, message: "Session expired" });
       }
+
       const result = await this.authService.refreshAccessToken(refreshToken);
       res.cookie("accessToken", result.accessToken, {
         httpOnly: true,
@@ -70,8 +90,13 @@ class AuthController {
         maxAge: 15 * 60 * 1000,
         path: "/",
       });
+
+      // Return both success status and the new access token in the response body
       return res.status(200).json({
         success: true,
+        data: {
+          accessToken: result.accessToken
+        }
       });
     } catch (error: any) {
       return res.status(401).json({ success: false, message: "Invalid session" });

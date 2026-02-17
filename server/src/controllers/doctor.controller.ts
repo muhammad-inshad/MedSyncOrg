@@ -1,12 +1,11 @@
 import { Request, Response } from "express";
-import { DoctorService } from "../services/doctor.service";
+import { DoctorService } from "../services/doctor.service.ts";
 
 class DoctorController {
   constructor(private readonly doctorService: DoctorService) { }
 
   RegistorDoctor = async (req: Request, res: Response) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const files = (req as any).files as { [fieldname: string]: any[] };
       const doctor = await this.doctorService.registerDoctor(
         req.body,
@@ -45,9 +44,13 @@ class DoctorController {
       return res.status(200).json({
         success: true,
         message: "Doctor login successful",
-        user: {
-          ...result.user,
-          role: "doctor"
+        data: {
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+          user: {
+            ...result.user,
+            role: "doctor"
+          }
         }
       });
     } catch (error: any) {
@@ -75,21 +78,8 @@ class DoctorController {
   doctorEdit = async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      console.log(id)
-      console.log(id)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const files = (req as any).files as { [fieldname: string]: any[] };
-      // Combine body and files for the service, or handle files explicitly
-      // The current service expects data:image strings or we need to update the service to handle buffers.
-      // Let's passed files separately or process them here.
-      // Based on registerDoctor, we should probably handle files in the service.
-      // But updateDoctorProfile signature is (id: string, updateData: any).
-      // We will pass files inside updateData or change signature.
-      // Let's pass them as part of updateData for now to match current service logic which expects profileImage/licenseImage
-
       const updateData = { ...req.body };
-
-      // Parse nested JSON fields if they come as strings (from FormData)
       if (typeof updateData.consultationTime === 'string') {
         try {
           updateData.consultationTime = JSON.parse(updateData.consultationTime);
@@ -107,10 +97,6 @@ class DoctorController {
       }
 
       if (files?.profileImage?.[0]) {
-        // If service expects base64/url, we might need to upload here or change service.
-        // Service line 127 checks for startswith('data:image').
-        // We should change service to handle file buffers like registerDoctor does.
-        // For now, let's pass the files in a way the service can handle
         updateData.profileImageFile = files.profileImage[0];
       }
       if (files?.license?.[0]) {
@@ -118,7 +104,6 @@ class DoctorController {
       }
 
       const updatedDoctor = await this.doctorService.updateDoctorProfile(id, updateData);
-      console.log(updatedDoctor)
       return res.status(200).json({
         success: true,
         message: "Doctor updated successfully",

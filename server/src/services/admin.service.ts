@@ -100,7 +100,7 @@ export class AdminService {
         throw { status: StatusCode.NOT_FOUND, message: "admin not found" };
       }
       return {
-        ...admin,
+        ...admin.toObject(),
         role: "admin"
       };
     }
@@ -113,12 +113,6 @@ export class AdminService {
   }
   async getAllHospitals() {
     try {
-      // Assuming admins are hospitals. If there's a specific flag, filter by it.
-      // Based on schema, 'hospitalName' is required, so all admins are hospitals or superadmins.
-      // We might want to filter out superadmins if they exist and are distinguished (e.g. by role, but role is in LoginDTO not schema explicitly for 'admin' vs 'superadmin' in the same collection unless 'role' field exists).
-      // The LoginDTO has role, but the schema doesn't seem to have a 'role' field stored, unless it's implicit?
-      // Actually, 'role' is passed during login.
-      // Let's just return all admins for now, or filter by isActive: true.
       const hospitals = await this._adminRepo.findAll();
       return hospitals.filter(admin => admin.isActive).map(admin => {
         const { password, ...safeAdmin } = admin.toObject();

@@ -6,7 +6,7 @@ const router = express.Router();
 const { adminController, doctorManagement, patientManagement } = adminContainer();
 
 router.get("/getme", (req, res) => adminController.getme(req, res))
-router.put("/hospitals/:id", (req, res) => doctorManagement.editHospital(req, res))
+router.patch("/hospitals/:id", (req, res) => doctorManagement.editHospital(req, res))
 router.get("/getalldoctors", (req, res) => doctorManagement.getAllDoctors(req, res))
 router.patch("/doctorsToggle/:id", (req, res) => doctorManagement.doctorsToggle(req, res))
 router.patch("/doctorAccept/:id", (req, res) => doctorManagement.acceptDoctor(req, res))

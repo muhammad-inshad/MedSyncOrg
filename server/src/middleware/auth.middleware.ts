@@ -14,7 +14,16 @@ export const protect = (
   next: NextFunction
 ): void => {
   try {
-    const token = req.cookies.accessToken;
+    // Check for token in cookies or Authorization header
+    let token = req.cookies.accessToken;
+    
+    if (!token) {
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.substring(7); // Remove "Bearer " prefix
+      }
+    }
+
     if (!token) {
       res.status(StatusCode.UNAUTHORIZED).json({
         success: false,
@@ -22,6 +31,7 @@ export const protect = (
       });
       return;
     }
+
     const decoded = jwt.verify(
       token,
       process.env.JWT_ACCESS_SECRET as string

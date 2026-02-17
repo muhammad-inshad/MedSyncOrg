@@ -14,7 +14,7 @@ interface KYCApplication {
   registrationNumber: string;
   address: string;
   licence?: string;
-  reviewStatus: 'pending' | 'approved' | 'rejected' | 'Revision';
+  reviewStatus: 'pending' | 'approved' | 'rejected' | 'revision';
   createdAt: string;
   rejectionReason?: string;
   reapplyDate?: string;
@@ -32,7 +32,7 @@ const KycManagement = () => {
   const [selectedApplication, setSelectedApplication] = useState<KYCApplication | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'Revision'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'rejected' | 'revision'>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [showZoomModal, setShowZoomModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -103,16 +103,14 @@ const KycManagement = () => {
   const getStatusBadge = (status: string) => {
     const styles = {
       pending: 'bg-yellow-101 text-yellow-800',
-      approved: 'bg-green-101 text-green-800',
       rejected: 'bg-red-101 text-red-800',
-      Revision: 'bg-orange-101 text-orange-800',
+      revision: 'bg-orange-101 text-orange-800',
     };
 
     const labels = {
       pending: 'Pending Review',
-      approved: 'Approved',
       rejected: 'Rejected',
-      Revision: 'Needs Revision',
+      revision: 'Needs Revision',
     };
 
     return (
@@ -164,7 +162,7 @@ const KycManagement = () => {
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
               <div className="text-sm text-gray-600 mb-1">Needs Revision</div>
               <div className="text-2xl font-bold text-orange-600">
-                {applications.filter((app) => app.reviewStatus === 'Revision').length}
+                {applications.filter((app) => app.reviewStatus === 'revision').length}
               </div>
             </div>
           </div>
@@ -172,7 +170,7 @@ const KycManagement = () => {
           {/* Filter Tabs */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
             <div className="flex border-b border-gray-200">
-              {(['all', 'Revision', 'pending', 'rejected'] as const).map((tab) => (
+              {(['all', 'revision', 'pending', 'rejected'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setFilter(tab)}
@@ -181,7 +179,7 @@ const KycManagement = () => {
                     : 'text-gray-600 hover:text-gray-901'
                     }`}
                 >
-                  {tab === 'all' ? 'All Applications' : tab === 'Revision' ? 'Needs Revision' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  {tab === 'all' ? 'All Applications' : tab === 'revision' ? 'Needs Revision' : tab.charAt(0).toUpperCase() + tab.slice(1)}
                   {tab !== 'all' && (
                     <span className="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-xs">
                       {applications.filter((app) => app.reviewStatus === tab).length}
@@ -224,12 +222,12 @@ const KycManagement = () => {
                     {applications.map((app: KYCApplication) => (
                       <tr
                         key={app._id}
-                        className={`hover:bg-gray-50 transition-colors ${app.reviewStatus === 'Revision' ? 'bg-orange-50' : ''
+                        className={`hover:bg-gray-50 transition-colors ${app.reviewStatus === 'revision' ? 'bg-orange-50' : ''
                           }`}
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center">
-                            {app.reviewStatus === 'Revision' && <span className="mr-2 text-orange-500">⚠️</span>}
+                            {app.reviewStatus === 'revision' && <span className="mr-2 text-orange-500">⚠️</span>}
                             <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 mr-3 flex-shrink-0 bg-gray-50 flex items-center justify-center">
                               {app.logo ? (
                                 <img
@@ -251,12 +249,12 @@ const KycManagement = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-gray-901">{app.adminName || 'Admin'}</div>
+                          <div className="text-sm text-gray-901">{'Admin'}</div>
                           <div className="text-sm text-gray-500">{app.email}</div>
                         </td>
                         <td className="px-6 py-4">
                           {getStatusBadge(app.reviewStatus)}
-                          {app.reviewStatus === 'Revision' && app.rejectionReason && (
+                          {app.reviewStatus === 'revision' && app.rejectionReason && (
                             <div className="mt-1 text-xs text-orange-600 line-clamp-1">{app.rejectionReason}</div>
                           )}
                         </td>
@@ -399,7 +397,7 @@ const KycManagement = () => {
                         Approve Application
                       </button>
                       <button
-                        onClick={() => handlestatus(selectedApplication._id, 'Revision')}
+                        onClick={() => handlestatus(selectedApplication._id, 'revision')}
                         className="flex-1 bg-orange-600 text-white px-6 py-3.5 rounded-lg hover:bg-orange-700 font-medium transition-colors shadow-sm"
                       >
                         Request Revision

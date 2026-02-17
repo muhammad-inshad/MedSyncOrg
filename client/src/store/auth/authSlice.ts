@@ -38,6 +38,10 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.isActive = true;
             state.loading = false;
+            // Clear localStorage
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("role");
         },
     },
     extraReducers: (builder) => {

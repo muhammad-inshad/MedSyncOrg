@@ -117,7 +117,7 @@ export class DoctorManagementService {
     }
 
     return await this._doctorRepo.update(id, {
-      reviewStatus: "Revision",
+      reviewStatus: "revision",
       rejectionReason: reason
     } as any);
   }

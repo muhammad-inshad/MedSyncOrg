@@ -115,7 +115,7 @@ export class DoctorService {
             throw { status: StatusCode.NOT_FOUND, message: MESSAGES.DOCTOR.NOT_FOUND };
         }
         return {
-            ...doctor,
+            ...doctor.toObject(),
             role: "doctor"
         };
     }
@@ -135,7 +135,7 @@ export class DoctorService {
             updateData.profileImage = profileImageUrl;
             delete updateData.profileImageFile;
         } else if (updateData.profileImage && updateData.profileImage.startsWith('data:image')) {
-    
+
             const res = await cloudinary.uploader.upload(updateData.profileImage, {
                 folder: 'doctors/profiles'
             });
@@ -159,10 +159,7 @@ export class DoctorService {
             updateData.licence = res.secure_url;
             delete updateData.licenseImage;
         }
-
-        // Reset review status on significant updates
-        updateData.reviewStatus = 'pending';
-        updateData.rejectionReason = undefined; // Clear previous rejection reason
+        updateData.rejectionReason = undefined;
 
         return await this._doctorRepo.update(id, updateData);
     }

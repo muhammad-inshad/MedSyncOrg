@@ -59,7 +59,7 @@ const AdminSchema = new Schema<IAdmin>(
 
     isActive: {
       type: Boolean,
-      default: false,
+      default: true,
     },
 
     autoDisabled: {

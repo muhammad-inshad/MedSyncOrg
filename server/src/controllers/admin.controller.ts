@@ -11,7 +11,7 @@ export class AdminController {
     async signup(req: Request, res: Response) {
         try {
             const adminData = req.body;
-            const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+            const files = (req as any).files;
 
             const processedFiles = {
                 logo: files?.logo ? files.logo[0] : undefined,
@@ -29,7 +29,7 @@ export class AdminController {
     async login(req: Request, res: Response) {
         try {
             const data = req.body
-
+console.log("ppppppppppppppppppppppppppppppppppp")
             const result = await this.adminService.loginAdmin(data)
             res.cookie("refreshToken", result.refreshToken, {
                 httpOnly: true,
@@ -47,9 +47,12 @@ export class AdminController {
 
             return res.status(200).json({
                 success: true,
-                message: "Doctor login successful",
-                user: result.user,
-                accessToken: result.accessToken,
+                message: "Admin login successful",
+                data: {
+                    accessToken: result.accessToken,
+                    refreshToken: result.refreshToken,
+                    user: { ...result.user, role: "admin" }
+                }
             });
         } catch (error: any) {
             res.status(error.status || 500).json({

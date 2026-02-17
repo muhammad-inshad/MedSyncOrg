@@ -49,7 +49,7 @@ const LogIn = () => {
   const [blockedError, setBlockedError] = useState<string | null>(null);
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
-  const isSuperAdmin = role !== "Superadmin"
+  const isSuperAdmin = role.toLowerCase() === "superadmin"
   const isPatient = role === "patient"
   const isDoctor = role === "doctor"
   const {
@@ -70,29 +70,34 @@ const LogIn = () => {
   const onSubmit = async (data: LogInFormData) => {
     setIsLoading(true);
     setBlockedError(null);
-    const allowedRoles = ["doctor", "admin", "Superadmin"];
-    const safeRole = allowedRoles.includes(role) ? role : "auth";
-    console.log(safeRole)
     try {
-      const response = await api.post(`/api/auth/${safeRole}/login`, {
-        ...data,
-        role,
-      });
+      let endpoint = '';
+      if (role === 'Superadmin') endpoint = '/api/auth/Superadmin/login';
+      else if (role === 'doctor') endpoint = '/api/auth/doctor/login';
+      else if (role === 'admin') endpoint = '/api/auth/admin/login';
+      else endpoint = '/api/auth/login';
 
+      const response = await api.post(endpoint, { ...data, role });
       const resData = response.data;
-      console.log(resData)
-      if (resData.success) {
 
-        if (resData.user.isActive === false) {
+      if (resData.success) {
+        const user = resData.data?.user;
+
+        if (user?.isActive === false) {
           setBlockedError("Your account is currently blocked. Please contact the hospital admin.");
           setIsLoading(false);
           return;
         }
+
         dispatch(loginSuccess({
-          user: resData.user,
-          profileData: resData.data
+          user,
+          profileData: resData.data,
         }));
+
         localStorage.setItem("role", role);
+        if (resData.data?.accessToken) localStorage.setItem("accessToken", resData.data.accessToken);
+        if (resData.data?.refreshToken) localStorage.setItem("refreshToken", resData.data.refreshToken);
+
         toast.success("Login successful");
         navigate(roleConfig.redirect);
       } else {
@@ -129,7 +134,7 @@ const LogIn = () => {
               {blockedError}
             </div>
           )}
-     
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
 
@@ -172,7 +177,7 @@ const LogIn = () => {
             )}
           </div>
 
-          {isSuperAdmin && (
+          {!isSuperAdmin && (
             <div className="flex justify-center gap-8 text-sm">
               <button type="button" onClick={() => navigate(`/forgot-password?role=${role}`)} className="text-red-500 hover:underline">
                 Forgot Password?
@@ -212,7 +217,7 @@ const LogIn = () => {
             </button>
           </>
         )}
-        {!isDoctor &&
+        {!isSuperAdmin &&
           <div className="text-center mt-8 text-sm text-gray-600">
             Don't have an account?{' '}
             <button onClick={() => navigate(`/${role}/signup`)} className="text-blue-600 hover:underline font-medium">

@@ -17,7 +17,7 @@ const DoctorManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalConfig, setModalConfig] = useState<{ id: string, name: string, status: boolean } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'Revision'>('all');
+  const [filter, setFilter] = useState<'approved'>('approved');
   const [totalPages, setTotalPages] = useState(0);
   const navigate = useNavigate();
 
@@ -45,7 +45,8 @@ const DoctorManagement = () => {
           page,
           limit: ITEMS_PER_PAGE,
           search: searchQuery,
-          filter: filter
+          filter: filter,
+          isKyc: false
         }
       });
       const { data, totalPages } = response.data;
@@ -101,14 +102,14 @@ const DoctorManagement = () => {
       approved: 'bg-emerald-50 text-emerald-700 border-emerald-100',
       pending: 'bg-blue-50 text-blue-700 border-blue-100',
       rejected: 'bg-slate-50 text-slate-700 border-slate-100',
-      Revision: 'bg-amber-50 text-amber-700 border-amber-100',
+      revision: 'bg-amber-50 text-amber-700 border-amber-100',
     };
 
     const labels = {
       approved: 'Verified',
       pending: 'Pending',
       rejected: 'Rejected',
-      Revision: 'Needs Revision',
+      revision: 'Needs Revision',
     };
 
     return (
@@ -177,16 +178,13 @@ const DoctorManagement = () => {
         {/* Filter Tabs */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 mb-10 overflow-hidden">
           <div className="flex border-b border-slate-100 overflow-x-auto no-scrollbar">
-            {(['all', 'Revision', 'pending', 'rejected', 'approved'] as const).map((tab) => (
+            {(['approved'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setFilter(tab)}
-                className={`px-8 py-4 text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap ${filter === tab
-                  ? 'border-b-2 border-blue-600 text-blue-600 bg-blue-50/30'
-                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
-                  }`}
+                className={`px-8 py-4 text-xs font-bold uppercase tracking-widest transition-all whitespace-nowrap border-b-2 border-blue-600 text-blue-600 bg-blue-50/30`}
               >
-                {tab === 'all' ? 'All Staff' : tab === 'Revision' ? 'Needs Revision' : tab}
+                {tab === 'approved' ? 'Active Doctors' : tab}
               </button>
             ))}
           </div>

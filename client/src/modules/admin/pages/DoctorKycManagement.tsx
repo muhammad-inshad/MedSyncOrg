@@ -13,7 +13,7 @@ const DoctorKycManagement = () => {
     const [selectedDoctor, setSelectedDoctor] = useState<IDoctor | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [rejectionReason, setRejectionReason] = useState('');
-    const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'Revision'>('all');
+    const [filter, setFilter] = useState<'all' | 'pending' | 'rejected' | 'revision'>('all');
     const [isLoading, setIsLoading] = useState(true);
     const [showZoomModal, setShowZoomModal] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -28,7 +28,8 @@ const DoctorKycManagement = () => {
                     page,
                     limit: ITEMS_PER_PAGE,
                     search: searchQuery,
-                    filter: filter
+                    filter: filter,
+                    isKyc: true
                 }
             });
             const { data, totalPages } = response.data;
@@ -72,7 +73,7 @@ const DoctorKycManagement = () => {
                 }
                 endpoint = `/api/admin/doctorReject/${id}`;
                 payload.reason = rejectionReason;
-            } else if (status === 'Revision') {
+            } else if (status === 'revision') {
                 if (!rejectionReason.trim()) {
                     toast.error("Please provide a reason for revision");
                     return;
@@ -100,14 +101,14 @@ const DoctorKycManagement = () => {
             pending: 'bg-blue-100 text-blue-700 border-blue-200',
             approved: 'bg-emerald-100 text-emerald-700 border-emerald-200',
             rejected: 'bg-rose-100 text-rose-700 border-rose-200',
-            Revision: 'bg-amber-100 text-amber-700 border-amber-200',
+            revision: 'bg-amber-100 text-amber-700 border-amber-200',
         };
 
         const labels = {
             pending: 'Pending Review',
             approved: 'Verified',
             rejected: 'Rejected',
-            Revision: 'Needs Revision',
+            revision: 'Needs Revision',
         };
 
         const currentStatus = status || 'pending';
@@ -149,7 +150,7 @@ const DoctorKycManagement = () => {
                     {[
                         { label: 'Total Applications', value: doctors.length, icon: Users, color: 'text-slate-600', bg: 'bg-slate-100' },
                         { label: 'Pending Review', value: doctors.filter(d => d.reviewStatus === 'pending').length, icon: Clock, color: 'text-blue-600', bg: 'bg-blue-100/50' },
-                        { label: 'Needs Revision', value: doctors.filter(d => d.reviewStatus === 'Revision').length, icon: FileWarning, color: 'text-amber-600', bg: 'bg-amber-100/50' },
+                        { label: 'Needs Revision', value: doctors.filter(d => d.reviewStatus === 'revision').length, icon: FileWarning, color: 'text-amber-600', bg: 'bg-amber-100/50' },
                         { label: 'Verified Doctors', value: doctors.filter(d => d.reviewStatus === 'approved').length, icon: UserCheck, color: 'text-emerald-600', bg: 'bg-emerald-100/50' },
                     ].map((stat, i) => (
                         <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 transition-all hover:shadow-md">
@@ -166,7 +167,7 @@ const DoctorKycManagement = () => {
 
                 {/* Filter Tabs */}
                 <div className="bg-white p-1 rounded-xl shadow-sm border border-slate-200 mb-8 inline-flex flex-wrap gap-1">
-                    {(['all', 'pending', 'Revision', 'rejected', 'approved'] as const).map((tab) => (
+                    {(['all', 'pending', 'revision', 'rejected'] as const).map((tab) => (
                         <button
                             key={tab}
                             onClick={() => {
@@ -178,7 +179,7 @@ const DoctorKycManagement = () => {
                                 : 'text-slate-600 hover:bg-slate-50'
                                 }`}
                         >
-                            <span className="capitalize">{tab === 'approved' ? 'Verified' : tab === 'Revision' ? 'Revision' : tab}</span>
+                            <span className="capitalize">{tab === 'revision' ? 'Revision' : tab}</span>
                             {tab !== 'all' && (
                                 <span className={`ml-2 px-1.5 py-0.5 rounded-md text-[10px] ${filter === tab ? 'bg-white/20' : 'bg-slate-100'}`}>
                                     {doctors.filter((d) => d.reviewStatus === tab).length}
@@ -408,7 +409,7 @@ const DoctorKycManagement = () => {
                                             Approve & Verify
                                         </button>
                                         <button
-                                            onClick={() => handleStatusUpdate(selectedDoctor._id, 'Revision')}
+                                            onClick={() => handleStatusUpdate(selectedDoctor._id, 'revision')}
                                             className="flex-1 bg-amber-500 text-white px-8 py-4 rounded-2xl hover:bg-amber-600 font-bold transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 active:scale-95 uppercase text-sm tracking-wider"
                                         >
                                             <Clock className="w-5 h-5" />

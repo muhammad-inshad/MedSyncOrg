@@ -8,7 +8,7 @@ export interface BaseUser {
   isActive: boolean;
   isAccountVerified: boolean;
   profileImage?: string;
-  reviewStatus?: 'pending' | 'approved' | 'rejected' | 'Revision';
+  reviewStatus?: 'pending' | 'approved' | 'rejected' | 'revision';
   rejectionReason?: string;
   image?: string;
   gender?: string;
