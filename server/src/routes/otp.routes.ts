@@ -16,7 +16,7 @@ const router = Router();
 
 router.post('/send-otp', (req, res) => otpController.sendOtp(req, res));
 router.post("/Superadmin/login", (req, res) => superAdminAuthController.login(req, res));
-router.post('/admin/login', (req, res) => adminAuthController.login(req, res))
+router.post('/admin/login', (req, res) => adminAuthController.loginAdmin(req, res))
 router.post("/admin/signup", upload.fields([{ name: "logo", maxCount: 1 }, { name: "licence", maxCount: 1 },]), (req, res) => adminAuthController.signup(req, res));
 router.post('/verify-otp', (req, res) => otpController.verifyOtp(req, res));
 router.post('/signup', (req, res) => authController.signup(req, res));

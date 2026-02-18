@@ -4,7 +4,7 @@ import { StatusCode } from "../../../constants/statusCodes.ts";
 import Logger from "../../../utils/logger.ts";
 import { IAdmin } from "../../../models/admin.model.ts";
 import { IAdminRepository } from "../../../repositories/admin/admin.repository.interface.ts";
-import { ITokenService, UnifiedUser } from "../../../interfaces/auth.types.ts";
+import { ITokenService, UnifiedUser, AuthResponse } from "../../../interfaces/auth.types.ts";
 import { LoginDTO } from "../../../dto/auth/signup.dto.ts";
 import { uploadBufferToCloudinary } from "../../../utils/cloudinaryUpload.ts";
 import { AdminUploadFiles } from "../../../types/admin.type.ts";
@@ -64,7 +64,7 @@ export class AdminAuthService {
     };
   }
 
-  async loginAdmin(loginData: LoginDTO): Promise<{ user: UnifiedUser; accessToken: string; refreshToken: string }> {
+  async loginAdmin(loginData: LoginDTO): Promise<AuthResponse> {
     const admin = await this._adminRepo.findByEmailWithPassword(loginData.email);
 
     if (!admin) {

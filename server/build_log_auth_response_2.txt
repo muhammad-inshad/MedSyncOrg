@@ -1,0 +1,4 @@
+src/services/auth/patient/patient.auth.service.ts(76,9): error TS2416: Property 'refreshAccessToken' in type 'PatientAuthService' is not assignable to the same property in base type 'IPatientAuthService'.
+  Type '(refreshToken: string) => Promise<{ accessToken: string; }>' is not assignable to type '(refreshToken: string) => Promise<AuthResponse>'.
+    Type 'Promise<{ accessToken: string; }>' is not assignable to type 'Promise<AuthResponse>'.
+      Type '{ accessToken: string; }' is missing the following properties from type 'AuthResponse': user, refreshToken

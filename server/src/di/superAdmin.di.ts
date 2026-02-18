@@ -7,7 +7,7 @@ import { Superadminkyc } from "../controllers/superAdminkyc.controller.ts";
 import { SuperadminkycService } from "../services/superAdminkyc.service.ts";
 import { KycRepository } from "../repositories/superAdminKyc.repository.ts";
 import { SuperAdminAuthService } from "../services/auth/superAdmin/superAdmin.service.ts";
-import { SuperAdminAuthController } from "../controllers/auth/superAdmin/superAdmin.controller.ts";
+import { SuperAdminAuthController } from "../controllers/auth/superAdmin/superAdmin.auth.controller.ts";
 
 import { AdminModel } from "../models/admin.model.ts"; 
 

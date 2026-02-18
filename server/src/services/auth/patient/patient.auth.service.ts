@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import { IUserRepository } from "../../../repositories/patient/user.repository.interface.ts";
 import { LoginDTO, PatientResponseDTO, SignupDTO } from "../../../dto/auth/signup.dto.ts";
 import { IPatientAuthService } from "./patient.auth.service.interface.ts";
-import { ITokenService, UnifiedUser } from "../../../interfaces/auth.types.ts";
+import { ITokenService, UnifiedUser, AuthResponse } from "../../../interfaces/auth.types.ts";
 
 export class PatientAuthService implements IPatientAuthService {
   constructor(
@@ -27,27 +27,24 @@ export class PatientAuthService implements IPatientAuthService {
 
   async login(
     data: LoginDTO
-  ): Promise<{ user: PatientResponseDTO; accessToken: string; refreshToken: string }> {
-    let user: UnifiedUser | null = null;
+  ): Promise<AuthResponse> {
+    const user = await this._userRepository.findByEmail(data.email);
 
-      user = await this._userRepository.findByEmail(data.email);
-   
     if (!user) {
       throw { status: 401, message: "Invalid credentials" };
     }
-    const userWithPassword = user as UnifiedUser & { password?: string };
 
-    if (!userWithPassword.password) {
+    if (!user.password) {
       throw { status: 401, message: "Invalid credentials" };
     }
 
-    const isPasswordValid = await bcrypt.compare(data.password, userWithPassword.password);
+    const isPasswordValid = await bcrypt.compare(data.password, user.password);
     if (!isPasswordValid) {
       throw { status: 401, message: "Invalid credentials" };
     }
 
     const payload = {
-      userId: (user as any)._id.toString(), 
+      userId: user._id.toString(),
       email: user.email,
       role: data.role,
     };
@@ -68,7 +65,7 @@ export class PatientAuthService implements IPatientAuthService {
 
     const hashedPassword = await bcrypt.hash(pass, 10);
 
-    await this._userRepository.update((user as any)._id, { password: hashedPassword });
+    await this._userRepository.update(user._id.toString(), { password: hashedPassword });
 
     return { success: true, message: "Password updated successfully" };
   }
@@ -83,8 +80,10 @@ export class PatientAuthService implements IPatientAuthService {
     return { accessToken: newAccessToken };
   }
 
-  private mapToResponse(user: UnifiedUser): PatientResponseDTO {
-    const u = user as any;
+  private mapToResponse(user: any): PatientResponseDTO {
+    // using any here for now as user can be complex document, but we extract safely
+    // ideally should use specific interface if possible
+    const u = user;
 
     return {
       id: u._id.toString(),
@@ -98,6 +97,11 @@ export class PatientAuthService implements IPatientAuthService {
       isProfileComplete: u.isProfileComplete || false,
       createdAt: u.createdAt,
       updatedAt: u.updatedAt,
+      image: u.image,
+      bloodGroup: u.bloodGroup,
+      gender: u.gender,
+      dateOfBirth: u.dateOfBirth,
+      address: u.address
     };
   }
 }

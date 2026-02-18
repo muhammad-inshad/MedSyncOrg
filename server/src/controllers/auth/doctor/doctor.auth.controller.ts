@@ -4,13 +4,15 @@ import { IDoctorAuthService } from "../../../services/auth/doctor/doctor.auth.se
 import { DoctorUploadFiles } from "../../../types/doctor.types.ts";
 import { DoctorSignupDTO, LoginDTO } from "../../../dto/auth/signup.dto.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
+import { IDoctorAuthController } from "./doctor.auth.controller.interface.ts";
+import { AppError } from "../../../types/error.types.ts";
 
-export class DoctorAuthController {
+export class DoctorAuthController implements IDoctorAuthController {
   constructor(private readonly _doctorAuthService: IDoctorAuthService) { }
 
   registerDoctor = async (req: Request, res: Response) => {
     try {
-      const files = (req as any).files as DoctorUploadFiles; 
+      const files = req.files as unknown as DoctorUploadFiles;
       const doctorData = req.body as DoctorSignupDTO;
 
       const doctor = await this._doctorAuthService.registerDoctor(
@@ -24,8 +26,9 @@ export class DoctorAuthController {
         data: doctor,
       });
     } catch (error: unknown) {
-      const errorMessage = (error as any).message || MESSAGES.DOCTOR.REGISTER_FAILED;
-      const errorStatus = (error as any).status || HttpStatusCode.INTERNAL_SERVER_ERROR;
+      const err = error as AppError;
+      const errorMessage = err.message || MESSAGES.DOCTOR.REGISTER_FAILED;
+      const errorStatus = err.status || HttpStatusCode.INTERNAL_SERVER_ERROR;
 
       return res.status(errorStatus).json({
         success: false,
@@ -65,8 +68,9 @@ export class DoctorAuthController {
         }
       });
     } catch (error: unknown) {
-      const errorMessage = (error as any).message || MESSAGES.AUTH.LOGIN_FAILED;
-      const errorStatus = (error as any).status || HttpStatusCode.INTERNAL_SERVER_ERROR;
+      const err = error as AppError;
+      const errorMessage = err.message || MESSAGES.AUTH.LOGIN_FAILED;
+      const errorStatus = err.status || HttpStatusCode.INTERNAL_SERVER_ERROR;
 
       return res.status(errorStatus).json({
         success: false,

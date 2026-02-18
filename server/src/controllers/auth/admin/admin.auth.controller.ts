@@ -5,29 +5,30 @@ import { IAdminAuthService } from "../../../services/auth/admin/admin.auth.servi
 import Logger from "../../../utils/logger.ts";
 import { AdminUploadFiles } from "../../../types/admin.type.ts";
 import { AppError } from "../../../types/error.types.ts";
+import { IAdminAuthController } from "./admin.auth.controller.interface.ts";
 
-export class AdminAuthController {
+export class AdminAuthController implements IAdminAuthController {
     constructor(private readonly _adminAuthService: IAdminAuthService) { }
 
     signup = async (req: Request, res: Response): Promise<Response> => {
         try {
             const adminData = req.body;
             const files = req.files as unknown as AdminUploadFiles;
-            
+
             const result = await this._adminAuthService.signup(adminData, files);
-            
+
             return res.status(HttpStatusCode.CREATED).json(result);
         } catch (error) {
-            const err = error as AppError; 
+            const err = error as AppError;
             Logger.error(`Admin Signup Error: ${err.message}`);
-            
+
             return res.status(err.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
                 message: err.message || MESSAGES.SERVER.ERROR,
             });
         }
     }
 
-    login = async (req: Request, res: Response): Promise<Response> => {
+    loginAdmin = async (req: Request, res: Response): Promise<Response> => {
         try {
             const data = req.body;
             const result = await this._adminAuthService.loginAdmin(data);
@@ -59,7 +60,7 @@ export class AdminAuthController {
         } catch (error) {
             const err = error as AppError;
             Logger.error(`Admin Login Error: ${err.message}`);
-            
+
             return res.status(err.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
                 message: err.message || MESSAGES.SERVER.ERROR,
             });
