@@ -8,8 +8,9 @@ import { ITokenService, UnifiedUser, AuthResponse } from "../../../interfaces/au
 import { LoginDTO } from "../../../dto/auth/signup.dto.ts";
 import { uploadBufferToCloudinary } from "../../../utils/cloudinaryUpload.ts";
 import { AdminUploadFiles } from "../../../types/admin.type.ts";
+import { IAdminAuthService } from "./admin.auth.service.interface.ts";
 
-export class AdminAuthService {
+export class AdminAuthService implements IAdminAuthService {
   constructor(
     private readonly _adminRepo: IAdminRepository,
     private readonly _tokenService: ITokenService
@@ -57,7 +58,7 @@ export class AdminAuthService {
     Logger.info(`New Admin/Hospital registered: ${email}`);
 
     const adminObject = admin.toObject();
-    const { password: _, __v, ...adminWithoutPassword } = adminObject;
+    const {  ...adminWithoutPassword } = adminObject;
 
     return {
       admin: adminWithoutPassword,
@@ -99,7 +100,7 @@ export class AdminAuthService {
     Logger.info(`Admin logged in: ${loginData.email}`);
 
     const adminObj = admin.toObject();
-    const { password, ...safeUser } = adminObj;
+    const {  ...safeUser } = adminObj;
 
     return { user: safeUser as UnifiedUser, accessToken, refreshToken };
   }

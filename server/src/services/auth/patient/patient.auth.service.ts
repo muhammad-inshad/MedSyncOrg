@@ -2,7 +2,8 @@ import bcrypt from "bcrypt";
 import { IUserRepository } from "../../../repositories/patient/user.repository.interface.ts";
 import { LoginDTO, PatientResponseDTO, SignupDTO } from "../../../dto/auth/signup.dto.ts";
 import { IPatientAuthService } from "./patient.auth.service.interface.ts";
-import { ITokenService, UnifiedUser, AuthResponse } from "../../../interfaces/auth.types.ts";
+import { ITokenService, AuthResponse } from "../../../interfaces/auth.types.ts";
+import { IPatient } from "../../../models/Patient.model.ts";
 
 export class PatientAuthService implements IPatientAuthService {
   constructor(
@@ -59,7 +60,7 @@ export class PatientAuthService implements IPatientAuthService {
     };
   }
 
-  async resetPassword(email: string, pass: string, role: string): Promise<{ success: boolean; message: string }> {
+  async resetPassword(email: string, pass: string): Promise<{ success: boolean; message: string }> {
     const user = await this._userRepository.findByEmail(email);
     if (!user) throw { status: 404, message: "User not found" };
 
@@ -80,20 +81,18 @@ export class PatientAuthService implements IPatientAuthService {
     return { accessToken: newAccessToken };
   }
 
-  private mapToResponse(user: any): PatientResponseDTO {
-    // using any here for now as user can be complex document, but we extract safely
-    // ideally should use specific interface if possible
+  private mapToResponse(user: IPatient): PatientResponseDTO {
     const u = user;
 
     return {
       id: u._id.toString(),
-      name: u.name || u.hospitalName || u.email,
+      name: u.name || u.email,
       email: u.email,
       phone: u.phone,
       isGoogleAuth: u.isGoogleAuth || false,
       walletBalance: u.walletBalance || 0,
       medicalReports: u.medicalReports || [],
-      appointmentHistory: u.appointmentHistory ? u.appointmentHistory.map((id: any) => id.toString()) : [],
+      appointmentHistory: u.appointmentHistory ? u.appointmentHistory.map((id: { toString(): string }) => id.toString()) : [],
       isProfileComplete: u.isProfileComplete || false,
       createdAt: u.createdAt,
       updatedAt: u.updatedAt,

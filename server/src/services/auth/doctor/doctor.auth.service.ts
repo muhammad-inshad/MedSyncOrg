@@ -100,7 +100,7 @@ export class DoctorAuthService implements IDoctorAuthService {
             role: loginData.role
         });
 
-        const { password, ...safeUser } = doctor.toObject();
+        const {  ...safeUser } = doctor.toObject();
         return { user: safeUser as unknown as DoctorDTO, accessToken, refreshToken };
     }
 }

@@ -1,0 +1,2 @@
+src/controllers/auth.controller.ts(61,34): error TS2304: Cannot find name 'AppError'.
+src/controllers/auth.controller.ts(116,34): error TS2304: Cannot find name 'AppError'.

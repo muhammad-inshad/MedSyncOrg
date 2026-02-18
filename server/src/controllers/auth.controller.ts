@@ -1,10 +1,11 @@
 import type { Request, Response } from "express";
 import type { SignupDTO, LoginDTO } from "../dto/auth/signup.dto.ts";
-import { IAuthService } from "../services/auth/auth.service.interface.ts";
+import { IPatientAuthService } from "../services/auth/patient/patient.auth.service.interface.ts";
+import { AppError } from "../types/error.types.ts";
 
 class AuthController {
 
-    constructor(private readonly authService: IAuthService) { }
+    constructor(private readonly authService: IPatientAuthService) { }
 
     signup = async (req: Request, res: Response) => {
         try {
@@ -17,9 +18,9 @@ class AuthController {
                 user,
             });
         } catch (error: unknown) {
-            // Safe error handling
-            const errorMessage = (error as any).message || "Failed to create account";
-            const errorStatus = (error as any).status || 400;
+            const err = error as AppError;
+            const errorMessage = err.message || "Failed to create account";
+            const errorStatus = err.status || 400;
 
             return res.status(errorStatus).json({
                 success: false,
@@ -58,8 +59,9 @@ class AuthController {
                 }
             });
         } catch (error: unknown) {
-            const errorMessage = (error as any).message || "Login failed";
-            const errorStatus = (error as any).status || 401;
+            const err = error as AppError;
+            const errorMessage = err.message || "Login failed";
+            const errorStatus = err.status || 401;
 
             return res.status(errorStatus).json({
                 success: false,
@@ -108,12 +110,13 @@ class AuthController {
 
     resetPassword = async (req: Request, res: Response) => {
         try {
-            const { email, password, role } = req.body
-            const result = await this.authService.resetPassword(email, password, role);
+            const { email, password } = req.body
+            const result = await this.authService.resetPassword(email, password);
             return res.status(200).json({ success: true, message: result.message });
         } catch (error: unknown) {
-            const errorMessage = (error as any).message || "Internal Server Error";
-            const errorStatus = (error as any).status || 500;
+            const err = error as AppError;
+            const errorMessage = err.message || "Internal Server Error";
+            const errorStatus = err.status || 500;
 
             return res.status(errorStatus).json({
                 success: false,

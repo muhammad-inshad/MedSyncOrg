@@ -3,7 +3,7 @@ import { ISuperAdminAuthService } from "../../../services/auth/superAdmin/superA
 import { HttpStatusCode } from "../../../constants/httpStatus.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
 import { AppError } from "../../../types/error.types.ts";
-import { ISuperAdminAuthController } from "./superAdmin.auth.contrller.interface.ts";
+import { ISuperAdminAuthController } from "./superAdmin.auth.controller.interface.ts";
 
 
 export class SuperAdminAuthController implements ISuperAdminAuthController {

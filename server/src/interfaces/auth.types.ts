@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+
 import { IPatient } from "../models/Patient.model.ts";
 import { IAdmin } from "../models/admin.model.ts";
 import { IDoctor } from "../models/doctor.model.ts";

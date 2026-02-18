@@ -17,9 +17,9 @@ export class GoogleAuthController {
         return res.redirect(`${process.env.FRONTEND_URL}/login?error=no_user`);
       }
 
-      const userDoc = req.user as any;
+      const userDoc = req.user as IPatient;
       const userPayload = userDoc.toObject ? userDoc.toObject() : userDoc;
-      const role = userPayload.role || 'patient';
+      const role = (userPayload as any).role || 'patient';
       const cleanPayload = {
         userId: userPayload._id.toString(),
         email: userPayload.email,

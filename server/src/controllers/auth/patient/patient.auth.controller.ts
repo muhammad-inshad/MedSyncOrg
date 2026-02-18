@@ -4,6 +4,7 @@ import { IPatientAuthService } from "../../../services/auth/patient/patient.auth
 import { LoginDTO, SignupDTO } from "../../../dto/auth/signup.dto.ts";
 import { IPatientAuthController } from "./patient.auth.controller.interface.ts";
 import { AppError } from "../../../types/error.types.ts";
+import { MESSAGES } from "../../../constants/messages.ts";
 
 class patientAuthController implements IPatientAuthController {
 
@@ -106,14 +107,14 @@ class patientAuthController implements IPatientAuthController {
         }
       });
     } catch (error: unknown) {
-      return res.status(401).json({ success: false, message: "Invalid session" });
+      return res.status(401).json({ success: false, message:MESSAGES.AUTH.INVALID_SEESSION,error});
     }
   };
 
   resetPassword = async (req: Request, res: Response) => {
     try {
-      const { email, password, role } = req.body
-      const result = await this.authService.resetPassword(email, password, role);
+      const { email, password } = req.body
+      const result = await this.authService.resetPassword(email, password);
       return res.status(200).json({ success: true, message: result.message });
     } catch (error: unknown) {
       const err = error as AppError;

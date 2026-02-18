@@ -2,6 +2,7 @@ export const MESSAGES = {
     AUTH: {
         LOGIN_SUCCESS: "Login successful",
         LOGIN_FAILED: "Invalid email or password",
+        INVALID_SEESSION: "Invalid session. Please log in again.",
         SIGNUP_SUCCESS: "Registration successful",
         ALREADY_EXISTS: "User already exists",
         OTP_SENT: "OTP sent successfully",

@@ -1,4 +1,4 @@
-import { AuthService } from "../services/auth/auth.service.ts";
+import { PatientAuthService } from "../services/auth/patient/patient.auth.service.ts";
 import { UserRepository } from "../repositories/patient/user.repository.ts";
 import OtpController from "../controllers/otp.controller.ts";
 import AuthController from "../controllers/auth.controller.ts";
@@ -29,7 +29,7 @@ export const userContainer = () => {
     adminRepo,
     doctorRepo
   );
-  const authService = new AuthService(userRepository, tokenService, adminRepo, doctorRepo);
+  const authService = new PatientAuthService(userRepository, tokenService);
 
   const otpController = new OtpController(otpservice);
   const authController = new AuthController(authService);
