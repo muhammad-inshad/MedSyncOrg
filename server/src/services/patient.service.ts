@@ -1,4 +1,4 @@
-import { UserRepository } from "../repositories/user.repository.ts";
+import { UserRepository } from "../repositories/patient/user.repository.ts";
 import cloudinary from "../config/cloudinary.ts";
 import { uploadBufferToCloudinary } from "../utils/cloudinaryUpload.ts";
 

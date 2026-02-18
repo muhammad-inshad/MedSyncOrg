@@ -4,49 +4,7 @@ import { SuperAdminService } from "../services/superAdmin.service.ts";
 export class SuperAdminController {
     constructor(private readonly service: SuperAdminService) { }
 
-    login = async (req: Request, res: Response) => {
-        try {
-            const { email, password } = req.body;
-
-            if (!email || !password) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Email and password are required"
-                });
-            }
-
-            const result = await this.service.login(email, password);
-
-            res.cookie("refreshToken", result.refreshToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-            });
-            res.cookie("accessToken", result.accessToken, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
-                maxAge: 15 * 60 * 1000,
-                path: "/",
-            });
-
-            return res.status(200).json({
-                success: true,
-                message: "Superadmin login successful",
-                data: {
-                    accessToken: result.accessToken,
-                    refreshToken: result.refreshToken,
-                    user: result.user
-                }
-            });
-        } catch (error: any) {
-            return res.status(error.status || 500).json({
-                success: false,
-                message: error.message || "Failed to login"
-            });
-        }
-    };
+  
 
     hospitalManagement = async (req: Request, res: Response) => {
         try {

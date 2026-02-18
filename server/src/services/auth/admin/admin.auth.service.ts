@@ -1,0 +1,106 @@
+import bcrypt from "bcryptjs";
+import { MESSAGES } from "../../../constants/messages.ts";
+import { StatusCode } from "../../../constants/statusCodes.ts";
+import Logger from "../../../utils/logger.ts";
+import { IAdmin } from "../../../models/admin.model.ts";
+import { IAdminRepository } from "../../../repositories/admin/admin.repository.interface.ts";
+import { ITokenService, UnifiedUser } from "../../../interfaces/auth.types.ts";
+import { LoginDTO } from "../../../dto/auth/signup.dto.ts";
+import { uploadBufferToCloudinary } from "../../../utils/cloudinaryUpload.ts";
+import { AdminUploadFiles } from "../../../types/admin.type.ts";
+
+export class AdminAuthService {
+  constructor(
+    private readonly _adminRepo: IAdminRepository,
+    private readonly _tokenService: ITokenService
+  ) { }
+
+  async signup(adminData: Partial<IAdmin>, files: AdminUploadFiles): Promise<{ admin: Partial<IAdmin> }> {
+    const { email, password, hospitalName } = adminData;
+
+    if (!email || !password || !hospitalName) {
+      Logger.warn("Signup failed: Required fields missing");
+      throw { status: StatusCode.BAD_REQUEST, message: MESSAGES.VALIDATION.REQUIRED_FIELD };
+    }
+
+    const existingAdmin = await this._adminRepo.findByEmail(email);
+    if (existingAdmin) {
+      Logger.warn(`Signup failed: Admin/Hospital already exists for email ${email}`);
+      throw { status: StatusCode.CONFLICT, message: MESSAGES.ADMIN.HOSPITAL_EXISTS };
+    }
+
+    let logoUrl = "";
+    let licenceUrl = "";
+
+    try {
+      if (files.logo && files.logo.length > 0) {
+        logoUrl = await uploadBufferToCloudinary(files.logo[0].buffer, "admin/logo");
+      }
+
+      if (files.licence && files.licence.length > 0) {
+        licenceUrl = await uploadBufferToCloudinary(files.licence[0].buffer, "admin/licence");
+      }
+    } catch (error) {
+      Logger.error(`Cloudinary upload failed: ${error}`);
+      throw { status: StatusCode.INTERNAL_SERVER_ERROR, message: MESSAGES.SERVER.INTERNAL_ERROR };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const admin = await this._adminRepo.create({
+      ...adminData,
+      password: hashedPassword,
+      logo: logoUrl,
+      licence: licenceUrl,
+      isActive: true,
+    });
+    Logger.info(`New Admin/Hospital registered: ${email}`);
+
+    const adminObject = admin.toObject();
+    const { password: _, __v, ...adminWithoutPassword } = adminObject;
+
+    return {
+      admin: adminWithoutPassword,
+    };
+  }
+
+  async loginAdmin(loginData: LoginDTO): Promise<{ user: UnifiedUser; accessToken: string; refreshToken: string }> {
+    const admin = await this._adminRepo.findByEmailWithPassword(loginData.email);
+
+    if (!admin) {
+      Logger.warn(`Login failed: Admin not found for email ${loginData.email}`);
+      throw { status: StatusCode.BAD_REQUEST, message: MESSAGES.AUTH.LOGIN_FAILED };
+    }
+
+    if (!admin.isActive) {
+      Logger.warn(`Login failed: Account blocked for email ${loginData.email}`);
+      throw { status: StatusCode.FORBIDDEN, message: MESSAGES.AUTH.ACCOUNT_BLOCKED };
+    }
+
+    const isPasswordMatch = await bcrypt.compare(loginData.password, admin.password);
+
+    if (!isPasswordMatch) {
+      Logger.warn(`Login failed: Invalid password for email ${loginData.email}`);
+      throw { status: StatusCode.BAD_REQUEST, message: MESSAGES.AUTH.LOGIN_FAILED };
+    }
+
+    const accessToken = this._tokenService.generateAccessToken({
+      userId: admin._id.toString(),
+      email: admin.email,
+      role: loginData.role
+    });
+
+    const refreshToken = this._tokenService.generateRefreshToken({
+      userId: admin._id.toString(),
+      email: admin.email,
+      role: loginData.role
+    });
+
+    Logger.info(`Admin logged in: ${loginData.email}`);
+
+    const adminObj = admin.toObject();
+    const { password, ...safeUser } = adminObj;
+
+    return { user: safeUser as UnifiedUser, accessToken, refreshToken };
+  }
+}

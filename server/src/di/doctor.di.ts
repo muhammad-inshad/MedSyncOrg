@@ -1,3 +1,5 @@
+import { DoctorAuthController } from "../controllers/auth/doctor/doctor.auth.controller.ts";
+import { DoctorAuthService } from "../services/auth/doctor/doctor.auth.service.ts";
 import DoctorController from "../controllers/doctor.controller.ts";
 import { DoctorService } from "../services/doctor.service.ts";
 import { DoctorRepository } from "../repositories/doctor.repository.ts";
@@ -7,14 +9,22 @@ import { DoctorModel } from "../models/doctor.model.ts";
 export const doctorContainer = () => {
   const doctorRepository = new DoctorRepository(DoctorModel);
   const tokenService = new TokenService();
+
   const doctorService = new DoctorService(
     doctorRepository,
     tokenService
   );
 
+  const doctorAuthService = new DoctorAuthService(
+    doctorRepository,
+    tokenService
+  );
+
   const doctorcontroller = new DoctorController(doctorService);
+  const doctorAuthController = new DoctorAuthController(doctorAuthService);
 
   return {
     doctorcontroller,
+    doctorAuthController
   };
 };

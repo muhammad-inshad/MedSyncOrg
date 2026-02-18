@@ -1,12 +1,14 @@
-import { AdminRepository } from "../repositories/admin.repository.ts";
+import { AdminRepository } from "../repositories/admin/admin.repository.ts";
 import { TokenService } from "./token.service.ts";
 import cloudinary from "../config/cloudinary.ts";
 import { extractPublicId } from "../utils/cloudinaryUpload.ts";
 import { DoctorRepository } from "../repositories/doctor.repository.ts";
 import { StatusCode } from "../constants/statusCodes.ts";
 import { MESSAGES } from "../constants/messages.ts";
+import { IDoctorManagementService } from "../interfaces/IDoctorManagementService.ts"; // [NEW] Import Interface
+import Logger from "../utils/logger.ts"; // [NEW] Import Logger
 
-export class DoctorManagementService {
+export class DoctorManagementService implements IDoctorManagementService { // [NEW] Implement Interface
   private readonly _adminRepo: AdminRepository;
   private readonly _tokenService: TokenService;
   private readonly _doctorRepo: DoctorRepository;
@@ -23,7 +25,10 @@ export class DoctorManagementService {
 
   async updateHospital(id: string, updateData: any) {
     const existingHospital = await this._adminRepo.findById(id);
-    if (!existingHospital) throw { status: StatusCode.NOT_FOUND, message: "Hospital not found" };
+    if (!existingHospital) {
+      Logger.warn(`Update Hospital failed: Hospital not found with ID ${id}`);
+      throw { status: StatusCode.NOT_FOUND, message: "Hospital not found" };
+    }
 
     const imagesToProcess = ["logo", "licence"] as const;
 
@@ -49,7 +54,7 @@ export class DoctorManagementService {
           // Update data with new URL
           updateData[field] = newUrl;
         } catch (error) {
-          console.error(`Failed to upload ${field}:`, error);
+          Logger.error(`Failed to upload ${field}: ${error}`);
           throw { status: StatusCode.INTERNAL_SERVER_ERROR, message: `Failed to upload ${field}` };
         }
       } else if (updateData[field] === '' && (existingHospital as any)[field]) {
@@ -61,6 +66,7 @@ export class DoctorManagementService {
         }
       }
     }
+    Logger.info(`Hospital updated: ${id}`);
     return await this._adminRepo.update(id, updateData);
   }
 
@@ -78,18 +84,22 @@ export class DoctorManagementService {
   async toggleDoctorStatus(id: string) {
     const doctor = await this._doctorRepo.findById(id);
     if (!doctor) {
+      Logger.warn(`Toggle Status failed: Doctor not found with ID ${id}`);
       throw { status: StatusCode.NOT_FOUND, message: MESSAGES.DOCTOR.NOT_FOUND };
     }
     const newStatus = !doctor.isActive;
+    Logger.info(`Doctor status toggled: ${id} -> ${newStatus}`);
     return await this._doctorRepo.update(id, { isActive: newStatus } as any);
   }
 
   async acceptDoctor(id: string) {
     const doctor = await this._doctorRepo.findById(id);
     if (!doctor) {
+      Logger.warn(`Accept Doctor failed: Doctor not found with ID ${id}`);
       throw { status: StatusCode.NOT_FOUND, message: MESSAGES.DOCTOR.NOT_FOUND };
     }
 
+    Logger.info(`Doctor accepted: ${id}`);
     return await this._doctorRepo.update(id, {
       isActive: true,
       reviewStatus: "approved",
@@ -100,9 +110,11 @@ export class DoctorManagementService {
   async rejectDoctor(id: string, reason: string) {
     const doctor = await this._doctorRepo.findById(id);
     if (!doctor) {
+      Logger.warn(`Reject Doctor failed: Doctor not found with ID ${id}`);
       throw { status: StatusCode.NOT_FOUND, message: MESSAGES.DOCTOR.NOT_FOUND };
     }
 
+    Logger.info(`Doctor rejected: ${id}, Reason: ${reason}`);
     return await this._doctorRepo.update(id, {
       isActive: false,
       reviewStatus: "rejected",
@@ -113,9 +125,11 @@ export class DoctorManagementService {
   async requestRevision(id: string, reason: string) {
     const doctor = await this._doctorRepo.findById(id);
     if (!doctor) {
+      Logger.warn(`Request Revision failed: Doctor not found with ID ${id}`);
       throw { status: StatusCode.NOT_FOUND, message: MESSAGES.DOCTOR.NOT_FOUND };
     }
 
+    Logger.info(`Doctor revision requested: ${id}, Reason: ${reason}`);
     return await this._doctorRepo.update(id, {
       reviewStatus: "revision",
       rejectionReason: reason
@@ -125,9 +139,11 @@ export class DoctorManagementService {
   async reapplyHospital(id: string) {
     const hospital = await this._adminRepo.findById(id);
     if (!hospital) {
+      Logger.warn(`Reapply Hospital failed: Hospital not found with ID ${id}`);
       throw { status: StatusCode.NOT_FOUND, message: "Hospital not found" };
     }
 
+    Logger.info(`Hospital reapplied: ${id}`);
     return await this._adminRepo.update(id, {
       reviewStatus: 'pending',
       rejectionReason: null

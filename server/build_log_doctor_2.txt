@@ -1,0 +1,22 @@
+src/controllers/auth.controller.ts(3,30): error TS2307: Cannot find module '../services/auth/auth.service.interface.ts' or its corresponding type declarations.
+src/di/doctor.di.ts(5,32): error TS2552: Cannot find name 'DoctorRepository'. Did you mean 'doctorRepository'?
+src/di/doctor.di.ts(5,49): error TS2304: Cannot find name 'DoctorModel'.
+src/di/doctor.di.ts(6,28): error TS2552: Cannot find name 'TokenService'. Did you mean 'tokenService'?
+src/di/doctor.di.ts(8,29): error TS2552: Cannot find name 'DoctorService'. Did you mean 'doctorService'?
+src/di/doctor.di.ts(18,32): error TS2552: Cannot find name 'DoctorController'. Did you mean 'doctorcontroller'?
+src/di/doctor.di.ts(19,57): error TS2345: Argument of type 'DoctorAuthService' is not assignable to parameter of type 'IDoctorAuthService'.
+  The types returned by 'loginDoctor(...)' are incompatible between these types.
+    Type 'Promise<{ user: DoctorDTO; accessToken: string; refreshToken: string; }>' is not assignable to type 'Promise<{ user: UnifiedUser; accessToken: string; refreshToken: string; }>'.
+      Type '{ user: DoctorDTO; accessToken: string; refreshToken: string; }' is not assignable to type '{ user: UnifiedUser; accessToken: string; refreshToken: string; }'.
+        Types of property 'user' are incompatible.
+          Type 'DoctorDTO' is not assignable to type 'UnifiedUser'.
+            Type 'DoctorDTO' is missing the following properties from type 'IDoctor': hospital_id, rating, reviewCount, walletBalance, and 59 more.
+src/services/auth/auth.service.ts(1,30): error TS2307: Cannot find module './auth.service.interface.ts' or its corresponding type declarations.
+src/services/auth/doctor/doctor.auth.service.ts(6,30): error TS2305: Module '"./doctor.auth.service.interface.ts"' has no exported member 'ITokenService'.
+src/services/auth/doctor/doctor.auth.service.ts(73,11): error TS2416: Property 'loginDoctor' in type 'DoctorAuthService' is not assignable to the same property in base type 'IDoctorAuthService'.
+  Type '(loginData: LoginDTO) => Promise<{ user: DoctorDTO; accessToken: string; refreshToken: string; }>' is not assignable to type '(data: LoginDTO) => Promise<{ user: UnifiedUser; accessToken: string; refreshToken: string; }>'.
+    Type 'Promise<{ user: DoctorDTO; accessToken: string; refreshToken: string; }>' is not assignable to type 'Promise<{ user: UnifiedUser; accessToken: string; refreshToken: string; }>'.
+      Type '{ user: DoctorDTO; accessToken: string; refreshToken: string; }' is not assignable to type '{ user: UnifiedUser; accessToken: string; refreshToken: string; }'.
+        Types of property 'user' are incompatible.
+          Type 'DoctorDTO' is not assignable to type 'UnifiedUser'.
+            Type 'DoctorDTO' is missing the following properties from type 'IDoctor': hospital_id, rating, reviewCount, walletBalance, and 59 more.

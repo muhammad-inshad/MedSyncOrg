@@ -7,24 +7,24 @@ import { superAdminContainer } from "../di/superAdmin.di.ts";
 import passport from 'passport';
 import { GoogleAuthController } from "../controllers/googleAuth.controller.ts";
 
-const { controller } = superAdminContainer();
-const { doctorcontroller } = doctorContainer()
+const { controller, superAdminAuthController } = superAdminContainer();
+const { doctorcontroller, doctorAuthController } = doctorContainer()
 const { authController, otpController } = userContainer();
-const { adminController } = adminContainer();
+const { adminController, adminAuthController } = adminContainer();
 const { googleAuthController } = userContainer();
 const router = Router();
 
 router.post('/send-otp', (req, res) => otpController.sendOtp(req, res));
-router.post("/Superadmin/login", (req, res) => controller.login(req, res));
-router.post('/admin/login', (req, res) => adminController.login(req, res))
-router.post("/admin/signup", upload.fields([{ name: "logo", maxCount: 1 }, { name: "licence", maxCount: 1 },]), (req, res) => adminController.signup(req, res));
+router.post("/Superadmin/login", (req, res) => superAdminAuthController.login(req, res));
+router.post('/admin/login', (req, res) => adminAuthController.login(req, res))
+router.post("/admin/signup", upload.fields([{ name: "logo", maxCount: 1 }, { name: "licence", maxCount: 1 },]), (req, res) => adminAuthController.signup(req, res));
 router.post('/verify-otp', (req, res) => otpController.verifyOtp(req, res));
 router.post('/signup', (req, res) => authController.signup(req, res));
 router.post('/login', (req, res) => authController.login(req, res));
 router.post('/refresh', (req, res) => authController.refresh(req, res));
 router.post('/reset-password', (req, res) => authController.resetPassword(req, res))
 router.post('/logout', (req, res) => authController.logout(req, res))
-router.post("/doctor/login", (req, res) => doctorcontroller.loginDoctor(req, res))
+router.post("/doctor/login", (req, res) => doctorAuthController.loginDoctor(req, res))
 router.get('/google', (req, res, next) => {
   const { role } = req.query;
   passport.authenticate('google', {

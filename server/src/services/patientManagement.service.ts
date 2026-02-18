@@ -1,8 +1,8 @@
-import { AdminRepository } from "../repositories/admin.repository.ts";
+import { AdminRepository } from "../repositories/admin/admin.repository.ts";
 import { TokenService } from "./token.service.ts";
 import cloudinary from "../config/cloudinary.ts";
 import { uploadBufferToCloudinary } from "../utils/cloudinaryUpload.ts";
-import { UserRepository } from "../repositories/user.repository.ts";
+import { UserRepository } from "../repositories/patient/user.repository.ts";
 import { IPatient } from "../models/Patient.model.ts";
 import bcrypt from "bcryptjs";
 export class patientManagementService {

@@ -4,62 +4,7 @@ import { DoctorService } from "../services/doctor.service.ts";
 class DoctorController {
   constructor(private readonly doctorService: DoctorService) { }
 
-  RegistorDoctor = async (req: Request, res: Response) => {
-    try {
-      const files = (req as any).files as { [fieldname: string]: any[] };
-      const doctor = await this.doctorService.registerDoctor(
-        req.body,
-        files
-      );
 
-      return res.status(201).json({
-        success: true,
-        message: "Doctor registered successfully",
-        data: doctor,
-      });
-    } catch (error: any) {
-      return res.status(error.status || 500).json({
-        success: false,
-        message: error.message || "Failed to register doctor",
-      });
-    }
-  };
-
-  loginDoctor = async (req: Request, res: Response) => {
-    try {
-      const result = await this.doctorService.loginDoctor(req.body);
-      res.cookie("refreshToken", result.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-      res.cookie("accessToken", result.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 15 * 60 * 1000,
-        path: "/",
-      });
-      return res.status(200).json({
-        success: true,
-        message: "Doctor login successful",
-        data: {
-          accessToken: result.accessToken,
-          refreshToken: result.refreshToken,
-          user: {
-            ...result.user,
-            role: "doctor"
-          }
-        }
-      });
-    } catch (error: any) {
-      return res.status(error.status || 500).json({
-        success: false,
-        message: error.message || "Login failed",
-      });
-    }
-  };
   getme = async (req: Request, res: Response) => {
     try {
       const doctorID = (req as any).user.userId;

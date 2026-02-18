@@ -1,12 +1,13 @@
 import type { Request, Response } from "express";
-import { DoctorManagementService } from "../services/doctorManagement.service.ts";
+import { IDoctorManagementService } from "../interfaces/IDoctorManagementService.ts";
 import { StatusCode } from "../constants/statusCodes.ts";
 import { MESSAGES } from "../constants/messages.ts";
+import Logger from "../utils/logger.ts";
 
 export class DoctorManagementController {
-  private readonly _doctorManagementService: DoctorManagementService;
+  private readonly _doctorManagementService: IDoctorManagementService;
 
-  constructor(doctorManagementService: DoctorManagementService) {
+  constructor(doctorManagementService: IDoctorManagementService) {
     this._doctorManagementService = doctorManagementService;
   }
 
@@ -15,15 +16,14 @@ export class DoctorManagementController {
 
       const { id } = req.params;
       const updateData = req.body;
-      console.log(updateData)
       const result = await this._doctorManagementService.updateHospital(id, updateData);
-      console.log(result)
       return res.status(StatusCode.OK).json({
         success: true,
         message: MESSAGES.ADMIN.UPDATE_SUCCESS,
         data: result,
       });
     } catch (error: any) {
+      Logger.error(`Edit Hospital Error: ${error.message}`);
       return res.status(error.status || StatusCode.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
   }
@@ -57,7 +57,7 @@ export class DoctorManagementController {
         totalPages: Math.ceil(result.total / limit)
       });
     } catch (error: any) {
-      console.error("Error in getAllDoctors:", error);
+      Logger.error(`Get All Doctors Error: ${error.message}`);
       return res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: MESSAGES.SERVER.ERROR
@@ -75,6 +75,7 @@ export class DoctorManagementController {
         data: updatedDoctor
       });
     } catch (error: any) {
+      Logger.error(`Doctor Toggle Error: ${error.message}`);
       return res.status(error.status || StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: error.message || MESSAGES.SERVER.ERROR
@@ -92,6 +93,7 @@ export class DoctorManagementController {
         data: updatedDoctor
       });
     } catch (error: any) {
+      Logger.error(`Accept Doctor Error: ${error.message}`);
       return res.status(error.status || StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: error.message || MESSAGES.SERVER.ERROR
@@ -110,6 +112,7 @@ export class DoctorManagementController {
         data: updatedDoctor
       });
     } catch (error: any) {
+      Logger.error(`Reject Doctor Error: ${error.message}`);
       return res.status(error.status || StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: error.message || MESSAGES.SERVER.ERROR
@@ -128,6 +131,7 @@ export class DoctorManagementController {
         data: updatedDoctor
       });
     } catch (error: any) {
+      Logger.error(`Request Revision Error: ${error.message}`);
       return res.status(error.status || StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: error.message || MESSAGES.SERVER.ERROR
@@ -145,6 +149,7 @@ export class DoctorManagementController {
         data: result
       });
     } catch (error: any) {
+      Logger.error(`Reapply Hospital Error: ${error.message}`);
       return res.status(error.status || StatusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: error.message || MESSAGES.SERVER.ERROR

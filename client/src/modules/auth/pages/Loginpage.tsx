@@ -51,7 +51,7 @@ const LogIn = () => {
   const navigate = useNavigate();
   const isSuperAdmin = role.toLowerCase() === "superadmin"
   const isPatient = role === "patient"
-  const isDoctor = role === "doctor"
+
   const {
     register,
     handleSubmit,
@@ -217,7 +217,7 @@ const LogIn = () => {
             </button>
           </>
         )}
-        {!isSuperAdmin &&
+        {isPatient &&
           <div className="text-center mt-8 text-sm text-gray-600">
             Don't have an account?{' '}
             <button onClick={() => navigate(`/${role}/signup`)} className="text-blue-600 hover:underline font-medium">

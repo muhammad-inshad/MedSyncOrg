@@ -3,7 +3,7 @@ import { Upload, X, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-import api from '@/lib/api';
+import { PatientService } from '@/services/patient.service'; // [NEW] Import Service
 import type { IPatient } from '@/interfaces/IPatient';
 import { PATIENT_ROUTES } from '@/constants/frontend/patient/patient.routes';
 import { initializeAuth } from '@/store/auth/authThunks';
@@ -141,13 +141,13 @@ const EditPatientProfile = () => {
         phone: formData.phone ? Number(formData.phone) : undefined,
       };
 
-      const response = await api.patch(`/api/patient/patientEdit/${patient?._id}`, payload);
-
-      if (response.status === 200) {
+      if (patient?._id) {
+        await PatientService.updateProfile(patient._id, payload);
         toast.success('Patient updated successfully!');
         await dispatch(initializeAuth('patient'));
         navigate(PATIENT_ROUTES.PATIENTPROFILE);
       }
+
     } catch (error) {
       console.error('Error updating patient:', error);
       const errorMessage = axios.isAxiosError(error) && error.response?.data?.message

@@ -1,78 +1,59 @@
-import { Model, Document } from "mongoose";
-import { IBaseRepository } from "../interfaces/IBaseRepository.ts";
+import { Model, Document, FilterQuery, UpdateQuery } from 'mongoose';
+import { IBaseRepository } from '../interfaces/IBaseRepository.ts';
 
 export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     constructor(private readonly model: Model<T>) { }
 
     async create(data: Partial<T>): Promise<T> {
-        const newDoc = new this.model(data);
-        return await newDoc.save();
-    }
-
-    async findAll(): Promise<T[]> {
-        return await this.model.find();
+        const createdEntity = new this.model(data);
+        return await createdEntity.save();
     }
 
     async findById(id: string): Promise<T | null> {
-        return await this.model.findById(id);
+        return await this.model.findById(id).exec();
     }
 
-    async findOne(filter: object): Promise<T | null> {
-        return await this.model.findOne(filter);
+    async findAll(): Promise<T[]> {
+        return await this.model.find().exec();
     }
 
     async update(id: string, data: Partial<T>): Promise<T | null> {
-        return await this.model.findByIdAndUpdate(id, data, { new: true });
+        return await this.model.findByIdAndUpdate(id, data as UpdateQuery<T>, { new: true }).exec();
     }
 
     async delete(id: string): Promise<boolean> {
-        const result = await this.model.findByIdAndDelete(id);
+        const result = await this.model.findByIdAndDelete(id).exec();
         return !!result;
     }
 
     async findByEmail(email: string): Promise<T | null> {
-        return await this.model.findOne({ email } as any);
+        return await this.model.findOne({ email } as FilterQuery<T>).exec();
     }
 
     async findByEmailWithPassword(email: string): Promise<T | null> {
-        return await this.model.findOne({ email } as any).select("+password");
+        return await this.model.findOne({ email } as FilterQuery<T>).select('+password').exec();
     }
 
-    async updatePassword(email: string, password: string): Promise<T | null> {
-        return await this.model.findOneAndUpdate({ email } as any, { password } as any, { new: true });
-    }
-
-    async findWithPagination(options: {
-        page: number;
-        limit: number;
-        filter?: object;
-        search?: string;
-        searchFields?: string[];
-    }): Promise<{ data: T[]; total: number; totalPages: number }> {
-        const { page, limit, filter = {}, search, searchFields = [] } = options;
+    async findWithPagination(options: { page: number; limit: number; search?: string; searchFields?: string[]; filter?: object }): Promise<{ data: T[]; total: number; page: number; limit: number }> {
+        const { page, limit, search, searchFields, filter } = options;
         const skip = (page - 1) * limit;
-        console.log(page)
-        const queryFilter: any = { ...filter };
-        if (search && searchFields.length > 0) {
-            const trimmedSearch = search.trim();
-            const regexCondition = { $regex: trimmedSearch, $options: "i" };
-            const isObjectId = /^[0-9a-fA-F]{24}$/.test(trimmedSearch);
-            queryFilter.$or = searchFields.map(field => {
-                if (field === '_id') {
-                    return isObjectId ? { _id: trimmedSearch } : null;
-                }
-                return { [field]: regexCondition };
-            }).filter(Boolean);
+
+        let query: FilterQuery<T> = filter ? { ...filter } : {};
+
+        if (search && searchFields && searchFields.length > 0) {
+            const searchRegex = new RegExp(search, 'i');
+            const searchConditions = searchFields.map(field => ({ [field]: searchRegex }));
+            query = {
+                ...query,
+                $or: searchConditions
+            } as FilterQuery<T>;
         }
+
         const [data, total] = await Promise.all([
-            this.model.find(queryFilter).sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
-            this.model.countDocuments(queryFilter).exec()
+            this.model.find(query).skip(skip).limit(limit).exec(),
+            this.model.countDocuments(query).exec()
         ]);
 
-        return {
-            data,
-            total,
-            totalPages: Math.ceil(total / limit)
-        };
+        return { data, total, page, limit };
     }
 }

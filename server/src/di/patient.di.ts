@@ -1,4 +1,4 @@
-import { UserRepository } from "../repositories/user.repository.ts";
+import { UserRepository } from "../repositories/patient/user.repository.ts";
 import PatientController from "../controllers/Patient.controller.ts";
 import { Patient } from "../models/Patient.model.ts";
 import { PatientService } from "../services/patient.service.ts";

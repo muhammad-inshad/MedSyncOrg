@@ -1,8 +1,8 @@
 import { generateOtp } from "../utils/otp/otp.util.ts";
 import { OtpData } from "../utils/otp/otp.Store.ts";
 import { EmailService } from "./email.service.ts";
-import { UserRepository } from "../repositories/user.repository.ts";
-import { AdminRepository } from "../repositories/admin.repository.ts";
+import { UserRepository } from "../repositories/patient/user.repository.ts";
+import { AdminRepository } from "../repositories/admin/admin.repository.ts";
 import { DoctorRepository } from "../repositories/doctor.repository.ts";
 
 export class OtpService {
