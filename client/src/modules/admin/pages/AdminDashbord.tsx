@@ -20,7 +20,35 @@ import {
   Legend,
 } from 'recharts';
 
+import { useEffect, useState } from 'react';
+import api from '@/lib/api';
+import toast from 'react-hot-toast';
+
 const AdminDashboard = () => {
+  const [stats, setStats] = useState({
+    totalDoctors: 0,
+    activeDoctors: 0,
+    totalPatients: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get('/api/admin/dashboard-stats');
+        if (response.data.success) {
+          setStats(response.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats', error);
+        toast.error('Failed to load dashboard statistics');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
   const performanceData = [
     { month: 'Jan', Appointments: 20, Patients: 15 },
     { month: 'Feb', Appointments: 35, Patients: 25 },
@@ -71,8 +99,9 @@ const AdminDashboard = () => {
         <div className="p-4 sm:p-6">
           {/* Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            <StatCard icon={Stethoscope} color="blue" title="Doctors" value="125" />
-            <StatCard icon={Users} color="green" title="Patients" value="2,340" />
+            <StatCard icon={Stethoscope} color="blue" title="Doctors" value={loading ? "..." : stats.totalDoctors.toString()} />
+            <StatCard icon={Users} color="green" title="Patients" value={loading ? "..." : stats.totalPatients.toString()} />
+            <StatCard icon={Stethoscope} color="green" title="Active Staff" value={loading ? "..." : stats.activeDoctors.toString()} />
             {/* Add more cards later: Appointments, Revenue, etc. */}
           </div>
 
@@ -89,22 +118,22 @@ const AdminDashboard = () => {
                 <ResponsiveContainer>
                   <LineChart data={performanceData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="month" 
-                      stroke="#9ca3af" 
+                    <XAxis
+                      dataKey="month"
+                      stroke="#9ca3af"
                       fontSize={11}
                       tick={{ fontSize: 11 }}
                     />
-                    <YAxis 
-                      stroke="#9ca3af" 
+                    <YAxis
+                      stroke="#9ca3af"
                       fontSize={11}
                       tick={{ fontSize: 11 }}
                       width={40}
                     />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ fontSize: '12px' }}
                     />
-                    <Legend 
+                    <Legend
                       wrapperStyle={{ fontSize: '12px' }}
                       iconSize={12}
                     />
@@ -136,9 +165,9 @@ const AdminDashboard = () => {
                 <ResponsiveContainer>
                   <BarChart data={financeData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                      dataKey="range" 
-                      stroke="#9ca3af" 
+                    <XAxis
+                      dataKey="range"
+                      stroke="#9ca3af"
                       fontSize={11}
                       tick={{ fontSize: 11 }}
                     />
@@ -154,7 +183,7 @@ const AdminDashboard = () => {
                         style: { fontSize: 11 },
                       }}
                     />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ fontSize: '12px' }}
                     />
                     <Bar dataKey="income" fill="#0891b2" radius={[4, 4, 0, 0]} />

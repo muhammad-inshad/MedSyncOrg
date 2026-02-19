@@ -95,8 +95,6 @@ const LogIn = () => {
         }));
 
         localStorage.setItem("role", role);
-        if (resData.data?.accessToken) localStorage.setItem("accessToken", resData.data.accessToken);
-        if (resData.data?.refreshToken) localStorage.setItem("refreshToken", resData.data.refreshToken);
 
         toast.success("Login successful");
         navigate(roleConfig.redirect);

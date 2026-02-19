@@ -5,16 +5,17 @@ import { adminContainer } from "../di/admin.di.ts";
 const router = express.Router();
 const { adminController, doctorManagement, patientManagement } = adminContainer();
 
-router.get("/getme", (req, res) => adminController.getme(req, res))
-router.patch("/hospitals/:id", (req, res) => doctorManagement.editHospital(req, res))
-router.get("/getalldoctors", (req, res) => doctorManagement.getAllDoctors(req, res))
-router.patch("/doctorsToggle/:id", (req, res) => doctorManagement.doctorsToggle(req, res))
-router.patch("/doctorAccept/:id", (req, res) => doctorManagement.acceptDoctor(req, res))
-router.patch("/doctorReject/:id", (req, res) => doctorManagement.rejectDoctor(req, res))
-router.patch("/doctorRevision/:id", (req, res) => doctorManagement.requestRevisionDoctor(req, res))
-router.patch("/PatientsToggle/:id", (req, res) => patientManagement.patientToggle(req, res))
-router.post("/patientAdd", upload.single('image'), (req, res) => patientManagement.patientAdd(req, res))
-router.patch("/reapply/:id", (req, res) => doctorManagement.reapplyHospital(req, res))
-router.get("/hospitals", (req, res) => adminController.getAllHospitals(req, res));
+router.get("/getme", adminController.getme.bind(adminController))
+router.patch("/hospitals/:id", doctorManagement.editHospital.bind(doctorManagement))
+router.get("/getalldoctors", doctorManagement.getAllDoctors.bind(doctorManagement))
+router.patch("/doctorsToggle/:id", doctorManagement.doctorsToggle.bind(doctorManagement))
+router.patch("/doctorAccept/:id", doctorManagement.acceptDoctor.bind(doctorManagement))
+router.patch("/doctorReject/:id", doctorManagement.rejectDoctor.bind(doctorManagement))
+router.patch("/doctorRevision/:id", doctorManagement.requestRevisionDoctor.bind(doctorManagement))
+router.patch("/PatientsToggle/:id", patientManagement.patientToggle.bind(patientManagement))
+router.post("/patientAdd", upload.single('image'), patientManagement.patientAdd.bind(patientManagement))
+router.patch("/reapply/:id", doctorManagement.reapplyHospital.bind(doctorManagement))
+router.get("/hospitals", adminController.getAllHospitals.bind(adminController));
+router.get("/dashboard-stats", adminController.getDashboardStats.bind(adminController));
 
 export default router;

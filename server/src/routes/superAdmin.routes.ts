@@ -5,10 +5,11 @@ const router = express.Router();
 const { controller, kyccontroller } = superAdminContainer();
 
 
-router.get("/hospitalManagement", (req, res) => controller.hospitalManagement(req, res))
-router.get("/getme", (req, res) => controller.getme(req, res))
-router.patch("/setActive", (req, res) => controller.setActive(req, res))
-router.get("/hospitals", (req, res) => kyccontroller.hospitals(req, res))
-router.patch("/hospitalStatus/:id/:status", (req, res) => kyccontroller.hospitalStatus(req, res))
-router.patch("/reapply/:id", (req, res) => kyccontroller.reapply(req, res))
+router.get("/dashboard-stats", controller.getDashboardStats.bind(controller));
+router.get("/hospitalManagement", controller.hospitalManagement.bind(controller))
+router.get("/getme", controller.getme.bind(controller))
+router.patch("/setActive", controller.setActive.bind(controller))
+router.get("/hospitals", kyccontroller.hospitals.bind(kyccontroller))
+router.patch("/hospitalStatus/:id/:status", kyccontroller.hospitalStatus.bind(kyccontroller))
+router.patch("/reapply/:id", kyccontroller.reapply.bind(kyccontroller))
 export default router;

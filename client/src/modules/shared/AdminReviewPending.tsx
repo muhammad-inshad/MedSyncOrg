@@ -29,7 +29,7 @@ const AdminReviewPending: React.FC = () => {
   const userData = (user as (BaseUser & { _doc?: BaseUser }))?._doc ?? user;
 
   const status = userData?.reviewStatus;
-  console.log(status)
+
   const rejectionReason = userData?.rejectionReason;
 
   const handleLogout = () => {

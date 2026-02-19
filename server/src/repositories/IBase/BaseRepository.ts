@@ -26,7 +26,7 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
         return !!result;
     }
 
-    async findByEmail(email: string): Promise<T | null> { // Added generic findByEmail as it's common
+    async findByEmail(email: string): Promise<T | null> { 
         return await this.model.findOne({ email } as FilterQuery<T>).exec();
     }
 

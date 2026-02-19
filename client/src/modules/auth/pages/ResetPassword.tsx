@@ -24,7 +24,7 @@ const ResetPassword = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+     console.log(role,"      inshad")
     if (password.length < 6) {
       return toast.error('Password must be at least 6 characters');
     }

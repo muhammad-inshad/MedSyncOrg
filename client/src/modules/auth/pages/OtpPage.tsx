@@ -9,7 +9,7 @@ const OtpPage = () => {
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const location = useLocation();
-  const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(0);
   const [isTimerExpired, setIsTimerExpired] = useState(false);
   const navigate = useNavigate();
 
@@ -40,6 +40,7 @@ const OtpPage = () => {
         if (purpose) {
           toast.success('OTP Verified! Please set your new password.');
           localStorage.removeItem('otpPageAllowed');
+          localStorage.removeItem('otpExpirationTime');
           localStorage.setItem("resetpassword", "true");
           navigate('/reset-password', {
             state: { email: signupData.email, role },
@@ -47,6 +48,7 @@ const OtpPage = () => {
         } else if (role === 'patient' || role === 'admin') {
           const result = await api.post('/api/auth/signup', signupData);
           localStorage.removeItem('otpPageAllowed');
+          localStorage.removeItem('otpExpirationTime');
           if (result.data.success) {
             toast.success('Account created successfully!');
             navigate(`/login/${role}`, { replace: true });
@@ -72,18 +74,44 @@ const OtpPage = () => {
 
   useEffect(() => {
     const isAllowed = localStorage.getItem('otpPageAllowed');
+    const storedExpiration = localStorage.getItem('otpExpirationTime');
 
-    if (!isAllowed) {
-      navigate(PATIENT_ROUTES.SIGNUP, { replace: true });
+    if (!isAllowed || !location.state?.signupData) {
+      // Clear potentially stale state
+      localStorage.removeItem('otpPageAllowed');
+      localStorage.removeItem('otpExpirationTime');
+      navigate(PATIENT_ROUTES.LOGIN, { replace: true });
+      return;
     }
-  }, [navigate]);
+
+    if (storedExpiration) {
+      const expirationTime = parseInt(storedExpiration, 10);
+      const now = Date.now();
+      const remainingTime = Math.max(0, Math.floor((expirationTime - now) / 1000));
+
+      setTimer(remainingTime);
+      if (remainingTime === 0) {
+        setIsTimerExpired(true);
+      }
+    } else {
+      setTimer(60);
+    }
+  }, [navigate, location.state]);
 
   const handleResend = async () => {
     try {
-      await api.post('/api/auth/send-otp', { email: signupData.email });
+      await api.post('/api/auth/send-otp', {
+        email: signupData.email,
+        purpose: purpose || 'signup'
+      });
 
       setOtp(['', '', '', '', '', '']);
+      setOtp(['', '', '', '', '', '']);
+
+      const newExpiration = Date.now() + 60 * 1000;
+      localStorage.setItem('otpExpirationTime', newExpiration.toString());
       setTimer(60);
+
       setIsTimerExpired(false);
       inputRefs.current[0]?.focus();
       toast.success('OTP resent successfully!');
@@ -219,8 +247,8 @@ const OtpPage = () => {
               {...(index === 0 ? { onPaste: handlePaste } : {})}
               disabled={isTimerExpired}
               className={`w-14 h-14 text-center text-2xl font-medium border-2 rounded-xl focus:outline-none bg-gray-50 transition-all ${isTimerExpired
-                  ? 'border-red-300 bg-red-50 cursor-not-allowed opacity-60'
-                  : 'border-gray-300 focus:border-blue-600'
+                ? 'border-red-300 bg-red-50 cursor-not-allowed opacity-60'
+                : 'border-gray-300 focus:border-blue-600'
                 }`}
               placeholder="0"
             />
@@ -231,8 +259,8 @@ const OtpPage = () => {
           onClick={handleConfirm}
           disabled={isTimerExpired}
           className={`w-full max-w-xs mx-auto block font-medium py-3.5 rounded-full mb-4 shadow-md transition-all ${isTimerExpired
-              ? 'bg-gray-400 text-white cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
+            ? 'bg-gray-400 text-white cursor-not-allowed'
+            : 'bg-blue-600 hover:bg-blue-700 text-white'
             }`}
         >
           Confirm
@@ -242,8 +270,8 @@ const OtpPage = () => {
           onClick={handleResend}
           disabled={!isTimerExpired}
           className={`w-full max-w-xs mx-auto block font-medium py-3.5 rounded-full transition-all shadow-md ${!isTimerExpired
-              ? 'bg-gray-300 text-gray-400 cursor-not-allowed'
-              : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+            ? 'bg-gray-300 text-gray-400 cursor-not-allowed'
+            : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
             }`}
         >
           {!isTimerExpired ? `Resend in ${formatTime(timer)}` : 'Resend OTP'}

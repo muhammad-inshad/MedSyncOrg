@@ -9,15 +9,23 @@ import { KycRepository } from "../repositories/superAdminKyc.repository.ts";
 import { SuperAdminAuthService } from "../services/auth/superAdmin/superAdmin.service.ts";
 import { SuperAdminAuthController } from "../controllers/auth/superAdmin/superAdmin.auth.controller.ts";
 
-import { AdminModel } from "../models/admin.model.ts"; 
+import { AdminModel } from "../models/admin.model.ts";
+
+import { DoctorRepository } from "../repositories/doctor/doctor.repository.ts";
+import { DoctorModel } from "../models/doctor.model.ts";
+import { UserRepository } from "../repositories/patient/user.repository.ts";
+import { Patient } from "../models/Patient.model.ts";
 
 export const superAdminContainer = () => {
   const repo = new SuperAdminRepository(SuperAdminModel);
   const tokenService = new TokenService();
 
-  const kycRepo = new KycRepository(AdminModel);
 
-  const service = new SuperAdminService(repo, tokenService, kycRepo);
+  const kycRepo = new KycRepository(AdminModel);
+  const doctorRepo = new DoctorRepository(DoctorModel);
+  const patientRepo = new UserRepository(Patient);
+
+  const service = new SuperAdminService(repo, tokenService, kycRepo, doctorRepo, patientRepo);
   const controller = new SuperAdminController(service);
 
   const kycservice = new SuperadminkycService(kycRepo);
@@ -26,5 +34,5 @@ export const superAdminContainer = () => {
   const superAdminAuthService = new SuperAdminAuthService(repo, tokenService);
   const superAdminAuthController = new SuperAdminAuthController(superAdminAuthService);
 
-  return { controller, kyccontroller, superAdminAuthController };
+  return { tokenService, controller, kyccontroller, superAdminAuthController };
 };

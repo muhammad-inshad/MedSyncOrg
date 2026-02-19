@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
+import { IAdminAuthService } from "../../../services/auth/admin/admin.auth.service.interface.ts";
 import { HttpStatusCode } from "../../../constants/httpStatus.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
-import { IAdminAuthService } from "../../../services/auth/admin/admin.auth.service.interface.ts";
-import Logger from "../../../utils/logger.ts";
-import { AdminUploadFiles } from "../../../types/admin.type.ts";
 import { AppError } from "../../../types/error.types.ts";
 import { IAdminAuthController } from "./admin.auth.controller.interface.ts";
+import { AdminUploadFiles } from "../../../types/admin.type.ts";
+import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 
 export class AdminAuthController implements IAdminAuthController {
     constructor(private readonly _adminAuthService: IAdminAuthService) { }
@@ -14,24 +14,29 @@ export class AdminAuthController implements IAdminAuthController {
         try {
             const adminData = req.body;
             const files = req.files as unknown as AdminUploadFiles;
-
             const result = await this._adminAuthService.signup(adminData, files);
 
-            return res.status(HttpStatusCode.CREATED).json(result);
-        } catch (error) {
+            return ApiResponse.created(res, MESSAGES.ADMIN.SIGNUP_SUCCESS || "Hospital account created successfully", result);
+        } catch (error: unknown) {
             const err = error as AppError;
-            Logger.error(`Admin Signup Error: ${err.message}`);
-
-            return res.status(err.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-                message: err.message || MESSAGES.SERVER.ERROR,
-            });
+            return ApiResponse.error(
+                res,
+                err.message || MESSAGES.SERVER.ERROR,
+                null,
+                (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
+            );
         }
     }
 
     loginAdmin = async (req: Request, res: Response): Promise<Response> => {
         try {
-            const data = req.body;
-            const result = await this._adminAuthService.loginAdmin(data);
+            const { email, password } = req.body;
+
+            if (!email || !password) {
+                return ApiResponse.validationError(res, MESSAGES.VALIDATION.REQUIRED_FIELD);
+            }
+
+            const result = await this._adminAuthService.loginAdmin({ email, password, role: "admin" });
 
             res.cookie("refreshToken", result.refreshToken, {
                 httpOnly: true,
@@ -39,7 +44,6 @@ export class AdminAuthController implements IAdminAuthController {
                 sameSite: "strict",
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             });
-
             res.cookie("accessToken", result.accessToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
@@ -48,22 +52,16 @@ export class AdminAuthController implements IAdminAuthController {
                 path: "/",
             });
 
-            return res.status(HttpStatusCode.OK).json({
-                success: true,
-                message: MESSAGES.ADMIN.LOGIN_SUCCESS,
-                data: {
-                    accessToken: result.accessToken,
-                    refreshToken: result.refreshToken,
-                    user: { ...result.user, role: "admin" }
-                }
-            });
-        } catch (error) {
+            return ApiResponse.success(res, MESSAGES.ADMIN.LOGIN_SUCCESS || MESSAGES.AUTH.LOGIN_SUCCESS, result);
+        } catch (error: unknown) {
             const err = error as AppError;
-            Logger.error(`Admin Login Error: ${err.message}`);
-
-            return res.status(err.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-                message: err.message || MESSAGES.SERVER.ERROR,
-            });
+            return ApiResponse.error(
+                res,
+                err.message || MESSAGES.SERVER.ERROR,
+                null,
+                (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
+            );
         }
     }
 }
+

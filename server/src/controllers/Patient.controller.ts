@@ -1,5 +1,9 @@
 import type { Request, Response } from "express";
 import { PatientService } from "../services/patient.service.ts";
+import { ApiResponse } from "../utils/apiResponse.utils.ts";
+import { HttpStatusCode } from "../constants/httpStatus.ts";
+import { MESSAGES } from "../constants/messages.ts";
+import { AppError } from "../types/error.types.ts";
 
 class PatientController {
   constructor(private readonly patientService: PatientService) { }
@@ -8,15 +12,15 @@ class PatientController {
     try {
       const userId = (req as any).user.userId;
       const patient = await this.patientService.getProfile(userId);
-      return res.status(200).json({
-        success: true,
-        data: patient,
-      });
-    } catch (error: any) {
-      return res.status(error.status || 500).json({
-        success: false,
-        message: error.message || "Failed to fetch patient",
-      });
+      return ApiResponse.success(res, MESSAGES.PATIENT.FETCH_SUCCESS, patient);
+    } catch (error: unknown) {
+      const err = error as AppError;
+      return ApiResponse.error(
+        res,
+        err.message || "Failed to fetch patient",
+        null,
+        (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
+      );
     }
   };
 
@@ -32,38 +36,53 @@ class PatientController {
         search,
       });
 
-      return res.status(200).json({
-        success: true,
-        data: result.data,
-        total: result.total,
+      return ApiResponse.success(res, MESSAGES.PATIENT.FETCH_SUCCESS, result.data, HttpStatusCode.OK, {
+        page,
+        limit,
+        totalItems: result.total,
         totalPages: Math.ceil(result.total / limit),
       });
-    } catch (error: any) {
-      return res.status(500).json({
-        success: false,
-        message: error.message || "Internal server error",
-      });
+    } catch (error: unknown) {
+      const err = error as AppError;
+      return ApiResponse.error(
+        res,
+        err.message || MESSAGES.SERVER.INTERNAL_ERROR,
+        null,
+        HttpStatusCode.INTERNAL_SERVER_ERROR
+      );
     }
   };
 
   patientEdit = async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const file = (req as any).file;
       const updatedPatient = await this.patientService.updatedPatient(id, req.body);
-      return res.status(200).json({
-        success: true,
-        message: "patient updated successfully",
-        data: updatedPatient
-      });
-    } catch (error: any) {
-      console.error("Controller Error:", error);
-      return res.status(error.status || 500).json({
-        success: false,
-        message: error.message || "Failed to update doctor"
-      });
+      return ApiResponse.success(res, MESSAGES.PATIENT.UPDATE_SUCCESS, updatedPatient);
+    } catch (error: unknown) {
+      const err = error as AppError;
+      return ApiResponse.error(
+        res,
+        err.message || MESSAGES.SERVER.ERROR,
+        null,
+        (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
+      );
     }
-  }
+  };
+
+  getHospitals = async (req: Request, res: Response) => {
+    try {
+      const hospitals = await this.patientService.getHospitals();
+      return ApiResponse.success(res, MESSAGES.ADMIN.FETCH_SUCCESS, hospitals);
+    } catch (error: unknown) {
+      const err = error as AppError;
+      return ApiResponse.error(
+        res,
+        err.message || "Failed to fetch hospitals",
+        null,
+        (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
+      );
+    }
+  };
 
 }
 

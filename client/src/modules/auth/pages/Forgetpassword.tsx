@@ -27,30 +27,35 @@ const ForgotPassword = () => {
       console.log(role)
       await api.post('/api/auth/send-otp', {
         email: email.trim(),
-        froget:"chackit",
-        role:role,
+        role: role,
         purpose: 'forgot-password',
       });
 
       toast.success('OTP sent to your email');
       localStorage.setItem('otpPageAllowed', 'true');
+
+      const expirationTime = Date.now() + 60 * 1000;
+      localStorage.setItem('otpExpirationTime', expirationTime.toString());
+
       navigate(`/otp?role=${role}`, {
+        replace: true,
         state: {
           signupData: { email: email.trim() },
           purpose: 'forgot-password',
           role,
+          from: 'forgot-password'
         },
       });
-  } catch (err: unknown) {
-  if (axios.isAxiosError(err)) {
-    toast.error(err.response?.data?.message || 'Failed to send OTP');
-  } else {
-    toast.error('An unexpected error occurred');
-    console.error(err);
-  }
-} finally {
-  setLoading(false);
-}
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data?.message || 'Failed to send OTP');
+      } else {
+        toast.error('An unexpected error occurred');
+        console.error(err);
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {

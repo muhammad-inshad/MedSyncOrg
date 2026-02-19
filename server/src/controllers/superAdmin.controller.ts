@@ -4,7 +4,7 @@ import { SuperAdminService } from "../services/superAdmin.service.ts";
 export class SuperAdminController {
     constructor(private readonly service: SuperAdminService) { }
 
-  
+
 
     hospitalManagement = async (req: Request, res: Response) => {
         try {
@@ -68,6 +68,21 @@ export class SuperAdminController {
             return res.status(error.status || 500).json({
                 success: false,
                 message: error.message || "Failed to update hospital status"
+            });
+        }
+    };
+
+    getDashboardStats = async (req: Request, res: Response) => {
+        try {
+            const stats = await this.service.getDashboardStats();
+            return res.status(200).json({
+                success: true,
+                data: stats
+            });
+        } catch (error: any) {
+            return res.status(error.status || 500).json({
+                success: false,
+                message: error.message || "Failed to fetch dashboard stats"
             });
         }
     };

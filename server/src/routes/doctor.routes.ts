@@ -6,13 +6,14 @@ const { doctorcontroller, doctorAuthController } = doctorContainer()
 const router = Router()
 router.post("/RegistorDoctor", upload.fields([
     { name: "profileImage", maxCount: 1 },
+    { name: "profileImage", maxCount: 1 },
     { name: "license", maxCount: 1 },]),
-    (req, res) => doctorAuthController.registerDoctor(req, res));
+    doctorAuthController.registerDoctor.bind(doctorAuthController));
 
-router.get("/getme", (req, res) => doctorcontroller.getme(req, res))
-router.patch("/reapply/:id", (req, res) => doctorcontroller.reapplyDoctor(req, res))
+router.get("/getme", doctorcontroller.getme.bind(doctorcontroller))
+router.patch("/reapply/:id", doctorcontroller.reapplyDoctor.bind(doctorcontroller))
 router.patch("/doctorEdit/:id", upload.fields([
     { name: "profileImage", maxCount: 1 },
     { name: "license", maxCount: 1 }
-]), (req, res) => doctorcontroller.doctorEdit(req, res));
+]), doctorcontroller.doctorEdit.bind(doctorcontroller));
 export default router

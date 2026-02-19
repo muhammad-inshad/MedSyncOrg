@@ -47,16 +47,22 @@ const SignUp = () => {
         setIsLoading(true);
         console.log(data)
         try {
-              localStorage.setItem('otpPageAllowed', 'true');
+            localStorage.setItem('otpPageAllowed', 'true');
             await api.post("/api/auth/send-otp", {
-                email: data.email,froget:"notchack"
+                email: data.email,
+                purpose: "signup"
             });
-          
+
             toast.success("OTP sent to your email");
-               
+
+            const expirationTime = Date.now() + 60 * 1000; // 60 seconds from now
+            localStorage.setItem('otpExpirationTime', expirationTime.toString());
+
             navigate("/otp?role=patient", {
+                replace: true,
                 state: {
                     signupData: data,
+                    from: 'signup'
                 },
             });
 

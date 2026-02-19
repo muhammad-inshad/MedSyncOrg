@@ -24,14 +24,20 @@ const DoctorProtectedRoute = () => {
 
   useEffect(() => {
     const savedRole = localStorage.getItem("role");
+
     if (!savedRole) {
-      dispatch(stopLoading());
+      if (loading) dispatch(stopLoading());
+      return;
+    }
+
+    if (isAuthenticated && user?.role === savedRole) {
+      if (loading) dispatch(stopLoading());
       return;
     }
 
     dispatch(initializeAuth(savedRole));
 
-  }, [location.pathname, dispatch]);
+  }, [dispatch, isAuthenticated, user?.role, loading]);
 
   if (loading) return <FullScreenLoader />;
 

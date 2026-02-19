@@ -3,13 +3,16 @@ import cors from 'cors';
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import passport from "passport";
-import otpRoutes from './routes/otp.routes.ts';
+import authRoutes from './routes/auth.routes.ts';
 import patientRoutes from './routes/patient.routes.ts';
 import doctorRoutes from './routes/doctor.routes.ts';
 import adminRoutes from './routes/admin.routes.ts';
 import superAdminRoutes from './routes/superAdmin.routes.ts';
 import "./config/google.strategy.ts";
-import { protect } from './middleware/auth.middleware.ts';
+import {adminAuthMiddleware} from "./middleware/admin.auth.middleware.ts";
+import {doctorAuthMiddleware} from "./middleware/doctor.auth.middleware.ts";
+import {patientAuthMiddleware} from "./middleware/patient.auth.middleware.ts";
+import {superAdminAuthMiddleware} from "./middleware/superAdmin.auth.middleware.ts";
 
 dotenv.config();
 const app = express();
@@ -22,10 +25,10 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-app.use("/api/auth", otpRoutes);
-app.use("/api/patient", protect, patientRoutes);
-app.use("/api/doctor", protect, doctorRoutes);
-app.use("/api/admin", protect, adminRoutes);
-app.use("/api/superadmin", protect, superAdminRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/patient", patientAuthMiddleware, patientRoutes);
+app.use("/api/doctor", doctorAuthMiddleware, doctorRoutes);
+app.use("/api/admin", adminAuthMiddleware, adminRoutes);
+app.use("/api/superadmin", superAdminAuthMiddleware, superAdminRoutes);
 
 export default app;

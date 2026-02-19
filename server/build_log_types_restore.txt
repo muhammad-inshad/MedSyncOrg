@@ -1,1 +1,0 @@
-src/services/auth/admin/admin.auth.service.interface.ts(3,34): error TS2307: Cannot find module '../../types/admin.type.ts' or its corresponding type declarations.

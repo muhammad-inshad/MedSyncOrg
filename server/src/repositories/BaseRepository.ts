@@ -2,7 +2,7 @@ import { Model, Document, FilterQuery, UpdateQuery } from 'mongoose';
 import { IBaseRepository } from '../interfaces/IBaseRepository.ts';
 
 export class BaseRepository<T extends Document> implements IBaseRepository<T> {
-    constructor(private readonly model: Model<T>) { }
+    constructor(protected readonly model: Model<T>) { }
 
     async create(data: Partial<T>): Promise<T> {
         const createdEntity = new this.model(data);

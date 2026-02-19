@@ -1,20 +1,50 @@
 
-import {  Building2,Hospital, TrendingUp, AlertCircle } from 'lucide-react';
+import { Building2, Hospital, TrendingUp, AlertCircle } from 'lucide-react';
 import SuperAdminsidebar from '@/modules/superAdmin/components/SuperAdminsidebar';
+import { useEffect, useState } from 'react';
+import api from '@/lib/api';
+import toast from 'react-hot-toast';
+
 export default function SuperAdminDashboard() {
-    
+  const [dashboardStats, setDashboardStats] = useState({
+    totalHospitals: 0,
+    activeHospitals: 0,
+    totalDoctors: 0,
+    activeDoctors: 0,
+    totalPatients: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get('/api/superadmin/dashboard-stats');
+        if (response.data.success) {
+          setDashboardStats(response.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats', error);
+        toast.error('Failed to load dashboard statistics');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   const stats = [
     {
       label: 'Total Hospitals Managed',
-      value: '42',
-      change: '+12%',
+      value: loading ? '...' : dashboardStats.totalHospitals.toString(),
+      change: `Active: ${dashboardStats.activeHospitals}`,
       icon: Building2,
       color: 'bg-blue-50',
       iconColor: 'text-blue-600'
     },
     {
       label: 'Active Subscriptions',
-      value: '38',
+      value: loading ? '...' : dashboardStats.activeHospitals.toString(), // Assuming active hospitals = active subscriptions for now
       change: '+5%',
       icon: null,
       color: 'bg-green-50',
@@ -23,7 +53,7 @@ export default function SuperAdminDashboard() {
     },
     {
       label: 'Expiring Soon',
-      value: '5',
+      value: '5', // Placeholder as backend doesn't support this yet
       change: 'Action',
       icon: null,
       color: 'bg-orange-50',
@@ -32,16 +62,16 @@ export default function SuperAdminDashboard() {
       alert: true
     },
     {
-      label: 'Departments',
-      value: '18',
-       icon: null,
+      label: 'Total Doctors',
+      value: loading ? '...' : dashboardStats.totalDoctors.toString(),
+      icon: null,
       color: 'bg-green-50',
       iconColor: 'text-green-600',
       indicator: 'green'
     },
     {
       label: 'Active Doctors',
-      value: '156',
+      value: loading ? '...' : dashboardStats.activeDoctors.toString(),
       icon: null,
       color: 'bg-green-50',
       iconColor: 'text-green-600',
@@ -49,8 +79,8 @@ export default function SuperAdminDashboard() {
     },
     {
       label: 'Total Patients',
-      value: '3,847',
-       icon: null,
+      value: loading ? '...' : dashboardStats.totalPatients.toString(),
+      icon: null,
       color: 'bg-green-50',
       iconColor: 'text-green-600',
       indicator: 'green'
@@ -69,8 +99,8 @@ export default function SuperAdminDashboard() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-    
-       <SuperAdminsidebar/>
+
+      <SuperAdminsidebar />
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         <div className="p-8">
@@ -101,9 +131,8 @@ export default function SuperAdminDashboard() {
                 <div className="flex items-end justify-between">
                   <h3 className="text-3xl font-bold text-gray-900">{stat.value}</h3>
                   {stat.change && (
-                    <span className={`text-xs font-medium flex items-center gap-1 ${
-                      stat.alert ? 'text-red-600' : 'text-green-600'
-                    }`}>
+                    <span className={`text-xs font-medium flex items-center gap-1 ${stat.alert ? 'text-red-600' : 'text-green-600'
+                      }`}>
                       {stat.alert ? (
                         <>
                           <AlertCircle className="w-3 h-3" />

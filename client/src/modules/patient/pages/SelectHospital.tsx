@@ -19,7 +19,7 @@ const SelectHospital: React.FC = () => {
   useEffect(() => {
     const fetchHospitals = async () => {
       try {
-        const response = await api.get('/api/admin/hospitals');
+        const response = await api.get('/api/patient/hospitals');
         if (response.data.success) {
           setHospitals(response.data.data);
         }

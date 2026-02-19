@@ -1,1 +1,0 @@
-src/controllers/auth/superAdmin/superAdmin.auth.controller.ts(6,43): error TS2307: Cannot find module './superAdmin.auth.contrller.interface.ts' or its corresponding type declarations.

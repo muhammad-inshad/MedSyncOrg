@@ -24,6 +24,7 @@ export const doctorContainer = () => {
   const doctorAuthController = new DoctorAuthController(doctorAuthService);
 
   return {
+    tokenService,
     doctorcontroller,
     doctorAuthController
   };

@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { MESSAGES } from "../../../constants/messages.ts";
-import { StatusCode } from "../../../constants/statusCodes.ts";
+import { HttpStatusCode } from "../../../constants/httpStatus.ts";
 import { IDoctor } from "../../../models/doctor.model.ts";
 import { uploadBufferToCloudinary } from "../../../utils/cloudinaryUpload.ts";
 import { IDoctorAuthService } from "./doctor.auth.service.interface.ts";
@@ -8,6 +8,7 @@ import { ITokenService } from "../../../interfaces/auth.types.ts";
 import { IDoctorRepository } from "../../../repositories/doctor/doctor.repository.interface.ts";
 import { DoctorDTO, LoginDTO } from "../../../dto/auth/signup.dto.ts";
 import { DoctorUploadFiles } from "../../../types/doctor.types.ts";
+import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 
 
 export class DoctorAuthService implements IDoctorAuthService {
@@ -18,10 +19,7 @@ export class DoctorAuthService implements IDoctorAuthService {
         let licenseUrl = "";
         const existingDoctor = await this._doctorRepo.findByEmail(body.email);
         if (existingDoctor) {
-            throw {
-                status: StatusCode.CONFLICT,
-                message: MESSAGES.AUTH.ALREADY_EXISTS,
-            };
+            ApiResponse.throwError(HttpStatusCode.CONFLICT, MESSAGES.AUTH.ALREADY_EXISTS);
         }
         if (files?.profileImage?.[0]) {
             profileImageUrl = await uploadBufferToCloudinary(
@@ -73,20 +71,20 @@ export class DoctorAuthService implements IDoctorAuthService {
         : Promise<{ user: DoctorDTO; accessToken: string; refreshToken: string }> {
         const doctor = await this._doctorRepo.findByEmailWithPassword(loginData.email);
         if (!doctor) {
-            throw { status: StatusCode.BAD_REQUEST, message: MESSAGES.AUTH.LOGIN_FAILED };
+            ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, MESSAGES.AUTH.LOGIN_FAILED);
         }
 
         if (!doctor.isActive) {
-            throw { status: StatusCode.FORBIDDEN, message: MESSAGES.AUTH.ACCOUNT_BLOCKED };
+            ApiResponse.throwError(HttpStatusCode.FORBIDDEN, MESSAGES.AUTH.ACCOUNT_BLOCKED);
         }
 
         const isPasswordMatch = await bcrypt.compare(
             loginData.password,
-            doctor.password
+            doctor.password!
         );
 
         if (!isPasswordMatch) {
-            throw { status: StatusCode.BAD_REQUEST, message: MESSAGES.AUTH.LOGIN_FAILED };
+            ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, MESSAGES.AUTH.LOGIN_FAILED);
         }
         const accessToken = this._tokenService.generateAccessToken({
             userId: doctor._id.toString(),
@@ -100,7 +98,7 @@ export class DoctorAuthService implements IDoctorAuthService {
             role: loginData.role
         });
 
-        const {  ...safeUser } = doctor.toObject();
+        const { ...safeUser } = doctor.toObject();
         return { user: safeUser as unknown as DoctorDTO, accessToken, refreshToken };
     }
 }

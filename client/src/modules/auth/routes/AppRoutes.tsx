@@ -6,12 +6,12 @@ import SignUp from "@/modules/auth/pages/PatientSignupPage";
 import OtpPage from "../pages/OtpPage";
 import Forgetpassword from "@/modules/auth/pages/Forgetpassword";
 import ResetPassword from "@/modules/auth/pages/ResetPassword";
-import ProtectedRoute from "./ProtectedRoute";
+import PublicRoute from "./PublicRoute";
 import GoogleCallback from "../pages/GoogleCallback";
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route element={<ProtectedRoute />}>
+      <Route element={<PublicRoute />}>
         <Route
           path={PATIENT_ROUTES.ROOT}
           element={

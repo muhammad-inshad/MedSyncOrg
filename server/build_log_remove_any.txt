@@ -1,2 +1,0 @@
-src/controllers/auth/superAdmin/superAdmin.auth.controller.ts(46,31): error TS18046: 'error' is of type 'unknown'.
-src/controllers/auth/superAdmin/superAdmin.auth.controller.ts(48,26): error TS18046: 'error' is of type 'unknown'.

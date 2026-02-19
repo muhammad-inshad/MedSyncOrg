@@ -10,10 +10,17 @@ export interface ITokenPayload {
     role: string;
 }
 
+export interface IAccessTokenPayload extends ITokenPayload { }
+
+export interface IRefreshTokenPayload extends ITokenPayload {
+    jti: string;
+}
+
 export interface ITokenService {
-    generateAccessToken(payload: ITokenPayload): string;
+    generateAccessToken(payload: IAccessTokenPayload): string;
     generateRefreshToken(payload: ITokenPayload): string;
-    verifyRefreshToken(token: string): ITokenPayload;
+    verifyRefreshToken(token: string): IRefreshTokenPayload;
+    verifyAccessToken(token: string): IAccessTokenPayload;
 }
 
 export type UnifiedUser = IPatient | IAdmin | IDoctor | PatientResponseDTO | DoctorDTO;

@@ -12,9 +12,11 @@ export const MESSAGES = {
         FORBIDDEN: "You do not have permission to perform this action",
         ACCOUNT_BLOCKED: "Your account has been deactivated. Contact support.",
         INVALID_TOKEN: "Invalid token",
+        LOGOUT_SUCCESS: "Logout successful",
     },
     DOCTOR: {
         REGISTER_SUCCESS: "Doctor registered successfully",
+        LOGIN_SUCCESS: "Doctor login successful",
         REGISTER_FAILED: "Failed to register doctor",
         NOT_FOUND: "Doctor not found",
         UPDATE_SUCCESS: "Doctor updated successfully",

@@ -7,15 +7,9 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Request interceptor to add token to headers
+// Request interceptor (Simplified: Cookies are handled automatically)
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
+  (config) => config,
   (error) => Promise.reject(error)
 );
 
@@ -31,24 +25,11 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) {
-          store.dispatch(logout());
-          return Promise.reject(error);
-        }
-        
-        const refreshResponse = await api.post("/api/auth/refresh", { 
-          refreshToken 
-        });
-        
-        // Update the access token in localStorage from the response
-        if (refreshResponse.data?.data?.accessToken) {
-          localStorage.setItem("accessToken", refreshResponse.data.data.accessToken);
-          // Update the original request with the new token
-          originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.data.accessToken}`;
-        }
-        
-        return api(originalRequest); 
+        // Attempt to refresh using the refresh cookie (handled by backend)
+        await api.post("/api/auth/refresh");
+
+        // Retry the original request (new access cookie will be sent automatically)
+        return api(originalRequest);
       } catch (refreshError) {
         store.dispatch(logout());
         return Promise.reject(refreshError);

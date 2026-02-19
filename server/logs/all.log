@@ -1,0 +1,102 @@
+2026-02-19 16:52:25:5225 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-19 16:52:25:5225 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-19 16:56:23:5623 [32minfo[39m: [32mGenerated refresh token with JTI: ff356bfb-7ff2-457f-b538-1a91abb6cce9 for user: 698e77ec636feee337429d73[39m
+2026-02-19 16:56:24:5624 [33mwarn[39m: [33mAttempted superAdmin access by user with role: patient[39m
+2026-02-19 16:56:24:5624 [33mwarn[39m: [33mAttempted superAdmin access by user with role: patient[39m
+2026-02-19 16:56:24:5624 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 16:56:24:5624 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 16:56:24:5624 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 16:56:24:5624 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 16:56:44:5644 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 16:56:44:5644 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 16:56:56:5656 [32minfo[39m: [32mGenerated refresh token with JTI: 6ddada43-ce6d-479c-aa8a-1e94b80e8fec for user: 698e77ec636feee337429d73[39m
+2026-02-19 16:56:57:5657 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 16:56:57:5657 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 16:56:57:5657 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 16:56:57:5657 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 17:02:02:22 [32minfo[39m: [32mGenerated refresh token with JTI: 5b15c8e8-ae26-48a6-9a8b-d5359b688a63 for user: 69879988b778a9582ba8fe29[39m
+2026-02-19 17:02:02:22 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 17:02:02:22 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 17:02:02:22 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 17:02:02:22 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 17:10:32:1032 [32minfo[39m: [32mGenerated refresh token with JTI: 89818f97-c2b9-4c0e-ab83-3a0190fe4ef0 for user: 698e77ec636feee337429d73[39m
+2026-02-19 17:10:32:1032 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 17:10:32:1032 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 17:10:33:1033 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 17:10:33:1033 [33mwarn[39m: [33mAttempted admin access by user with role: patient[39m
+2026-02-19 17:26:14:2614 [32minfo[39m: [32mGenerated refresh token with JTI: 0c7e6ddc-c35c-4679-ab98-e7d50acc7c83 for user: 698e77ec636feee337429d73[39m
+2026-02-19 17:28:08:288 [32minfo[39m: [32mGenerated refresh token with JTI: 4c3cb630-3760-4754-b303-67ec6d38cd2e for user: 6996fab4fc7121ad6bee4c44[39m
+2026-02-19 17:32:37:3237 [32minfo[39m: [32mGenerated refresh token with JTI: 1ada6681-3d23-4f66-a8e4-598cace7760d for user: 698e77ec636feee337429d73[39m
+2026-02-19 17:33:03:333 [32minfo[39m: [32mGenerated refresh token with JTI: 3176067d-1bcf-42b3-a62c-2eb1a9aeb724 for user: 698e77ec636feee337429d73[39m
+2026-02-20 00:08:30:830 [32minfo[39m: [32mGenerated refresh token with JTI: 315daf06-0162-4dd7-8a8e-f18fb9569145 for user: 698e77ec636feee337429d73[39m
+2026-02-20 00:09:03:93 [32minfo[39m: [32mGenerated refresh token with JTI: 4f247db7-ccdc-4480-a306-589eddae7295 for user: 69879988b778a9582ba8fe29[39m
+2026-02-20 00:18:50:1850 [32minfo[39m: [32mGenerated refresh token with JTI: 25667605-fdca-4634-b9b9-58f68d9d7d20 for user: 69975b094fde80671ebbf3d3[39m
+2026-02-20 00:20:01:201 [32minfo[39m: [32mGenerated refresh token with JTI: 33683a7b-d33e-43ca-9a42-7633b03cee67 for user: 696fd4cb8df1a54cbaacff68[39m
+2026-02-20 00:20:01:201 [32minfo[39m: [32mAdmin logged in: royal@gmal.com[39m
+2026-02-20 00:21:19:2119 [32minfo[39m: [32mGenerated refresh token with JTI: 17b6397b-5e50-41b3-a90c-f739512a87a4 for user: 6964d0b9f1c7940f84968aa3[39m
+2026-02-20 00:21:20:2120 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:21:20:2120 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:21:21:2121 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:21:23:2123 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:21:23:2123 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:21:26:2126 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:21:26:2126 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:21:36:2136 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:21:36:2136 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:22:00:220 [32minfo[39m: [32mGenerated refresh token with JTI: 69d0cbd8-1794-4936-a2d4-eef6113f8857 for user: 6964d0b9f1c7940f84968aa3[39m
+2026-02-20 00:22:05:225 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:22:05:225 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:22:05:225 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:22:18:2218 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:22:18:2218 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:28:53:2853 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:28:53:2853 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:04:294 [32minfo[39m: [32mGenerated refresh token with JTI: 07682e5e-0a93-4d5e-97b9-a320a3c475ea for user: 6964d0b9f1c7940f84968aa3[39m
+2026-02-20 00:29:04:294 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:04:294 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:09:299 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:09:299 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:09:299 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:11:2911 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:11:2911 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:12:2912 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:17:2917 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:17:2917 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:19:2919 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:19:2919 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:43:2943 [32minfo[39m: [32mGenerated refresh token with JTI: 83608f12-4402-4d90-9e3b-5da7bffeb0e8 for user: 6964d0b9f1c7940f84968aa3[39m
+2026-02-20 00:29:43:2943 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:43:2943 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:50:2950 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:50:2950 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:59:2959 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:29:59:2959 [33mwarn[39m: [33mAttempted superAdmin access by user with role: superadmin[39m
+2026-02-20 00:40:18:4018 [32minfo[39m: [32mGenerated refresh token with JTI: af27b38b-a25f-4f4c-82f1-d00eaa46fcda for user: 6964d0b9f1c7940f84968aa3[39m
+2026-02-20 00:40:47:4047 [32minfo[39m: [32mGenerated refresh token with JTI: 4c63d120-4a4d-4a5a-8ee4-894fafcd2663 for user: 698e77ec636feee337429d73[39m
+2026-02-20 00:41:23:4123 [32minfo[39m: [32mGenerated refresh token with JTI: be2a4e6a-8abf-4250-a9ba-dd836b063e8e for user: 698e7a9a81a7667e8a7f7cce[39m
+2026-02-20 00:41:23:4123 [32minfo[39m: [32mAdmin logged in: max@gmail.com[39m
+2026-02-20 00:49:54:4954 [32minfo[39m: [32mGenerated refresh token with JTI: 1814d98c-4462-4fe6-954d-83c65239fdaf for user: 69879988b778a9582ba8fe29[39m
+2026-02-20 00:51:54:5154 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:51:54:5154 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:51:54:5154 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:51:54:5154 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:51:54:5154 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:51:58:5158 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:51:58:5158 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:51:58:5158 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:53:14:5314 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:53:14:5314 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:53:14:5314 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:53:34:5334 [32minfo[39m: [32mGenerated refresh token with JTI: 715d52da-7d86-48a9-a2d2-3ab2c5067b0d for user: 69879988b778a9582ba8fe29[39m
+2026-02-20 00:53:56:5356 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:53:56:5356 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:53:56:5356 [33mwarn[39m: [33mAttempted patient access by user with role: admin[39m
+2026-02-20 00:54:26:5426 [32minfo[39m: [32mGenerated refresh token with JTI: 05dff7a3-061e-4a6e-97ea-ea0fa4d79528 for user: 696a4a113787b2a89c899e07[39m
+2026-02-20 00:54:59:5459 [32minfo[39m: [32mGenerated refresh token with JTI: e78b51ef-61a6-4386-a3fa-43316cfe7f91 for user: 6964d0b9f1c7940f84968aa3[39m
+2026-02-20 01:33:21:3321 [32minfo[39m: [32mGenerated refresh token with JTI: b69d7fd7-8cf2-4a34-acc9-7483d51bd617 for user: 698e77ec636feee337429d73[39m
+2026-02-20 01:49:29:4929 [32minfo[39m: [32mGenerated refresh token with JTI: d920c963-10b5-483e-a463-211a86e24c99 for user: 698e77ec636feee337429d73[39m
+2026-02-20 01:50:20:5020 [32minfo[39m: [32mGenerated refresh token with JTI: eabf3cd9-e885-47a1-a987-6b7f92f4199d for user: 69879988b778a9582ba8fe29[39m
+2026-02-20 01:50:41:5041 [32minfo[39m: [32mGenerated refresh token with JTI: 9a29561a-8f70-495c-a5be-334504609c78 for user: 696a4a113787b2a89c899e07[39m
+2026-02-20 01:53:44:5344 [32minfo[39m: [32mGenerated refresh token with JTI: 7f513f67-9284-4b1e-9b7b-e726fef4ea7d for user: 698e7a9a81a7667e8a7f7cce[39m
+2026-02-20 01:53:44:5344 [32minfo[39m: [32mAdmin logged in: max@gmail.com[39m
+2026-02-20 02:02:42:242 [32minfo[39m: [32mGenerated refresh token with JTI: 778924ec-f46d-431a-ba44-e037c6972d5e for user: 698e77ec636feee337429d73[39m

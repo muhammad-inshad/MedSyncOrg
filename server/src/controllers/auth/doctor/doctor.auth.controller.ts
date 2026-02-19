@@ -6,6 +6,7 @@ import { DoctorSignupDTO, LoginDTO } from "../../../dto/auth/signup.dto.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
 import { IDoctorAuthController } from "./doctor.auth.controller.interface.ts";
 import { AppError } from "../../../types/error.types.ts";
+import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 
 export class DoctorAuthController implements IDoctorAuthController {
   constructor(private readonly _doctorAuthService: IDoctorAuthService) { }
@@ -20,20 +21,15 @@ export class DoctorAuthController implements IDoctorAuthController {
         files
       );
 
-      return res.status(HttpStatusCode.CREATED).json({
-        success: true,
-        message: MESSAGES.DOCTOR.REGISTER_SUCCESS,
-        data: doctor,
-      });
+      return ApiResponse.created(res, MESSAGES.DOCTOR.REGISTER_SUCCESS, doctor);
     } catch (error: unknown) {
       const err = error as AppError;
-      const errorMessage = err.message || MESSAGES.DOCTOR.REGISTER_FAILED;
-      const errorStatus = err.status || HttpStatusCode.INTERNAL_SERVER_ERROR;
-
-      return res.status(errorStatus).json({
-        success: false,
-        message: errorMessage,
-      });
+      return ApiResponse.error(
+        res,
+        err.message || MESSAGES.DOCTOR.REGISTER_FAILED,
+        null,
+        (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
+      );
     }
   };
 
@@ -55,27 +51,23 @@ export class DoctorAuthController implements IDoctorAuthController {
         maxAge: 15 * 60 * 1000,
         path: "/",
       });
-      return res.status(HttpStatusCode.OK).json({
-        success: true,
-        message: "Doctor login successful",
-        data: {
-          accessToken: result.accessToken,
-          refreshToken: result.refreshToken,
-          user: {
-            ...result.user,
-            role: "doctor"
-          }
+
+      return ApiResponse.success(res, MESSAGES.DOCTOR.LOGIN_SUCCESS, {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        user: {
+          ...result.user,
+          role: "doctor"
         }
       });
     } catch (error: unknown) {
       const err = error as AppError;
-      const errorMessage = err.message || MESSAGES.AUTH.LOGIN_FAILED;
-      const errorStatus = err.status || HttpStatusCode.INTERNAL_SERVER_ERROR;
-
-      return res.status(errorStatus).json({
-        success: false,
-        message: errorMessage,
-      });
+      return ApiResponse.error(
+        res,
+        err.message || MESSAGES.AUTH.LOGIN_FAILED,
+        null,
+        (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
+      );
     }
   };
 }

@@ -1,9 +1,12 @@
 import { UserRepository } from "../repositories/patient/user.repository.ts";
 import cloudinary from "../config/cloudinary.ts";
-import { uploadBufferToCloudinary } from "../utils/cloudinaryUpload.ts";
+import { IAdminRepository } from "../repositories/admin/admin.repository.interface.ts";
 
 export class PatientService {
-    constructor(private readonly userRepo: UserRepository) { }
+    constructor(
+        private readonly userRepo: UserRepository,
+        private readonly adminRepo: IAdminRepository
+    ) { }
 
     async getProfile(userId: string) {
         const patient = await this.userRepo.findById(userId);
@@ -63,5 +66,14 @@ export class PatientService {
         }
 
         return await this.userRepo.update(id, updateData);
+    }
+
+    async getHospitals() {
+        const hospitals = await this.adminRepo.findAll();
+        return hospitals.filter(admin => admin.isActive).map(admin => {
+            const adminObj = admin.toObject ? admin.toObject() : admin;
+            const { password, ...safeAdmin } = adminObj;
+            return safeAdmin;
+        });
     }
 }

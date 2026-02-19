@@ -4,6 +4,7 @@ import { HttpStatusCode } from "../../../constants/httpStatus.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
 import { AppError } from "../../../types/error.types.ts";
 import { ISuperAdminAuthController } from "./superAdmin.auth.controller.interface.ts";
+import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 
 
 export class SuperAdminAuthController implements ISuperAdminAuthController {
@@ -13,10 +14,7 @@ export class SuperAdminAuthController implements ISuperAdminAuthController {
             const { email, password } = req.body;
 
             if (!email || !password) {
-                return res.status(HttpStatusCode.BAD_REQUEST).json({
-                    success: false,
-                    message: MESSAGES.VALIDATION.REQUIRED_FIELD
-                });
+                return ApiResponse.validationError(res, MESSAGES.VALIDATION.REQUIRED_FIELD);
             }
 
             const result = await this._SuperadminAuthService.login(email, password);
@@ -35,21 +33,19 @@ export class SuperAdminAuthController implements ISuperAdminAuthController {
                 path: "/",
             });
 
-            return res.status(HttpStatusCode.OK).json({
-                success: true,
-                message: MESSAGES.AUTH.LOGIN_SUCCESS,
-                data: {
-                    accessToken: result.accessToken,
-                    refreshToken: result.refreshToken,
-                    user: result.user
-                }
+            return ApiResponse.success(res, MESSAGES.AUTH.LOGIN_SUCCESS, {
+                accessToken: result.accessToken,
+                refreshToken: result.refreshToken,
+                user: result.user
             });
         } catch (error: unknown) {
             const err = error as AppError;
-            return res.status(err.status || HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-                success: false,
-                message: err.message || MESSAGES.SERVER.ERROR
-            });
+            return ApiResponse.error(
+                res,
+                err.message || MESSAGES.SERVER.ERROR,
+                null,
+                (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
+            );
         }
     }
 }

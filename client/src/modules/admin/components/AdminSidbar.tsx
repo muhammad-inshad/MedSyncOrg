@@ -84,7 +84,7 @@ const AdminSidbar = ({ isOpen, setIsOpen }: AdminSidebarProps) => {
       {/* Mobile Overlay: darkens background when sidebar is open */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-[60] md:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}

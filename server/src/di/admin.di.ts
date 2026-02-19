@@ -5,7 +5,7 @@ import { TokenService } from "../services/token.service.ts";
 import { AdminModel } from "../models/admin.model.ts";
 import { DoctorManagementController } from "../controllers/DoctorManagement.Controller.ts";
 import { DoctorManagementService } from "../services/doctorManagement.service.ts";
-import { DoctorRepository } from "../repositories/doctor.repository.ts";
+import { DoctorRepository } from "../repositories/doctor/doctor.repository.ts";
 import { DoctorModel } from "../models/doctor.model.ts";
 import { PatientManagementController } from "../controllers/patientManagement.controller.ts";
 import { patientManagementService } from "../services/patientManagement.service.ts"
@@ -15,25 +15,27 @@ import { AdminAuthService } from "../services/auth/admin/admin.auth.service.ts";
 import { AdminAuthController } from "../controllers/auth/admin/admin.auth.controller.ts";
 
 export const adminContainer = () => {
-  const adminRepository = new AdminRepository(AdminModel);
-  const userRepository = new UserRepository(Patient)
+  const adminRepo = new AdminRepository(AdminModel);
+  const patientRepo = new UserRepository(Patient)
   const tokenService = new TokenService();
-  const doctorRepository = new DoctorRepository(DoctorModel);
+  const doctorRepo = new DoctorRepository(DoctorModel);
 
   const adminService = new AdminService(
-    adminRepository,
-    tokenService
+    adminRepo,
+    tokenService,
+    doctorRepo,
+    patientRepo
   );
 
   const adminAuthService = new AdminAuthService(
-    adminRepository,
+    adminRepo,
     tokenService
   );
 
   const doctorManagementService = new DoctorManagementService(
-    adminRepository,
+    adminRepo,
     tokenService,
-    doctorRepository
+    doctorRepo
   );
 
   const adminController = new AdminController(adminService);
@@ -43,19 +45,20 @@ export const adminContainer = () => {
     doctorManagementService
   );
   const patientService = new patientManagementService(
-    adminRepository, userRepository
+    adminRepo, patientRepo
   )
   const patientManagement = new PatientManagementController(
     patientService
   );
 
   return {
+    tokenService,
     adminController,
     adminAuthController,
     doctorManagement,
     adminService,
     doctorManagementService,
-    adminRepository,
+    adminRepo: adminRepo,
     patientManagement,
     patientService
   };

@@ -23,14 +23,36 @@ const AdminProtectedRoute = () => {
 
   useEffect(() => {
     const savedRole = localStorage.getItem("role");
+
+    // If no role, stop loading (will redirect in render)
     if (!savedRole) {
-      dispatch(stopLoading());
+      if (loading) dispatch(stopLoading());
       return;
     }
 
+    // If already authenticated and role matches, don't re-initialize
+    // If already authenticated:
+    if (isAuthenticated && user) {
+      // If roles match, stop loading
+      if (user.role === savedRole) {
+        if (loading) dispatch(stopLoading());
+        return;
+      }
+
+      // If roles mismatch (e.g. saved='patient' but token='admin'), update savedRole ?
+      // Or reject?
+      // If we are in AdminProtectedRoute, we EXPECT 'admin' role.
+      if (user.role === 'admin') {
+        localStorage.setItem("role", "admin");
+        if (loading) dispatch(stopLoading());
+        return;
+      }
+    }
+
+    // Otherwise verify/fetch user
     dispatch(initializeAuth(savedRole));
 
-  }, [location.pathname, dispatch]);
+  }, [dispatch, isAuthenticated, user, loading]);
 
   if (loading) return <FullScreenLoader />;
 
