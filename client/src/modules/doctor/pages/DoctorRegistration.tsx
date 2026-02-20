@@ -64,7 +64,7 @@ const DoctorRegistrationForm: React.FC = () => {
       if (licenseImageFile) {
         formData.append('license', licenseImageFile);
       }
-      const response = await api.post('/api/doctor/RegistorDoctor', formData, {
+      const response = await api.post('/api/auth/RegistorDoctor', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

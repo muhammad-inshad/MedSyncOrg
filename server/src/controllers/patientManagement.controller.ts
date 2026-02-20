@@ -1,5 +1,7 @@
-import type { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { patientManagementService } from "../services/patientManagement.service.ts";
+import { ApiResponse } from "../utils/apiResponse.utils.ts";
+
 export class PatientManagementController {
   private patientservice: patientManagementService;
 
@@ -7,34 +9,27 @@ export class PatientManagementController {
     this.patientservice = patientservice;
   }
 
-  async patientToggle(req: Request, res: Response) {
+  async patientToggle(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
       const updatePatient = await this.patientservice.togglePatientStatus(id)
-      return res.status(200).json({
-        success: true,
-        message: `Doctor ${updatePatient?.isActive ? 'activated' : 'deactivated'} successfully`,
-        data: updatePatient
-      })
+      return ApiResponse.success(res, `Patient ${updatePatient?.isActive ? 'activated' : 'deactivated'} successfully`, updatePatient);
     } catch (error: any) {
-      return res.status(error.message === "Doctor not found" ? 404 : 500).json({
-        success: false,
-        message: error.message || "Internal Server Error"
-      });
+      next(error);
     }
   }
 
-  async patientAdd(req: Request, res: Response) {
+  async patientAdd(req: Request, res: Response, next: NextFunction) {
     try {
       const patientData = req.body
       const file = req.file
       if (!file) {
-        return res.status(400).json({ message: "Profile image is required" });
+        return ApiResponse.validationError(res, "Profile image is required");
       }
       const result = await this.patientservice.createPatient(patientData, file)
-      return res.status(201).json(result)
+      return ApiResponse.created(res, "Patient created successfully", result);
     } catch (error: any) {
-      return res.status(500).json({ message: error.message || "Internal sever error" })
+      next(error);
     }
   }
 }

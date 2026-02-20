@@ -1,12 +1,13 @@
-import type { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { SuperAdminService } from "../services/superAdmin.service.ts";
+import { ApiResponse } from "../utils/apiResponse.utils.ts";
 
 export class SuperAdminController {
     constructor(private readonly service: SuperAdminService) { }
 
 
 
-    hospitalManagement = async (req: Request, res: Response) => {
+    hospitalManagement = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 8;
@@ -14,76 +15,49 @@ export class SuperAdminController {
 
             const result = await this.service.hospitalManagement({ page, limit, search });
 
-            return res.status(200).json({
-                success: true,
-                data: result.data,
-                total: result.total,
+            return ApiResponse.success(res, "Hospital management data fetched successfully", result.data, 200, {
                 page,
                 limit,
+                totalItems: result.total,
                 totalPages: Math.ceil(result.total / limit)
             });
         } catch (error: any) {
-            return res.status(error.status || 500).json({
-                success: false,
-                message: error.message || "Failed to fetch hospital management data"
-            });
+            next(error);
         }
     };
 
-    getme = async (req: Request, res: Response) => {
+    getme = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const superAdminId = (req as any).user.userId;
             const superAdmin = await this.service.getme(superAdminId);
 
-            return res.status(200).json({
-                success: true,
-                data: superAdmin
-            });
+            return ApiResponse.success(res, "Super admin details fetched successfully", superAdmin);
         } catch (error: any) {
-            return res.status(error.status || 500).json({
-                success: false,
-                message: error.message || "Failed to fetch super admin details"
-            });
+            next(error);
         }
     };
 
-    setActive = async (req: Request, res: Response) => {
+    setActive = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { id, isActive } = req.body;
 
             if (!id || isActive === undefined) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Missing required parameters: id and isActive"
-                });
+                return ApiResponse.validationError(res, "Missing required parameters: id and isActive");
             }
             const result = await this.service.setActive(id as string, isActive);
 
-            return res.status(200).json({
-                success: true,
-                message: "Hospital status updated successfully",
-                data: result
-            });
+            return ApiResponse.success(res, "Hospital status updated successfully", result);
         } catch (error: any) {
-            return res.status(error.status || 500).json({
-                success: false,
-                message: error.message || "Failed to update hospital status"
-            });
+            next(error);
         }
     };
 
-    getDashboardStats = async (req: Request, res: Response) => {
+    getDashboardStats = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const stats = await this.service.getDashboardStats();
-            return res.status(200).json({
-                success: true,
-                data: stats
-            });
+            return ApiResponse.success(res, "Dashboard stats fetched successfully", stats);
         } catch (error: any) {
-            return res.status(error.status || 500).json({
-                success: false,
-                message: error.message || "Failed to fetch dashboard stats"
-            });
+            next(error);
         }
     };
 }

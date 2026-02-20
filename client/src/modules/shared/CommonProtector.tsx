@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 import type { RootState } from "../../store/store";
@@ -9,6 +9,7 @@ import FullScreenLoader from "@/components/FullScreenLoader";
 import { ADMIN_ROUTES } from "@/constants/frontend/admin/admin.routes";
 import { DOCTOR_ROUTES } from "@/constants/frontend/doctor/doctor.routes";
 import { COMMON_ROUTES } from "@/constants/frontend/common/common.routes";
+import { SUPERADMIN_ROUTES } from "@/constants/frontend/superAdmin/superAdmin.routes";
 
 interface MongooseUser {
   _doc?: Record<string, unknown>;
@@ -19,14 +20,18 @@ const CommonProtector = () => {
   const dispatch = useAppDispatch();
   const location = useLocation();
   const { isAuthenticated, loading, user } = useSelector((state: RootState) => state.auth);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const savedRole = localStorage.getItem("role");
     if (!savedRole) {
       dispatch(stopLoading());
       return;
     }
-    dispatch(initializeAuth(savedRole));
+    if(savedRole==="Superadmin"){
+      navigate(SUPERADMIN_ROUTES.DASHBOARD)
+    }else{
+      dispatch(initializeAuth(savedRole));
+    }
   }, [dispatch]);
 
   if (loading) return <FullScreenLoader />;

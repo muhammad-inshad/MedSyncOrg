@@ -1,30 +1,23 @@
-import type { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { PatientService } from "../services/patient.service.ts";
 import { ApiResponse } from "../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../constants/httpStatus.ts";
 import { MESSAGES } from "../constants/messages.ts";
-import { AppError } from "../types/error.types.ts";
 
 class PatientController {
   constructor(private readonly patientService: PatientService) { }
 
-  getMe = async (req: Request, res: Response) => {
+  getMe = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = (req as any).user.userId;
       const patient = await this.patientService.getProfile(userId);
       return ApiResponse.success(res, MESSAGES.PATIENT.FETCH_SUCCESS, patient);
     } catch (error: unknown) {
-      const err = error as AppError;
-      return ApiResponse.error(
-        res,
-        err.message || "Failed to fetch patient",
-        null,
-        (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
-      );
+      next(error);
     }
   };
 
-  getAllPatient = async (req: Request, res: Response) => {
+  getAllPatient = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 8;
@@ -43,49 +36,29 @@ class PatientController {
         totalPages: Math.ceil(result.total / limit),
       });
     } catch (error: unknown) {
-      const err = error as AppError;
-      return ApiResponse.error(
-        res,
-        err.message || MESSAGES.SERVER.INTERNAL_ERROR,
-        null,
-        HttpStatusCode.INTERNAL_SERVER_ERROR
-      );
+      next(error);
     }
   };
 
-  patientEdit = async (req: Request, res: Response) => {
+  patientEdit = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
       const updatedPatient = await this.patientService.updatedPatient(id, req.body);
       return ApiResponse.success(res, MESSAGES.PATIENT.UPDATE_SUCCESS, updatedPatient);
     } catch (error: unknown) {
-      const err = error as AppError;
-      return ApiResponse.error(
-        res,
-        err.message || MESSAGES.SERVER.ERROR,
-        null,
-        (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
-      );
+      next(error);
     }
   };
 
-  getHospitals = async (req: Request, res: Response) => {
+  getHospitals = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const hospitals = await this.patientService.getHospitals();
       return ApiResponse.success(res, MESSAGES.ADMIN.FETCH_SUCCESS, hospitals);
     } catch (error: unknown) {
-      const err = error as AppError;
-      return ApiResponse.error(
-        res,
-        err.message || "Failed to fetch hospitals",
-        null,
-        (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
-      );
+      next(error);
     }
   };
 
 }
-
-
 
 export default PatientController;

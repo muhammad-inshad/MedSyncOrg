@@ -100,3 +100,31 @@
 2026-02-20 01:53:44:5344 [32minfo[39m: [32mGenerated refresh token with JTI: 7f513f67-9284-4b1e-9b7b-e726fef4ea7d for user: 698e7a9a81a7667e8a7f7cce[39m
 2026-02-20 01:53:44:5344 [32minfo[39m: [32mAdmin logged in: max@gmail.com[39m
 2026-02-20 02:02:42:242 [32minfo[39m: [32mGenerated refresh token with JTI: 778924ec-f46d-431a-ba44-e037c6972d5e for user: 698e77ec636feee337429d73[39m
+2026-02-20 10:06:48:648 [32minfo[39m: [32mGenerated refresh token with JTI: d9f90d37-93ea-43cf-806e-e4fb48150d26 for user: 698e77ec636feee337429d73[39m
+2026-02-20 10:08:32:832 [33mwarn[39m: [33mAttempted doctor access by user with role: patient[39m
+2026-02-20 10:08:41:841 [33mwarn[39m: [33mAttempted doctor access by user with role: patient[39m
+2026-02-20 10:08:51:851 [33mwarn[39m: [33mAttempted doctor access by user with role: patient[39m
+2026-02-20 10:08:59:859 [33mwarn[39m: [33mAttempted doctor access by user with role: patient[39m
+2026-02-20 10:28:55:2855 [33mwarn[39m: [33mAttempted doctor access by user with role: patient[39m
+2026-02-20 10:28:56:2856 [33mwarn[39m: [33mAttempted doctor access by user with role: patient[39m
+2026-02-20 10:31:28:3128 [32minfo[39m: [32mGenerated refresh token with JTI: 246b00f2-7f67-48c1-92c2-bca03dd5834e for user: 6997ea88382a2f649bd5c631[39m
+2026-02-20 10:36:19:3619 [32minfo[39m: [32mNew Admin/Hospital registered: menath@gmail.com[39m
+2026-02-20 10:36:33:3633 [32minfo[39m: [32mGenerated refresh token with JTI: 9358d572-b698-4b41-a7e0-9f2f11ff3773 for user: 6997ebcb382a2f649bd5c641[39m
+2026-02-20 10:36:33:3633 [32minfo[39m: [32mAdmin logged in: menath@gmail.com[39m
+2026-02-20 17:34:43:3443 [32minfo[39m: [32mGenerated refresh token with JTI: adacce1b-1f22-4237-8f5e-3724f785a51f for user: 698e77ec636feee337429d73[39m
+2026-02-20 17:35:14:3514 [32minfo[39m: [32mGenerated refresh token with JTI: e2c060bd-4be7-4860-8d52-daa90f4f9bbd for user: 69879988b778a9582ba8fe29[39m
+2026-02-20 17:36:35:3635 [32minfo[39m: [32mGenerated refresh token with JTI: d58dcbcd-a914-4e27-b8c7-284efc3e32cd for user: 696a4a113787b2a89c899e07[39m
+2026-02-20 17:36:52:3652 [31merror[39m: [31mNo doctor found with this email address[39m
+2026-02-20 17:37:43:3743 [33mwarn[39m: [33mLogin failed: Invalid password for email max@gmail.com[39m
+2026-02-20 17:37:43:3743 [31merror[39m: [31mInvalid email or password[39m
+2026-02-20 17:37:57:3757 [33mwarn[39m: [33mLogin failed: Invalid password for email max@gmail.com[39m
+2026-02-20 17:37:57:3757 [31merror[39m: [31mInvalid email or password[39m
+2026-02-20 17:38:06:386 [33mwarn[39m: [33mLogin failed: Invalid password for email max@gmail.com[39m
+2026-02-20 17:38:06:386 [31merror[39m: [31mInvalid email or password[39m
+2026-02-20 17:38:50:3850 [32minfo[39m: [32mGenerated refresh token with JTI: a3bfd149-260d-4391-a2ec-58e15ae14e4e for user: 698e7a9a81a7667e8a7f7cce[39m
+2026-02-20 17:38:50:3850 [32minfo[39m: [32mAdmin logged in: max@gmail.com[39m
+2026-02-20 17:39:50:3950 [31merror[39m: [31mInvalid email or password[39m
+2026-02-20 17:39:52:3952 [31merror[39m: [31mInvalid email or password[39m
+2026-02-20 17:40:01:401 [32minfo[39m: [32mGenerated refresh token with JTI: fb562d84-c320-4940-b7ca-0d3c654df91c for user: 6964d0b9f1c7940f84968aa3[39m
+2026-02-20 17:42:40:4240 [32minfo[39m: [32mGenerated refresh token with JTI: 5fa533ed-c9b1-4067-afa1-a3c6a2ccdfb7 for user: 6964d0b9f1c7940f84968aa3[39m
+2026-02-20 18:20:45:2045 [32minfo[39m: [32mGenerated refresh token with JTI: 4622bb44-8a35-41ea-ba52-d843062419ce for user: 698e77ec636feee337429d73[39m

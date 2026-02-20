@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 export interface IAdminAuthController {
-    signup:(req:Request, res:Response) => Promise<Response>;
-    loginAdmin:(req:Request, res:Response) => Promise<Response>;
+    signup: (req: Request, res: Response, next: NextFunction) => Promise<Response | void>;
+    loginAdmin: (req: Request, res: Response, next: NextFunction) => Promise<Response | void>;
 }

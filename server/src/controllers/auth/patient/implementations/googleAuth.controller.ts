@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { TokenService } from '../../../../services/token.service.ts';
 import { IPatient } from '../../../../models/Patient.model.ts';
 interface AuthRequest extends Request {
@@ -11,7 +11,7 @@ export class GoogleAuthController {
     this.tokenService = tokenService;
   }
 
-  public async handleCallback(req: Request, res: Response) {
+  public async handleCallback(req: Request, res: Response, next: NextFunction) {
     try {
       const authReq = req as AuthRequest;
       if (!authReq.user) {
@@ -56,7 +56,10 @@ export class GoogleAuthController {
 
     } catch (error) {
       console.error("Google Auth Controller Error:", error);
-      return res.redirect(`${process.env.FRONTEND_URL}/login?error=auth_failed`);
+      // For Google Auth, we might still want a redirect, but decentralized error handling
+      // usually means next(error). If we want to maintain the redirect, we can do it in the error middleware
+      // or keep it here. Given the user's request to "centralize", I'll use next(error).
+      next(error);
     }
   }
 }

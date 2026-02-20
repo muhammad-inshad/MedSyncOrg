@@ -7,10 +7,10 @@ import { superAdminContainer } from "../di/superAdmin.di.ts";
 import passport from 'passport';
 
 
-const {superAdminAuthController } = superAdminContainer();
-const {doctorAuthController } = doctorContainer()
+const { superAdminAuthController } = superAdminContainer();
+const { doctorAuthController } = doctorContainer()
 const { authController, otpController } = userContainer();
-const {  adminAuthController } = adminContainer();
+const { adminAuthController } = adminContainer();
 const { googleAuthController } = userContainer();
 const router = Router();
 
@@ -35,7 +35,13 @@ router.get('/google', (req, res, next) => {
 });
 router.get('/google/callback',
   passport.authenticate('google', { session: false, failureRedirect: '/login' }),
-  googleAuthController.handleCallback.bind(googleAuthController) 
+  googleAuthController.handleCallback.bind(googleAuthController)
 );
+
+router.post("/RegistorDoctor", upload.fields([
+  { name: "profileImage", maxCount: 1 },
+  { name: "profileImage", maxCount: 1 },
+  { name: "license", maxCount: 1 },]),
+  doctorAuthController.registerDoctor.bind(doctorAuthController));
 
 export default router;

@@ -13,6 +13,7 @@ import {adminAuthMiddleware} from "./middleware/admin.auth.middleware.ts";
 import {doctorAuthMiddleware} from "./middleware/doctor.auth.middleware.ts";
 import {patientAuthMiddleware} from "./middleware/patient.auth.middleware.ts";
 import {superAdminAuthMiddleware} from "./middleware/superAdmin.auth.middleware.ts";
+import errorHandler from "./middleware/error.middleware.ts";
 
 dotenv.config();
 const app = express();
@@ -30,5 +31,7 @@ app.use("/api/patient", patientAuthMiddleware, patientRoutes);
 app.use("/api/doctor", doctorAuthMiddleware, doctorRoutes);
 app.use("/api/admin", adminAuthMiddleware, adminRoutes);
 app.use("/api/superadmin", superAdminAuthMiddleware, superAdminRoutes);
+
+app.use(errorHandler);
 
 export default app;

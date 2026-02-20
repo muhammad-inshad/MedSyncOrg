@@ -1,11 +1,11 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { DoctorService } from "../services/doctor.service.ts";
 
 class DoctorController {
   constructor(private readonly doctorService: DoctorService) { }
 
 
-  getme = async (req: Request, res: Response) => {
+  getme = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const doctorID = (req as any).user.userId;
       const doctor = await this.doctorService.getDoctorProfile(doctorID);
@@ -14,13 +14,11 @@ class DoctorController {
         data: doctor,
       });
     } catch (error: any) {
-      return res.status(error.status || 500).json({
-        success: false,
-        message: error.message || "Failed to fetch doctor",
-      });
+      next(error);
     }
   };
-  doctorEdit = async (req: Request, res: Response) => {
+
+  doctorEdit = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
       const files = (req as any).files as { [fieldname: string]: any[] };
@@ -55,15 +53,11 @@ class DoctorController {
         data: updatedDoctor
       });
     } catch (error: any) {
-      console.error("Controller Error:", error);
-      return res.status(error.status || 500).json({
-        success: false,
-        message: error.message || "Failed to update doctor"
-      });
+      next(error);
     }
   };
 
-  reapplyDoctor = async (req: Request, res: Response) => {
+  reapplyDoctor = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
       const result = await this.doctorService.reapply(id, req.body);
@@ -73,10 +67,7 @@ class DoctorController {
         data: result
       });
     } catch (error: any) {
-      return res.status(error.status || 500).json({
-        success: false,
-        message: error.message || "Failed to re-apply"
-      });
+      next(error);
     }
   };
 }

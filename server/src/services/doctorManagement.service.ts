@@ -2,21 +2,21 @@ import { AdminRepository } from "../repositories/admin/admin.repository.ts";
 import { TokenService } from "./token.service.ts";
 import cloudinary from "../config/cloudinary.ts";
 import { extractPublicId } from "../utils/cloudinaryUpload.ts";
-import { DoctorRepository } from "../repositories/doctor.repository.ts";
+import { IDoctorRepository } from "../repositories/doctor/doctor.repository.interface.ts";
 import { StatusCode } from "../constants/statusCodes.ts";
 import { MESSAGES } from "../constants/messages.ts";
-import { IDoctorManagementService } from "../interfaces/IDoctorManagementService.ts"; // [NEW] Import Interface
-import Logger from "../utils/logger.ts"; // [NEW] Import Logger
+import { IDoctorManagementService } from "../interfaces/IDoctorManagementService.ts";
+import Logger from "../utils/logger.ts";
 
-export class DoctorManagementService implements IDoctorManagementService { // [NEW] Implement Interface
+export class DoctorManagementService implements IDoctorManagementService {
   private readonly _adminRepo: AdminRepository;
   private readonly _tokenService: TokenService;
-  private readonly _doctorRepo: DoctorRepository;
+  private readonly _doctorRepo: IDoctorRepository;
 
   constructor(
     adminRepo: AdminRepository,
     tokenService: TokenService,
-    doctorRepo: DoctorRepository
+    doctorRepo: IDoctorRepository
   ) {
     this._adminRepo = adminRepo;
     this._tokenService = tokenService;

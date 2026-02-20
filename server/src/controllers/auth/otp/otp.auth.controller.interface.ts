@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 export interface IPatientOtpAuthController {
-    sendOtp: (req: Request, res: Response) => Promise<Response>;
-    verifyOtp: (req: Request, res: Response) => Promise<Response>;
+    sendOtp: (req: Request, res: Response, next: NextFunction) => Promise<Response | void>;
+    verifyOtp: (req: Request, res: Response, next: NextFunction) => Promise<Response | void>;
 }

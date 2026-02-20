@@ -1,17 +1,16 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { HttpStatusCode } from "../../../constants/httpStatus.ts";
 import { IDoctorAuthService } from "../../../services/auth/doctor/doctor.auth.service.interface.ts";
 import { DoctorUploadFiles } from "../../../types/doctor.types.ts";
 import { DoctorSignupDTO, LoginDTO } from "../../../dto/auth/signup.dto.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
 import { IDoctorAuthController } from "./doctor.auth.controller.interface.ts";
-import { AppError } from "../../../types/error.types.ts";
 import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 
 export class DoctorAuthController implements IDoctorAuthController {
   constructor(private readonly _doctorAuthService: IDoctorAuthService) { }
 
-  registerDoctor = async (req: Request, res: Response) => {
+  registerDoctor = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const files = req.files as unknown as DoctorUploadFiles;
       const doctorData = req.body as DoctorSignupDTO;
@@ -23,17 +22,11 @@ export class DoctorAuthController implements IDoctorAuthController {
 
       return ApiResponse.created(res, MESSAGES.DOCTOR.REGISTER_SUCCESS, doctor);
     } catch (error: unknown) {
-      const err = error as AppError;
-      return ApiResponse.error(
-        res,
-        err.message || MESSAGES.DOCTOR.REGISTER_FAILED,
-        null,
-        (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
-      );
+      next(error);
     }
   };
 
-  loginDoctor = async (req: Request, res: Response) => {
+  loginDoctor = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const loginData = req.body as LoginDTO;
       const result = await this._doctorAuthService.loginDoctor(loginData);
@@ -61,13 +54,7 @@ export class DoctorAuthController implements IDoctorAuthController {
         }
       });
     } catch (error: unknown) {
-      const err = error as AppError;
-      return ApiResponse.error(
-        res,
-        err.message || MESSAGES.AUTH.LOGIN_FAILED,
-        null,
-        (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
-      );
+      next(error);
     }
   };
 }

@@ -2,6 +2,7 @@ import { Response } from "express";
 import { HttpStatusCode } from "../constants/httpStatus.ts";
 import { MESSAGES } from "../constants/messages.ts";
 import { PaginationMeta } from "../interfaces/pagination.ts";
+import { AppError } from "../errors/app.error.ts";
 
 
 export class ApiResponse {
@@ -54,6 +55,6 @@ export class ApiResponse {
     }
 
     static throwError(statusCode: HttpStatusCode, message: string): never {
-        throw { status: statusCode, message };
+        throw new AppError(message, statusCode);
     }
 }

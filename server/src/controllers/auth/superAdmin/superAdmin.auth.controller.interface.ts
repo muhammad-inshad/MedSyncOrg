@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 export interface ISuperAdminAuthController {
-    login:(req:Request, res:Response) => Promise<Response>;
+    login: (req: Request, res: Response, next: NextFunction) => Promise<Response | void>;
 }

@@ -1,34 +1,26 @@
-import type { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { IPatientAuthService } from "../../../../services/auth/patient/interfaces/patient.auth.service.interface.ts";
 import { LoginDTO, SignupDTO } from "../../../../dto/auth/signup.dto.ts";
 import { IPatientAuthController } from "../interfaces/patient.auth.controller.interface.ts";
-import { AppError } from "../../../../types/error.types.ts";
 import { MESSAGES } from "../../../../constants/messages.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../../../constants/httpStatus.ts";
 
 class patientAuthController implements IPatientAuthController {
 
   constructor(private readonly authService: IPatientAuthService) { }
 
-  signup = async (req: Request, res: Response) => {
+  signup = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const signupData: SignupDTO = req.body;
       const user = await this.authService.signup(signupData);
 
       return ApiResponse.created(res, "Account created successfully", user);
     } catch (error: unknown) {
-      const err = error as AppError;
-      return ApiResponse.error(
-        res,
-        err.message || "Failed to create account",
-        null,
-        (err.status as HttpStatusCode) || HttpStatusCode.BAD_REQUEST
-      );
+      next(error);
     }
   };
 
-  login = async (req: Request, res: Response) => {
+  login = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const loginData: LoginDTO = req.body;
 
@@ -55,17 +47,11 @@ class patientAuthController implements IPatientAuthController {
         user: { ...result.user, role: loginData.role }
       });
     } catch (error: unknown) {
-      const err = error as AppError;
-      return ApiResponse.error(
-        res,
-        err.message || "Login failed",
-        null,
-        (err.status as HttpStatusCode) || HttpStatusCode.UNAUTHORIZED
-      );
+      next(error);
     }
   };
 
-  refresh = async (req: Request, res: Response) => {
+  refresh = async (req: Request, res: Response, next: NextFunction) => {
     try {
       let refreshToken = req.cookies?.refreshToken;
 
@@ -96,24 +82,17 @@ class patientAuthController implements IPatientAuthController {
         accessToken: result.accessToken
       });
     } catch (error: unknown) {
-      const err = error as AppError;
-      return ApiResponse.unauthorized(res, err.message || MESSAGES.AUTH.INVALID_SEESSION);
+      next(error);
     }
   };
 
-  resetPassword = async (req: Request, res: Response) => {
+  resetPassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password, role } = req.body
       const result = await this.authService.resetPassword(email, password, role);
       return ApiResponse.success(res, result.message);
     } catch (error: unknown) {
-      const err = error as AppError;
-      return ApiResponse.error(
-        res,
-        err.message || MESSAGES.SERVER.INTERNAL_ERROR,
-        null,
-        (err.status as HttpStatusCode) || HttpStatusCode.INTERNAL_SERVER_ERROR
-      );
+      next(error);
     }
   };
 
