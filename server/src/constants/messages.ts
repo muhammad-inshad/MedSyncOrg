@@ -1,0 +1,53 @@
+export const MESSAGES = {
+    AUTH: {
+        LOGIN_SUCCESS: "Login successful",
+        LOGIN_FAILED: "Invalid email or password",
+        INVALID_SEESSION: "Invalid session. Please log in again.",
+        SIGNUP_SUCCESS: "Registration successful",
+        ALREADY_EXISTS: "User already exists",
+        OTP_SENT: "OTP sent successfully",
+        OTP_VERIFIED: "OTP verified successfully",
+        UNAUTHORIZED: "Authentication required. Please log in.",
+        SESSION_EXPIRED: "Session expired or invalid token",
+        FORBIDDEN: "You do not have permission to perform this action",
+        ACCOUNT_BLOCKED: "Your account has been deactivated. Contact support.",
+        INVALID_TOKEN: "Invalid token",
+        LOGOUT_SUCCESS: "Logout successful",
+    },
+    DOCTOR: {
+        REGISTER_SUCCESS: "Doctor registered successfully",
+        LOGIN_SUCCESS: "Doctor login successful",
+        REGISTER_FAILED: "Failed to register doctor",
+        NOT_FOUND: "Doctor not found",
+        UPDATE_SUCCESS: "Doctor updated successfully",
+        FETCH_SUCCESS: "Doctor fetched successfully",
+        VERIFIED: "Doctor account verified successfully",
+        REJECTED: "Doctor application rejected",
+        INVALID_STATUS: "Invalid status provided",
+    },
+    ADMIN: {
+        HOSPITAL_EXISTS: "Hospital already exists",
+        FETCH_SUCCESS: "Hospital profile fetched successfully",
+        UPDATE_SUCCESS: "Hospital updated successfully",
+        STATUS_CHANGED: (isActive: boolean) => `Hospital successfully ${isActive ? 'activated' : 'deactivated'}`,
+        SIGNUP_SUCCESS: "Hospital registered successfully",
+        LOGIN_SUCCESS: "Hospital login successful",
+        NOT_FOUND: "Hospital not found",
+    },
+    PATIENT: {
+        FETCH_SUCCESS: "Patient profile fetched successfully",
+        UPDATE_SUCCESS: "Patient updated successfully",
+        NOT_FOUND: "Patient not found",
+    },
+    VALIDATION: {
+        REQUIRED_FIELD: "This field is required",
+        INVALID_EMAIL: "Invalid email format",
+        INVALID_PHONE: "Invalid phone number",
+        INVALID_INPUT: "Invalid input provided",
+    },
+    SERVER: {
+        ERROR: "An unexpected error occurred",
+        NOT_FOUND: "Resource not found",
+        INTERNAL_ERROR: "Internal Server Error",
+    }
+};
