@@ -26,21 +26,11 @@ const HospitalManagement = () => {
   const fetchHospitals = async (page: number) => {
     try {
       setIsLoading(true);
-<<<<<<< HEAD
-      const response = await api.get('/api/superadmin/hospitalManagement', {
-        params: {
-          page,
-          limit: ITEMS_PER_PAGE,
-          search: searchQuery,
-          status: activeTab
-        }
-=======
       const response = await superAdminApi.getHospitalManagement({
         page,
         limit: ITEMS_PER_PAGE,
         search: searchQuery,
         status: activeTab
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
       });
       const responseData = response.data.data || [];
       const pagination = response.data.pagination || {};

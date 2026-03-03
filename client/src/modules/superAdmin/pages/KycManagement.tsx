@@ -97,13 +97,7 @@ const KycManagement = () => {
         toast.error("Application ID is missing");
         return;
       }
-<<<<<<< HEAD
 
-      const payload = status !== 'approved' && rejectionReason.trim().length > 0
-        ? { rejectionReason }
-        : {};
-=======
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
 
       if (status === 'approved') {
         await superAdminApi.updateKycStatus({ id, status });
@@ -201,13 +195,8 @@ const KycManagement = () => {
                   key={tab}
                   onClick={() => setFilter(tab)}
                   className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${filter === tab
-<<<<<<< HEAD
-                      ? 'border-b-2 border-blue-500 text-blue-600'
-                      : 'text-gray-600 hover:text-gray-900'
-=======
                     ? 'border-b-2 border-blue-500 text-blue-600'
                     : 'text-gray-600 hover:text-gray-900'
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
                     }`}
                 >
                   {tab === 'all' ? 'All Applications' : tab === 'revision' ? 'Needs Revision' : tab.charAt(0).toUpperCase() + tab.slice(1)}

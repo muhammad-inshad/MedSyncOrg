@@ -158,11 +158,8 @@ export class DoctorManagementService implements IDoctorManagementService {
     async updateDoctor(id: string, data: UpdateDoctorDTO, files: DoctorUploadFiles): Promise<DoctorResponseDTO | null> {
         const doctor = await this._doctorRepo.findById(id);
         if (!doctor) {
-<<<<<<< HEAD
-            throw { status: HttpStatusCode.NOT_FOUND, message: "Doctor not found" };
-=======
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Doctor not found");
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
+
         }
 
         let profileImageUrl = doctor.profileImage;

@@ -11,18 +11,9 @@ import { IDoctor } from "../../models/doctor.model.ts";
 import { IDoctorRepository } from "../../repositories/doctor/doctor.repository.interface.ts";
 
 export class DoctorService {
-<<<<<<< HEAD
-    private readonly _doctorRepo: IDoctorRepository;;
-    private readonly _tokenService: TokenService;
-
-    constructor(doctorRepo: IDoctorRepository, tokenService: TokenService) {
-        this._doctorRepo = doctorRepo;
-        this._tokenService = tokenService;
-=======
-   
-    constructor(    private readonly _doctorRepo: IDoctorRepository, private readonly _tokenService: ITokenService) {
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
+    constructor(private readonly _doctorRepo: IDoctorRepository, private readonly _tokenService: ITokenService) {
     }
+
 
 
     async getDoctorProfile(doctorId: string) {

@@ -1,19 +1,13 @@
 import { Request, Response, NextFunction } from "express";
-<<<<<<< HEAD
-import { TokenService } from "../services/token.service.ts";
-=======
 import { ITokenService } from "../services/token/token.service.interface.ts";
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
+
 import { IDoctorRepository } from "../repositories/doctor/doctor.repository.interface.ts";
 import logger from "../utils/logger.ts";
 
 export class DoctorAuthMiddleware {
   constructor(
-<<<<<<< HEAD
-    private readonly _tokenService: TokenService,
-=======
     private readonly _tokenService: ITokenService,
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
+
     private readonly _doctorRepo: IDoctorRepository
   ) { }
 

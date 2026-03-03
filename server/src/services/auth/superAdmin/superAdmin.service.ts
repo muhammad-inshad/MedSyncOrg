@@ -1,10 +1,7 @@
 import bcrypt from "bcryptjs";
 import { ISuperAdminAuthService } from "./superAdmin.auth.service.interface.ts";
-<<<<<<< HEAD
-import { ITokenService } from "../../../interfaces/auth.types.ts";
-=======
 import { ITokenService } from "../../token/token.service.interface.ts";
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
+
 import { ISuperAdminRepository } from "../../../repositories/superAdmin/interfaces/superAdmin.repository.interface.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
 import { HttpStatusCode } from "../../../constants/httpStatus.ts";

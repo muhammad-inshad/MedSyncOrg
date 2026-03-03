@@ -2,7 +2,7 @@ export const AUTH_MANAGEMENT = {
     SEND_OTP: "/api/auth/send-otp",
     VERIFY_OTP: "/api/auth/verify-otp",
     SIGNUP: "/api/auth/signup",
-    LOGIN: "/api/auth/auth/login",
+    LOGIN: "/api/auth/login",
     REFRESH: "/api/auth/refresh",
     RESET_PASSWORD: "/api/auth/reset-password",
     LOGOUT: "/api/auth/logout",

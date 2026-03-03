@@ -57,11 +57,7 @@ export const hospitalContainer = () => {
     );
 
     const hospitalAuthMiddleware = new HospitalAuthMiddleware(
-<<<<<<< HEAD
-        tokenService, 
-=======
         tokenService,
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
         hospitalRepo
     );
     return {

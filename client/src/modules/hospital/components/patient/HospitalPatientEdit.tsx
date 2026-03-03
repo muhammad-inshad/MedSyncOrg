@@ -163,19 +163,7 @@ const HospitalPatientEdit = () => {
         formPayload.append('image', selectedFile);
       }
 
-<<<<<<< HEAD
-      const response = await api.patch(
-        `/api/hospital/patientEdit/${patient._id}`,
-        formPayload,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-=======
       const response = await hospitalApi.editPatient(patient._id, formPayload);
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
 
       if (response.status === 200) {
         toast.success('Patient updated successfully!');
@@ -267,14 +255,8 @@ const HospitalPatientEdit = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-<<<<<<< HEAD
-                  className={`w-full px-4 py-2 rounded-lg border outline-none transition-all ${
-                    errors.name ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'
-                  }`}
-=======
                   className={`w-full px-4 py-2 rounded-lg border outline-none transition-all ${errors.name ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'
                     }`}
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
                 />
                 {errors.name && <p className="text-xs text-red-500 font-medium">{errors.name}</p>}
               </div>
@@ -286,14 +268,8 @@ const HospitalPatientEdit = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-<<<<<<< HEAD
-                  className={`w-full px-4 py-2 rounded-lg border outline-none transition-all ${
-                    errors.email ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'
-                  }`}
-=======
                   className={`w-full px-4 py-2 rounded-lg border outline-none transition-all ${errors.email ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'
                     }`}
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
                 />
                 {errors.email && <p className="text-xs text-red-500 font-medium">{errors.email}</p>}
               </div>
@@ -306,14 +282,8 @@ const HospitalPatientEdit = () => {
                   value={formData.phone}
                   onChange={handleInputChange}
                   maxLength={10}
-<<<<<<< HEAD
-                  className={`w-full px-4 py-2 rounded-lg border outline-none transition-all ${
-                    errors.phone ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'
-                  }`}
-=======
                   className={`w-full px-4 py-2 rounded-lg border outline-none transition-all ${errors.phone ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'
                     }`}
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
                 />
                 {errors.phone && <p className="text-xs text-red-500 font-medium">{errors.phone}</p>}
               </div>

@@ -200,15 +200,7 @@ const HospitalDoctorEditpage: React.FC = () => {
         formData.append('license', licenseImageFile);
       }
 
-<<<<<<< HEAD
-      const response = await api.patch(`/api/hospital/doctorEdit/${doctor._id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-=======
       const response = await hospitalApi.editHospitalDoctor(doctor._id, formData);
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
 
       if (response.status === 200) {
         showToast.success("Doctor profile updated successfully!");

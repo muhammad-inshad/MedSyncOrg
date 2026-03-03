@@ -214,12 +214,7 @@ const EditHospital = () => {
 
     console.log("Validation passed. Submitting...");
     setIsLoading(true);
-<<<<<<< HEAD
-    console.log("Submitting for hospital:", hospital.id || hospital._id);
 
-=======
-    
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
     try {
       const targetId = hospital.id || hospital._id;
       if (!targetId) {
@@ -247,15 +242,7 @@ const EditHospital = () => {
       // Append subscription as stringified JSON
       submissionData.append('subscription', JSON.stringify(formData.subscription));
 
-<<<<<<< HEAD
-      const response = await api.patch(`/api/superadmin/hospitals/${targetId}`, submissionData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-=======
       const response = await superAdminApi.editHospital(targetId, submissionData);
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
       if (response.status === 200 || response.status === 204) {
         toast.success('Hospital information updated successfully!');
         if (fromReview) {

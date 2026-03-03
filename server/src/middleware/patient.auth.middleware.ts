@@ -1,24 +1,16 @@
 // middleware/patient.auth.middleware.ts
 import { Request, Response, NextFunction } from "express";
-<<<<<<< HEAD
-import { TokenService } from "../services/token.service.ts";
-=======
 import { ITokenService } from "../services/token/token.service.interface.ts";
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
+
 import { IUserRepository } from "../repositories/patient/user.repository.interface.ts";
 import logger from "../utils/logger.ts";
 
 export class PatientAuthMiddleware {
   constructor(
-<<<<<<< HEAD
-    private readonly _tokenService: TokenService,
-    private readonly _userRepo: IUserRepository // Added to check for blocked status
-  ) {}
-=======
     private readonly _tokenService: ITokenService,
-    private readonly _userRepo: IUserRepository 
+    private readonly _userRepo: IUserRepository
   ) { }
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
+
 
   public handle = async (req: Request, res: Response, next: NextFunction) => {
     try {

@@ -4,11 +4,8 @@ import { SuperAdminDashboardController } from "../controllers/superAdmin/dashboa
 import { SuperAdminDashboardService } from "../services/superAdmin/dashboard/implementation/dashboard.service.ts";
 import { SuperAdminKycController } from "../controllers/superAdmin/kycManagement/implementation/kyc.controller.ts";
 import { SuperAdminKycService } from "../services/superAdmin/kycManagement/implementation/kyc.service.ts";
-<<<<<<< HEAD
-import { TokenService } from "../services/token.service.ts";
-=======
 import { TokenService } from "../services/token/token.service.ts";
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
+
 import { SuperAdminModel } from "../models/superAdmin.model.ts";
 import { KycRepository } from "../repositories/superAdmin/implements/superAdminKyc.repository.ts";
 import { SuperAdminAuthService } from "../services/auth/superAdmin/superAdmin.service.ts";
@@ -42,11 +39,8 @@ export const superAdminContainer = () => {
   const hospitalController = new SuperAdminHospitalController(hospitalService);
 
   // KYC Management Module
-<<<<<<< HEAD
-  const kycService = new SuperAdminKycService(kycRepo,hospitalMapper);
-=======
   const kycService = new SuperAdminKycService(kycRepo, hospitalMapper);
->>>>>>> c8a5339 (fix: final removal of secrets and hospital edit logic)
+
   const kycController = new SuperAdminKycController(kycService);
 
   // Auth Module
