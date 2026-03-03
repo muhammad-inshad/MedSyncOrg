@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
 import Logger from "../../../../utils/logger.ts";
-import { HttpStatusCode } from "../../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { IDoctor } from "../../../../models/doctor.model.ts";
 import { IPaginationResult, IDoctorListOptions } from "../../../../types/hospital.types.ts";
 import { IDoctorManagementService } from "../interfaces/IDoctorManagementService.ts";

@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
 import { ApiResponse } from "../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../constants/httpStatus.ts";
+import { HttpStatusCode } from "../constants/enums.ts";
 import { MESSAGES } from "../constants/messages.ts";
 import logger from "../utils/logger.ts";
 import { AppError } from "../errors/app.error.ts";

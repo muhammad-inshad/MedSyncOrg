@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { ISuperAdminAuthService } from "../../../services/auth/superAdmin/superAdmin.auth.service.interface.ts";
-import { HttpStatusCode } from "../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
 import { ISuperAdminAuthController } from "./superAdmin.auth.controller.interface.ts";
 import { ApiResponse } from "../../../utils/apiResponse.utils.ts";

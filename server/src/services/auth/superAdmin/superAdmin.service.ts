@@ -4,7 +4,7 @@ import { ITokenService } from "../../token/token.service.interface.ts";
 
 import { ISuperAdminRepository } from "../../../repositories/superAdmin/interfaces/superAdmin.repository.interface.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
-import { HttpStatusCode } from "../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
 import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 import { SuperAdminMapper } from "../../../mappers/superAdmin.mapper.ts";
 

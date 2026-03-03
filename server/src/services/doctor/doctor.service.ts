@@ -1,10 +1,11 @@
 
+import bcrypt from "bcryptjs";
 import { uploadBufferToCloudinary } from "../../utils/cloudinaryUpload.ts";
 import { ApiResponse } from "../../utils/apiResponse.utils.ts";
 import cloudinary from "../../config/cloudinary.ts";
 import { extractPublicId } from "../../utils/cloudinaryUpload.ts";
 import { ITokenService } from "../token/token.service.interface.ts";
-import { HttpStatusCode } from "../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../constants/enums.ts";
 import { MESSAGES } from "../../constants/messages.ts";
 import { UpdateDoctorDTO } from "../../dto/doctor/doctor-response.dto.ts";
 import { IDoctor } from "../../models/doctor.model.ts";
@@ -67,6 +68,27 @@ export class DoctorService {
             delete updateData.licenseImage;
         }
         updateData.rejectionReason = undefined;
+
+        if (updateData.currentPassword && updateData.newPassword) {
+            const doctorWithPassword = await this._doctorRepo.findByIdWithPassword(id);
+            if (!doctorWithPassword) {
+                ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
+            }
+
+            const isPasswordMatch = await bcrypt.compare(
+                updateData.currentPassword,
+                doctorWithPassword.password
+            );
+
+            if (!isPasswordMatch) {
+                ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Current password does not match");
+            }
+
+            const hashedPassword = await bcrypt.hash(updateData.newPassword, 10);
+            (updateData as any).password = hashedPassword;
+            delete updateData.currentPassword;
+            delete updateData.newPassword;
+        }
 
         return await this._doctorRepo.update(id, updateData as UpdateDoctorDTO as Partial<IDoctor>);
     }

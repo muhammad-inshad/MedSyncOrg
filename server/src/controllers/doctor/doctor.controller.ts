@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from "express";
+import { HttpStatusCode } from "../../constants/enums.ts";
+
 import { DoctorService } from "../../services/doctor/doctor.service.ts";
 
 import { DoctorUploadFiles } from "../../types/doctor.types.ts";
@@ -14,10 +16,10 @@ class DoctorController {
       const user = req.user as unknown as ITokenPayload;
       const doctorID = user?.userId;
       if (!doctorID) {
-        ApiResponse.throwError(401, "Unauthorized");
+        ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Unauthorized");
       }
       const doctor = await this.doctorService.getDoctorProfile(doctorID);
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success: true,
         data: doctor,
       });
@@ -55,7 +57,7 @@ class DoctorController {
       }
 
       const updatedDoctor = await this.doctorService.updateDoctorProfile(id, updateData);
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "Doctor updated successfully",
         data: updatedDoctor
@@ -69,7 +71,7 @@ class DoctorController {
     try {
       const { id } = req.params;
       const result = await this.doctorService.reapply(id);
-      return res.status(200).json({
+      return res.status(HttpStatusCode.OK).json({
         success: true,
         message: "Doctor re-application submitted",
         data: result

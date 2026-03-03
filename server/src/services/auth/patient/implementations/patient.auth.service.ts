@@ -8,7 +8,7 @@ import { IPatientAuthService } from "../interfaces/patient.auth.service.interfac
 import { ITokenService } from "../../../token/token.service.interface.ts";
 import { AuthResponse } from "../../../../interfaces/auth.types.ts";
 import { IPatient } from "../../../../models/Patient.model.ts";
-import { HttpStatusCode } from "../../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { MESSAGES } from "../../../../constants/messages.ts";
 import { PatientMapper } from "../../../../mappers/patient.mapper.ts";

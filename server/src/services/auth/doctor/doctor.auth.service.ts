@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { MESSAGES } from "../../../constants/messages.ts";
-import { HttpStatusCode } from "../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
 import { IDoctor } from "../../../models/doctor.model.ts";
 import { uploadBufferToCloudinary } from "../../../utils/cloudinaryUpload.ts";
 import { DoctorUploadFiles } from "../../../types/doctor.types.ts";

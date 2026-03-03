@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { IHospitalAuthService } from "../../../services/auth/hospital/hospital.auth.service.interface.ts";
-import { HttpStatusCode } from "../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
 import { IHospitalAuthController } from "./hospital.auth.controller.interface.ts";
 import { HospitalUploadFiles } from "../../../types/hospital.type.ts";

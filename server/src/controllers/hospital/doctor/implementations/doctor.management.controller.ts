@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { IDoctorManagementService } from "../../../../services/hospital/doctor/interfaces/IDoctorManagementService.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { IDoctorManagementController } from "../interfaces/doctor.management.controller.interface.ts";
-import { HttpStatusCode } from "../../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { IDoctorFilter } from "../../../../types/hospital.types.ts";
 import { DoctorUploadFiles } from "../../../../types/doctor.types.ts";
 import { DoctorDTO } from "../../../../dto/auth/signup.dto.ts";

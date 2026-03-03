@@ -1,4 +1,4 @@
-import { HttpStatusCode } from "../constants/httpStatus.ts";
+import { HttpStatusCode } from "../constants/enums.ts";
 
 export class AppError extends Error {
     statusCode: number;

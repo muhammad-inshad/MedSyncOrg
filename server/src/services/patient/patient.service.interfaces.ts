@@ -5,4 +5,5 @@ export interface IPatientService {
     updateProfile(patientId: string, updateData: UpdatePatientDTO): Promise<unknown>;
     getAllPatient(options: { page: number; limit: number; search?: string; filter?: object }): Promise<{ data: unknown[]; total: number }>;
     gethospitals(): Promise<unknown[]>;
+    changePassword(id: string, currentPassword: string, newPassword: string): Promise<void>;
 }

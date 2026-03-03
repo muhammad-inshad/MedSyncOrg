@@ -1,5 +1,5 @@
 import { ISuperAdminHospitalService, IHospitalManagementResult } from "../interfaces/hospital.service.interface.ts";
-import { HttpStatusCode } from "../../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { IHospital } from "../../../../models/hospital.model.ts";
 import { uploadBufferToCloudinary } from "../../../../utils/cloudinaryUpload.ts";

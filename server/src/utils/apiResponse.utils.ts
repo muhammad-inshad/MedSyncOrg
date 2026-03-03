@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { HttpStatusCode } from "../constants/httpStatus.ts";
+import { HttpStatusCode } from "../constants/enums.ts";
 import { MESSAGES } from "../constants/messages.ts";
 import { PaginationMeta } from "../interfaces/pagination.ts";
 import { AppError } from "../errors/app.error.ts";

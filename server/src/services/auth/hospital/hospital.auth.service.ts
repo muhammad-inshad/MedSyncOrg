@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { MESSAGES } from "../../../constants/messages.ts";
-import { HttpStatusCode } from "../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
 import Logger from "../../../utils/logger.ts";
 import { IHospital } from "../../../models/hospital.model.ts";
 import { IHospitalRepository } from "../../../repositories/hospital/hospital.repository.interface.ts";

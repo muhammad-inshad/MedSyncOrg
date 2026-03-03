@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { ApiResponse } from "../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../constants/enums.ts";
 import { MESSAGES } from "../../constants/messages.ts";
 
 import { IPatientService } from "../../services/patient/patient.service.interfaces.ts";
@@ -56,6 +56,17 @@ class PatientController {
       const hospitals = await this.patientService.gethospitals();
 
       return ApiResponse.success(res, MESSAGES.ADMIN.FETCH_SUCCESS, hospitals);
+    } catch (error: unknown) {
+      next(error);
+    }
+  };
+
+  changePassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const { currentPassword, newPassword } = req.body;
+      await this.patientService.changePassword(id, currentPassword, newPassword);
+      return ApiResponse.success(res, "Password changed successfully");
     } catch (error: unknown) {
       next(error);
     }

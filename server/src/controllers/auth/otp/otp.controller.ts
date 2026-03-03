@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { IPatientOtpAuthController } from "./otp.auth.controller.interface.ts";
 import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
 import { IPatientOtpAuthService } from "../../../services/auth/otp/interfaces/otp.auth.service.interface.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
 

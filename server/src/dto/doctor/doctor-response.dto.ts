@@ -74,4 +74,6 @@ export interface UpdateDoctorDTO {
   rejectionReason?: string;
   profileImageFile?: Express.Multer.File;
   licenseFile?: Express.Multer.File;
+  currentPassword?: string;
+  newPassword?: string;
 }

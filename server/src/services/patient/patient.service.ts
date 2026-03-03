@@ -2,10 +2,11 @@
 import cloudinary from "../../config/cloudinary.ts";
 import { ApiResponse } from "../../utils/apiResponse.utils.ts";
 import { IHospitalRepository } from "../../repositories/hospital/hospital.repository.interface.ts";
-import { HttpStatusCode } from "../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../constants/enums.ts";
 import { UpdatePatientDTO } from "../../dto/patient/patient-response.dto.ts";
 import { IUserRepository } from "../../repositories/patient/user.repository.interface.ts";
 import { IPatientService } from "./patient.service.interfaces.ts";
+import bcrypt from "bcryptjs";
 
 export class PatientService implements IPatientService {
     constructor(
@@ -82,5 +83,22 @@ export class PatientService implements IPatientService {
             delete hospitalObj.password;
             return hospitalObj;
         });
+    }
+
+    async changePassword(id: string, currentPassword: string, newPassword: string) {
+        const patient = await this.userRepo.findByIdWithPassword(id);
+        if (!patient) {
+            ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Patient not found");
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, patient.password);
+        if (!isMatch) {
+            ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Current password does not match");
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+
+        await this.userRepo.update(id, { password: hashedNewPassword } as any);
     }
 }

@@ -3,7 +3,7 @@ import { IPatientManagementService } from "../../../../services/hospital/patient
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { IPatientManagementController } from "../interfaces/patient.management.controller.interface.ts";
 import { MESSAGES } from "../../../../constants/messages.ts";
-import { HttpStatusCode } from "../../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
 // import { IPatientFilter } from "../../../../types/hospital.types.ts";
 import { AuthHOspitalPayload } from "../../../../dto/hospital/hospital-response.dto.ts";
 

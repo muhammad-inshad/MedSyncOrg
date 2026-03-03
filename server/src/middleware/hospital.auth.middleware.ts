@@ -1,5 +1,7 @@
 // middlewares/hospital.auth.middleware.ts
 import { Request, Response, NextFunction } from "express";
+import { HttpStatusCode } from "../constants/enums.ts";
+
 
 import logger from "../utils/logger.ts";
 import { IHospitalRepository } from "../repositories/hospital/hospital.repository.interface.ts";
@@ -16,13 +18,13 @@ export class HospitalAuthMiddleware {
     try {
       const token = req.cookies?.accessToken;
       if (!token) {
-        return res.status(401).json({ message: "Access token missing" });
+        return res.status(HttpStatusCode.UNAUTHORIZED).json({ message: "Access token missing" });
       }
 
       const payload = this.tokenService.verifyAccessToken(token);
 
       if (payload.role !== "hospital") {
-        return res.status(403).json({ message: "Insufficient permissions" });
+        return res.status(HttpStatusCode.FORBIDDEN).json({ message: "Insufficient permissions" });
       }
 
 
@@ -30,7 +32,7 @@ export class HospitalAuthMiddleware {
 
       if (!hospital || hospital.isActive === false) {
         logger.warn(`Access denied: Hospital ${payload.userId} is inactive or not found.`);
-        return res.status(403).json({ message: "Account is blocked or inactive" });
+        return res.status(HttpStatusCode.FORBIDDEN).json({ message: "Account is blocked or inactive" });
       }
 
 
@@ -39,7 +41,7 @@ export class HospitalAuthMiddleware {
       next();
     } catch (error) {
       logger.error("Hospital auth middleware error:", error);
-      return res.status(401).json({ message: "Invalid or expired token" });
+      return res.status(HttpStatusCode.UNAUTHORIZED).json({ message: "Invalid or expired token" });
     }
   };
 }

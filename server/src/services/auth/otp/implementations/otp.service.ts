@@ -2,7 +2,7 @@ import { generateOtp } from "../../../../utils/otp/otp.util.ts";
 import { UserRepository } from "../../../../repositories/patient/user.repository.ts";
 import { DoctorRepository } from "../../../../repositories/doctor/doctor.repository.ts";
 import { IPatientOtpAuthService } from "../interfaces/otp.auth.service.interface.ts";
-import { HttpStatusCode } from "../../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { MESSAGES } from "../../../../constants/messages.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { IEmailService } from "../interfaces/email.otp.interface.ts";

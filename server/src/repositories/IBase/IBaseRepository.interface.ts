@@ -7,5 +7,6 @@ export interface IBaseRepository<T> {
     findByEmail(email: string): Promise<T | null>;
     findWithPagination(options: { page: number; limit: number; search?: string; searchFields?: string[]; filter?: object }): Promise<{ data: T[]; total: number; page: number; limit: number }>;
     findByEmailWithPassword(email: string): Promise<T | null>;
+    findByIdWithPassword(id: string): Promise<T | null>;
     countDocuments(filter?: object): Promise<number>;
 }

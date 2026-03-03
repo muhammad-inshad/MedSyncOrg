@@ -1,5 +1,5 @@
 import { MESSAGES } from "../../../../constants/messages.ts";
-import { HttpStatusCode } from "../../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.ts";
 import { HospitalResponseDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
 import { IHospitalService } from "../interfaces/hospital.services.interfaces.ts";

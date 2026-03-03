@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { ISuperAdminHospitalController } from "../interfaces/hospital.controller.interface.ts";
 import { ISuperAdminHospitalService } from "../../../../services/superAdmin/hospital/interfaces/hospital.service.interface.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { IHospital } from "../../../../models/hospital.model.ts";
 
 export class SuperAdminHospitalController implements ISuperAdminHospitalController {

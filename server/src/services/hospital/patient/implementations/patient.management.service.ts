@@ -3,7 +3,7 @@ import { IPatientManagementService } from "../interfaces/patient.management.serv
 import { IPatient } from "../../../../models/Patient.model.ts";
 import { uploadBufferToCloudinary } from "../../../../utils/cloudinaryUpload.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../../../constants/httpStatus.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { PatientResponseDTO } from "../../../../dto/patient/patient-response.dto.ts";
 import { PatientMapper } from "../../../../mappers/patient.mapper.ts";
 import { IPaginationResult } from "../../../../types/hospital.types.ts";
