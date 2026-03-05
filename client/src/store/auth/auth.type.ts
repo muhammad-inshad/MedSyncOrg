@@ -3,6 +3,7 @@ export interface BaseUser {
   _id: string;
   id?: string;
   name: string;
+  hospitalName?: string;
   email: string;
   role: 'patient' | 'doctor' | 'hospital' | 'superadmin';
   phone: string | number;
@@ -15,8 +16,9 @@ export interface BaseUser {
   gender?: string;
   age?: number | string;
   address?: string;
-  bloodGroup?: string;
-  fatherName?: string;
+  logo?:string;
+  pincode?:string;
+   since: number;
 }
 
 export interface PatientProfile extends BaseUser {

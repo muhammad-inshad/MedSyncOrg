@@ -10,4 +10,5 @@ export const AUTH_MANAGEMENT = {
     DOCTOR_LOGIN: "/api/auth/Doctor/login",
     HOSPITAL_LOGIN: "/api/auth/Hospital/login",
     SUPERADMIN_LOGIN: "/api/auth/Superadmin/login",
+    HOSPITAL_SIGNUP: "/api/auth/hospital/signup",
 };

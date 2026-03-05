@@ -34,7 +34,8 @@ export class HospitalController implements IHospitalController {
         try {
             const { id } = req.params;
             const hospitalData = req.body;
-            const result = await this._hospitalService.updateHospital(id, hospitalData);
+            const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+            const result = await this._hospitalService.updateHospital(id, hospitalData, files);
             return ApiResponse.success(res, MESSAGES.ADMIN.UPDATE_SUCCESS, result);
         } catch (error: unknown) {
             next(error);

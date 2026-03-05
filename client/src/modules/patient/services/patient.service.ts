@@ -8,11 +8,22 @@ export const PatientService = {
     },
 
     getProfile: async (id: string) => {
-        const response = await api.get(`/api/patient/profile/${id}`); 
+        const response = await api.get(`/api/patient/profile/${id}`);
         return response.data;
     },
-    getHospitals: async () => {
-        const response = await api.get('/api/patient/hospitals');
+   getHospitals: async (page: number, limit: number, search: string) => {
+    const response = await api.get('/api/patient/hospitals', {
+        params: {
+            page,
+            limit,
+            search
+        }
+    });
+
+    return response.data;
+},
+    changePassword: async (id: string, data: { currentPassword?: string; newPassword?: string }) => {
+        const response = await api.patch(`/api/patient/changePassword/${id}`, data);
         return response.data;
     }
 };

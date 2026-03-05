@@ -13,29 +13,31 @@ import { COMMON_ROUTES } from "@/constants/frontend/common/common.routes";
 import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
 import { SUPERADMIN_ROUTES } from "@/constants/frontend/superAdmin/superAdmin.routes";
 import { authApi } from '../../../constants/backend/auth/auth.api';
+import { AUTH_MESSAGES } from '@/constants/frontend/auth/auth.messages';
+import type { AuthRole } from '@/interfaces/api.interfaces';
 
 const LogInSchema = z.object({
-  email: z.string().min(1, 'Username or email is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().min(1, AUTH_MESSAGES.LOGIN.EMAIL_REQUIRED),
+  password: z.string().min(6, AUTH_MESSAGES.COMMON.PASSWORD_LENGTH),
 });
 
 type LogInFormData = z.infer<typeof LogInSchema>;
 
 const ROLE_CONFIG: Record<string, { title: string; redirect: string }> = {
   doctor: {
-    title: "Doctor Login",
+    title: AUTH_MESSAGES.LOGIN.DOCTOR_TITLE,
     redirect: COMMON_ROUTES.REVIEWPENDING,
   },
   patient: {
-    title: "Patient Login",
+    title: AUTH_MESSAGES.LOGIN.PATIENT_TITLE,
     redirect: PATIENT_ROUTES.SELECTHOSPITAL,
   },
   hospital: {
-    title: "Hospital Login",
+    title: AUTH_MESSAGES.LOGIN.HOSPITAL_TITLE,
     redirect: COMMON_ROUTES.REVIEWPENDING,
   },
   Superadmin: {
-    title: "Super Admin Login",
+    title: AUTH_MESSAGES.LOGIN.SUPERADMIN_TITLE,
     redirect: SUPERADMIN_ROUTES.DASHBOARD,
   },
 };
@@ -71,15 +73,16 @@ const LogIn = () => {
     setIsLoading(true);
     setBlockedError(null);
     console.log(role)
+    const roleToUse = role as AuthRole;
     try {
-      const response = await authApi.login({ ...data, role });
+      const response = await authApi.login({ ...data, role: roleToUse });
       const resData = response.data;
 
       if (resData.success) {
         const user = resData.data?.user;
 
         if (user?.isActive === false) {
-          setBlockedError("Your account is currently blocked. Please contact the hospital admin.");
+          setBlockedError(AUTH_MESSAGES.LOGIN.BLOCKED_ERROR);
           setIsLoading(false);
           return;
         }
@@ -91,13 +94,13 @@ const LogIn = () => {
 
         localStorage.setItem("role", role);
 
-        toast.success("Login successful");
+        toast.success(AUTH_MESSAGES.LOGIN.SUCCESS);
         navigate(roleConfig.redirect);
       } else {
-        toast.error(resData.message || "Login failed");
+        toast.error(resData.message || AUTH_MESSAGES.LOGIN.FAILED);
       }
     } catch (error: unknown) {
-      let errorMessage = 'An unexpected error occurred';
+      let errorMessage = AUTH_MESSAGES.COMMON.UNEXPECTED_ERROR;
       if (axios.isAxiosError(error)) {
         errorMessage = error.response?.data?.message || error.message;
       } else if (error instanceof Error) {
@@ -131,12 +134,12 @@ const LogIn = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
 
-              Email
+              {AUTH_MESSAGES.LOGIN.EMAIL_LABEL}
             </label>
             <input
               {...register('email')}
               type="text"
-              placeholder="example@gmail.com"
+              placeholder={AUTH_MESSAGES.LOGIN.EMAIL_PLACEHOLDER}
               className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-500' : 'border-gray-300'
                 }`}
             />
@@ -147,13 +150,13 @@ const LogIn = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
+              {AUTH_MESSAGES.LOGIN.PASSWORD_LABEL}
             </label>
             <div className="relative">
               <input
                 {...register('password')}
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Enter Your Password"
+                placeholder={AUTH_MESSAGES.LOGIN.PASSWORD_PLACEHOLDER}
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12 ${errors.password ? 'border-red-500' : 'border-gray-300'
                   }`}
               />
@@ -173,7 +176,7 @@ const LogIn = () => {
           {!isSuperAdmin && (
             <div className="flex justify-center gap-8 text-sm">
               <button type="button" onClick={() => navigate(`/forgot-password?role=${role}`)} className="text-red-500 hover:underline">
-                Forgot Password?
+                {AUTH_MESSAGES.LOGIN.FORGOT_PASSWORD}
               </button>
 
             </div>
@@ -184,7 +187,7 @@ const LogIn = () => {
             disabled={isLoading}
             className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Logging in..." : "Login"}
+            {isLoading ? AUTH_MESSAGES.COMMON.LOGGING_IN : AUTH_MESSAGES.COMMON.LOGIN}
           </button>
         </div>
         {isPatient && (
@@ -192,7 +195,7 @@ const LogIn = () => {
 
             <div className="flex items-center gap-4 my-6">
               <div className="flex-1 h-px bg-gray-300"></div>
-              <span className="text-gray-500 text-sm">Or With</span>
+              <span className="text-gray-500 text-sm">{AUTH_MESSAGES.LOGIN.OR_WITH}</span>
               <div className="flex-1 h-px bg-gray-300"></div>
             </div>
 
@@ -206,15 +209,15 @@ const LogIn = () => {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              Login with Google
+              {AUTH_MESSAGES.LOGIN.GOOGLE_LOGIN}
             </button>
           </>
         )}
         {!isSuperAdmin && (
           <div className="text-center mt-8 text-sm text-gray-600">
-            Don't have an account?{' '}
+            {AUTH_MESSAGES.LOGIN.DONT_HAVE_ACCOUNT}{' '}
             <button onClick={() => navigate(`/${role}/signup`)} className="text-blue-600 hover:underline font-medium">
-              Sign Up
+              {AUTH_MESSAGES.COMMON.SIGNUP}
             </button>
           </div>)}
       </div>

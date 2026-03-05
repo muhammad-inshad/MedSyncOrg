@@ -8,7 +8,12 @@ const { doctorManagement, patientManagement, hospitalController } = hospitalCont
 
 router.get("/getme", hospitalController.getHospitalProfile.bind(hospitalController));
 router.patch("/reapply", hospitalController.reapply.bind(hospitalController));
-router.patch("/hospitals/:id", hospitalController.updateHospital.bind(hospitalController));
+router.patch("/hospitals/:id",upload.fields([{ name: "logo", maxCount: 1 },
+    { name: "licence", maxCount: 1 },
+    { name: "landscape", maxCount: 3 },
+    { name: "medicalTeam", maxCount: 3 },
+    { name: "patientCare", maxCount: 3 },
+    { name: "services", maxCount: 3 },]),hospitalController.updateHospital.bind(hospitalController));
 
 router.get("/getalldoctors", doctorManagement.getAllDoctors.bind(doctorManagement));
 router.patch("/doctorEdit/:id", upload.fields([

@@ -7,15 +7,11 @@ import {
     Save,
     User,
     FileText,
-    MapPin,
-    Briefcase,
-    Phone,
-    Mail,
     Award,
     Info,
-    Clock,
     CreditCard,
-    ChevronLeft
+    ChevronLeft,
+    Lock
 } from 'lucide-react';
 import { doctorApi } from '@/constants/backend/doctor/doctor.api';
 import { useNavigate } from 'react-router-dom';
@@ -27,6 +23,7 @@ import { COMMON_ROUTES } from '@/constants/frontend/common/common.routes';
 import type { DoctorProfile, BaseUser } from '@/store/auth/auth.type';
 import ConfirmationModal from '@/components/ConfirmationModal';
 
+// --- UPDATED SCHEMA (6 CHAR MINIMUM) ---
 const doctorUpdateSchema = z.object({
     name: z.string().min(1, 'Doctor name is required'),
     email: z.string().email('Invalid email address'),
@@ -48,6 +45,25 @@ const doctorUpdateSchema = z.object({
         payoutCycle: z.enum(['weekly', 'monthly']),
         patientsPerDayLimit: z.string().min(1, 'Limit is required'),
     }),
+    currentPassword: z.string().optional(),
+    newPassword: z.string().optional(),
+    confirmPassword: z.string().optional(),
+}).refine((data) => {
+    // UPDATED: Now checking for 6 characters instead of 8
+    if (data.newPassword && data.newPassword.length > 0 && data.newPassword.length < 6) return false;
+    return true;
+}, {
+    message: "New password must be at least 6 characters",
+    path: ["newPassword"],
+}).refine((data) => {
+    if (data.newPassword && !data.currentPassword) return false;
+    return true;
+}, {
+    message: "Current password is required to change password",
+    path: ["currentPassword"],
+}).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
 });
 
 type DoctorUpdateFormData = z.infer<typeof doctorUpdateSchema>;
@@ -66,80 +82,11 @@ const DoctorEditProfile: React.FC = () => {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [pendingData, setPendingData] = useState<DoctorUpdateFormData | null>(null);
 
-    // ────────────────────────────────────────────────
-    //  Dropdown options (common in Indian hospitals)
-    // ────────────────────────────────────────────────
-    const departments = [
-        "General Medicine",
-        "Cardiology",
-        "Neurology",
-        "Pediatrics",
-        "Obstetrics & Gynecology",
-        "Orthopedics",
-        "General Surgery",
-        "ENT",
-        "Dermatology",
-        "Psychiatry",
-        "Radiology",
-        "Anesthesiology",
-        "Ophthalmology",
-        "Gastroenterology",
-        "Urology",
-        "Nephrology",
-        "Oncology",
-        "Pulmonology",
-        "Endocrinology",
-        "Emergency Medicine",
-    ];
+    const departments = ["General Medicine", "Cardiology", "Neurology", "Pediatrics", "Obstetrics & Gynecology", "Orthopedics", "General Surgery", "ENT", "Dermatology", "Psychiatry", "Radiology", "Anesthesiology", "Ophthalmology", "Gastroenterology", "Urology", "Nephrology", "Oncology", "Pulmonology", "Endocrinology", "Emergency Medicine"];
+    const qualifications = ["MBBS", "MBBS, MD", "MBBS, MS", "MD Medicine", "MD Pediatrics", "MD Dermatology", "MD Radiology", "MS General Surgery", "MS Orthopedics", "MS Obstetrics & Gynecology", "DNB", "DM Cardiology", "DM Neurology", "MCh Neurosurgery", "Diploma"];
+    const specializations = ["General Physician", "Cardiologist", "Neurologist", "Pediatrician", "Gynecologist", "Orthopedic Surgeon", "General Surgeon", "ENT Specialist", "Dermatologist", "Psychiatrist", "Radiologist", "Anesthesiologist", "Ophthalmologist", "Gastroenterologist", "Urologist", "Nephrologist", "Oncologist", "Pulmonologist", "Endocrinologist", "Emergency Physician"];
 
-    const qualifications = [
-        "MBBS",
-        "MBBS, MD",
-        "MBBS, MS",
-        "MD Medicine",
-        "MD Pediatrics",
-        "MD Dermatology",
-        "MD Radiology",
-        "MS General Surgery",
-        "MS Orthopedics",
-        "MS Obstetrics & Gynecology",
-        "DNB",
-        "DM Cardiology",
-        "DM Neurology",
-        "MCh Neurosurgery",
-        "Diploma",
-    ];
-
-    const specializations = [
-        "General Physician",
-        "Cardiologist",
-        "Neurologist",
-        "Pediatrician",
-        "Gynecologist",
-        "Orthopedic Surgeon",
-        "General Surgeon",
-        "ENT Specialist",
-        "Dermatologist",
-        "Psychiatrist",
-        "Radiologist",
-        "Anesthesiologist",
-        "Ophthalmologist",
-        "Gastroenterologist",
-        "Urologist",
-        "Nephrologist",
-        "Oncologist",
-        "Pulmonologist",
-        "Endocrinologist",
-        "Emergency Physician",
-    ];
-
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        reset,
-        watch,
-    } = useForm<DoctorUpdateFormData>({
+    const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<DoctorUpdateFormData>({
         resolver: zodResolver(doctorUpdateSchema),
     });
 
@@ -191,15 +138,17 @@ const DoctorEditProfile: React.FC = () => {
                 formData.append(key, String(pendingData[key as keyof DoctorUpdateFormData]));
             });
 
+            // Append password only if newPassword exists
+            if (pendingData.newPassword && pendingData.currentPassword) {
+                formData.append('currentPassword', pendingData.currentPassword);
+                formData.append('newPassword', pendingData.newPassword);
+            }
+
             formData.append('consultationTime', JSON.stringify(pendingData.consultationTime));
             formData.append('payment', JSON.stringify(pendingData.payment));
 
-            if (profileImageFile) {
-                formData.append('profileImage', profileImageFile);
-            }
-            if (licenseImageFile) {
-                formData.append('license', licenseImageFile);
-            }
+            if (profileImageFile) formData.append('profileImage', profileImageFile);
+            if (licenseImageFile) formData.append('license', licenseImageFile);
 
             await doctorApi.editProfile(userData._id, formData);
 
@@ -207,11 +156,17 @@ const DoctorEditProfile: React.FC = () => {
             navigate(COMMON_ROUTES.REVIEWPENDING, { replace: true });
         } catch (error: unknown) {
             console.error('ERROR:', error);
-            let errorMessage = 'An unexpected error occurred';
-            if (axios.isAxiosError(error)) {
-                errorMessage = error.response?.data?.message || error.message;
-            }
-            toast.error(`Update failed: ${errorMessage}`);
+    
+    let errorMessage = 'Update failed';
+
+    // Type Guard: Check if the error is specifically an Axios error
+    if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || error.message;
+    } else if (error instanceof Error) {
+        errorMessage = error.message;
+    }
+
+    toast.error(errorMessage);
         } finally {
             setIsSubmitting(false);
             setIsConfirmOpen(false);
@@ -223,9 +178,7 @@ const DoctorEditProfile: React.FC = () => {
         if (file) {
             setProfileImageFile(file);
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfilePreview(reader.result as string);
-            };
+            reader.onloadend = () => setProfilePreview(reader.result as string);
             reader.readAsDataURL(file);
         }
     };
@@ -235,9 +188,7 @@ const DoctorEditProfile: React.FC = () => {
         if (file) {
             setLicenseImageFile(file);
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setLicensePreview(reader.result as string);
-            };
+            reader.onloadend = () => setLicensePreview(reader.result as string);
             reader.readAsDataURL(file);
         }
     };
@@ -245,326 +196,125 @@ const DoctorEditProfile: React.FC = () => {
     return (
         <div className="min-h-screen bg-[#F8FAFC]">
             <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-                {/* Navigation Breadcrumb */}
-                <button
-                    onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-6 transition-colors group"
-                >
+                {/* Back Button */}
+                <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-6 transition-colors group">
                     <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                     <span className="text-sm font-medium">Back</span>
                 </button>
 
-                {/* Header Section */}
+                {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
                     <div>
                         <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Edit Your Profile</h1>
                         <p className="text-slate-500 mt-1 flex items-center gap-2">
                             <Info className="w-4 h-4 text-blue-500" />
-                            Update your professional details and settings
+                            Update your professional details and security settings
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <button
-                            type="button"
-                            onClick={() => navigate(-1)}
-                            className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50 transition-all"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            form="doctor-edit-form"
-                            disabled={isSubmitting}
-                            className="px-8 py-2.5 rounded-xl bg-slate-900 text-white font-semibold flex items-center gap-2 hover:bg-black transition-all shadow-lg shadow-slate-200 disabled:opacity-50"
-                        >
-                            {isSubmitting ? (
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            ) : (
-                                <>
-                                    <Save className="w-4 h-4" />
-                                    Save Changes
-                                </>
-                            )}
+                        <button type="button" onClick={() => navigate(-1)} className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold hover:bg-slate-50">Cancel</button>
+                        <button type="submit" form="doctor-edit-form" disabled={isSubmitting} className="px-8 py-2.5 rounded-xl bg-slate-900 text-white font-semibold flex items-center gap-2 hover:bg-black shadow-lg disabled:opacity-50">
+                            {isSubmitting ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <><Save className="w-4 h-4" /> Save Changes</>}
                         </button>
                     </div>
                 </div>
 
                 <form id="doctor-edit-form" onSubmit={handleSubmit(onFormSubmit)} className="space-y-8">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-                        {/* Left Sidebar: Photos */}
+                        
+                        {/* PHOTO UPLOADS */}
                         <div className="lg:col-span-4 space-y-6">
-                            {/* Profile Photo Card */}
                             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center">
                                 <h3 className="w-full text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 px-1">Profile Photo</h3>
-                                <div className="relative group/photo">
-                                    <div className="w-40 h-40 rounded-3xl overflow-hidden ring-4 ring-slate-50 group-hover/photo:ring-blue-50 transition-all duration-300">
-                                        {profilePreview ? (
-                                            <img src={profilePreview} alt="Profile" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full bg-slate-50 flex items-center justify-center">
-                                                <User className="w-12 h-12 text-slate-300" />
-                                            </div>
-                                        )}
+                                <div className="relative group">
+                                    <div className="w-40 h-40 rounded-3xl overflow-hidden ring-4 ring-slate-50 group-hover:ring-blue-50 transition-all">
+                                        {profilePreview ? <img src={profilePreview} alt="Profile" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-slate-50 flex items-center justify-center"><User className="w-12 h-12 text-slate-300" /></div>}
                                     </div>
-                                    <label className="absolute -bottom-3 -right-3 bg-blue-600 p-3 rounded-2xl text-white shadow-xl cursor-pointer hover:bg-blue-700 hover:scale-110 active:scale-95 transition-all">
-                                        <Upload className="w-5 h-5" />
-                                        <input type="file" className="hidden" accept="image/*" onChange={handleProfileImageChange} />
+                                    <label className="absolute -bottom-3 -right-3 bg-blue-600 p-3 rounded-2xl text-white shadow-xl cursor-pointer hover:scale-110 transition-all">
+                                        <Upload className="w-5 h-5" /><input type="file" className="hidden" accept="image/*" onChange={handleProfileImageChange} />
                                     </label>
                                 </div>
-                                <p className="mt-8 text-[11px] text-slate-400 text-center leading-relaxed">
-                                    Allowed formats: JPG, PNG, WEBP. <br />Max size: 5MB
-                                </p>
                             </div>
 
-                            {/* Medical License Card */}
                             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 px-1">Medical License</h3>
-                                <div className="relative group/license aspect-[4/3] rounded-2xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center">
-                                    {licensePreview ? (
-                                        <img src={licensePreview} alt="License" className="w-full h-full object-cover" />
-                                    ) : (
-                                        <FileText className="w-10 h-10 text-slate-300" />
-                                    )}
-                                    <label className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover/license:opacity-100 transition-all flex items-center justify-center cursor-pointer backdrop-blur-[2px]">
-                                        <div className="bg-white text-slate-900 px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2">
-                                            <Upload className="w-3.5 h-3.5" /> Update Document
-                                        </div>
+                                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center">
+                                    {licensePreview ? <img src={licensePreview} alt="License" className="w-full h-full object-cover" /> : <FileText className="w-10 h-10 text-slate-300" />}
+                                    <label className="absolute inset-0 bg-slate-900/60 opacity-0 hover:opacity-100 transition-all flex items-center justify-center cursor-pointer backdrop-blur-[2px]">
+                                        <div className="bg-white text-slate-900 px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2"><Upload className="w-3.5 h-3.5" /> Update Document</div>
                                         <input type="file" className="hidden" accept="image/*" onChange={handleLicenseImageChange} />
                                     </label>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Right Column: Main Form Sections */}
+                        {/* FORM CONTENT */}
                         <div className="lg:col-span-8 space-y-8">
-
-                            {/* Profile Information */}
+                            
+                            {/* Personal Information */}
                             <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                                <div className="flex items-center gap-3 mb-8">
-                                    <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
-                                        <User className="w-5 h-5" />
-                                    </div>
-                                    <h2 className="text-xl font-bold text-slate-900">Personal Information</h2>
-                                </div>
-
+                                <div className="flex items-center gap-3 mb-8"><div className="p-3 bg-blue-50 text-blue-600 rounded-2xl"><User className="w-5 h-5" /></div><h2 className="text-xl font-bold text-slate-900">Personal Information</h2></div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Full Name</label>
-                                        <div className="relative">
-                                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                            <input
-                                                {...register('name')}
-                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-slate-300 text-sm font-medium"
-                                            />
-                                        </div>
-                                        {errors.name && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.name.message}</p>}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Email Address</label>
-                                        <div className="relative">
-                                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                            <input
-                                                {...register('email')}
-                                                readOnly
-                                                className="w-full pl-11 pr-4 py-3 bg-slate-50/50 border border-slate-100 rounded-2xl text-slate-500 outline-none transition-all text-sm font-medium cursor-not-allowed"
-                                            />
-                                        </div>
-                                        {errors.email && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.email.message}</p>}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Phone Number</label>
-                                        <div className="relative">
-                                            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                            <input
-                                                {...register('phone')}
-                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium"
-                                            />
-                                        </div>
-                                        {errors.phone && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.phone.message}</p>}
-                                    </div>
-
-                                    {/* Department Dropdown */}
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Department</label>
-                                        <div className="relative">
-                                            <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none z-10" />
-                                            <select
-                                                {...register('department')}
-                                                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium appearance-none"
-                                            >
-                                                <option value="">Select Department</option>
-                                                {departments.map(dept => (
-                                                    <option key={dept} value={dept}>{dept}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        {errors.department && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.department.message}</p>}
-                                    </div>
+                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Full Name</label><input {...register('name')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" />{errors.name && <p className="text-[10px] text-rose-500 font-bold">{errors.name.message}</p>}</div>
+                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Email</label><input {...register('email')} readOnly className="w-full px-4 py-3 bg-slate-50/50 border border-slate-100 rounded-2xl text-slate-500 cursor-not-allowed text-sm" /></div>
+                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Phone</label><input {...register('phone')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" />{errors.phone && <p className="text-[10px] text-rose-500 font-bold">{errors.phone.message}</p>}</div>
+                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Department</label><select {...register('department')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm">{departments.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
                                 </div>
-
-                                <div className="mt-6 space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Address</label>
-                                    <div className="relative">
-                                        <MapPin className="absolute left-4 top-4 w-4 h-4 text-slate-400" />
-                                        <textarea
-                                            {...register('address')}
-                                            rows={2}
-                                            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all resize-none text-sm font-medium"
-                                        />
-                                    </div>
-                                </div>
+                                <div className="mt-6 space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Address</label><textarea {...register('address')} rows={2} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl resize-none text-sm" /></div>
                             </div>
 
-                            {/* Professional details */}
+                            {/* --- PASSWORD SECURITY (6 CHAR MIN) --- */}
                             <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
                                 <div className="flex items-center gap-3 mb-8">
-                                    <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
-                                        <Award className="w-5 h-5" />
-                                    </div>
-                                    <h2 className="text-xl font-bold text-slate-900">Expertise & Schedule</h2>
+                                    <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl"><Lock className="w-5 h-5" /></div>
+                                    <h2 className="text-xl font-bold text-slate-900">Security & Password</h2>
                                 </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Current Password</label>
+                                        <input type="password" {...register('currentPassword')} placeholder="Required for change" className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:border-rose-500 outline-none text-sm font-medium" />
+                                        {errors.currentPassword && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.currentPassword.message}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">New Password</label>
+                                        <input type="password" {...register('newPassword')} placeholder="Min 6 characters" className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none text-sm font-medium" />
+                                        {errors.newPassword && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.newPassword.message}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Confirm New Password</label>
+                                        <input type="password" {...register('confirmPassword')} placeholder="Repeat new password" className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:border-blue-500 outline-none text-sm font-medium" />
+                                        {errors.confirmPassword && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.confirmPassword.message}</p>}
+                                    </div>
+                                </div>
+                                <p className="mt-4 text-[11px] text-slate-400 px-1 italic">Leave fields blank to keep your current password.</p>
+                            </div>
 
+                            {/* Expertise & Schedule */}
+                            <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                                <div className="flex items-center gap-3 mb-8"><div className="p-3 bg-amber-50 text-amber-600 rounded-2xl"><Award className="w-5 h-5" /></div><h2 className="text-xl font-bold text-slate-900">Expertise & Schedule</h2></div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Specialization Dropdown */}
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Specialization</label>
-                                        <select
-                                            {...register('specialization')}
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium appearance-none"
-                                        >
-                                            <option value="">Select Specialization</option>
-                                            {specializations.map(spec => (
-                                                <option key={spec} value={spec}>{spec}</option>
-                                            ))}
-                                        </select>
-                                        {errors.specialization && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.specialization.message}</p>}
-                                    </div>
-
-                                    {/* Qualification Dropdown */}
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Qualification</label>
-                                        <select
-                                            {...register('qualification')}
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium appearance-none"
-                                        >
-                                            <option value="">Select Qualification</option>
-                                            {qualifications.map(qual => (
-                                                <option key={qual} value={qual}>{qual}</option>
-                                            ))}
-                                        </select>
-                                        {errors.qualification && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.qualification.message}</p>}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Experience (Years)</label>
-                                        <input
-                                            {...register('experience')}
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium"
-                                        />
-                                    </div>
-
-                                    {/* Consultation Time Grid */}
+                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Specialization</label><select {...register('specialization')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm">{specializations.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
+                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Qualification</label><select {...register('qualification')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm">{qualifications.map(q => <option key={q} value={q}>{q}</option>)}</select></div>
+                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Experience (Years)</label><input {...register('experience')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" /></div>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Availability From</label>
-                                            <div className="relative">
-                                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                                                <input
-                                                    type="time"
-                                                    {...register('consultationTime.start')}
-                                                    className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-xs font-bold"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">To</label>
-                                            <div className="relative">
-                                                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                                                <input
-                                                    type="time"
-                                                    {...register('consultationTime.end')}
-                                                    className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-xs font-bold"
-                                                />
-                                            </div>
-                                        </div>
+                                        <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">From</label><input type="time" {...register('consultationTime.start')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold" /></div>
+                                        <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">To</label><input type="time" {...register('consultationTime.end')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold" /></div>
                                     </div>
                                 </div>
-
-                                <div className="mt-6 space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Bio / Professional Brief</label>
-                                    <textarea
-                                        {...register('about')}
-                                        rows={4}
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all resize-none text-sm font-medium"
-                                    />
-                                </div>
+                                <div className="mt-6 space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Bio</label><textarea {...register('about')} rows={4} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl resize-none text-sm" /></div>
                             </div>
 
-                            {/* Payment Configuration */}
+                            {/* Payment Config */}
                             <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                                <div className="flex items-center gap-3 mb-8">
-                                    <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
-                                        <CreditCard className="w-5 h-5" />
-                                    </div>
-                                    <h2 className="text-xl font-bold text-slate-900">Payment & limits</h2>
-                                </div>
-
+                                <div className="flex items-center gap-3 mb-8"><div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><CreditCard className="w-5 h-5" /></div><h2 className="text-xl font-bold text-slate-900">Payment & Limits</h2></div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Payment Model</label>
-                                        <select
-                                            {...register('payment.type')}
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-bold"
-                                        >
-                                            <option value="commission">Commission Based</option>
-                                            <option value="fixed">Fixed Salary</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Payout Cycle</label>
-                                        <select
-                                            {...register('payment.payoutCycle')}
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-bold"
-                                        >
-                                            <option value="monthly">Monthly</option>
-                                            <option value="weekly">Weekly</option>
-                                        </select>
-                                    </div>
-
+                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Payment Model</label><select {...register('payment.type')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold"><option value="commission">Commission Based</option><option value="fixed">Fixed Salary</option></select></div>
                                     {paymentType === 'commission' ? (
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Commission %</label>
-                                            <input
-                                                type="number"
-                                                {...register('payment.commissionPercentage')}
-                                                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium"
-                                                placeholder="e.g. 15"
-                                            />
-                                        </div>
+                                        <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Commission %</label><input type="number" {...register('payment.commissionPercentage')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" /></div>
                                     ) : (
-                                        <div className="space-y-2">
-                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Fixed Salary (₹)</label>
-                                            <input
-                                                type="number"
-                                                {...register('payment.fixedSalary')}
-                                                className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium"
-                                                placeholder="e.g. 80000"
-                                            />
-                                        </div>
+                                        <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Fixed Salary (₹)</label><input type="number" {...register('payment.fixedSalary')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" /></div>
                                     )}
-
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Patients / Day Limit</label>
-                                        <input
-                                            type="number"
-                                            {...register('payment.patientsPerDayLimit')}
-                                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium"
-                                        />
-                                    </div>
+                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Patients / Day</label><input type="number" {...register('payment.patientsPerDayLimit')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" /></div>
                                 </div>
                             </div>
 
@@ -577,17 +327,8 @@ const DoctorEditProfile: React.FC = () => {
                 isOpen={isConfirmOpen}
                 onClose={() => setIsConfirmOpen(false)}
                 onConfirm={executeUpdate}
-                title="Confirm Profile Updates"
-                message={
-                    <div className="space-y-3">
-                        <p>Are you sure you want to save these changes to your profile?</p>
-                        <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
-                            <p className="text-xs text-blue-700 font-medium leading-relaxed">
-                                Changes will take effect immediately. If you are currently active, your profile visibility will reflect these updates instantly.
-                            </p>
-                        </div>
-                    </div>
-                }
+                title="Confirm Updates"
+                message={<p>Are you sure you want to save these changes to your profile?</p>}
                 confirmText="Yes, Save Changes"
                 type="info"
             />

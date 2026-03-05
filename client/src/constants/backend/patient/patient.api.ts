@@ -7,6 +7,7 @@ export const patientApi = {
 
     updateProfile: (data: FormData) =>
         api.put(PATIENT_MANAGEMENT.UPDATE_PROFILE, data),
-
-
+    get_hospital:(id:string)=>{
+        return api.get(PATIENT_MANAGEMENT.GET_SELECTED_HOSPITAL(id))
+    }
 };

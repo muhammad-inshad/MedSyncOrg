@@ -55,4 +55,7 @@ export const hospitalApi = {
 
     editHospitalDoctor: (id: string, data: FormData) =>
         api.patch(HOSPITAL_MANAGEMENT.DOCTOR_UPDATE(id), data),
+    getHospitalById:(id:string)=>{
+        api.get(HOSPITAL_MANAGEMENT.GET_HOSPITAL_DATA(id))
+    }
 };

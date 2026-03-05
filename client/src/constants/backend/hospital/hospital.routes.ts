@@ -19,4 +19,5 @@ export const HOSPITAL_MANAGEMENT = {
     GET_ALL_PATIENTS: "/api/hospital/getallpatients",
     REAPPLY: "/api/hospital/reapply",
     DOCTOR_UPDATE: (id: string) => `/api/hospital/doctorEdit/${id}`,
+    GET_HOSPITAL_DATA:(id:string)=>`/api/hospital/hosptalData/${id}`,
 };

@@ -10,21 +10,22 @@ import logo from "../../../assets/images/logo.png"
 import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
 import { Upload, AlertCircle } from "lucide-react"
+import { AUTH_MESSAGES } from "@/constants/frontend/auth/auth.messages"
 
 const hospitalSignupSchema = z
   .object({
-    hospitalName: z.string().min(1, "Hospital name is required"),
-    email: z.string().email("Invalid email address"),
-    phone: z.string().min(10, "Phone number must be at least 10 digits"),
-    address: z.string().min(1, "Address is required"),
-    about: z.string().min(1, "About is required"),
-    pincode: z.string().min(6, "Pincode must be at least 6 digits"),
-    since: z.string().min(4, "Year is required"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    hospitalName: z.string().min(1, AUTH_MESSAGES.SIGNUP.HOSPITAL_NAME_REQUIRED),
+    email: z.string().email(AUTH_MESSAGES.SIGNUP.INVALID_EMAIL),
+    phone: z.string().min(10, AUTH_MESSAGES.SIGNUP.HOSPITAL_PHONE_MIN),
+    address: z.string().min(1, AUTH_MESSAGES.SIGNUP.ADDRESS_REQUIRED),
+    about: z.string().min(1, AUTH_MESSAGES.SIGNUP.ABOUT_REQUIRED),
+    pincode: z.string().min(6, AUTH_MESSAGES.SIGNUP.PINCODE_MIN),
+    since: z.string().min(4, AUTH_MESSAGES.SIGNUP.YEAR_REQUIRED),
+    password: z.string().min(6, AUTH_MESSAGES.COMMON.PASSWORD_LENGTH),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: AUTH_MESSAGES.COMMON.PASSWORDS_NOT_MATCH,
     path: ["confirmPassword"],
   })
 
@@ -94,10 +95,10 @@ const HospitalSignup: React.FC = () => {
     }
 
     try {
-      const response = await authApi.signup(formData)
+      const response = await authApi.hospitalSignup(formData)
 
       if (response.status === 200 || response.status === 201) {
-        toast.success("Hospital signup successful")
+        toast.success(AUTH_MESSAGES.SIGNUP.HOSPITAL_SUCCESS)
         navigate("/login/hospital")
         reset()
         setLogoPreview("")
@@ -107,13 +108,13 @@ const HospitalSignup: React.FC = () => {
       }
     } catch (error: unknown) {
       console.error('ERROR:', error);
-      let errorMessage = 'An unexpected error occurred';
+      let errorMessage = AUTH_MESSAGES.COMMON.UNEXPECTED_ERROR;
       if (axios.isAxiosError(error)) {
         errorMessage = error.response?.data?.message || error.message;
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
-      toast.error(`Registration failed: ${errorMessage}`);
+      toast.error(`${AUTH_MESSAGES.SIGNUP.HOSPITAL_FAILED_PREFIX} ${errorMessage}`);
     } finally {
       setLoading(false)
     }
@@ -132,8 +133,8 @@ const HospitalSignup: React.FC = () => {
             <div className="mb-6 flex justify-center">
               <img src={logo || "/placeholder.svg"} alt="MedSync" className="h-16 w-auto" />
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">Hospital Registration</h1>
-            <p className="text-slate-600">Join MedSync and streamline your healthcare operations</p>
+            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 mb-2">{AUTH_MESSAGES.SIGNUP.HOSPITAL_TITLE}</h1>
+            <p className="text-slate-600">{AUTH_MESSAGES.SIGNUP.HOSPITAL_SUBTITLE}</p>
           </div>
 
           {/* Form Card */}
@@ -145,16 +146,16 @@ const HospitalSignup: React.FC = () => {
                   <span className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full mr-3 text-sm font-bold">
                     1
                   </span>
-                  Hospital Details
+                  {AUTH_MESSAGES.SIGNUP.HOSPITAL_DETAILS}
                 </h2>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Hospital Name</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{AUTH_MESSAGES.SIGNUP.HOSPITAL_NAME_LABEL}</label>
                     <input
                       {...register("hospitalName")}
                       type="text"
-                      placeholder="Enter hospital name"
+                      placeholder={AUTH_MESSAGES.SIGNUP.HOSPITAL_NAME_REQUIRED}
                       className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${errors.hospitalName
                         ? "border-red-300 bg-red-50"
                         : "border-slate-200 bg-slate-50 hover:border-slate-300"
@@ -170,11 +171,11 @@ const HospitalSignup: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">{AUTH_MESSAGES.COMMON.EMAIL}</label>
                       <input
                         {...register("email")}
                         type="email"
-                        placeholder="hospital@example.com"
+                        placeholder={AUTH_MESSAGES.SIGNUP.EMAIL_PLACEHOLDER}
                         className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${errors.email
                           ? "border-red-300 bg-red-50"
                           : "border-slate-200 bg-slate-50 hover:border-slate-300"
@@ -189,7 +190,7 @@ const HospitalSignup: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Phone</label>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">{AUTH_MESSAGES.SIGNUP.PHONE_PLACEHOLDER.split(" ")[0]}</label>
                       <input
                         {...register("phone")}
                         type="tel"
@@ -209,10 +210,10 @@ const HospitalSignup: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Address</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{AUTH_MESSAGES.SIGNUP.ADDRESS_LABEL}</label>
                     <textarea
                       {...register("address")}
-                      placeholder="Enter hospital address"
+                      placeholder={AUTH_MESSAGES.SIGNUP.ADDRESS_REQUIRED}
                       rows={2}
                       className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none ${errors.address
                         ? "border-red-300 bg-red-50"
@@ -229,11 +230,11 @@ const HospitalSignup: React.FC = () => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Pincode</label>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">{AUTH_MESSAGES.SIGNUP.PINCODE_LABEL}</label>
                       <input
                         {...register("pincode")}
                         type="text"
-                        placeholder="123456"
+                        placeholder={AUTH_MESSAGES.SIGNUP.PINCODE_MIN.split(" ")[0]}
                         className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${errors.pincode
                           ? "border-red-300 bg-red-50"
                           : "border-slate-200 bg-slate-50 hover:border-slate-300"
@@ -248,11 +249,11 @@ const HospitalSignup: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">Established Year</label>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">{AUTH_MESSAGES.SIGNUP.ESTABLISHED_YEAR_LABEL}</label>
                       <input
                         {...register("since")}
                         type="text"
-                        placeholder="1990"
+                        placeholder={AUTH_MESSAGES.SIGNUP.YEAR_REQUIRED.split(" ")[0]}
                         className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition ${errors.since
                           ? "border-red-300 bg-red-50"
                           : "border-slate-200 bg-slate-50 hover:border-slate-300"
@@ -268,10 +269,10 @@ const HospitalSignup: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">About Hospital</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{AUTH_MESSAGES.SIGNUP.ABOUT_LABEL}</label>
                     <textarea
                       {...register("about")}
-                      placeholder="Tell us about your hospital..."
+                      placeholder={AUTH_MESSAGES.SIGNUP.ABOUT_REQUIRED}
                       rows={2}
                       className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none ${errors.about
                         ? "border-red-300 bg-red-50"
@@ -294,13 +295,13 @@ const HospitalSignup: React.FC = () => {
                   <span className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full mr-3 text-sm font-bold">
                     2
                   </span>
-                  Documents
+                  {AUTH_MESSAGES.SIGNUP.DOCUMENTS}
                 </h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {/* Logo Upload */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-3">Hospital Logo</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-3">{AUTH_MESSAGES.SIGNUP.HOSPITAL_LOGO}</label>
                     <label className="block">
                       <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all text-center group">
                         <input type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
@@ -309,9 +310,9 @@ const HospitalSignup: React.FC = () => {
                           className="mx-auto mb-2 text-slate-400 group-hover:text-blue-500 transition"
                         />
                         <p className="text-sm font-medium text-slate-600">
-                          {logoPreview ? "Change logo" : "Upload logo"}
+                          {logoPreview ? AUTH_MESSAGES.SIGNUP.CHANGE_LOGO : AUTH_MESSAGES.SIGNUP.UPLOAD_LOGO}
                         </p>
-                        <p className="text-xs text-slate-500 mt-1">PNG, JPG or GIF (max 5MB)</p>
+                        <p className="text-xs text-slate-500 mt-1">{AUTH_MESSAGES.SIGNUP.FILE_SIZE_HINT}</p>
                       </div>
                     </label>
                     {logoPreview && (
@@ -327,7 +328,7 @@ const HospitalSignup: React.FC = () => {
 
                   {/* Licence Upload */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-3">Hospital Licence</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-3">{AUTH_MESSAGES.SIGNUP.HOSPITAL_LICENCE}</label>
                     <label className="block">
                       <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all text-center group">
                         <input type="file" accept="image/*" onChange={handleLicenceChange} className="hidden" />
@@ -336,9 +337,9 @@ const HospitalSignup: React.FC = () => {
                           className="mx-auto mb-2 text-slate-400 group-hover:text-blue-500 transition"
                         />
                         <p className="text-sm font-medium text-slate-600">
-                          {licencePreview ? "Change licence" : "Upload licence"}
+                          {licencePreview ? AUTH_MESSAGES.SIGNUP.CHANGE_LICENCE : AUTH_MESSAGES.SIGNUP.UPLOAD_LICENCE}
                         </p>
-                        <p className="text-xs text-slate-500 mt-1">PNG, JPG or GIF (max 5MB)</p>
+                        <p className="text-xs text-slate-500 mt-1">{AUTH_MESSAGES.SIGNUP.FILE_SIZE_HINT}</p>
                       </div>
                     </label>
                     {licencePreview && (
@@ -360,12 +361,12 @@ const HospitalSignup: React.FC = () => {
                   <span className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-600 rounded-full mr-3 text-sm font-bold">
                     3
                   </span>
-                  Password
+                  {AUTH_MESSAGES.COMMON.PASSWORD}
                 </h2>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{AUTH_MESSAGES.COMMON.PASSWORD}</label>
                     <input
                       {...register("password")}
                       type="password"
@@ -384,7 +385,7 @@ const HospitalSignup: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Confirm Password</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">{AUTH_MESSAGES.COMMON.CONFIRM_PASSWORD}</label>
                     <input
                       {...register("confirmPassword")}
                       type="password"
@@ -433,10 +434,10 @@ const HospitalSignup: React.FC = () => {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Creating account...
+                      {AUTH_MESSAGES.SIGNUP.CREATING_ACCOUNT}
                     </span>
                   ) : (
-                    "Create Account"
+                    AUTH_MESSAGES.SIGNUP.CREATE_ACCOUNT
                   )}
                 </button>
               </div>
@@ -444,9 +445,9 @@ const HospitalSignup: React.FC = () => {
               {/* Login Link */}
               <div className="text-center pt-4">
                 <p className="text-slate-600">
-                  Already have an account?{" "}
+                  {AUTH_MESSAGES.SIGNUP.ALREADY_HAVE_ACCOUNT}{" "}
                   <a href="/login/hospital" className="font-semibold text-blue-600 hover:text-blue-700 transition">
-                    Sign in
+                    {AUTH_MESSAGES.SIGNUP.SIGN_IN_LINK}
                   </a>
                 </p>
               </div>
@@ -455,7 +456,7 @@ const HospitalSignup: React.FC = () => {
 
           {/* Footer */}
           <div className="mt-8 text-center text-sm text-slate-500">
-            <p>By signing up, you agree to our Terms of Service and Privacy Policy</p>
+            <p>{AUTH_MESSAGES.SIGNUP.TERMS_PRIVACY}</p>
           </div>
         </div>
       </div>

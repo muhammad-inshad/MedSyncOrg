@@ -10,6 +10,6 @@ router.get("/hospitals", patientController.getHospitals.bind(patientController))
 router.get("/getAllPatient", patientController.getAllPatient.bind(patientController))
 router.patch("/patientEdit/:id", patientController.updatePatient.bind(patientController));
 router.patch("/changePassword/:id", patientController.changePassword.bind(patientController));
-
+router.get("/selected_hospital/:id",patientController.selectedHospital.bind(patientController))
 
 export default router;

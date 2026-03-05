@@ -1,9 +1,10 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from '@/hooks/redux';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { logout } from '@/store/auth/authSlice';
 import toast from 'react-hot-toast';
 import { authApi } from '@/constants/backend/auth/auth.api';
+
 import {
   LayoutDashboard,
   DollarSign,
@@ -57,7 +58,7 @@ const HospitalSidbar = ({ isOpen, setIsOpen }: HospitalSidebarProps) => {
     { icon: SquareStack, label: 'Chat' },
     { icon: Bell, label: 'Subscription' },
   ];
-
+ 
   const handleClick = (item: MenuItem) => {
     setActiveMenu(item.label);
     if (item.path) navigate(item.path);
@@ -78,9 +79,12 @@ const HospitalSidbar = ({ isOpen, setIsOpen }: HospitalSidebarProps) => {
       toast.error("Session cleared");
     }
   };
-
+  const { user } = useAppSelector(
+    (state) => state.auth
+  );
   return (
     <>
+
       {/* Mobile Overlay: darkens background when sidebar is open */}
       {isOpen && (
         <div
@@ -96,13 +100,21 @@ const HospitalSidbar = ({ isOpen, setIsOpen }: HospitalSidebarProps) => {
         md:translate-x-0 md:static md:inset-0
       `}>
         <div className="p-6 border-b border-gray-800 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
-              <User className="w-6 h-6" />
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={()=>navigate(HOSPITAL_ROUTES.HOSPITALEDIT)} >
+            <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center overflow-hidden">
+              {user?.logo ? (
+                <img
+                  src={user?.logo}
+                  alt="profile"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <User className="w-6 h-6 text-white" />
+              )}
             </div>
             <div>
-              <h3 className="font-semibold text-sm">Hospital</h3>
-              <p className="text-[10px] text-gray-400">Hospital Admin</p>
+              <h3 className="font-semibold text-sm">{user?.hospitalName}</h3>
+              <p className="text-[10px] text-gray-400">Admin</p>
             </div>
           </div>
           {/* Close button for mobile */}

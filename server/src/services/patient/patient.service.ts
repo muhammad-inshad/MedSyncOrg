@@ -7,6 +7,7 @@ import { UpdatePatientDTO } from "../../dto/patient/patient-response.dto.ts";
 import { IUserRepository } from "../../repositories/patient/user.repository.interface.ts";
 import { IPatientService } from "./patient.service.interfaces.ts";
 import bcrypt from "bcryptjs";
+import { MESSAGES } from "../../constants/messages.ts";
 
 export class PatientService implements IPatientService {
     constructor(
@@ -74,17 +75,30 @@ export class PatientService implements IPatientService {
         return await this.userRepo.update(id, updateData);
     }
 
-    async gethospitals() {
-        const hospitals = await this.hospitalRepo.findAll();
 
-        return hospitals.filter(hospital => hospital.isActive).map(hospital => {
-            console.log("first")
-            const hospitalObj = hospital.toObject ? hospital.toObject() : hospital;
-            delete hospitalObj.password;
-            return hospitalObj;
-        });
-    }
+ async gethospitals(page: number, limit: number, search: string) {
+    
+    const result = await this.hospitalRepo.findWithPagination({
+        page,
+        limit,
+        search,
+        searchFields: ['hospitalName', 'address'], 
+        filter: { isActive: true } 
+    });
 
+    const cleanedHospitals = result.data.map(hospital => {
+        const hospitalObj = hospital.toObject ? hospital.toObject() : hospital;
+        delete hospitalObj.password;
+        return hospitalObj;
+    });
+
+    return {
+        hospitals: cleanedHospitals,
+        totalCount: result.total,
+        totalPages: Math.ceil(result.total / limit),
+        currentPage: page
+    };
+}
     async changePassword(id: string, currentPassword: string, newPassword: string) {
         const patient = await this.userRepo.findByIdWithPassword(id);
         if (!patient) {
@@ -99,6 +113,19 @@ export class PatientService implements IPatientService {
         const salt = await bcrypt.genSalt(10);
         const hashedNewPassword = await bcrypt.hash(newPassword, salt);
 
-        await this.userRepo.update(id, { password: hashedNewPassword } as any);
+        await this.userRepo.update(id, { password: hashedNewPassword });
+    }
+
+    async selectedHospital(id:string){
+        const Hospital=await this.hospitalRepo.findById(id)
+        if(!Hospital){
+            ApiResponse.throwError(HttpStatusCode.BAD_REQUEST,MESSAGES.ADMIN.NOT_FOUND)
+        }
+         const hospitalObj = Hospital.toObject ? Hospital.toObject() : Hospital
+       
+    return {
+        ...hospitalObj,
+        _id: hospitalObj._id.toString()
+    }
     }
 }

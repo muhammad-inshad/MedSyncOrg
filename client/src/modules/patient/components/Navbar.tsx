@@ -3,11 +3,21 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import logo from "../../../assets/images/logo.png";
 import { Phone, User, Menu, Bell, Search, X } from "lucide-react";
 import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
+import { useDispatch } from "react-redux";
+import { setSearchQuery } from "@/store/search/searchSlice";
+import { useAppSelector } from "@/hooks/redux";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dispatch = useDispatch();
+  const searchQuery = useAppSelector((state) => state.search.query);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(setSearchQuery(e.target.value));
+  };
 
   const isHiddenPath =
     location.pathname.includes("/login") ||
@@ -45,9 +55,23 @@ const Navbar = () => {
 
           {/* Desktop Icons + Hamburger */}
           <div className="flex items-center gap-5 sm:gap-6">
-            <button aria-label="Search" className="text-gray-600 hover:text-blue-600 transition-colors">
-              <Search className="w-6 h-6" />
-            </button>
+            {isSearchOpen && (
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          placeholder="Search..."
+          className="border-b border-blue-600 outline-none px-2 py-1 text-sm transition-all"
+          autoFocus
+        />
+      )}
+      
+      <button 
+        onClick={() => setIsSearchOpen(!isSearchOpen)}
+        className="text-gray-600 hover:text-blue-600 transition-colors"
+      >
+        {isSearchOpen ? <X className="w-6 h-6" /> : <Search className="w-6 h-6" />}
+      </button>
 
             <button
               aria-label="Profile"

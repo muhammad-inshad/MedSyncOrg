@@ -37,8 +37,9 @@ class PatientController {
   getAllPatient = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 8;
+      const limit = parseInt(req.query.limit as string) || 5;
       const search = (req.query.search as string) || "";
+      console.log("-------------------------")
       const result = await this.patientService.getAllPatient({ page, limit, search });
       return ApiResponse.success(res, MESSAGES.PATIENT.FETCH_SUCCESS, result.data, HttpStatusCode.OK, {
         page,
@@ -53,8 +54,10 @@ class PatientController {
 
   getHospitals = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const hospitals = await this.patientService.gethospitals();
-
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 6;
+      const search = (req.query.search as string) || "";
+      const hospitals = await this.patientService.gethospitals(page, limit, search);
       return ApiResponse.success(res, MESSAGES.ADMIN.FETCH_SUCCESS, hospitals);
     } catch (error: unknown) {
       next(error);
@@ -67,6 +70,16 @@ class PatientController {
       const { currentPassword, newPassword } = req.body;
       await this.patientService.changePassword(id, currentPassword, newPassword);
       return ApiResponse.success(res, "Password changed successfully");
+    } catch (error: unknown) {
+      next(error);
+    }
+  };
+
+  selectedHospital = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const hospital = await this.patientService.selectedHospital(id);
+      return ApiResponse.success(res, MESSAGES.ADMIN.FETCH_SUCCESS, hospital);
     } catch (error: unknown) {
       next(error);
     }

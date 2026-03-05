@@ -18,6 +18,12 @@ export class HospitalMapper implements IMapper<IHospital, HospitalResponseDTO> {
             pincode: hospital.pincode,
             about: hospital.about,
             licence: hospital.licence,
+            images: hospital.images || {
+                landscape: [],
+                medicalTeam: [],
+                patientCare: [],
+                services: [],
+            },
             income: hospital.income || 0,
             reviewStatus: hospital.reviewStatus,
             reapplyDate: hospital.reapplyDate,

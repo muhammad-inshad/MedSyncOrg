@@ -4,6 +4,7 @@ import { authApi } from '../../../constants/backend/auth/auth.api';
 import toast from 'react-hot-toast';
 import { PATIENT_ROUTES } from '@/constants/frontend/patient/patient.routes';
 import axios from 'axios';
+import { AUTH_MESSAGES } from '@/constants/frontend/auth/auth.messages';
 
 const OtpPage = () => {
   const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
@@ -11,6 +12,8 @@ const OtpPage = () => {
   const location = useLocation();
   const [timer, setTimer] = useState(0);
   const [isTimerExpired, setIsTimerExpired] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const isConfirming = useRef(false);
   const navigate = useNavigate();
 
   const searchParams = new URLSearchParams(location.search);
@@ -19,18 +22,20 @@ const OtpPage = () => {
   const purpose = location.state?.purpose;
 
   const handleConfirm = async () => {
-    if (isTimerExpired) {
-      toast.error('OTP has expired! Please resend OTP.');
+    if (isTimerExpired || isLoading || isConfirming.current) {
+      if (isTimerExpired) toast.error(AUTH_MESSAGES.COMMON.OTP_EXPIRED);
       return;
     }
 
     const otpValue = otp.join('');
     if (otpValue.length !== 6) {
-      toast.error('Please enter all 6 digits');
+      toast.error(AUTH_MESSAGES.OTP.ENTER_ALL_DIGITS);
       return;
     }
 
     try {
+      setIsLoading(true);
+      isConfirming.current = true;
       const response = await authApi.verifyOtp({
         otp: otpValue,
         signupData,
@@ -38,7 +43,7 @@ const OtpPage = () => {
 
       if (response.data.success) {
         if (purpose) {
-          toast.success('OTP Verified! Please set your new password.');
+          toast.success(AUTH_MESSAGES.OTP.VERIFY_SUCCESS);
           localStorage.removeItem('otpPageAllowed');
           localStorage.removeItem('otpExpirationTime');
           localStorage.setItem("resetpassword", "true");
@@ -50,25 +55,28 @@ const OtpPage = () => {
           localStorage.removeItem('otpPageAllowed');
           localStorage.removeItem('otpExpirationTime');
           if (result.data.success) {
-            toast.success('Account created successfully!');
+            toast.success(AUTH_MESSAGES.SIGNUP.SUCCESS);
             navigate(`/login/${role}`, { replace: true });
           } else {
-            toast.error(result.data.message || 'Failed to create account');
+            toast.error(result.data.message || AUTH_MESSAGES.SIGNUP.FAILED);
           }
         } else {
-          toast.error('Unknown role');
+          toast.error(AUTH_MESSAGES.OTP.UNKNOWN_ROLE);
         }
       } else {
-        toast.error('Invalid OTP. Please try again.');
+        toast.error(AUTH_MESSAGES.COMMON.INVALID_OTP);
       }
     } catch (error: unknown) {
-      let errorMessage = 'An unexpected error occurred';
+      let errorMessage = AUTH_MESSAGES.COMMON.UNEXPECTED_ERROR;
       if (axios.isAxiosError(error)) {
         errorMessage = error.response?.data?.message || error.message;
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
       toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+      isConfirming.current = false;
     }
   };
 
@@ -102,7 +110,7 @@ const OtpPage = () => {
     try {
       await authApi.sendOtp({
         email: signupData.email,
-        role: role as any,
+        role: role as "doctor" | "patient" | "hospital",
         purpose: purpose || 'signup'
       });
 
@@ -115,10 +123,10 @@ const OtpPage = () => {
 
       setIsTimerExpired(false);
       inputRefs.current[0]?.focus();
-      toast.success('OTP resent successfully!');
+      toast.success(AUTH_MESSAGES.COMMON.RESEND_SUCCESS);
     } catch (error: unknown) {
       console.error(error);
-      toast.error('Failed to resend OTP. Please try again.');
+      toast.error(AUTH_MESSAGES.COMMON.RESEND_FAILED);
     }
   };
 
@@ -128,7 +136,7 @@ const OtpPage = () => {
         setTimer((prev) => {
           if (prev <= 1) {
             setIsTimerExpired(true);
-            toast.error('OTP has expired! Please click Resend OTP.');
+            toast.error(AUTH_MESSAGES.COMMON.OTP_EXPIRED_CLICK_RESEND);
             return 0;
           }
           return prev - 1;
@@ -213,18 +221,18 @@ const OtpPage = () => {
       </div>
 
       <div className="w-full max-w-md text-center">
-        <h2 className="text-4xl font-bold text-gray-900 mb-4">Enter OTP</h2>
+        <h2 className="text-4xl font-bold text-gray-900 mb-4">{AUTH_MESSAGES.OTP.TITLE}</h2>
         <p className="text-gray-600 text-sm mb-8">
-          We sent an OTP to <strong>{signupData.email}</strong>. Please enter the code to verify your account.
+          {AUTH_MESSAGES.OTP.SUBTITLE} <strong>{signupData.email}</strong>{AUTH_MESSAGES.OTP.SUBTITLE_CONTINUE}
         </p>
 
         <div className="mb-6">
           <p className={`text-lg font-semibold ${isTimerExpired ? 'text-red-600' : 'text-blue-600'}`}>
-            {isTimerExpired ? 'OTP Expired' : `Time remaining: ${formatTime(timer)}`}
+            {isTimerExpired ? AUTH_MESSAGES.OTP.EXPIRED_TITLE : `${AUTH_MESSAGES.OTP.TIME_REMAINING} ${formatTime(timer)}`}
           </p>
           {isTimerExpired && (
             <p className="text-red-500 text-sm mt-2">
-              Please click "Resend OTP" to receive a new code
+              {AUTH_MESSAGES.OTP.EXPIRED_HINT}
             </p>
           )}
         </div>
@@ -246,8 +254,8 @@ const OtpPage = () => {
               onKeyDown={(e) => handleKeyDown(index, e)}
               onFocus={handleFocus}
               {...(index === 0 ? { onPaste: handlePaste } : {})}
-              disabled={isTimerExpired}
-              className={`w-14 h-14 text-center text-2xl font-medium border-2 rounded-xl focus:outline-none bg-gray-50 transition-all ${isTimerExpired
+              disabled={isTimerExpired || isLoading}
+              className={`w-14 h-14 text-center text-2xl font-medium border-2 rounded-xl focus:outline-none bg-gray-50 transition-all ${isTimerExpired || isLoading
                 ? 'border-red-300 bg-red-50 cursor-not-allowed opacity-60'
                 : 'border-gray-300 focus:border-blue-600'
                 }`}
@@ -258,13 +266,13 @@ const OtpPage = () => {
 
         <button
           onClick={handleConfirm}
-          disabled={isTimerExpired}
-          className={`w-full max-w-xs mx-auto block font-medium py-3.5 rounded-full mb-4 shadow-md transition-all ${isTimerExpired
+          disabled={isTimerExpired || isLoading}
+          className={`w-full max-w-xs mx-auto block font-medium py-3.5 rounded-full mb-4 shadow-md transition-all ${isTimerExpired || isLoading
             ? 'bg-gray-400 text-white cursor-not-allowed'
             : 'bg-blue-600 hover:bg-blue-700 text-white'
             }`}
         >
-          Confirm
+          {isLoading ? AUTH_MESSAGES.OTP.VERIFYING_BUTTON : AUTH_MESSAGES.OTP.CONFIRM_BUTTON}
         </button>
 
         <button
@@ -275,7 +283,7 @@ const OtpPage = () => {
             : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
             }`}
         >
-          {!isTimerExpired ? `Resend in ${formatTime(timer)}` : 'Resend OTP'}
+          {!isTimerExpired ? `${AUTH_MESSAGES.OTP.RESEND_IN} ${formatTime(timer)}` : AUTH_MESSAGES.OTP.RESEND_BUTTON}
         </button>
       </div>
     </div>

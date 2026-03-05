@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, X, Loader2 } from 'lucide-react';
+import { Upload, X, Loader2, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-import { PatientService } from '../../services/patient.service'; 
+import { PatientService } from '../../services/patient.service';
 import type { IPatient } from '@/interfaces/IPatient';
 import { PATIENT_ROUTES } from '@/constants/frontend/patient/patient.routes';
 import { initializeAuth } from '@/store/auth/authThunks';
@@ -17,7 +17,11 @@ const EditPatientProfile = () => {
 
   const patient = profileData as IPatient | null;
 
-  const [formData, setFormData] = useState<Partial<IPatient>>({
+  const [formData, setFormData] = useState<Partial<IPatient> & {
+    currentPassword?: string;
+    newPassword?: string;
+    confirmNewPassword?: string;
+  }>({
     name: '',
     email: '',
     phone: undefined,
@@ -28,11 +32,14 @@ const EditPatientProfile = () => {
     bloodGroup: '',
     image: undefined,
     isActive: true,
+    currentPassword: '',
+    newPassword: '',
+    confirmNewPassword: '',
   });
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [willRemoveImage, setWillRemoveImage] = useState(false);
-  const [errors, setErrors] = useState<Partial<Record<keyof IPatient, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof IPatient | 'currentPassword' | 'newPassword' | 'confirmNewPassword', string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
@@ -56,6 +63,9 @@ const EditPatientProfile = () => {
         bloodGroup: patient.bloodGroup || '',
         image: undefined,
         isActive: patient.isActive ?? true,
+        currentPassword: '',
+        newPassword: '',
+        confirmNewPassword: '',
       });
 
       if (patient.image) {
@@ -75,7 +85,7 @@ const EditPatientProfile = () => {
       [name]: type === 'checkbox' ? checked : value,
     }));
 
-    if (errors[name as keyof IPatient]) {
+    if (errors[name as keyof typeof errors]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
@@ -106,8 +116,9 @@ const EditPatientProfile = () => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof IPatient, string>> = {};
+    const newErrors: Partial<Record<keyof typeof formData, string>> = {};
 
+    // Required fields
     if (!formData.name?.trim()) newErrors.name = 'Name is required';
     if (!formData.email?.trim()) {
       newErrors.email = 'Email is required';
@@ -122,6 +133,19 @@ const EditPatientProfile = () => {
       newErrors.phone = 'Phone must be 10 digits';
     }
 
+    // Password validation (only if attempting to change)
+    if (formData.newPassword || formData.confirmNewPassword || formData.currentPassword) {
+      if (!formData.currentPassword) {
+        newErrors.currentPassword = 'Current password is required to change password';
+      }
+      if (formData.newPassword && formData.newPassword.length < 6) {
+        newErrors.newPassword = 'New password must be at least 6 characters';
+      }
+      if (formData.newPassword !== formData.confirmNewPassword) {
+        newErrors.confirmNewPassword = 'Passwords do not match';
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -133,24 +157,60 @@ const EditPatientProfile = () => {
     setIsSubmitting(true);
 
     try {
-      const payload = {
+      const profilePayload = {
         ...formData,
         willRemoveImage,
         phone: formData.phone ? Number(formData.phone) : undefined,
       };
 
-      if (patient?._id) {
-        await PatientService.updateProfile(patient._id, payload);
-        toast.success('Patient updated successfully!');
-        await dispatch(initializeAuth('patient'));
-        navigate(PATIENT_ROUTES.PATIENTPROFILE);
-      }
+      // Remove sensitive/password fields from profile update payload
+      delete (profilePayload ).confirmNewPassword;
+      delete (profilePayload ).currentPassword;
+      delete (profilePayload ).newPassword;
 
+      let profileUpdated = false;
+      let passwordUpdated = false;
+
+      if (patient?._id) {
+        // 1. Update Profile Basic Info
+        await PatientService.updateProfile(patient._id, profilePayload);
+        profileUpdated = true;
+
+        // 2. Update Password if requested
+        if (formData.newPassword && formData.currentPassword) {
+          try {
+            await PatientService.changePassword(patient._id, {
+              currentPassword: formData.currentPassword,
+              newPassword: formData.newPassword,
+            });
+            passwordUpdated = true;
+          } catch (passwordError) {
+            const errorMessage =
+              axios.isAxiosError(passwordError) && passwordError.response?.data?.message
+                ? passwordError.response.data.message
+                : 'Failed to update password';
+            toast.error(errorMessage);
+            // We don't throw here if profile was updated, but we won't navigate yet
+          }
+        }
+
+        if (profileUpdated && (!formData.newPassword || passwordUpdated)) {
+          toast.success('Patient profile updated successfully!');
+          await dispatch(initializeAuth('patient'));
+          navigate(PATIENT_ROUTES.PATIENTPROFILE);
+        } else if (profileUpdated) {
+          // Profile updated but password failed
+          toast.success('Profile information updated, but password change failed.');
+          await dispatch(initializeAuth('patient'));
+          // Stay on page to fix password if they want, or they can navigate away manually
+        }
+      }
     } catch (error) {
       console.error('Error updating patient:', error);
-      const errorMessage = axios.isAxiosError(error) && error.response?.data?.message
-        ? error.response.data.message
-        : 'Failed to update patient';
+      const errorMessage =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : 'Failed to update patient';
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -274,6 +334,64 @@ const EditPatientProfile = () => {
               </div>
             </div>
 
+            {/* Security / Password Change */}
+            <div className="space-y-6 pt-4 border-t border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-800">Change Password (optional)</h2>
+              <p className="text-sm text-gray-500 -mt-2">
+                Leave blank if you do not want to update your password
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">Current Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      value={formData.currentPassword || ''}
+                      onChange={handleInputChange}
+                      placeholder="Required if changing password"
+                      className={`w-full pl-10 px-4 py-2 rounded-lg border outline-none transition-all ${errors.currentPassword ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                    />
+                  </div>
+                  {errors.currentPassword && <p className="text-xs text-red-500 font-medium">{errors.currentPassword}</p>}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">New Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="password"
+                      name="newPassword"
+                      value={formData.newPassword || ''}
+                      onChange={handleInputChange}
+                      placeholder="Minimum 6 characters"
+                      className={`w-full pl-10 px-4 py-2 rounded-lg border outline-none transition-all ${errors.newPassword ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                    />
+                  </div>
+                  {errors.newPassword && <p className="text-xs text-red-500 font-medium">{errors.newPassword}</p>}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-gray-700">Confirm New Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <input
+                      type="password"
+                      name="confirmNewPassword"
+                      value={formData.confirmNewPassword || ''}
+                      onChange={handleInputChange}
+                      placeholder="Re-enter new password"
+                      className={`w-full pl-10 px-4 py-2 rounded-lg border outline-none transition-all ${errors.confirmNewPassword ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
+                    />
+                  </div>
+                  {errors.confirmNewPassword && <p className="text-xs text-red-500 font-medium">{errors.confirmNewPassword}</p>}
+                </div>
+              </div>
+            </div>
+
             {/* Medical / Personal Details */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <h2 className="col-span-full text-lg font-semibold text-gray-800 border-b pb-2">Medical Details</h2>
@@ -333,14 +451,12 @@ const EditPatientProfile = () => {
               </div>
             </div>
 
-            
-
             {/* Form Actions */}
             <div className="flex flex-col sm:flex-row gap-3 pt-6">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-2 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-md shadow-blue-200"
+                className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-md shadow-blue-200"
               >
                 {isSubmitting ? (
                   <>

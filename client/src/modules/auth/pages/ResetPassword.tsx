@@ -4,6 +4,7 @@ import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { authApi } from '@/constants/backend/auth/auth.api';
 import axios from 'axios';
+import { AUTH_MESSAGES } from '@/constants/frontend/auth/auth.messages';
 
 const ResetPassword = () => {
   const location = useLocation();
@@ -26,10 +27,10 @@ const ResetPassword = () => {
     e.preventDefault();
     console.log(role, "      inshad")
     if (password.length < 6) {
-      return toast.error('Password must be at least 6 characters');
+      return toast.error(AUTH_MESSAGES.COMMON.PASSWORD_LENGTH);
     }
     if (password !== confirmPassword) {
-      return toast.error('Passwords do not match');
+      return toast.error(AUTH_MESSAGES.COMMON.PASSWORDS_NOT_MATCH);
     }
 
     setLoading(true);
@@ -40,17 +41,17 @@ const ResetPassword = () => {
         role: role
       });
 
-      toast.success('Password reset successfully!');
+      toast.success(AUTH_MESSAGES.RESET_PASSWORD.SUCCESS);
       localStorage.removeItem('resetpassword');
       navigate(`/login/${role || 'patient'}`);
     } catch (error: unknown) {
-      let errorMessage = 'An unexpected error occurred';
+      let errorMessage = AUTH_MESSAGES.COMMON.UNEXPECTED_ERROR;
       if (axios.isAxiosError(error)) {
         errorMessage = error.response?.data?.message || error.message;
       } else if (error instanceof Error) {
         errorMessage = error.message;
       }
-      toast.error(`reset password failed: ${errorMessage}`);
+      toast.error(`${AUTH_MESSAGES.RESET_PASSWORD.FAILED_PREFIX} ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -59,12 +60,12 @@ const ResetPassword = () => {
   return (
     <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Set New Password</h2>
-        <p className="text-gray-600 mb-6">Resetting password for {email}</p>
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">{AUTH_MESSAGES.RESET_PASSWORD.TITLE}</h2>
+        <p className="text-gray-600 mb-6">{AUTH_MESSAGES.RESET_PASSWORD.SUBTITLE} {email}</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{AUTH_MESSAGES.RESET_PASSWORD.NEW_PASSWORD_LABEL}</label>
             <div className="relative">
               <input
                 type={showPass ? "text" : "password"}
@@ -85,7 +86,7 @@ const ResetPassword = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{AUTH_MESSAGES.COMMON.CONFIRM_PASSWORD}</label>
             <input
               type="password"
               value={confirmPassword}
@@ -101,7 +102,7 @@ const ResetPassword = () => {
             disabled={loading}
             className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 disabled:bg-indigo-400"
           >
-            {loading ? 'Updating...' : 'Update Password'}
+            {loading ? AUTH_MESSAGES.RESET_PASSWORD.UPDATING_BUTTON : AUTH_MESSAGES.RESET_PASSWORD.UPDATE_BUTTON}
           </button>
         </form>
       </div>

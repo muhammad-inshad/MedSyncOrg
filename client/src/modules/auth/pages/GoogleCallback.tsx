@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../../../store/auth/authSlice';
 import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
 import { COMMON_ROUTES } from "@/constants/frontend/common/common.routes";
+import { AUTH_MESSAGES } from '@/constants/frontend/auth/auth.messages';
 
 const GoogleCallback = () => {
   const [searchParams] = useSearchParams();
@@ -47,7 +48,7 @@ const GoogleCallback = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-      <p className="text-gray-600 font-medium">Completing your login...</p>
+      <p className="text-gray-600 font-medium">{AUTH_MESSAGES.COMMON.COMPLETING_LOGIN}</p>
     </div>
   );
 };

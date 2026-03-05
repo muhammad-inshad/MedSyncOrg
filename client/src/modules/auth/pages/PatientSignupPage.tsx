@@ -8,18 +8,19 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { authApi } from '../../../constants/backend/auth/auth.api';
 import axios from 'axios';
+import { AUTH_MESSAGES } from '@/constants/frontend/auth/auth.messages';
 
 
 const SignUpSchema = z
     .object({
-        name: z.string().min(3, "Name must be at least 3 characters"),
-        email: z.string().email("Invalid email address"),
-        phone: z.string().regex(/^[0-9]{10}$/, "Phone number must be 10 digits"),
-        password: z.string().min(6, "Password must be at least 6 characters"),
-        confirmPassword: z.string().min(6, "Confirm password is required"),
+        name: z.string().min(3, AUTH_MESSAGES.SIGNUP.NAME_MIN_LENGTH),
+        email: z.string().email(AUTH_MESSAGES.SIGNUP.INVALID_EMAIL),
+        phone: z.string().regex(/^[0-9]{10}$/, AUTH_MESSAGES.SIGNUP.PHONE_TEN_DIGITS),
+        password: z.string().min(6, AUTH_MESSAGES.COMMON.PASSWORD_LENGTH),
+        confirmPassword: z.string().min(6, AUTH_MESSAGES.SIGNUP.CONFIRM_PASSWORD_REQUIRED),
     })
     .refine((data) => data.password === data.confirmPassword, {
-        message: "Passwords do not match",
+        message: AUTH_MESSAGES.COMMON.PASSWORDS_NOT_MATCH,
         path: ["confirmPassword"],
     });
 
@@ -50,10 +51,11 @@ const SignUp = () => {
             localStorage.setItem('otpPageAllowed', 'true');
             await authApi.sendOtp({
                 email: data.email,
-                role: "patient"
+                role: "patient",
+                purpose: "signup"
             });
 
-            toast.success("OTP sent to your email");
+            toast.success(AUTH_MESSAGES.COMMON.OTP_SENT);
 
             const expirationTime = Date.now() + 60 * 1000; // 60 seconds from now
             localStorage.setItem('otpExpirationTime', expirationTime.toString());
@@ -67,7 +69,7 @@ const SignUp = () => {
             });
 
         } catch (error: unknown) {
-            let errorMessage = 'An unexpected error occurred';
+            let errorMessage = AUTH_MESSAGES.COMMON.UNEXPECTED_ERROR;
 
             if (axios.isAxiosError(error)) {
                 errorMessage = error.response?.data?.message || error.message;
@@ -90,7 +92,7 @@ const SignUp = () => {
             {/* Sign Up Form */}
             <div className="w-full max-w-md">
                 <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
-                    Sign Up
+                    {AUTH_MESSAGES.SIGNUP.PATIENT_TITLE}
                 </h2>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -99,7 +101,7 @@ const SignUp = () => {
                         <input
                             {...register('name')}
                             type="text"
-                            placeholder="Username"
+                            placeholder={AUTH_MESSAGES.SIGNUP.USERNAME_PLACEHOLDER}
                             className={`w-full px-4 py-3 border rounded-lg ${errors.name ? 'border-red-500' : 'border-gray-300'
                                 }`}
                         />
@@ -115,7 +117,7 @@ const SignUp = () => {
                         <input
                             {...register('email')}
                             type="email"
-                            placeholder="Email"
+                            placeholder={AUTH_MESSAGES.SIGNUP.EMAIL_PLACEHOLDER}
                             className={`w-full px-4 py-3 border rounded-lg ${errors.email ? 'border-red-500' : 'border-gray-300'
                                 }`}
                         />
@@ -131,7 +133,7 @@ const SignUp = () => {
                         <input
                             {...register('phone')}
                             type="tel"
-                            placeholder="Phone Number"
+                            placeholder={AUTH_MESSAGES.SIGNUP.PHONE_PLACEHOLDER}
                             className={`w-full px-4 py-3 border rounded-lg ${errors.phone ? 'border-red-500' : 'border-gray-300'
                                 }`}
                         />
@@ -146,7 +148,7 @@ const SignUp = () => {
                         <input
                             {...register('password')}
                             type={showPassword ? 'text' : 'password'}
-                            placeholder="Password"
+                            placeholder={AUTH_MESSAGES.SIGNUP.PASSWORD_PLACEHOLDER}
                             className={`w-full px-4 py-3 border rounded-lg pr-12 ${errors.password ? 'border-red-500' : 'border-gray-300'
                                 }`}
                         />
@@ -169,7 +171,7 @@ const SignUp = () => {
                         <input
                             {...register('confirmPassword')}
                             type={showConfirmPassword ? 'text' : 'password'}
-                            placeholder="Confirm Password"
+                            placeholder={AUTH_MESSAGES.SIGNUP.CONFIRM_PASSWORD_PLACEHOLDER}
                             className={`w-full px-4 py-3 border rounded-lg pr-12 ${errors.confirmPassword
                                 ? 'border-red-500'
                                 : 'border-gray-300'
@@ -197,15 +199,15 @@ const SignUp = () => {
                         disabled={isLoading}
                         className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
                     >
-                        {isLoading ? 'Signing Up...' : 'Sign Up'}
+                        {isLoading ? AUTH_MESSAGES.COMMON.SIGNING_UP : AUTH_MESSAGES.COMMON.SIGNUP}
                     </button>
                 </form>
 
                 {/* Login Link */}
                 <p className="text-center mt-6 text-gray-600">
-                    Already have an account?{' '}
+                    {AUTH_MESSAGES.SIGNUP.ALREADY_HAVE_ACCOUNT}{' '}
                     <a href="/" className="text-blue-600 font-medium">
-                        Login
+                        {AUTH_MESSAGES.SIGNUP.LOGIN_LINK}
                     </a>
                 </p>
             </div>

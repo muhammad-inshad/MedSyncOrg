@@ -6,21 +6,22 @@ import toast from "react-hot-toast";
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../../../constants/backend/auth/auth.api';
 import axios from 'axios';
+import { AUTH_MESSAGES } from '@/constants/frontend/auth/auth.messages';
 
 const doctorRegistrationSchema = z.object({
-  name: z.string().min(1, 'Doctor name is required'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  name: z.string().min(1, AUTH_MESSAGES.SIGNUP.DOCTOR_NAME_REQUIRED),
+  email: z.string().email(AUTH_MESSAGES.SIGNUP.INVALID_EMAIL),
+  password: z.string().min(6, AUTH_MESSAGES.COMMON.PASSWORD_LENGTH),
   confirmPassword: z.string(),
-  phone: z.string().min(10, 'Phone number must be at least 10 digits'),
-  address: z.string().min(1, 'Address is required'),
-  qualification: z.string().min(1, 'Qualification is required'),
-  experience: z.string().min(1, 'Experience is required'),
-  department: z.string().min(1, 'Department is required'),
-  specialization: z.string().min(1, 'Specialization is required'),
-  about: z.string().min(1, 'About is required'),
+  phone: z.string().min(10, AUTH_MESSAGES.SIGNUP.HOSPITAL_PHONE_MIN),
+  address: z.string().min(1, AUTH_MESSAGES.SIGNUP.ADDRESS_REQUIRED),
+  qualification: z.string().min(1, AUTH_MESSAGES.SIGNUP.QUALIFICATION_REQUIRED),
+  experience: z.string().min(1, AUTH_MESSAGES.SIGNUP.EXPERIENCE_REQUIRED),
+  department: z.string().min(1, AUTH_MESSAGES.SIGNUP.DEPARTMENT_REQUIRED),
+  specialization: z.string().min(1, AUTH_MESSAGES.SIGNUP.SPECIALIZATION_REQUIRED),
+  about: z.string().min(1, AUTH_MESSAGES.SIGNUP.ABOUT_REQUIRED),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: AUTH_MESSAGES.COMMON.PASSWORDS_NOT_MATCH,
   path: ["confirmPassword"],
 });
 
@@ -56,7 +57,7 @@ const DoctorRegistrationForm: React.FC = () => {
 
       await authApi.signup(formData);
 
-      toast.success('Registration successful! Please login.');
+      toast.success(AUTH_MESSAGES.SIGNUP.REGISTRATION_SUCCESS_LOGIN);
       navigate(`/login/doctor`);
       reset();
       setProfileImageFile(null);
@@ -64,11 +65,11 @@ const DoctorRegistrationForm: React.FC = () => {
       setProfilePreview('');
       setLicensePreview('');
     } catch (error: unknown) {
-      let msg = 'Something went wrong';
+      let msg = AUTH_MESSAGES.COMMON.SOMETHING_WENT_WRONG;
       if (axios.isAxiosError(error) && error.response?.data?.message) {
         msg = error.response.data.message;
       }
-      toast.error(`Registration failed: ${msg}`);
+      toast.error(`${AUTH_MESSAGES.SIGNUP.HOSPITAL_FAILED_PREFIX} ${msg}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -105,23 +106,23 @@ const DoctorRegistrationForm: React.FC = () => {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-gray-800">Doctor Registration</h1>
-          <p className="text-sm text-gray-500 mt-1">Fill in your details to create an account.</p>
+          <h1 className="text-2xl font-semibold text-gray-800">{AUTH_MESSAGES.SIGNUP.DOCTOR_TITLE}</h1>
+          <p className="text-sm text-gray-500 mt-1">{AUTH_MESSAGES.SIGNUP.DOCTOR_SUBTITLE}</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
           {/* Personal Info */}
           <div>
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Personal Information</h2>
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{AUTH_MESSAGES.SIGNUP.PERSONAL_INFO}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Full Name</label>
+                <label className={labelClass}>{AUTH_MESSAGES.SIGNUP.NAME_LABEL}</label>
                 <input {...register('name')} className={inputClass(!!errors.name)} placeholder="Dr. John Doe" />
                 {errors.name && <p className={errorClass}>{errors.name.message}</p>}
               </div>
               <div>
-                <label className={labelClass}>Phone Number</label>
+                <label className={labelClass}>{AUTH_MESSAGES.SIGNUP.PHONE_LABEL}</label>
                 <input {...register('phone')} type="tel" className={inputClass(!!errors.phone)} placeholder="+91 98765 43210" />
                 {errors.phone && <p className={errorClass}>{errors.phone.message}</p>}
               </div>
@@ -129,13 +130,13 @@ const DoctorRegistrationForm: React.FC = () => {
           </div>
 
           <div>
-            <label className={labelClass}>Email Address</label>
+            <label className={labelClass}>{AUTH_MESSAGES.COMMON.EMAIL}</label>
             <input {...register('email')} type="email" className={inputClass(!!errors.email)} placeholder="doctor@example.com" />
             {errors.email && <p className={errorClass}>{errors.email.message}</p>}
           </div>
 
           <div>
-            <label className={labelClass}>Clinic / Hospital Address</label>
+            <label className={labelClass}>{AUTH_MESSAGES.SIGNUP.ADDRESS_LABEL_HOSPITAL}</label>
             <textarea {...register('address')} rows={2} className={inputClass(!!errors.address)} placeholder="123 Medical Street, Malappuram, Kerala" />
             {errors.address && <p className={errorClass}>{errors.address.message}</p>}
           </div>
@@ -144,12 +145,12 @@ const DoctorRegistrationForm: React.FC = () => {
 
           {/* Professional Info */}
           <div>
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Professional Details</h2>
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{AUTH_MESSAGES.SIGNUP.PROFESSIONAL_DETAILS}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Qualification</label>
+                <label className={labelClass}>{AUTH_MESSAGES.SIGNUP.QUALIFICATION_LABEL}</label>
                 <select {...register('qualification')} className={inputClass(!!errors.qualification)}>
-                  <option value="">Select</option>
+                  <option value="">{AUTH_MESSAGES.SIGNUP.SELECT}</option>
                   <option value="MBBS">MBBS</option>
                   <option value="MD">MD</option>
                   <option value="MS">MS</option>
@@ -162,14 +163,14 @@ const DoctorRegistrationForm: React.FC = () => {
                 {errors.qualification && <p className={errorClass}>{errors.qualification.message}</p>}
               </div>
               <div>
-                <label className={labelClass}>Years of Experience</label>
+                <label className={labelClass}>{AUTH_MESSAGES.SIGNUP.EXPERIENCE_LABEL}</label>
                 <input {...register('experience')} className={inputClass(!!errors.experience)} placeholder="e.g. 8" />
                 {errors.experience && <p className={errorClass}>{errors.experience.message}</p>}
               </div>
               <div>
-                <label className={labelClass}>Department</label>
+                <label className={labelClass}>{AUTH_MESSAGES.SIGNUP.DEPARTMENT_LABEL}</label>
                 <select {...register('department')} className={inputClass(!!errors.department)}>
-                  <option value="">Select</option>
+                  <option value="">{AUTH_MESSAGES.SIGNUP.SELECT}</option>
                   <option value="cardiology">Cardiology</option>
                   <option value="neurology">Neurology</option>
                   <option value="orthopedics">Orthopedics</option>
@@ -183,9 +184,9 @@ const DoctorRegistrationForm: React.FC = () => {
                 {errors.department && <p className={errorClass}>{errors.department.message}</p>}
               </div>
               <div>
-                <label className={labelClass}>Specialization</label>
+                <label className={labelClass}>{AUTH_MESSAGES.SIGNUP.SPECIALIZATION_LABEL}</label>
                 <select {...register('specialization')} className={inputClass(!!errors.specialization)}>
-                  <option value="">Select</option>
+                  <option value="">{AUTH_MESSAGES.SIGNUP.SELECT}</option>
                   <option value="interventional-cardiology">Interventional Cardiology</option>
                   <option value="pediatric-neurology">Pediatric Neurology</option>
                   <option value="spine-surgery">Spine Surgery</option>
@@ -200,12 +201,12 @@ const DoctorRegistrationForm: React.FC = () => {
           </div>
 
           <div>
-            <label className={labelClass}>About You</label>
+            <label className={labelClass}>{AUTH_MESSAGES.SIGNUP.ABOUT_YOU}</label>
             <textarea
               {...register('about')}
               rows={4}
               className={inputClass(!!errors.about)}
-              placeholder="Brief professional summary, expertise, achievements..."
+              placeholder={AUTH_MESSAGES.SIGNUP.ABOUT_EXPERTISE_HINT}
             />
             {errors.about && <p className={errorClass}>{errors.about.message}</p>}
           </div>
@@ -214,20 +215,20 @@ const DoctorRegistrationForm: React.FC = () => {
 
           {/* Documents */}
           <div>
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Documents</h2>
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{AUTH_MESSAGES.SIGNUP.DOCUMENTS}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
               {/* Profile Photo */}
               <div>
-                <label className={labelClass}>Profile Photo</label>
+                <label className={labelClass}>{AUTH_MESSAGES.SIGNUP.PROFILE_PHOTO}</label>
                 <div className="flex items-center gap-3">
                   {profilePreview ? (
                     <img src={profilePreview} alt="Profile" className="w-14 h-14 rounded-full object-cover border border-gray-200" />
                   ) : (
-                    <div className="w-14 h-14 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400 text-xs">Photo</div>
+                    <div className="w-14 h-14 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400 text-xs">{AUTH_MESSAGES.SIGNUP.PHOTO_PLACEHOLDER}</div>
                   )}
                   <label className="cursor-pointer text-sm text-blue-600 hover:underline">
-                    Upload
+                    {AUTH_MESSAGES.SIGNUP.UPLOAD}
                     <input type="file" accept="image/*" onChange={handleProfileChange} className="hidden" />
                   </label>
                 </div>
@@ -235,11 +236,11 @@ const DoctorRegistrationForm: React.FC = () => {
 
               {/* License */}
               <div>
-                <label className={labelClass}>Medical License</label>
+                <label className={labelClass}>{AUTH_MESSAGES.SIGNUP.MEDICAL_LICENSE}</label>
                 <label className="cursor-pointer block border border-dashed border-gray-300 rounded-md px-3 py-4 text-center hover:bg-gray-50 transition">
                   <input type="file" accept="image/*" onChange={handleLicenseChange} className="hidden" />
                   <p className="text-sm text-gray-500">
-                    {licenseImageFile ? licenseImageFile.name : 'Click to upload license'}
+                    {licenseImageFile ? licenseImageFile.name : AUTH_MESSAGES.SIGNUP.CLICK_TO_UPLOAD_LICENSE}
                   </p>
                 </label>
                 {licensePreview && (
@@ -253,16 +254,16 @@ const DoctorRegistrationForm: React.FC = () => {
 
           {/* Password */}
           <div>
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Account Security</h2>
+            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">{AUTH_MESSAGES.SIGNUP.ACCOUNT_SECURITY}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className={labelClass}>Password</label>
-                <input {...register('password')} type="password" className={inputClass(!!errors.password)} placeholder="Min. 6 characters" />
+                <label className={labelClass}>{AUTH_MESSAGES.COMMON.PASSWORD}</label>
+                <input {...register('password')} type="password" className={inputClass(!!errors.password)} placeholder={AUTH_MESSAGES.SIGNUP.PASSWORD_HINT} />
                 {errors.password && <p className={errorClass}>{errors.password.message}</p>}
               </div>
               <div>
-                <label className={labelClass}>Confirm Password</label>
-                <input {...register('confirmPassword')} type="password" className={inputClass(!!errors.confirmPassword)} placeholder="Re-enter password" />
+                <label className={labelClass}>{AUTH_MESSAGES.COMMON.CONFIRM_PASSWORD}</label>
+                <input {...register('confirmPassword')} type="password" className={inputClass(!!errors.confirmPassword)} placeholder={AUTH_MESSAGES.SIGNUP.CONFIRM_PASSWORD_HINT} />
                 {errors.confirmPassword && <p className={errorClass}>{errors.confirmPassword.message}</p>}
               </div>
             </div>
@@ -275,13 +276,13 @@ const DoctorRegistrationForm: React.FC = () => {
               disabled={isSubmitting}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium py-2.5 rounded-md transition"
             >
-              {isSubmitting ? 'Submitting...' : 'Create Account'}
+              {isSubmitting ? AUTH_MESSAGES.SIGNUP.SUBMITTING : AUTH_MESSAGES.SIGNUP.CREATE_ACCOUNT}
             </button>
           </div>
 
           <p className="text-center text-xs text-gray-400">
-            Already have an account?{' '}
-            <a href="/login/doctor" className="text-blue-600 hover:underline">Login</a>
+            {AUTH_MESSAGES.SIGNUP.ALREADY_HAVE_ACCOUNT}{' '}
+            <a href="/login/doctor" className="text-blue-600 hover:underline">{AUTH_MESSAGES.SIGNUP.LOGIN_LINK}</a>
           </p>
 
         </form>

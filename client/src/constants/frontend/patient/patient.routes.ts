@@ -5,5 +5,10 @@ export const PATIENT_ROUTES = {
     OTP: '/otp',
     SELECTHOSPITAL: "/patient/selectHospital",
     PATIENTPROFILE: "/patient/profile",
-    PATIENTEDIT:"/patient/patient-edit"
+    PATIENTEDIT:"/patient/patient-edit",
+    HOSPITAL_HOMEPAGE:"/patient/hospital-home",
+    HOSPITAL_DOCTOR:"/patient/doctor",
+    DOCTOR_APPOIMENT:"/patient/appoiment",
+    HOSPITAL_DEPaRTMENTS:"/patient/hospital/deprtment",
+    DOCTOR_PROFILE:"/patient/doctor/profile"
 };

@@ -5,24 +5,35 @@ export interface PaginationParams {
     [key: string]: string | number | boolean | undefined;
 }
 
+export type AuthRole = 'patient' | 'doctor' | 'hospital' | 'superadmin' | 'Superadmin';
+
+export interface SendOtpData {
+    email: string;
+    role?: AuthRole;
+    purpose?: string;
+}
+
 export interface LoginData {
     email: string;
     password: string;
-    role?: string;
+    role?: AuthRole;
 }
 
 export interface VerifyOtpData {
     email?: string;
     otp: string;
-    role?: string;
+    role?: AuthRole;
     signupData?: Record<string, unknown>;
 }
 
+export type SignupData = Record<string, unknown> | FormData;
+
 export interface ResetPasswordData {
     email: string;
-    otp: string;
+    otp?: string;
     newPassword?: string;
     password?: string;
+    role?: AuthRole;
 }
 
 export interface UpdateDoctorKycStatusPayload {
