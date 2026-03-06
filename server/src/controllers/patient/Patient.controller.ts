@@ -78,9 +78,43 @@ class PatientController {
   selectedHospital = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      const hospital = await this.patientService.selectedHospital(id);
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 6;
+      const search = (req.query.search as string) || "";
+      const hospital = await this.patientService.selectedHospital(id, page, limit, search);
       return ApiResponse.success(res, MESSAGES.ADMIN.FETCH_SUCCESS, hospital);
     } catch (error: unknown) {
+      next(error);
+    }
+  };
+
+  getdepartments = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj")
+    } catch (error) {
+      next(error)
+    }
+  }
+  getDoctorDepartment = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 6;
+      const search = (req.query.search as string) || "";
+      const doctor = await this.patientService.getDoctorDepartment(id, page, limit, search);
+      return ApiResponse.success(res, MESSAGES.DOCTOR.FETCH_SUCCESS, doctor)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  getDoctorById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      console.log(id,"hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+      const doctor = await this.patientService.getDoctorById(id);
+      return ApiResponse.success(res, MESSAGES.DOCTOR.FETCH_SUCCESS, doctor);
+    } catch (error) {
       next(error);
     }
   };

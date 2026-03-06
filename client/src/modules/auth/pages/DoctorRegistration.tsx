@@ -9,9 +9,9 @@ import axios from 'axios';
 import { AUTH_MESSAGES } from '@/constants/frontend/auth/auth.messages';
 import { getHospitalSession, removeHospitalSession } from '@/utils/session';
 import { COMMON_ROUTES } from '@/constants/frontend/common/common.routes';
-import type{ IDepartment } from '../../../interfaces/IDepartment';
-import type{ IQualification } from '../../../interfaces/IQualification';
-import type{ ISpecialization } from '../../../interfaces/ISpecialization';
+import type { IDepartment } from '../../../interfaces/IDepartment';
+import type { IQualification } from '../../../interfaces/IQualification';
+import type { ISpecialization } from '../../../interfaces/ISpecialization';
 
 const doctorRegistrationSchema = z.object({
   name: z.string().min(1, AUTH_MESSAGES.SIGNUP.DOCTOR_NAME_REQUIRED),
@@ -44,7 +44,7 @@ const DoctorRegistrationForm: React.FC = () => {
   const [specializations, setSpecializations] = useState<ISpecialization[]>([]);
 
   const navigate = useNavigate();
-
+  
   useEffect(() => {
     const selectedHospitalId = getHospitalSession();
     if (!selectedHospitalId) {
@@ -74,8 +74,8 @@ const DoctorRegistrationForm: React.FC = () => {
           authApi.getHospitalDepartments(hospitalId),
           authApi.getHospitalQualifications(hospitalId)
         ]);
-        setDepartments(deptRes.data.data);
-        setQualifications(qualRes.data.data);
+        setDepartments(deptRes.data.data?.data ?? deptRes.data.data ?? []);
+        setQualifications(qualRes.data.data ?? []);
       } catch (error) {
         console.error("Error fetching departments/qualifications:", error);
         toast.error("Failed to load departments or qualifications.");
@@ -94,7 +94,7 @@ const DoctorRegistrationForm: React.FC = () => {
 
       try {
         const res = await authApi.getHospitalSpecializations(hospitalId, selectedDepartment);
-        setSpecializations(res.data.data);
+        setSpecializations(res.data.data ?? []);
       } catch (error) {
         console.error("Error fetching specializations:", error);
       }

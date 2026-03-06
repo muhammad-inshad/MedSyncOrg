@@ -62,7 +62,7 @@ const SelectHospitalDoctor: React.FC = () => {
 
     try {
       setHospitalSession(hospitalId);
-      dispatch(loadHospitalData(hospitalId));
+      dispatch(loadHospitalData({ hospitalId }));
       navigate(COMMON_ROUTES.DOCTORREGISTRATIONFORM);
     } catch (error) {
       console.error("Failed to load hospital:", error);

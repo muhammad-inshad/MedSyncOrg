@@ -8,11 +8,19 @@ import { IUserRepository } from "../../repositories/patient/user.repository.inte
 import { IPatientService } from "./patient.service.interfaces.ts";
 import bcrypt from "bcryptjs";
 import { MESSAGES } from "../../constants/messages.ts";
+import { IDepartmentRepository } from "../../repositories/hospital/department.repository.interface.ts";
+import { IDoctorRepository } from "../../repositories/doctor/doctor.repository.interface.ts";
+import { IDepartment } from "../../models/department.model.ts";
+import { DepartmentResponseDTO, selectedHospitalDto } from "../../dto/hospital/hospital-response.dto.ts";
+import { IDoctor } from "../../models/doctor.model.ts";
+import { DoctorResponseDTO } from "../../dto/doctor/doctor-response.dto.ts";
 
 export class PatientService implements IPatientService {
     constructor(
         private readonly userRepo: IUserRepository,
-        private readonly hospitalRepo: IHospitalRepository
+        private readonly hospitalRepo: IHospitalRepository,
+        private readonly departmentRepo: IDepartmentRepository,
+        private readonly doctorRepo: IDoctorRepository
     ) { }
 
     async getProfile(userId: string) {
@@ -75,30 +83,29 @@ export class PatientService implements IPatientService {
         return await this.userRepo.update(id, updateData);
     }
 
+    async gethospitals(page: number, limit: number, search: string) {
 
- async gethospitals(page: number, limit: number, search: string) {
-    
-    const result = await this.hospitalRepo.findWithPagination({
-        page,
-        limit,
-        search,
-        searchFields: ['hospitalName', 'address'], 
-        filter: { isActive: true } 
-    });
+        const result = await this.hospitalRepo.findWithPagination({
+            page,
+            limit,
+            search,
+            searchFields: ['hospitalName', 'address'],
+            filter: { isActive: true }
+        });
 
-    const cleanedHospitals = result.data.map(hospital => {
-        const hospitalObj = hospital.toObject ? hospital.toObject() : hospital;
-        delete hospitalObj.password;
-        return hospitalObj;
-    });
+        const cleanedHospitals = result.data.map(hospital => {
+            const hospitalObj = hospital.toObject ? hospital.toObject() : hospital;
+            delete hospitalObj.password;
+            return hospitalObj;
+        });
 
-    return {
-        hospitals: cleanedHospitals,
-        totalCount: result.total,
-        totalPages: Math.ceil(result.total / limit),
-        currentPage: page
-    };
-}
+        return {
+            hospitals: cleanedHospitals,
+            totalCount: result.total,
+            totalPages: Math.ceil(result.total / limit),
+            currentPage: page
+        };
+    }
     async changePassword(id: string, currentPassword: string, newPassword: string) {
         const patient = await this.userRepo.findByIdWithPassword(id);
         if (!patient) {
@@ -116,16 +123,95 @@ export class PatientService implements IPatientService {
         await this.userRepo.update(id, { password: hashedNewPassword });
     }
 
-    async selectedHospital(id:string){
-        const Hospital=await this.hospitalRepo.findById(id)
-        if(!Hospital){
-            ApiResponse.throwError(HttpStatusCode.BAD_REQUEST,MESSAGES.ADMIN.NOT_FOUND)
+    async selectedHospital(id: string, page: number = 1, limit: number = 6, search: string = "") {
+        const hospital = await this.hospitalRepo.findById(id)
+        if (!hospital) {
+            ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, MESSAGES.ADMIN.NOT_FOUND)
         }
-         const hospitalObj = Hospital.toObject ? Hospital.toObject() : Hospital
-       
-    return {
-        ...hospitalObj,
-        _id: hospitalObj._id.toString()
+
+        const hospitalObj = hospital.toObject ? hospital.toObject() : hospital
+        const { data: departments, total } = await this.departmentRepo.findByHospitalId(id, page, limit, search);
+
+        const departmentsWithCount = await Promise.all(departments.map(async (dept: IDepartment) => {
+            const doctorCount = await this.doctorRepo.countByDepartment(id, dept._id.toString());
+            return {
+                ...dept.toObject(),
+                doctorCount
+            };
+        })) as DepartmentResponseDTO[];
+
+        return {
+            ...hospitalObj,
+            _id: hospitalObj._id.toString(),
+            departments: departmentsWithCount,
+            totalDepartments: total,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit)
+        } as selectedHospitalDto;
     }
+
+    async getDoctorDepartment(
+        id: string,
+        page: number,
+        limit: number,
+        search: string
+    ) {
+        const department = await this.departmentRepo.findById(id);
+
+        if (!department) {
+            ApiResponse.throwError(
+                HttpStatusCode.NOT_FOUND,
+                MESSAGES.DOCTOR.NOT_FOUND
+            );
+        }
+
+        const result = await this.doctorRepo.findWithPagination({
+            page,
+            limit,
+            search,
+            searchFields: ["name"],
+            filter: {
+                department: id,
+                isActive: true,
+                reviewStatus: "approved"
+            }
+        });
+
+        const doctorData = result.data.map((doctor: IDoctor) => {
+            const docObj = doctor.toObject ? doctor.toObject() : doctor;
+            delete docObj.password;
+            return {
+                ...docObj,
+                id: docObj._id.toString(),
+                _id: docObj._id.toString(),
+                hospital_id: docObj.hospital_id?.toString()
+            };
+        }) as unknown as DoctorResponseDTO[];
+
+        return {
+            data: doctorData,
+            total: result.total
+        };
+    }
+
+    async getDoctorById(id: string) {
+        const doctor = await this.doctorRepo.findById(id);
+
+        if (!doctor || !doctor.isActive || doctor.reviewStatus !== "approved") {
+            ApiResponse.throwError(
+                HttpStatusCode.NOT_FOUND,
+                MESSAGES.DOCTOR.NOT_FOUND
+            );
+        }
+
+        const docObj = doctor.toObject ? doctor.toObject() : doctor;
+        delete docObj.password;
+
+        return {
+            ...docObj,
+            id: docObj._id.toString(),
+            _id: docObj._id.toString(),
+            hospital_id: docObj.hospital_id?.toString()
+        } as unknown as DoctorResponseDTO;
     }
 }

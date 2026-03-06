@@ -2,5 +2,5 @@ import { IDepartment } from "../../models/department.model.ts";
 import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
 
 export interface IDepartmentRepository extends IBaseRepository<IDepartment> {
-    findByHospitalId(hospitalId: string): Promise<IDepartment[]>;
+    findByHospitalId(hospitalId: string, page?: number, limit?: number, search?: string): Promise<{ data: IDepartment[], total: number }>;
 }

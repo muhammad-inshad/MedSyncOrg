@@ -1,5 +1,5 @@
 export interface HospitalResponseDTO {
-  _id:string;
+  _id: string;
   hospitalName: string;
   logo?: string;
   address: string;
@@ -21,5 +21,8 @@ export interface HospitalResponseDTO {
   pincode: string;
   about?: string;
   licence?: string;
-  
+  departments: any[];
+  totalDepartments: number;
+  currentPage: number;
+  totalPages: number;
 }

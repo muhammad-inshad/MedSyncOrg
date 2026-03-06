@@ -15,6 +15,9 @@ import { IHospitalRepository } from "../../../repositories/hospital/hospital.rep
 import { HospitalMapper } from "../../../mappers/hospital.mapper.ts";
 import { IHospital } from "../../../models/hospital.model.ts";
 import { Types } from "mongoose";
+import { IDepartmentRepository } from "../../../repositories/hospital/department.repository.interface.ts";
+import { IQualificationRepository } from "../../../repositories/hospital/qualification.repository.interface.ts";
+import { ISpecializationRepository } from "../../../repositories/hospital/specialization.repository.interface.ts";
 
 
 export class DoctorAuthService implements IDoctorAuthService {
@@ -22,8 +25,11 @@ export class DoctorAuthService implements IDoctorAuthService {
         private readonly _doctorRepo: IDoctorRepository,
         private readonly _tokenService: ITokenService,
         private readonly _doctorMapper: DoctorMapper,
-        private readonly _hospitalRepo:IHospitalRepository,
-        private readonly _hospitalMapper:HospitalMapper
+        private readonly _hospitalRepo: IHospitalRepository,
+        private readonly _hospitalMapper: HospitalMapper,
+        private readonly _departmentRepo: IDepartmentRepository,
+        private readonly _qualificationRepo: IQualificationRepository,
+        private readonly _specializationRepo: ISpecializationRepository
     ) {
     }
     async registerDoctor(body: DoctorDTO, files: DoctorUploadFiles) {
@@ -115,28 +121,43 @@ export class DoctorAuthService implements IDoctorAuthService {
     }
 
     async getAvailableHospitals(page: number, limit: number, search: string) {
-    const filter: FilterQuery<IHospital> = {
-        reviewStatus: "approved",
-        isActive: true
-    };
-    if (search) {
-        filter.$or = [
-            { hospitalName: { $regex: search, $options: "i" } },
-            { address: { $regex: search, $options: "i" } }
-        ];
+        const filter: FilterQuery<IHospital> = {
+            reviewStatus: "approved",
+            isActive: true
+        };
+        if (search) {
+            filter.$or = [
+                { hospitalName: { $regex: search, $options: "i" } },
+                { address: { $regex: search, $options: "i" } }
+            ];
+        }
+
+        const result = await this._hospitalRepo.findWithPagination({
+            page,
+            limit,
+            filter,
+        });
+
+        return {
+            hospitals: result.data.map(h => this._hospitalMapper.toDTO(h)),
+            total: result.total,
+            totalPages: Math.ceil(result.total / limit),
+            currentPage: page
+        };
     }
 
-    const result = await this._hospitalRepo.findWithPagination({
-        page,
-        limit,
-        filter,
-    });
+    async getHospitalDepartments(hospitalId: string) {
+        return this._departmentRepo.findByHospitalId(hospitalId);
+    }
 
-    return {
-        hospitals: result.data.map(h => this._hospitalMapper.toDTO(h)), 
-        total: result.total,
-        totalPages: Math.ceil(result.total / limit),
-        currentPage: page 
-    };
-}
+    async getHospitalQualifications(hospitalId: string) {
+        return this._qualificationRepo.findByHospitalId(hospitalId);
+    }
+
+    async getHospitalSpecializations(hospitalId: string, departmentId?: string) {
+        if (departmentId) {
+            return this._specializationRepo.findByDepartmentId(departmentId);
+        }
+        return this._specializationRepo.findByHospitalId(hospitalId);
+    }
 }

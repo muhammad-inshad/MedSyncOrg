@@ -1,20 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store/store";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import { patientApi } from "@/constants/backend/patient/patient.api";
+import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
 
 interface Doctor {
+  id: string;
   name: string;
-  specialty: string;
+  specialization: string;
+  profileImage: string;
 }
-
-const doctors: Doctor[] = [
-  { name: "Doctor's Name", specialty: "NEUROLOGY" },
-  { name: "Doctor's Name", specialty: "NEUROLOGY" },
-  { name: "Doctor's Name", specialty: "NEUROLOGY" },
-  { name: "Doctor's Name", specialty: "NEUROLOGY" },
-  { name: "Doctor's Name", specialty: "NEUROLOGY" },
-  { name: "Doctor's Name", specialty: "NEUROLOGY" },
-];
 
 const testimonials = [
   {
@@ -101,10 +99,45 @@ const InstagramIcon = () => (
 
 export default function PatientDoctor() {
   const [activeTestimonial, setActiveTestimonial] = useState<number>(0);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const limit = 6;
+
+  const navigate = useNavigate();
+  const { departmentId } = useParams();
+  const searchQuery = useSelector((state: RootState) => state.search.query);
+
+  const getDoctors = async (id: string, page: number, query: string) => {
+    try {
+      const res = await patientApi.getDoctorsByDepartment(id, page, limit, query);
+      if (res.data.success) {
+        setDoctors(res.data.data.data);
+        setTotalCount(res.data.data.total);
+        setTotalPages(Math.ceil(res.data.data.total / limit));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (!departmentId) {
+      navigate(PATIENT_ROUTES.HOSPITAL_DEPaRTMENTS);
+      return;
+    }
+    getDoctors(departmentId, currentPage, searchQuery);
+  }, [departmentId, currentPage, searchQuery]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
 
   return (
     <div className="font-sans text-gray-800 bg-white">
- <Navbar/>
+      <Navbar />
       {/* ── HERO BANNER ── */}
       <section className="relative h-44 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-[#0d2b4e]/80 to-[#1a8fd1]/60" />
@@ -123,53 +156,107 @@ export default function PatientDoctor() {
 
       {/* ── DOCTOR GRID ── */}
       <section className="px-[7%] py-16 bg-white">
-        <div className="grid grid-cols-3 gap-6 max-w-4xl mx-auto mb-6">
-          {doctors.map((doc, i) => (
-            <div
-              key={i}
-              className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100"
-            >
-              {/* Photo */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-10">
+          {doctors.length > 0 ? (
+            doctors.map((doc, i) => (
               <div
-                className="h-52 flex items-end justify-center"
-                style={{ background: "linear-gradient(180deg,#c8dff0,#a8cce8)" }}
+                key={i}
+                className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex flex-col"
               >
+                {/* Photo */}
                 <div
-                  className="w-28 h-44 rounded-t-[56px]"
-                  style={{ background: "rgba(255,255,255,0.3)" }}
-                />
-              </div>
-
-              {/* Info */}
-              <div className="bg-[#dbeeff] px-4 py-3 text-center">
-                <p className="text-[#0d2b4e] font-semibold text-sm mb-0.5">{doc.name}</p>
-                <p className="text-[#1a8fd1] text-[11px] tracking-widest font-bold mb-2.5">
-                  {doc.specialty}
-                </p>
-                <div className="flex justify-center gap-2.5">
-                  {[<LinkedInIcon />, <FacebookIcon />, <InstagramIcon />].map((icon, j) => (
+                  className="h-64 flex items-end justify-center overflow-hidden bg-gray-100"
+                  style={{ background: "linear-gradient(180deg,#c8dff0,#a8cce8)" }}
+                >
+                  {doc.profileImage ? (
+                    <img
+                      src={doc.profileImage}
+                      alt={doc.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
                     <div
-                      key={j}
-                      className="w-7 h-7 rounded-full bg-[#1a8fd1] flex items-center justify-center text-white cursor-pointer hover:bg-[#0d2b4e] transition-colors"
-                    >
-                      {icon}
-                    </div>
-                  ))}
+                      className="w-28 h-44 rounded-t-[56px]"
+                      style={{ background: "rgba(255,255,255,0.3)" }}
+                    />
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="bg-[#dbeeff] px-4 py-4 text-center">
+                  <p className="text-[#0d2b4e] font-bold text-base mb-1">{doc.name}</p>
+                  <p className="text-[#1a8fd1] text-[10px] tracking-widest font-black uppercase mb-3">
+                    {doc.specialization}
+                  </p>
+                  <div className="flex justify-center gap-3">
+                    {[<LinkedInIcon />, <FacebookIcon />, <InstagramIcon />].map((icon, j) => (
+                      <div
+                        key={j}
+                        className="w-8 h-8 rounded-full bg-[#1a8fd1] flex items-center justify-center text-white cursor-pointer hover:bg-[#0d2b4e] transition-colors shadow-sm"
+                      >
+                        {icon}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Button */}
+                <div className="bg-white px-4 py-4 mt-auto">
+                  <button
+                    onClick={() => navigate(`/patient/doctor-profile/${doc.id}`)}
+                    className="w-full bg-[#0d2b4e] text-white text-sm font-bold py-2.5 rounded-lg hover:bg-[#163a68] transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer shadow-md"
+                  >
+                    View Profile
+                  </button>
                 </div>
               </div>
-
-              {/* Button */}
-              <div className="bg-white px-4 py-2.5 text-center">
-                <button className="w-full bg-[#0d2b4e] text-white text-sm font-semibold py-2 rounded hover:bg-[#163a68] transition-colors cursor-pointer">
-                  View Profile
-                </button>
-              </div>
+            ))
+          ) : (
+            <div className="col-span-full py-20 text-center">
+              <p className="text-gray-400 text-lg italic">No doctors found in this department.</p>
             </div>
-          ))}
+          )}
         </div>
 
-        {/* Showing entries info */}
-        <p className="text-gray-400 text-xs text-center">Showing 1 to 6 of 32 entries</p>
+        {/* Status and Pagination */}
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 border-t border-gray-100 pt-8">
+          <p className="text-gray-400 text-xs font-medium order-2 md:order-1">
+            Showing {(currentPage - 1) * limit + 1} to {Math.min(currentPage * limit, totalCount)} of {totalCount} entries
+          </p>
+
+          {totalPages > 1 && (
+            <div className="flex gap-2 order-1 md:order-2">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+                className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors text-[#0d2b4e]"
+              >
+                Previous
+              </button>
+
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => handlePageChange(i + 1)}
+                  className={`w-10 h-10 rounded-lg text-sm font-bold transition-all ${currentPage === i + 1
+                      ? "bg-[#1a8fd1] text-white shadow-lg"
+                      : "bg-white border border-gray-200 text-[#0d2b4e] hover:bg-gray-50"
+                    }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+                className="px-4 py-2 rounded-lg border border-gray-200 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors text-[#0d2b4e]"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
       </section>
 
       {/* ── TESTIMONIAL ── */}
@@ -203,9 +290,8 @@ export default function PatientDoctor() {
               <button
                 key={i}
                 onClick={() => setActiveTestimonial(i)}
-                className={`w-2.5 h-2.5 rounded-full border-0 cursor-pointer transition-colors ${
-                  activeTestimonial === i ? "bg-white" : "bg-white/40"
-                }`}
+                className={`w-2.5 h-2.5 rounded-full border-0 cursor-pointer transition-colors ${activeTestimonial === i ? "bg-white" : "bg-white/40"
+                  }`}
               />
             ))}
           </div>
@@ -225,24 +311,21 @@ export default function PatientDoctor() {
           {contactCards.map((card, i) => (
             <div
               key={i}
-              className={`rounded-lg px-5 py-7 text-center ${
-                card.dark ? "bg-[#0d2b4e]" : "bg-[#dbeeff]"
-              }`}
+              className={`rounded-lg px-5 py-7 text-center ${card.dark ? "bg-[#0d2b4e]" : "bg-[#dbeeff]"
+                }`}
             >
               <div className="flex justify-center mb-3">{card.icon}</div>
               <p
-                className={`text-[11px] tracking-widest font-bold mb-2.5 ${
-                  card.dark ? "text-white/70" : "text-[#1a8fd1]"
-                }`}
+                className={`text-[11px] tracking-widest font-bold mb-2.5 ${card.dark ? "text-white/70" : "text-[#1a8fd1]"
+                  }`}
               >
                 {card.label}
               </p>
               {card.lines.map((line, j) => (
                 <p
                   key={j}
-                  className={`text-xs leading-5 ${
-                    card.dark ? "text-white" : "text-gray-600"
-                  }`}
+                  className={`text-xs leading-5 ${card.dark ? "text-white" : "text-gray-600"
+                    }`}
                 >
                   {line}
                 </p>
@@ -251,7 +334,7 @@ export default function PatientDoctor() {
           ))}
         </div>
       </section>
-      <Footer/>
+      <Footer />
     </div>
   );
 }

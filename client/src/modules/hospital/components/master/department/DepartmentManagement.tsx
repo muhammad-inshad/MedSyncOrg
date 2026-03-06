@@ -92,7 +92,6 @@ const ImageUploadField = ({
   );
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
 
 const ModalForm = ({
   isOpen,
@@ -241,7 +240,6 @@ const DepartmentManagement = () => {
   const [editErrors, setEditErrors] = useState<Partial<DepartmentForm>>({});
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
 
-  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);

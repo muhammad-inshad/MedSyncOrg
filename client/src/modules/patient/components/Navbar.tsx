@@ -121,9 +121,13 @@ const Navbar = () => {
       About us
     </NavLink>
 
-    <NavLink to="/services" current={location.pathname} onClick={closeMobileMenu}>
-      Services
-    </NavLink>
+   <NavLink
+  to={PATIENT_ROUTES.HOSPITAL_DEPaRTMENTS}
+  current={location.pathname}
+  onClick={closeMobileMenu}
+>
+  Department
+</NavLink>
 
     <NavLink to="/doctors" current={location.pathname} onClick={closeMobileMenu}>
       Doctors

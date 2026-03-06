@@ -15,7 +15,7 @@ export interface HospitalResponseDTO {
   about?: string;
   licence?: string;
   income: number;
-   images: {
+  images: {
     landscape: string[];
     medicalTeam: string[];
     patientCare: string[];
@@ -43,8 +43,16 @@ export interface AuthHOspitalPayload {
   exp: number;
 }
 
+export interface DepartmentResponseDTO {
+  _id: string;
+  departmentName: string;
+  description?: string;
+  image?: string;
+  doctorCount?: number;
+}
+
 export interface selectedHospitalDto {
-  _id:string;
+  _id: string;
   hospitalName: string;
   logo?: string;
   address: string;
@@ -66,23 +74,27 @@ export interface selectedHospitalDto {
   pincode: string;
   about?: string;
   licence?: string;
-  
+
+  departments: DepartmentResponseDTO[];
+  totalDepartments: number;
+  currentPage: number;
+  totalPages: number;
 }
 
 
 export interface IHospitalUpdateDTO {
-    hospitalName?: string;
-    logo?: string;
-    address?: string;
-    email?: string;
-    phone?: string;
-    since?: number | string;
-    pincode?: string;
-    about?: string;
-    licence?: string;
-    isActive?: boolean | string;
-    password?: string;
-    confirmPassword?: string;
-    subscription?: string | IHospital['subscription'];
-    images?: string | IHospital['images'];
+  hospitalName?: string;
+  logo?: string;
+  address?: string;
+  email?: string;
+  phone?: string;
+  since?: number | string;
+  pincode?: string;
+  about?: string;
+  licence?: string;
+  isActive?: boolean | string;
+  password?: string;
+  confirmPassword?: string;
+  subscription?: string | IHospital['subscription'];
+  images?: string | IHospital['images'];
 }

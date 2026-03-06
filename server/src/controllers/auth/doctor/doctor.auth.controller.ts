@@ -58,16 +58,47 @@ export class DoctorAuthController implements IDoctorAuthController {
     }
   };
 
-  selectHospitals=async(req:Request,res:Response,next:NextFunction)=>{
+  selectHospitals = async (req: Request, res: Response, next: NextFunction) => {
     try {
-     
+
       const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 6;
-        const search = (req.query.search as string) || "";
-        const result = await this._doctorAuthService.getAvailableHospitals(page, limit, search);
-        return ApiResponse.success(res, "Hospitals fetched successfully", result);
+      const limit = parseInt(req.query.limit as string) || 6;
+      const search = (req.query.search as string) || "";
+      const result = await this._doctorAuthService.getAvailableHospitals(page, limit, search);
+      return ApiResponse.success(res, "Hospitals fetched successfully", result);
     } catch (error: unknown) {
-        next(error);
+      next(error);
     }
   }
+
+  getHospitalDepartments = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { hospitalId } = req.params;
+      const result = await this._doctorAuthService.getHospitalDepartments(hospitalId);
+      return ApiResponse.success(res, "Departments fetched successfully", result);
+    } catch (error: unknown) {
+      next(error);
+    }
+  };
+
+  getHospitalQualifications = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { hospitalId } = req.params;
+      const result = await this._doctorAuthService.getHospitalQualifications(hospitalId);
+      return ApiResponse.success(res, "Qualifications fetched successfully", result);
+    } catch (error: unknown) {
+      next(error);
+    }
+  };
+
+  getHospitalSpecializations = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { hospitalId } = req.params;
+      const { departmentId } = req.query;
+      const result = await this._doctorAuthService.getHospitalSpecializations(hospitalId, departmentId as string);
+      return ApiResponse.success(res, "Specializations fetched successfully", result);
+    } catch (error: unknown) {
+      next(error);
+    }
+  };
 }

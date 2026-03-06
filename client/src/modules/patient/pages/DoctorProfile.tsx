@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import { patientApi } from "@/constants/backend/patient/patient.api";
+import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
+import { toast } from "react-hot-toast";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -13,55 +17,21 @@ interface Review {
   rating: number;
 }
 
-interface DoctorQualification {
-  name: string;
-  age?: number;
-  degree: string;
-  specialist: string;
-  graduatedFrom: string;
-  experience: string;
-}
-
 interface Doctor {
+  id: string;
   _id: string;
   name: string;
-  image?: string;
-  bio: string;
-  qualification: DoctorQualification;
+  profileImage?: string;
+  about: string;
+  specialization: string;
+  qualification: string;
+  experience: string;
   reviews?: Review[];
+  consultationTime?: {
+    start: string;
+    end: string;
+  };
 }
-
-// ── Fallback Data ─────────────────────────────────────────────────────────────
-
-const FALLBACK_DOCTOR: Doctor = {
-  _id: "1",
-  name: "Dr. Arun Dev",
-  bio: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque placerat scelerisque tortor ornare ornare. Quisque placerat scelerisque tortor ornare ornare Convallis felis vitae tortor augue. Velit nascetur proin massa in. Consequat faucibus porttitor enim Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque placerat scelerisque tortor ornare ornare. Quisque placerat scelerisque tortor ornare ornare Convallis felis vitae tortor augue. Velit nascetur proin massa in. Consequat faucibus porttitor enim Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque placerat scelerisque tortor ornare ornare. Quisque placerat scelerisque tortor ornare ornare Convallis felis vitae tortor augue. Velit nascetur proin massa in. Consequat faucibus porttitor enim Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque placerat scelerisque tortor ornare ornare. Quisque placerat scelerisque tortor ornare ornare Convallis felis vitae tortor augue. Velit nascetur proin massa in. Consequat faucibus porttitor enim Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque placerat scelerisque tortor ornare ornare. Quisque placerat scelerisque tortor ornare ornare Convallis felis vitae tortor augue. Velit nascetur proin massa in. Consequat faucibus porttitor enim et.`,
-  qualification: {
-    name: "arun dev",
-    age: 32,
-    degree: "MBBS MD",
-    specialist: "Psychiatrists",
-    graduatedFrom: "indernational university",
-    experience: "22 year",
-  },
-  reviews: [
-    {
-      _id: "r1",
-      author: "Patient",
-      date: "22/2/2202",
-      comment: "this hospital is very good and service is also good over all is good",
-      rating: 4,
-    },
-    {
-      _id: "r2",
-      author: "Patient",
-      date: "15/3/2024",
-      comment: "Excellent doctor, very professional and caring. Highly recommended.",
-      rating: 5,
-    },
-  ],
-};
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -114,14 +84,39 @@ const CopyIcon = () => (
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export default function DoctorProfile() {
+  const { doctorId } = useParams();
+  const navigate = useNavigate();
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [showAllReviews, setShowAllReviews] = useState(false);
 
-  // In real usage: const doctor = useAppSelector(...) or receive as prop
-  const doctor: Doctor = FALLBACK_DOCTOR;
-  const { qualification, reviews = [] } = doctor;
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      if (!doctorId) {
+        navigate(PATIENT_ROUTES.HOSPITAL_DEPaRTMENTS);
+        return;
+      }
+      try {
+        setLoading(true);
+        const res = await patientApi.getDoctorDetails(doctorId);
+        if (res.data.success) {
+          setDoctor(res.data.data);
+        } else {
+          toast.error(res.data.message || "Failed to fetch doctor details");
+          navigate(-1);
+        }
+      } catch (error) {
+        console.error("Error fetching doctor:", error);
+        toast.error("An error occurred while fetching doctor details");
+        navigate(-1);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 1);
+    fetchDoctor();
+  }, [doctorId, navigate]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -129,20 +124,31 @@ export default function DoctorProfile() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1a8fd1]"></div>
+      </div>
+    );
+  }
+
+  if (!doctor) return null;
+
+  const reviews = doctor.reviews || [];
+  const visibleReviews = showAllReviews ? reviews : reviews.slice(0, 1);
+
   const contactCards = [
-    { icon: <PhoneIcon />,   label: "EMERGENCY",     lines: ["(237) 681-812-255", "(237) 666-331-894"], dark: false },
-    { icon: <LocationIcon />,label: "LOCATION",      lines: ["0123 Some place", "9876 Some country"],   dark: true  },
-    { icon: <EmailIcon />,   label: "EMAIL",         lines: ["fildineeeoe@gmil.com", "myebstudios@gmail.com"], dark: false },
-    { icon: <ClockIcon />,   label: "WORKING HOURS", lines: ["Mon-Sat 09:00-20:00", "Sunday Emergency only"],  dark: false },
+    { icon: <PhoneIcon />, label: "EMERGENCY", lines: ["(237) 681-812-255", "(237) 666-331-894"], dark: false },
+    { icon: <LocationIcon />, label: "LOCATION", lines: ["0123 Some place", "9876 Some country"], dark: true },
+    { icon: <EmailIcon />, label: "EMAIL", lines: ["medsync@example.com", "support@medsync.com"], dark: false },
+    { icon: <ClockIcon />, label: "WORKING HOURS", lines: [doctor.consultationTime ? `${doctor.consultationTime.start}-${doctor.consultationTime.end}` : "Mon-Sat 09:00-20:00", "Sunday Emergency only"], dark: false },
   ];
 
-  const qualRows: { label: string; value: string }[] = [
-    { label: "name",             value: qualification.name },
-    { label: "age",              value: String(qualification.age ?? "") },
-    { label: "degree",           value: qualification.degree },
-    { label: "specialist",       value: `- ${qualification.specialist}` },
-    { label: "graduated from",   value: `- ${qualification.graduatedFrom}` },
-    { label: "experience",       value: `${qualification.experience}` },
+  const detailsRows: { label: string; value: string }[] = [
+    { label: "Name", value: doctor.name },
+    { label: "Specialization", value: doctor.specialization },
+    { label: "Qualification", value: doctor.qualification },
+    { label: "Experience", value: `${doctor.experience}` },
   ];
 
   return (
@@ -155,36 +161,21 @@ export default function DoctorProfile() {
         <div className="absolute inset-0 bg-[#0d2b4e]/55" />
         <div className="relative z-10 px-[7%] h-full flex flex-col justify-end pb-7">
           <p className="text-white/60 text-xs mb-2 font-sans">
-            Home / News / Health Care
+            Home / Doctors / Profile
           </p>
           <h1 className="text-[clamp(20px,3vw,30px)] font-extrabold text-white leading-tight mb-3">
             A passion for putting patients first.
           </h1>
           <div className="flex items-center gap-5 text-white/75 text-xs font-sans">
             <span className="flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-              </svg>
-              Monday 05, September 2021
+              <StarRating rating={5} />
+              Expert Care
             </span>
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-1.5 capitalize">
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
               </svg>
-              By Author
-            </span>
-            <span className="flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              68
-            </span>
-            <span className="flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5 text-red-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
-              </svg>
-              86
+              {doctor.specialization}
             </span>
           </div>
         </div>
@@ -193,18 +184,18 @@ export default function DoctorProfile() {
 
       {/* ── MAIN CONTENT ── */}
       <section className="px-[7%] py-14 bg-white">
-        <div className="max-w-5xl mx-auto flex gap-10 items-start">
+        <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-10 items-start">
 
           {/* ── LEFT COLUMN ── */}
           <div className="flex-1 min-w-0">
             {/* Doctor Photo */}
-            <div className="mb-8 flex justify-center">
+            <div className="mb-8 flex justify-center md:justify-start">
               <div
                 className="w-56 h-64 rounded-xl overflow-hidden shadow-md"
                 style={{ background: "linear-gradient(180deg,#c8dff0,#a8cce8)" }}
               >
-                {doctor.image ? (
-                  <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover" />
+                {doctor.profileImage ? (
+                  <img src={doctor.profileImage} alt={doctor.name} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-end justify-center">
                     <div className="w-36 h-52 rounded-t-[70px]" style={{ background: "rgba(255,255,255,0.3)" }} />
@@ -213,26 +204,27 @@ export default function DoctorProfile() {
               </div>
             </div>
 
-            {/* Bio */}
-            <p className="text-gray-600 text-sm leading-relaxed">
-              {doctor.bio}
+            {/* About */}
+            <h2 className="text-xl font-bold text-[#0d2b4e] mb-4">About Dr. {doctor.name.split(' ')[0]}</h2>
+            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
+              {doctor.about}
             </p>
           </div>
 
           {/* ── RIGHT COLUMN ── */}
-          <div className="w-72 shrink-0 flex flex-col gap-5">
+          <div className="w-full md:w-72 shrink-0 flex flex-col gap-5">
 
-            {/* Qualification Card */}
-            <div className="border border-gray-200 rounded-xl p-5">
+            {/* Details Card */}
+            <div className="border border-gray-200 rounded-xl p-5 shadow-sm">
               <h3 className="text-[#1a8fd1] font-bold text-lg mb-4" style={{ fontFamily: "'Georgia', serif" }}>
-                qulification
+                Details
               </h3>
               <div className="flex flex-col gap-3">
-                {qualRows.map((row) => (
+                {detailsRows.map((row) => (
                   <div key={row.label}>
                     <p className="text-gray-700 text-sm">
-                      <span className="text-gray-500">{row.label}:</span>
-                      {row.value ? ` ${row.value}` : ""}
+                      <span className="text-gray-500 font-medium">{row.label}:</span>
+                      {row.value ? ` ${row.value}` : " -"}
                     </p>
                     <div className="h-px bg-gray-100 mt-2" />
                   </div>
@@ -241,93 +233,63 @@ export default function DoctorProfile() {
             </div>
 
             {/* Appointment Button */}
-            <button className="w-full bg-[#dbeeff] text-[#1a8fd1] font-semibold text-sm py-3 rounded-lg hover:bg-[#1a8fd1] hover:text-white transition-colors cursor-pointer">
-              Appointment
+            <button className="w-full bg-[#dbeeff] text-[#1a8fd1] font-bold text-sm py-3 rounded-lg hover:bg-[#1a8fd1] hover:text-white transition-all cursor-pointer shadow-sm">
+              Book Appointment
             </button>
 
             {/* Copy & Refer Button */}
             <button
               onClick={handleCopy}
-              className="w-full bg-[#0d2b4e] text-white font-semibold text-sm py-3 rounded-lg hover:bg-[#163a68] transition-colors cursor-pointer flex items-center justify-center gap-2"
+              className="w-full bg-[#0d2b4e] text-white font-semibold text-sm py-3 rounded-lg hover:bg-[#163a68] transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-md"
             >
               <CopyIcon />
-              {copied ? "Link Copied!" : "copy and reffer"}
+              {copied ? "Link Copied!" : "Copy Profile Link"}
             </button>
 
             {/* Reviews */}
-            <div>
-              <p className="text-gray-500 text-xs font-semibold mb-3 tracking-wide">reviews</p>
-              <div className="flex flex-col gap-4">
-                {visibleReviews.map((review) => (
-                  <div key={review._id} className="flex gap-3 items-start">
-                    {/* Avatar */}
-                    <div className="w-10 h-10 rounded-full bg-[#dbeeff] flex items-center justify-center shrink-0 overflow-hidden">
-                      {review.avatar ? (
-                        <img src={review.avatar} alt={review.author} className="w-full h-full object-cover" />
-                      ) : (
-                        <svg className="w-6 h-6 text-[#1a8fd1]" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                        </svg>
-                      )}
-                    </div>
+            {reviews.length > 0 && (
+              <div>
+                <p className="text-gray-500 text-xs font-semibold mb-3 tracking-wide uppercase">Patient Reviews</p>
+                <div className="flex flex-col gap-4">
+                  {visibleReviews.map((review) => (
+                    <div key={review._id} className="flex gap-3 items-start p-3 bg-gray-50 rounded-lg">
+                      <div className="w-10 h-10 rounded-full bg-[#dbeeff] flex items-center justify-center shrink-0 overflow-hidden">
+                        {review.avatar ? (
+                          <img src={review.avatar} alt={review.author} className="w-full h-full object-cover" />
+                        ) : (
+                          <svg className="w-6 h-6 text-[#1a8fd1]" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                          </svg>
+                        )}
+                      </div>
 
-                    <div className="flex-1 min-w-0">
-                      <p className="text-gray-400 text-[11px] mb-1">{review.date}</p>
-                      <p className="text-gray-600 text-xs leading-relaxed mb-1.5">{review.comment}</p>
-                      <StarRating rating={review.rating} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-gray-400 text-[10px] mb-1">{review.date}</p>
+                        <p className="text-gray-600 text-xs leading-relaxed mb-1.5">{review.comment}</p>
+                        <StarRating rating={review.rating} />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+
+                {reviews.length > 1 && (
+                  <button
+                    onClick={() => setShowAllReviews(!showAllReviews)}
+                    className="flex items-center gap-1.5 text-[#1a8fd1] text-xs font-semibold mt-3 hover:underline cursor-pointer"
+                  >
+                    {showAllReviews ? "Show less" : "Show all reviews"}
+                    <svg className={`w-3.5 h-3.5 transition-transform ${showAllReviews ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                  </button>
+                )}
               </div>
-
-              {reviews.length > 1 && (
-                <button
-                  onClick={() => setShowAllReviews(!showAllReviews)}
-                  className="flex items-center gap-1.5 text-[#1a8fd1] text-xs font-semibold mt-3 hover:underline cursor-pointer"
-                >
-                  {showAllReviews ? "show less" : "show more"}
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d={showAllReviews ? "M4.5 15.75l7.5-7.5 7.5 7.5" : "M8.25 4.5l7.5 7.5-7.5 7.5"} />
-                  </svg>
-                </button>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* ── CONTACT ── */}
-      <section className="px-[7%] py-16 bg-white">
-        <div className="text-center mb-12">
-          <p className="text-[#1a8fd1] text-xs tracking-[0.15em] font-bold">GET IN TOUCH</p>
-          <h2 className="text-[clamp(22px,3vw,34px)] font-extrabold text-[#0d2b4e] mt-2">
-            Contact
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-4 gap-4 max-w-4xl mx-auto">
-          {contactCards.map((card, i) => (
-            <div
-              key={i}
-              className={`rounded-lg px-5 py-7 text-center ${
-                card.dark ? "bg-[#0d2b4e]" : "bg-[#dbeeff]"
-              }`}
-            >
-              <div className={`flex justify-center mb-3 ${card.dark ? "text-white" : "text-[#1a8fd1]"}`}>
-                {card.icon}
-              </div>
-              <p className={`text-[11px] tracking-widest font-bold mb-2.5 ${card.dark ? "text-white/70" : "text-[#1a8fd1]"}`}>
-                {card.label}
-              </p>
-              {card.lines.map((line, j) => (
-                <p key={j} className={`text-xs leading-5 ${card.dark ? "text-white" : "text-gray-600"}`}>
-                  {line}
-                </p>
-              ))}
-            </div>
-          ))}
-        </div>
-      </section>
+    
 
       <Footer />
     </div>

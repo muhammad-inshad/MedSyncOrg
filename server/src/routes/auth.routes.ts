@@ -16,8 +16,8 @@ const router = Router();
 
 router.post('/send-otp', otpController.sendOtp.bind(otpController));
 router.post("/RegistorDoctor", upload.fields([
-    { name: "profileImage", maxCount: 1 },
-    { name: "license", maxCount: 1 }
+  { name: "profileImage", maxCount: 1 },
+  { name: "license", maxCount: 1 }
 ]), doctorAuthController.registerDoctor.bind(doctorAuthController));
 router.post("/Superadmin/login", superAdminAuthController.login.bind(superAdminAuthController));
 router.post('/hospital/login', hospitalAuthController.loginHospital.bind(hospitalAuthController))
@@ -42,6 +42,9 @@ router.get('/google/callback',
   googleAuthController.handleCallback.bind(googleAuthController)
 );
 
-router.get("/selectHospitals",doctorAuthController.selectHospitals.bind(doctorAuthController))
+router.get("/selectHospitals", doctorAuthController.selectHospitals.bind(doctorAuthController))
+router.get("/hospitals/:hospitalId/departments", doctorAuthController.getHospitalDepartments.bind(doctorAuthController));
+router.get("/hospitals/:hospitalId/qualifications", doctorAuthController.getHospitalQualifications.bind(doctorAuthController));
+router.get("/hospitals/:hospitalId/specializations", doctorAuthController.getHospitalSpecializations.bind(doctorAuthController));
 
 export default router;

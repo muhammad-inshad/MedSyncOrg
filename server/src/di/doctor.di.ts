@@ -10,12 +10,22 @@ import { DoctorAuthMiddleware } from "../middleware/doctor.auth.middleware.ts";
 import { HospitalMapper } from "../mappers/hospital.mapper.ts";
 import { HospitalRepository } from "../repositories/hospital/hospital.repository.ts";
 import { HospitalModel } from "../models/hospital.model.ts";
+import { DepartmentRepository } from "../repositories/hospital/implementation/department.repository.ts";
+import DepartmentModel from "../models/department.model.ts";
+import { QualificationRepository } from "../repositories/hospital/implementation/qualification.repository.ts";
+import QualificationModel from "../models/qualification.model.ts";
+import { SpecializationRepository } from "../repositories/hospital/implementation/specialization.repository.ts";
+import SpecializationModel from "../models/specialization.model.ts";
 
 export const doctorContainer = () => {
   const doctorRepository = new DoctorRepository(DoctorModel);
   const tokenService = new TokenService();
-   const hospitalRepo = new HospitalRepository(HospitalModel);
-   const hospitalMapper = new HospitalMapper();
+  const hospitalRepo = new HospitalRepository(HospitalModel);
+  const hospitalMapper = new HospitalMapper();
+  const departmentRepo = new DepartmentRepository(DepartmentModel);
+  const qualificationRepo = new QualificationRepository(QualificationModel);
+  const specializationRepo = new SpecializationRepository();
+
   const doctorService = new DoctorService(
     doctorRepository,
     tokenService
@@ -26,11 +36,14 @@ export const doctorContainer = () => {
     doctorRepository,
     tokenService,
     doctorMapper,
-   hospitalRepo,
-   hospitalMapper
+    hospitalRepo,
+    hospitalMapper,
+    departmentRepo,
+    qualificationRepo,
+    specializationRepo
   );
 
-  
+
 
   const doctorcontroller = new DoctorController(doctorService);
   const doctorAuthController = new DoctorAuthController(doctorAuthService);
