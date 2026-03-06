@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import type { IDepartment } from '@/interfaces/IDepartment';
 import { hospitalApi } from '@/constants/backend/hospital/hospital.api';
+import Pagination from '@/components/Pagination';
 
 interface DepartmentForm {
   departmentName: string;
@@ -14,10 +15,6 @@ interface DepartmentForm {
 }
 
 const EMPTY_FORM: DepartmentForm = { departmentName: '', description: '', image: '', file: null };
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Defined OUTSIDE the parent component so React never remounts them on re-render
-// ─────────────────────────────────────────────────────────────────────────────
 
 const ImageUploadField = ({
   preview,
@@ -224,13 +221,15 @@ const ModalForm = ({
   </div>
 );
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Main component
-// ─────────────────────────────────────────────────────────────────────────────
 
 const DepartmentManagement = () => {
   const [departments, setDepartments] = useState<IDepartment[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [limit] = useState(5);
 
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [addForm, setAddForm] = useState<DepartmentForm>(EMPTY_FORM);
@@ -242,24 +241,34 @@ const DepartmentManagement = () => {
   const [editErrors, setEditErrors] = useState<Partial<DepartmentForm>>({});
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
 
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const fetchDepartments = useCallback(async () => {
     try {
-      const res = await hospitalApi.getDeparment();
-      // res.data is the Axios body, res.data.data is the actual department array
-      setDepartments(res.data.data || []);
+      const res = await hospitalApi.getDeparment({
+        page: currentPage,
+        limit,
+        search: debouncedSearch
+      });
+      const { data, total, limit: resLimit } = res.data.data;
+      setDepartments(data || []);
+      setTotalItems(total || 0);
+      setTotalPages(Math.ceil((total || 0) / (resLimit || limit)) || 1);
     } catch (error) {
       console.error('Failed to fetch departments:', error);
     }
-  }, []);
+  }, [currentPage, limit, debouncedSearch]);
 
   useEffect(() => {
     fetchDepartments();
   }, [fetchDepartments]);
-
-  const filtered = departments.filter((d) =>
-    d.departmentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (d.description || '').toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const handleToggleStatus = async (id: string) => {
     try {
@@ -297,13 +306,11 @@ const DepartmentManagement = () => {
       if (addForm.file) {
         formData.append('image', addForm.file);
       } else if (addForm.image && !addForm.image.startsWith('data:')) {
-        // This case shouldn't happen for Add, but good for completeness
         formData.append('image', addForm.image);
       }
 
-      const res = await hospitalApi.createDepartment(formData);
-      // res.data.data is the newly created department object
-      setDepartments((prev) => [res.data.data, ...prev]);
+      await hospitalApi.createDepartment(formData);
+      fetchDepartments(); // Refresh current page
       setIsAddOpen(false);
       setAddForm(EMPTY_FORM);
     } catch (error) {
@@ -349,17 +356,13 @@ const DepartmentManagement = () => {
       if (editForm.file) {
         formData.append('image', editForm.file);
       } else if (editForm.image === '') {
-        formData.append('image', ''); // Signal removal
+        formData.append('image', '');
       } else if (editForm.image && !editForm.image.startsWith('data:')) {
         formData.append('image', editForm.image);
       }
 
-      // TODO: Real API call for edit
-      // const res = await hospitalApi.updateDepartment(editTarget._id, formData);
-
-      setDepartments((prev) =>
-        prev.map((d) => d._id === editTarget._id ? { ...d, ...editForm } : d)
-      );
+      await hospitalApi.updateDepartment(editTarget._id, formData);
+      fetchDepartments(); // Refresh current page
       setEditTarget(null);
     } catch (err) {
       console.error('Failed to update:', err);
@@ -413,7 +416,7 @@ const DepartmentManagement = () => {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-10">
           {[
-            { label: 'Total Departments', value: departments.length, icon: LayoutGrid, color: 'text-slate-600', bg: 'bg-slate-100' },
+            { label: 'Total Departments', value: totalItems, icon: LayoutGrid, color: 'text-slate-600', bg: 'bg-slate-100' },
             { label: 'Active', value: departments.filter(d => d.isActive).length, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-100/50' },
             { label: 'Inactive', value: departments.filter(d => !d.isActive).length, icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-100/50' },
             { label: 'Total Doctors', value: departments.reduce((acc, d) => acc + (d.doctors?.length || 0), 0), icon: Users, color: 'text-blue-600', bg: 'bg-blue-100/50' },
@@ -432,7 +435,7 @@ const DepartmentManagement = () => {
 
         {/* Table */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          {filtered.length === 0 ? (
+          {departments.length === 0 ? (
             <div className="py-20 text-center">
               <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
                 <Search className="w-8 h-8 text-slate-300" />
@@ -441,80 +444,87 @@ const DepartmentManagement = () => {
               <p className="text-slate-500">Try adjusting your search criteria.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-slate-50/50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Department</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Description</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Doctors</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filtered.map((dept) => (
-                    <tr key={dept._id} className="hover:bg-slate-50/50 transition-all group">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-xl overflow-hidden ring-2 ring-slate-100 group-hover:ring-blue-100 flex-shrink-0">
-                            {dept.image ? (
-                              <img src={dept.image} alt={dept.departmentName} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full bg-blue-50 flex items-center justify-center">
-                                <Building2 className="w-6 h-6 text-blue-400" />
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <div className="text-sm font-bold text-slate-900 group-hover:text-blue-600 uppercase">
-                              {dept.departmentName}
-                            </div>
-                            <div className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-tight">
-                              Department
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 max-w-xs">
-                        <div className="flex items-start gap-2 text-xs font-medium text-slate-600">
-                          <FileText className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
-                          <span className="line-clamp-2">
-                            {dept.description || <span className="text-slate-300 italic">No description</span>}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                          <Users className="w-3.5 h-3.5 text-blue-500" />
-                          {dept.doctors?.length || 0} Doctors
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">{getStatusBadge(dept.isActive)}</td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => openEdit(dept)}
-                            className="p-2 rounded-lg bg-slate-50 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleToggleStatus(dept._id)}
-                            className={`p-2 rounded-lg shadow-sm transition-all ${dept.isActive
-                              ? 'bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white'
-                              : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white'
-                              }`}
-                          >
-                            <Ban className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead className="bg-slate-50/50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Department</th>
+                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Description</th>
+                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Doctors</th>
+                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {departments.map((dept) => (
+                      <tr key={dept._id} className="hover:bg-slate-50/50 transition-all group">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl overflow-hidden ring-2 ring-slate-100 group-hover:ring-blue-100 flex-shrink-0">
+                              {dept.image ? (
+                                <img src={dept.image} alt={dept.departmentName} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full bg-blue-50 flex items-center justify-center">
+                                  <Building2 className="w-6 h-6 text-blue-400" />
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <div className="text-sm font-bold text-slate-900 group-hover:text-blue-600 uppercase">
+                                {dept.departmentName}
+                              </div>
+                              <div className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-tight">
+                                Department
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 max-w-xs">
+                          <div className="flex items-start gap-2 text-xs font-medium text-slate-600">
+                            <FileText className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
+                            <span className="line-clamp-2">
+                              {dept.description || <span className="text-slate-300 italic">No description</span>}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                            <Users className="w-3.5 h-3.5 text-blue-500" />
+                            {dept.doctors?.length || 0} Doctors
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">{getStatusBadge(dept.isActive)}</td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => openEdit(dept)}
+                              className="p-2 rounded-lg bg-slate-50 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleToggleStatus(dept._id)}
+                              className={`p-2 rounded-lg shadow-sm transition-all ${dept.isActive
+                                ? 'bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white'
+                                : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white'
+                                }`}
+                            >
+                              <Ban className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </>
           )}
         </div>
       </div>

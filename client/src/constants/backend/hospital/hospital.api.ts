@@ -58,8 +58,8 @@ export const hospitalApi = {
     getHospitalById: (id: string) => {
         return api.get(HOSPITAL_MANAGEMENT.GET_HOSPITAL_DATA(id))
     },
-    getDeparment: () => {
-        return api.get(HOSPITAL_MANAGEMENT.GET_HOSPITAL_DEPARTMENT)
+    getDeparment: (params?: { page?: number; limit?: number; search?: string }) => {
+        return api.get(HOSPITAL_MANAGEMENT.GET_HOSPITAL_DEPARTMENT, { params })
     },
     createDepartment: (data: FormData) => {
         return api.post(HOSPITAL_MANAGEMENT.CREATEDEPARTMENT, data, {
@@ -68,7 +68,58 @@ export const hospitalApi = {
             },
         });
     },
+    updateDepartment: (id: string, data: FormData) => {
+        return api.patch(HOSPITAL_MANAGEMENT.UPDATE_DEPARTMENT(id), data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    },
     toggleDepartmentStatus: (id: string) => {
         return api.patch(HOSPITAL_MANAGEMENT.DEPARTMENT_TOGGLE(id));
+    },
+
+    // Qualifications
+    getQualifications: (params?: { page?: number; limit?: number; search?: string }) => {
+        return api.get(HOSPITAL_MANAGEMENT.GET_QUALIFICATION, { params })
+    },
+    createQualification: (data: FormData) => {
+        return api.post(HOSPITAL_MANAGEMENT.CREATE_QUALIFICATION, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    },
+    updateQualification: (id: string, data: FormData) => {
+        return api.patch(HOSPITAL_MANAGEMENT.UPDATE_QUALIFICATION(id), data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    },
+    toggleQualificationStatus: (id: string) => {
+        return api.patch(HOSPITAL_MANAGEMENT.QUALIFICATION_TOGGLE(id));
+    },
+
+    // Specializations
+    getSpecializations: (params?: { page?: number; limit?: number; search?: string }) => {
+        return api.get(HOSPITAL_MANAGEMENT.GET_SPECIALIZATION, { params })
+    },
+    createSpecialization: (data: FormData) => {
+        return api.post(HOSPITAL_MANAGEMENT.CREATE_SPECIALIZATION, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    },
+    updateSpecialization: (id: string, data: FormData) => {
+        return api.patch(HOSPITAL_MANAGEMENT.UPDATE_SPECIALIZATION(id), data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    },
+    toggleSpecializationStatus: (id: string) => {
+        return api.patch(HOSPITAL_MANAGEMENT.SPECIALIZATION_TOGGLE(id));
     }
 };

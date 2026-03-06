@@ -10,8 +10,14 @@ export class DepartmentService implements IDepartmentService {
         private readonly _imageService: ICloudinaryImageService
     ) { }
 
-    async getDepartments(hospitalId: string): Promise<IDepartment[]> {
-        return await this._departmentRepo.findByHospitalId(hospitalId);
+    async getDepartments(hospitalId: string, page: number, limit: number, search?: string): Promise<{ data: IDepartment[]; total: number; page: number; limit: number }> {
+        return await this._departmentRepo.findWithPagination({
+            page,
+            limit,
+            search,
+            searchFields: ["departmentName", "description"],
+            filter: { hospital_id: new Types.ObjectId(hospitalId) }
+        });
     }
 
     async createDepartment(hospitalId: string, data: Partial<IDepartment>, file?: Express.Multer.File): Promise<IDepartment> {

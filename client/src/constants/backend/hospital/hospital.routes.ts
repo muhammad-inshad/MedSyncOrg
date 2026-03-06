@@ -23,4 +23,13 @@ export const HOSPITAL_MANAGEMENT = {
     GET_HOSPITAL_DEPARTMENT: "/api/hospital/department",
     CREATEDEPARTMENT: "/api/hospital/createDepartment",
     DEPARTMENT_TOGGLE: (id: string) => `/api/hospital/departmentToggle/${id}`,
+    UPDATE_DEPARTMENT: (id: string) => `/api/hospital/department/${id}`,
+    GET_QUALIFICATION: "/api/hospital/qualification",
+    CREATE_QUALIFICATION: "/api/hospital/createQualification",
+    QUALIFICATION_TOGGLE: (id: string) => `/api/hospital/qualificationToggle/${id}`,
+    UPDATE_QUALIFICATION: (id: string) => `/api/hospital/qualification/${id}`,
+    GET_SPECIALIZATION: "/api/hospital/specialization",
+    CREATE_SPECIALIZATION: "/api/hospital/createSpecialization",
+    SPECIALIZATION_TOGGLE: (id: string) => `/api/hospital/specializationToggle/${id}`,
+    UPDATE_SPECIALIZATION: (id: string) => `/api/hospital/specialization/${id}`,
 };

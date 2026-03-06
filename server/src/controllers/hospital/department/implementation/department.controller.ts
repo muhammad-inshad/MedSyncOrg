@@ -13,8 +13,17 @@ export class DepartmentManagementController {
             if (!hospitalId) {
                 return ApiResponse.unauthorized(res, "Hospital ID not found in token");
             }
-            const departments = await this._departmentService.getDepartments(hospitalId);
-            return ApiResponse.success(res, "Departments fetched successfully", departments, HttpStatusCode.OK);
+
+            const { page = 1, limit = 10, search = "" } = req.query;
+
+            const paginatedDepartments = await this._departmentService.getDepartments(
+                hospitalId,
+                Number(page),
+                Number(limit),
+                search as string
+            );
+
+            return ApiResponse.success(res, "Departments fetched successfully", paginatedDepartments, HttpStatusCode.OK);
         } catch (error) {
             next(error);
         }
@@ -28,8 +37,25 @@ export class DepartmentManagementController {
             }
             const departmentData: Partial<IDepartment> = req.body;
             const file = req.file;
+
             const department = await this._departmentService.createDepartment(hospitalId, departmentData, file);
             return ApiResponse.success(res, "Department created successfully", department, HttpStatusCode.CREATED);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async updateDepartment(req: Request, res: Response, next: NextFunction) {
+        try {
+            const { id } = req.params;
+            const departmentData: Partial<IDepartment> = req.body;
+            const file = req.file;
+
+            const department = await this._departmentService.updateDepartment(id, departmentData, file);
+            if (!department) {
+                return ApiResponse.notFound(res, "Department not found");
+            }
+            return ApiResponse.success(res, "Department updated successfully", department, HttpStatusCode.OK);
         } catch (error) {
             next(error);
         }

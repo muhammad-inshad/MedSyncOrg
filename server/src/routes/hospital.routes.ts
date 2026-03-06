@@ -2,7 +2,11 @@ import express from "express";
 import { upload } from "../middleware/multer.middleware.ts";
 import { hospitalContainer } from "../di/hospital.di.ts";
 import { departmentContiner } from "../di/department.di.ts";
+import { qualificationContainer } from "../di/qualification.di.ts";
+import { specializationContainer } from "../di/specialization.di.ts";
 const router = express.Router();
+const { specializationManagement } = specializationContainer()
+const { qualificationManagement } = qualificationContainer()
 const { departmentManagement } = departmentContiner()
 const { doctorManagement, patientManagement, hospitalController } = hospitalContainer();
 
@@ -40,5 +44,16 @@ router.patch("/patientEdit/:id", upload.single('image'), patientManagement.updat
 router.post("/createDepartment", upload.single("image"), departmentManagement.createDepartment.bind(departmentManagement));
 router.get("/department", departmentManagement.getDepartments.bind(departmentManagement));
 router.patch("/departmentToggle/:id", departmentManagement.toggleStatus.bind(departmentManagement));
+router.patch("/department/:id", upload.single("image"), departmentManagement.updateDepartment.bind(departmentManagement));
+
+router.get("/qualification", qualificationManagement.getQualifications.bind(qualificationManagement));
+router.post("/createQualification", upload.single("image"), qualificationManagement.createQualification.bind(qualificationManagement));
+router.patch("/qualificationToggle/:id", qualificationManagement.toggleStatus.bind(qualificationManagement));
+router.patch("/qualification/:id", upload.single("image"), qualificationManagement.updateQualification.bind(qualificationManagement));
+
+router.get("/specialization", specializationManagement.getSpecializations.bind(specializationManagement));
+router.post("/createSpecialization", upload.single("image"), specializationManagement.createSpecialization.bind(specializationManagement));
+router.patch("/specializationToggle/:id", specializationManagement.toggleStatus.bind(specializationManagement));
+router.patch("/specialization/:id", upload.single("image"), specializationManagement.updateSpecialization.bind(specializationManagement));
 
 export default router;
