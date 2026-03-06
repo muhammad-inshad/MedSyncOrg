@@ -44,7 +44,6 @@ export class PatientManagementController implements IPatientManagementController
       const { id } = req.params;
       const patientData = req.body;
       const patientFile = req.file;
-      console.log("--------------------------------id",id)
       const result = await this._patientManagementService.updatePatient(id, patientData, patientFile);
       return ApiResponse.success(res, "Patient updated successfully", result);
     } catch (error: unknown) {

@@ -7,16 +7,23 @@ import { DoctorUploadFiles } from "../../../types/doctor.types.ts";
 import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 import { DoctorMapper } from "../../../mappers/doctor.mapper.ts";
 import { IDoctorAuthService, DoctorAuthResponse } from "./doctor.auth.service.interface.ts";
-
+import { FilterQuery } from "mongoose";
 import { ITokenService } from "../../token/token.service.interface.ts";
 import { IDoctorRepository } from "../../../repositories/doctor/doctor.repository.interface.ts";
 import { DoctorDTO, LoginDTO } from "../../../dto/auth/signup.dto.ts";
+import { IHospitalRepository } from "../../../repositories/hospital/hospital.repository.interface.ts";
+import { HospitalMapper } from "../../../mappers/hospital.mapper.ts";
+import { IHospital } from "../../../models/hospital.model.ts";
+import { Types } from "mongoose";
+
 
 export class DoctorAuthService implements IDoctorAuthService {
     constructor(
         private readonly _doctorRepo: IDoctorRepository,
         private readonly _tokenService: ITokenService,
-        private readonly _doctorMapper: DoctorMapper
+        private readonly _doctorMapper: DoctorMapper,
+        private readonly _hospitalRepo:IHospitalRepository,
+        private readonly _hospitalMapper:HospitalMapper
     ) {
     }
     async registerDoctor(body: DoctorDTO, files: DoctorUploadFiles) {
@@ -44,6 +51,7 @@ export class DoctorAuthService implements IDoctorAuthService {
             name: body.name,
             email: body.email,
             password: hashedPassword,
+            hospital_id: new Types.ObjectId(body.hospital_id),
             phone: body.phone,
             address: body.address,
             specialization: body.specialization,
@@ -105,4 +113,30 @@ export class DoctorAuthService implements IDoctorAuthService {
 
         return { user: this._doctorMapper.toDTO(doctor), accessToken, refreshToken };
     }
+
+    async getAvailableHospitals(page: number, limit: number, search: string) {
+    const filter: FilterQuery<IHospital> = {
+        reviewStatus: "approved",
+        isActive: true
+    };
+    if (search) {
+        filter.$or = [
+            { hospitalName: { $regex: search, $options: "i" } },
+            { address: { $regex: search, $options: "i" } }
+        ];
+    }
+
+    const result = await this._hospitalRepo.findWithPagination({
+        page,
+        limit,
+        filter,
+    });
+
+    return {
+        hospitals: result.data.map(h => this._hospitalMapper.toDTO(h)), 
+        total: result.total,
+        totalPages: Math.ceil(result.total / limit),
+        currentPage: page 
+    };
+}
 }

@@ -57,4 +57,17 @@ export class DoctorAuthController implements IDoctorAuthController {
       next(error);
     }
   };
+
+  selectHospitals=async(req:Request,res:Response,next:NextFunction)=>{
+    try {
+     
+      const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 6;
+        const search = (req.query.search as string) || "";
+        const result = await this._doctorAuthService.getAvailableHospitals(page, limit, search);
+        return ApiResponse.success(res, "Hospitals fetched successfully", result);
+    } catch (error: unknown) {
+        next(error);
+    }
+  }
 }

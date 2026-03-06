@@ -34,4 +34,18 @@ export const authApi = {
 
     googleLogin: () =>
         window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`,
+
+   getHospitals: (page: number, limit: number, search: string) => 
+        api.get(AUTH_MANAGEMENT.SELECTHOSPITLADOCTOR, {
+            params: {
+                page,
+                limit,
+                search
+            }
+        }),
+
+    RegistorDoctor: (data: FormData) => {
+  return api.post(AUTH_MANAGEMENT.REGISTORDOCTOR, data);
+}
+
 };

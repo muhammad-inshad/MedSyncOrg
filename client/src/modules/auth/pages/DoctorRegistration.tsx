@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { authApi } from '../../../constants/backend/auth/auth.api';
 import axios from 'axios';
 import { AUTH_MESSAGES } from '@/constants/frontend/auth/auth.messages';
+import { getHospitalSession, removeHospitalSession } from '@/utils/session';
+import { COMMON_ROUTES } from '@/constants/frontend/common/common.routes';
 
 const doctorRegistrationSchema = z.object({
   name: z.string().min(1, AUTH_MESSAGES.SIGNUP.DOCTOR_NAME_REQUIRED),
@@ -36,6 +38,13 @@ const DoctorRegistrationForm: React.FC = () => {
 
   const navigate = useNavigate();
 
+ useEffect(()=>{
+  const selectedHospitalId = getHospitalSession();
+  if(!selectedHospitalId){
+   navigate(COMMON_ROUTES.DOCTORSELECTHOSPITAL)
+  }
+},[])
+
   const {
     register,
     handleSubmit,
@@ -49,15 +58,25 @@ const DoctorRegistrationForm: React.FC = () => {
     try {
       setIsSubmitting(true);
       const formData = new FormData();
+
+      const selectedHospitalId = getHospitalSession();
+    if (selectedHospitalId) {
+      formData.append('hospital_id', selectedHospitalId);
+    } else {
+      toast.error("Please select a hospital first.");
+      return;
+    }
+
       Object.entries(data).forEach(([key, value]) => {
         if (key !== 'confirmPassword' && value) formData.append(key, value as string);
       });
       if (profileImageFile) formData.append('profileImage', profileImageFile);
       if (licenseImageFile) formData.append('license', licenseImageFile);
 
-      await authApi.signup(formData);
+      await authApi.RegistorDoctor(formData);
 
       toast.success(AUTH_MESSAGES.SIGNUP.REGISTRATION_SUCCESS_LOGIN);
+      removeHospitalSession()
       navigate(`/login/doctor`);
       reset();
       setProfileImageFile(null);

@@ -19,6 +19,7 @@ export const AUTH_MESSAGES = {
         CONFIRM_PASSWORD: 'Confirm Password',
         COMPLETING_LOGIN: 'Completing your login...',
         SOMETHING_WENT_WRONG: 'Something went wrong',
+        PLEASE_SELECT_HOSPITAL:"select a hospital please"
     },
     OTP: {
         TITLE: 'Enter OTP',

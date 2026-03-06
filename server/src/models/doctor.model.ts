@@ -55,6 +55,8 @@ const doctorSchema = new Schema<IDoctor>(
       trim: true,
     },
 
+    
+
     email: {
       type: String,
       required: [true, 'Email is required'],

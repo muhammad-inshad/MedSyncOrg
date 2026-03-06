@@ -18,11 +18,12 @@ const Navbar = () => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setSearchQuery(e.target.value));
   };
-
+  const isDoctor=  location.pathname.includes("/doctor/select/hospital")
   const isHiddenPath =
     location.pathname.includes("/login") ||
     location.pathname.includes("/register") ||
     location.pathname.includes("/profile");
+  
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
@@ -72,19 +73,24 @@ const Navbar = () => {
       >
         {isSearchOpen ? <X className="w-6 h-6" /> : <Search className="w-6 h-6" />}
       </button>
+          {!isDoctor && (
+  <>
+    <button
+      aria-label="Profile"
+      onClick={() => navigate(PATIENT_ROUTES.PATIENTPROFILE)}
+      className="text-gray-600 hover:text-blue-600 transition-colors"
+    >
+      <User className="w-6 h-6" />
+    </button>
 
-            <button
-              aria-label="Profile"
-              onClick={() => navigate(PATIENT_ROUTES.PATIENTPROFILE)}
-              className="text-gray-600 hover:text-blue-600 transition-colors"
-            >
-              <User className="w-6 h-6" />
-            </button>
-
-            <button aria-label="Notifications" className="text-gray-600 hover:text-blue-600 transition-colors">
-              <Bell className="w-6 h-6" />
-            </button>
-
+    <button
+      aria-label="Notifications"
+      className="text-gray-600 hover:text-blue-600 transition-colors"
+    >
+      <Bell className="w-6 h-6" />
+    </button>
+  </>
+)}
             {/* Hamburger Button - only on mobile */}
             <button
               aria-label="Toggle menu"
@@ -105,26 +111,34 @@ const Navbar = () => {
       <div className="bg-indigo-900 py-3 px-6 shadow-md hidden md:block">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <nav className="flex items-center gap-8 text-white font-medium">
-            <NavLink to="/patient/dashboard" current={location.pathname} onClick={closeMobileMenu}>
-              Home
-            </NavLink>
-            <NavLink to="/about" current={location.pathname} onClick={closeMobileMenu}>
-              About us
-            </NavLink>
-            <NavLink to="/services" current={location.pathname} onClick={closeMobileMenu}>
-              Services
-            </NavLink>
-            <NavLink to="/doctors" current={location.pathname} onClick={closeMobileMenu}>
-              Doctors
-            </NavLink>
-            <NavLink to="/contact" current={location.pathname} onClick={closeMobileMenu}>
-              Contact
-            </NavLink>
-          </nav>
+           {!isDoctor && (
+  <>
+    <NavLink to="/patient/dashboard" current={location.pathname} onClick={closeMobileMenu}>
+      Home
+    </NavLink>
 
+    <NavLink to="/about" current={location.pathname} onClick={closeMobileMenu}>
+      About us
+    </NavLink>
+
+    <NavLink to="/services" current={location.pathname} onClick={closeMobileMenu}>
+      Services
+    </NavLink>
+
+    <NavLink to="/doctors" current={location.pathname} onClick={closeMobileMenu}>
+      Doctors
+    </NavLink>
+
+    <NavLink to="/contact" current={location.pathname} onClick={closeMobileMenu}>
+      Contact
+    </NavLink>
+  </>
+)}
+          </nav>
+         
           {!isHiddenPath && (
             <button className="bg-blue-400 hover:bg-blue-500 text-white px-6 py-2 rounded-full font-medium transition-colors">
-              Book Appointment
+              {isDoctor?"          ":"Book Appointment"}
             </button>
           )}
         </div>

@@ -55,7 +55,20 @@ export const hospitalApi = {
 
     editHospitalDoctor: (id: string, data: FormData) =>
         api.patch(HOSPITAL_MANAGEMENT.DOCTOR_UPDATE(id), data),
-    getHospitalById:(id:string)=>{
-        api.get(HOSPITAL_MANAGEMENT.GET_HOSPITAL_DATA(id))
+    getHospitalById: (id: string) => {
+        return api.get(HOSPITAL_MANAGEMENT.GET_HOSPITAL_DATA(id))
+    },
+    getDeparment: () => {
+        return api.get(HOSPITAL_MANAGEMENT.GET_HOSPITAL_DEPARTMENT)
+    },
+    createDepartment: (data: FormData) => {
+        return api.post(HOSPITAL_MANAGEMENT.CREATEDEPARTMENT, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    },
+    toggleDepartmentStatus: (id: string) => {
+        return api.patch(HOSPITAL_MANAGEMENT.DEPARTMENT_TOGGLE(id));
     }
 };

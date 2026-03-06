@@ -4,4 +4,5 @@ export const COMMON_ROUTES = {
     FORGETPASSWORD: '/forgot-password',
     RESETPASSWORD: '/reset-password',
     DOCTORREGISTRATIONFORM: "/doctor/signup",
+    DOCTORSELECTHOSPITAL:"/doctor/select/hospital"
 };

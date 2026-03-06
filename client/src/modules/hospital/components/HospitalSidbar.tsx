@@ -22,6 +22,8 @@ import {
   UserPlus,
   X, // Import X to close sidebar
   type LucideIcon,
+  GraduationCap,
+  HeartPulse,
 } from 'lucide-react';
 import { HOSPITAL_ROUTES } from '@/constants/frontend/hospital/hospital.routes';
 
@@ -47,10 +49,12 @@ const HospitalSidbar = ({ isOpen, setIsOpen }: HospitalSidebarProps) => {
     { icon: Stethoscope, label: 'Doctor Management', path: HOSPITAL_ROUTES.HOSPITALDOCTORMANGEMENT },
     { icon: UserCheck, label: 'Doctor KYC', path: HOSPITAL_ROUTES.HOSPITALDOCTORKYC },
     { icon: UserPlus, label: 'Patient Management', path: HOSPITAL_ROUTES.HOSPITALPATIENT },
+    { icon: Building2, label: 'Department',path:HOSPITAL_ROUTES.HOSPITAL_DEPARTMENT_MANGEMENT},
+    {icon:HeartPulse,label:"Specilaization",path:HOSPITAL_ROUTES.HOSPITAL_SPECIALIZATION_MANGEMENT},
+    {icon:GraduationCap ,label:"Qualification",path:HOSPITAL_ROUTES.HOSPITAL_QULIFICATION_MANGEMENT},
     { icon: DollarSign, label: 'Finance' },
     { icon: Wallet, label: 'Payout Management' },
     { icon: RefreshCw, label: 'Return Payment' },
-    { icon: Building2, label: 'Department' },
     { icon: BadgeDollarSign, label: 'Doctor Salary Inc' },
     { icon: UserCheck, label: 'Doctor Selection' },
     { icon: Umbrella, label: 'Doctor Leave Management' },

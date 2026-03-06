@@ -19,5 +19,8 @@ export const HOSPITAL_MANAGEMENT = {
     GET_ALL_PATIENTS: "/api/hospital/getallpatients",
     REAPPLY: "/api/hospital/reapply",
     DOCTOR_UPDATE: (id: string) => `/api/hospital/doctorEdit/${id}`,
-    GET_HOSPITAL_DATA:(id:string)=>`/api/hospital/hosptalData/${id}`,
+    GET_HOSPITAL_DATA: (id: string) => `/api/hospital/hosptalData/${id}`,
+    GET_HOSPITAL_DEPARTMENT: "/api/hospital/department",
+    CREATEDEPARTMENT: "/api/hospital/createDepartment",
+    DEPARTMENT_TOGGLE: (id: string) => `/api/hospital/departmentToggle/${id}`,
 };

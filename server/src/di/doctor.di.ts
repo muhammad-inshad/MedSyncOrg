@@ -7,11 +7,15 @@ import { TokenService } from "../services/token/token.service.ts";
 import { DoctorModel } from "../models/doctor.model.ts";
 import { DoctorMapper } from "../mappers/doctor.mapper.ts";
 import { DoctorAuthMiddleware } from "../middleware/doctor.auth.middleware.ts";
+import { HospitalMapper } from "../mappers/hospital.mapper.ts";
+import { HospitalRepository } from "../repositories/hospital/hospital.repository.ts";
+import { HospitalModel } from "../models/hospital.model.ts";
 
 export const doctorContainer = () => {
   const doctorRepository = new DoctorRepository(DoctorModel);
   const tokenService = new TokenService();
-
+   const hospitalRepo = new HospitalRepository(HospitalModel);
+   const hospitalMapper = new HospitalMapper();
   const doctorService = new DoctorService(
     doctorRepository,
     tokenService
@@ -21,8 +25,12 @@ export const doctorContainer = () => {
   const doctorAuthService = new DoctorAuthService(
     doctorRepository,
     tokenService,
-    doctorMapper
+    doctorMapper,
+   hospitalRepo,
+   hospitalMapper
   );
+
+  
 
   const doctorcontroller = new DoctorController(doctorService);
   const doctorAuthController = new DoctorAuthController(doctorAuthService);

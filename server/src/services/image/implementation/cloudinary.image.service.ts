@@ -9,7 +9,6 @@ export class CloudinaryImageService implements ICloudinaryImageService {
             return uploadBufferToCloudinary(source, folder);
         }
 
-        // Handle Base64
         try {
             const result = await cloudinary.uploader.upload(source, {
                 folder: folder,

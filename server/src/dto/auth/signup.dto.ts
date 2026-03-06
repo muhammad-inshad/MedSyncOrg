@@ -55,7 +55,7 @@ export interface DoctorDTO {
   experience: string;
   department: string;
   about: string;
-
+  hospital_id:string;
   licence: string;
   profileImage: string;
 

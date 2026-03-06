@@ -42,4 +42,6 @@ router.get('/google/callback',
   googleAuthController.handleCallback.bind(googleAuthController)
 );
 
+router.get("/selectHospitals",doctorAuthController.selectHospitals.bind(doctorAuthController))
+
 export default router;

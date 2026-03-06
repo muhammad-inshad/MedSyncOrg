@@ -1,19 +1,20 @@
 import express from "express";
 import { upload } from "../middleware/multer.middleware.ts";
 import { hospitalContainer } from "../di/hospital.di.ts";
-
+import { departmentContiner } from "../di/department.di.ts";
 const router = express.Router();
+const { departmentManagement } = departmentContiner()
 const { doctorManagement, patientManagement, hospitalController } = hospitalContainer();
 
 
 router.get("/getme", hospitalController.getHospitalProfile.bind(hospitalController));
 router.patch("/reapply", hospitalController.reapply.bind(hospitalController));
-router.patch("/hospitals/:id",upload.fields([{ name: "logo", maxCount: 1 },
-    { name: "licence", maxCount: 1 },
-    { name: "landscape", maxCount: 3 },
-    { name: "medicalTeam", maxCount: 3 },
-    { name: "patientCare", maxCount: 3 },
-    { name: "services", maxCount: 3 },]),hospitalController.updateHospital.bind(hospitalController));
+router.patch("/hospitals/:id", upload.fields([{ name: "logo", maxCount: 1 },
+{ name: "licence", maxCount: 1 },
+{ name: "landscape", maxCount: 3 },
+{ name: "medicalTeam", maxCount: 3 },
+{ name: "patientCare", maxCount: 3 },
+{ name: "services", maxCount: 3 },]), hospitalController.updateHospital.bind(hospitalController));
 
 router.get("/getalldoctors", doctorManagement.getAllDoctors.bind(doctorManagement));
 router.patch("/doctorEdit/:id", upload.fields([
@@ -35,5 +36,9 @@ router.patch("/PatientsToggle/:id", patientManagement.patientsToggle.bind(patien
 router.get("/getallpatients", patientManagement.getAllPatient.bind(patientManagement));
 router.post("/patientAdd", upload.single('image'), patientManagement.addPatient.bind(patientManagement));
 router.patch("/patientEdit/:id", upload.single('image'), patientManagement.updatePatient.bind(patientManagement));
+
+router.post("/createDepartment", upload.single("image"), departmentManagement.createDepartment.bind(departmentManagement));
+router.get("/department", departmentManagement.getDepartments.bind(departmentManagement));
+router.patch("/departmentToggle/:id", departmentManagement.toggleStatus.bind(departmentManagement));
 
 export default router;

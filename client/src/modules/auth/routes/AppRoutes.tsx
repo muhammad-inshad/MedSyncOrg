@@ -9,6 +9,7 @@ import ResetPassword from "@/modules/auth/pages/ResetPassword";
 import PublicRoute from "./PublicRoute";
 import GoogleCallback from "../pages/GoogleCallback";
 import DoctorRegistration from "../pages/DoctorRegistration";
+import SelectHospitalDoctor from "../components/SelectHospitalDoctor";
 const AppRoutes = () => {
   return (
     <Routes>
@@ -27,6 +28,7 @@ const AppRoutes = () => {
         <Route path={COMMON_ROUTES.FORGETPASSWORD} element={<Forgetpassword />} />
         <Route path={COMMON_ROUTES.RESETPASSWORD} element={<ResetPassword />} />
         <Route path="/api/auth/google-success" element={<GoogleCallback />} />
+        <Route path={COMMON_ROUTES.DOCTORSELECTHOSPITAL} element={<SelectHospitalDoctor/>}/>
         <Route path={COMMON_ROUTES.DOCTORREGISTRATIONFORM} element={<DoctorRegistration />} />
       </Route>
 
