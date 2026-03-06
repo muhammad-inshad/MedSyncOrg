@@ -28,30 +28,30 @@ const SelectHospitalDoctor: React.FC = () => {
   const searchQuery = useAppSelector((state) => state.search.query);
 
   useEffect(() => {
-   const fetchHospitals = async () => {
-  setLoading(true);
+    const fetchHospitals = async () => {
+      setLoading(true);
 
-  try {
-    const response = await authApi.getHospitals(
-      currentPage,
-      itemsPerPage,
-      searchQuery
-    );
-  
-    const backendResponse = response.data; 
+      try {
+        const response = await authApi.getHospitals(
+          currentPage,
+          itemsPerPage,
+          searchQuery
+        );
 
-    if (backendResponse.success) {
-    
-      setHospitals(backendResponse.data.hospitals ?? []);
+        const backendResponse = response.data;
 
-      setTotalPages(backendResponse.data.totalPages ?? 1);
-    }
-  } catch (error) {
-    console.error("Failed to fetch hospitals:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+        if (backendResponse.success) {
+
+          setHospitals(backendResponse.data.hospitals ?? []);
+
+          setTotalPages(backendResponse.data.totalPages ?? 1);
+        }
+      } catch (error) {
+        console.error("Failed to fetch hospitals:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchHospitals();
   }, [currentPage, searchQuery]);
@@ -61,22 +61,18 @@ const SelectHospitalDoctor: React.FC = () => {
     setSelecting(true);
 
     try {
- 
       setHospitalSession(hospitalId);
-
-      await dispatch(loadHospitalData(hospitalId));
-
+      dispatch(loadHospitalData(hospitalId));
       navigate(COMMON_ROUTES.DOCTORREGISTRATIONFORM);
     } catch (error) {
       console.error("Failed to load hospital:", error);
-    } finally {
       setSelecting(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Navbar/>
+      <Navbar />
       <main className="grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 w-full">
         {loading ? (
           <div className="flex justify-center items-center h-64">

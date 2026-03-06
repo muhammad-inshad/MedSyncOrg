@@ -11,6 +11,9 @@ export const AUTH_MANAGEMENT = {
     HOSPITAL_LOGIN: "/api/auth/Hospital/login",
     SUPERADMIN_LOGIN: "/api/auth/Superadmin/login",
     HOSPITAL_SIGNUP: "/api/auth/hospital/signup",
-    SELECTHOSPITLADOCTOR:"/api/auth/selectHospitals",
-    REGISTORDOCTOR:"/api/auth/RegistorDoctor"
+    SELECTHOSPITLADOCTOR: "/api/auth/selectHospitals",
+    REGISTORDOCTOR: "/api/auth/RegistorDoctor",
+    GET_HOSPITAL_DEPARTMENTS: (hospitalId: string) => `/api/auth/hospitals/${hospitalId}/departments`,
+    GET_HOSPITAL_QUALIFICATIONS: (hospitalId: string) => `/api/auth/hospitals/${hospitalId}/qualifications`,
+    GET_HOSPITAL_SPECIALIZATIONS: (hospitalId: string) => `/api/auth/hospitals/${hospitalId}/specializations`,
 };

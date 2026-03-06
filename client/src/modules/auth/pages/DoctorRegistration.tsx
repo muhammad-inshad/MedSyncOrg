@@ -9,6 +9,9 @@ import axios from 'axios';
 import { AUTH_MESSAGES } from '@/constants/frontend/auth/auth.messages';
 import { getHospitalSession, removeHospitalSession } from '@/utils/session';
 import { COMMON_ROUTES } from '@/constants/frontend/common/common.routes';
+import type{ IDepartment } from '../../../interfaces/IDepartment';
+import type{ IQualification } from '../../../interfaces/IQualification';
+import type{ ISpecialization } from '../../../interfaces/ISpecialization';
 
 const doctorRegistrationSchema = z.object({
   name: z.string().min(1, AUTH_MESSAGES.SIGNUP.DOCTOR_NAME_REQUIRED),
@@ -36,23 +39,68 @@ const DoctorRegistrationForm: React.FC = () => {
   const [licensePreview, setLicensePreview] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [departments, setDepartments] = useState<IDepartment[]>([]);
+  const [qualifications, setQualifications] = useState<IQualification[]>([]);
+  const [specializations, setSpecializations] = useState<ISpecialization[]>([]);
+
   const navigate = useNavigate();
 
- useEffect(()=>{
-  const selectedHospitalId = getHospitalSession();
-  if(!selectedHospitalId){
-   navigate(COMMON_ROUTES.DOCTORSELECTHOSPITAL)
-  }
-},[])
+  useEffect(() => {
+    const selectedHospitalId = getHospitalSession();
+    if (!selectedHospitalId) {
+      navigate(COMMON_ROUTES.DOCTORSELECTHOSPITAL)
+    }
+  }, [])
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
   } = useForm<DoctorRegistrationFormData>({
     resolver: zodResolver(doctorRegistrationSchema),
   });
+
+  const selectedDepartment = watch('department');
+
+  useEffect(() => {
+    const fetchMasterData = async () => {
+      const hospitalId = getHospitalSession();
+      if (!hospitalId) return;
+
+      try {
+        const [deptRes, qualRes] = await Promise.all([
+          authApi.getHospitalDepartments(hospitalId),
+          authApi.getHospitalQualifications(hospitalId)
+        ]);
+        setDepartments(deptRes.data.data);
+        setQualifications(qualRes.data.data);
+      } catch (error) {
+        console.error("Error fetching departments/qualifications:", error);
+        toast.error("Failed to load departments or qualifications.");
+      }
+    };
+    fetchMasterData();
+  }, []);
+
+  useEffect(() => {
+    const fetchSpecializations = async () => {
+      const hospitalId = getHospitalSession();
+      if (!hospitalId || !selectedDepartment) {
+        setSpecializations([]);
+        return;
+      }
+
+      try {
+        const res = await authApi.getHospitalSpecializations(hospitalId, selectedDepartment);
+        setSpecializations(res.data.data);
+      } catch (error) {
+        console.error("Error fetching specializations:", error);
+      }
+    };
+    fetchSpecializations();
+  }, [selectedDepartment]);
 
   const onSubmit = async (data: DoctorRegistrationFormData) => {
     try {
@@ -60,12 +108,12 @@ const DoctorRegistrationForm: React.FC = () => {
       const formData = new FormData();
 
       const selectedHospitalId = getHospitalSession();
-    if (selectedHospitalId) {
-      formData.append('hospital_id', selectedHospitalId);
-    } else {
-      toast.error("Please select a hospital first.");
-      return;
-    }
+      if (selectedHospitalId) {
+        formData.append('hospital_id', selectedHospitalId);
+      } else {
+        toast.error("Please select a hospital first.");
+        return;
+      }
 
       Object.entries(data).forEach(([key, value]) => {
         if (key !== 'confirmPassword' && value) formData.append(key, value as string);
@@ -170,14 +218,9 @@ const DoctorRegistrationForm: React.FC = () => {
                 <label className={labelClass}>{AUTH_MESSAGES.SIGNUP.QUALIFICATION_LABEL}</label>
                 <select {...register('qualification')} className={inputClass(!!errors.qualification)}>
                   <option value="">{AUTH_MESSAGES.SIGNUP.SELECT}</option>
-                  <option value="MBBS">MBBS</option>
-                  <option value="MD">MD</option>
-                  <option value="MS">MS</option>
-                  <option value="DM">DM</option>
-                  <option value="MCh">MCh</option>
-                  <option value="DNB">DNB</option>
-                  <option value="BDS">BDS</option>
-                  <option value="MDS">MDS</option>
+                  {qualifications.map(q => (
+                    <option key={q._id} value={q.name}>{q.name}</option>
+                  ))}
                 </select>
                 {errors.qualification && <p className={errorClass}>{errors.qualification.message}</p>}
               </div>
@@ -190,15 +233,9 @@ const DoctorRegistrationForm: React.FC = () => {
                 <label className={labelClass}>{AUTH_MESSAGES.SIGNUP.DEPARTMENT_LABEL}</label>
                 <select {...register('department')} className={inputClass(!!errors.department)}>
                   <option value="">{AUTH_MESSAGES.SIGNUP.SELECT}</option>
-                  <option value="cardiology">Cardiology</option>
-                  <option value="neurology">Neurology</option>
-                  <option value="orthopedics">Orthopedics</option>
-                  <option value="pediatrics">Pediatrics</option>
-                  <option value="gynecology">Gynecology</option>
-                  <option value="dermatology">Dermatology</option>
-                  <option value="oncology">Oncology</option>
-                  <option value="psychiatry">Psychiatry</option>
-                  <option value="general">General Medicine</option>
+                  {departments.map(d => (
+                    <option key={d._id} value={d._id}>{d.departmentName}</option>
+                  ))}
                 </select>
                 {errors.department && <p className={errorClass}>{errors.department.message}</p>}
               </div>
@@ -206,13 +243,9 @@ const DoctorRegistrationForm: React.FC = () => {
                 <label className={labelClass}>{AUTH_MESSAGES.SIGNUP.SPECIALIZATION_LABEL}</label>
                 <select {...register('specialization')} className={inputClass(!!errors.specialization)}>
                   <option value="">{AUTH_MESSAGES.SIGNUP.SELECT}</option>
-                  <option value="interventional-cardiology">Interventional Cardiology</option>
-                  <option value="pediatric-neurology">Pediatric Neurology</option>
-                  <option value="spine-surgery">Spine Surgery</option>
-                  <option value="neonatology">Neonatology</option>
-                  <option value="fertility">Fertility & IVF</option>
-                  <option value="cosmetic-dermatology">Cosmetic Dermatology</option>
-                  <option value="general">General Practice</option>
+                  {specializations.map(s => (
+                    <option key={s._id} value={s.name}>{s.name}</option>
+                  ))}
                 </select>
                 {errors.specialization && <p className={errorClass}>{errors.specialization.message}</p>}
               </div>

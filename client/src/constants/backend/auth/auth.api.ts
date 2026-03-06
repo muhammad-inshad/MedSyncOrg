@@ -35,7 +35,7 @@ export const authApi = {
     googleLogin: () =>
         window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`,
 
-   getHospitals: (page: number, limit: number, search: string) => 
+    getHospitals: (page: number, limit: number, search: string) =>
         api.get(AUTH_MANAGEMENT.SELECTHOSPITLADOCTOR, {
             params: {
                 page,
@@ -45,7 +45,17 @@ export const authApi = {
         }),
 
     RegistorDoctor: (data: FormData) => {
-  return api.post(AUTH_MANAGEMENT.REGISTORDOCTOR, data);
-}
+        return api.post(AUTH_MANAGEMENT.REGISTORDOCTOR, data);
+    },
+    getHospitalDepartments: (hospitalId: string) =>
+        api.get(AUTH_MANAGEMENT.GET_HOSPITAL_DEPARTMENTS(hospitalId)),
+
+    getHospitalQualifications: (hospitalId: string) =>
+        api.get(AUTH_MANAGEMENT.GET_HOSPITAL_QUALIFICATIONS(hospitalId)),
+
+    getHospitalSpecializations: (hospitalId: string, departmentId?: string) =>
+        api.get(AUTH_MANAGEMENT.GET_HOSPITAL_SPECIALIZATIONS(hospitalId), {
+            params: { departmentId }
+        }),
 
 };
