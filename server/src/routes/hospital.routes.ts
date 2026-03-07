@@ -12,6 +12,7 @@ const { doctorManagement, patientManagement, hospitalController } = hospitalCont
 
 
 router.get("/getme", hospitalController.getHospitalProfile.bind(hospitalController));
+router.get("/selected_hospital/:id", hospitalController.getSelectedHospital.bind(hospitalController));
 router.patch("/reapply", hospitalController.reapply.bind(hospitalController));
 router.patch("/hospitals/:id", upload.fields([{ name: "logo", maxCount: 1 },
 { name: "licence", maxCount: 1 },

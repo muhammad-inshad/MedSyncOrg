@@ -32,4 +32,5 @@ export const HOSPITAL_MANAGEMENT = {
     CREATE_SPECIALIZATION: "/api/hospital/createSpecialization",
     SPECIALIZATION_TOGGLE: (id: string) => `/api/hospital/specializationToggle/${id}`,
     UPDATE_SPECIALIZATION: (id: string) => `/api/hospital/specialization/${id}`,
+    SELECTED_HOSPITAL: (id: string) => `/api/hospital/selected_hospital/${id}`,
 };

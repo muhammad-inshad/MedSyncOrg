@@ -11,7 +11,7 @@ export class SuperAdminAuthController implements ISuperAdminAuthController {
     login = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { email, password } = req.body;
-console.log(email,password)
+            console.log(email, password)
             if (!email || !password) {
                 ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, MESSAGES.VALIDATION.REQUIRED_FIELD);
             }
@@ -23,6 +23,7 @@ console.log(email,password)
                 secure: process.env.NODE_ENV === "production",
                 sameSite: "strict",
                 maxAge: Number(process.env.MAX_AGE_REFRESH_TOKEN) || 7 * 24 * 60 * 60 * 1000,
+                path: "/",
             });
             res.cookie("accessToken", result.accessToken, {
                 httpOnly: true,

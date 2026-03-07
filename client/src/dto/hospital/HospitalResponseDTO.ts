@@ -1,3 +1,26 @@
+export interface DepartmentResponseDTO {
+  _id: string;
+  departmentName: string;
+  description?: string;
+  image?: string;
+  doctorCount?: number;
+}
+
+export interface QualificationResponseDTO {
+  _id: string;
+  qualificationName: string;
+  description?: string;
+  image?: string;
+}
+
+export interface SpecializationResponseDTO {
+  _id: string;
+  name: string;
+  description?: string;
+  image?: string;
+  department_id: string;
+}
+
 export interface HospitalResponseDTO {
   _id: string;
   hospitalName: string;
@@ -21,7 +44,9 @@ export interface HospitalResponseDTO {
   pincode: string;
   about?: string;
   licence?: string;
-  departments: any[];
+  departments: DepartmentResponseDTO[];
+  qualifications: QualificationResponseDTO[];
+  specializations: SpecializationResponseDTO[];
   totalDepartments: number;
   currentPage: number;
   totalPages: number;

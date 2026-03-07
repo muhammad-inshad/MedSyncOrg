@@ -52,7 +52,7 @@ const HospitalProtectedRoute = () => {
 
     return (
       <Navigate
-        to="/login/admin"
+        to="/login/hospital"
         state={{ blockedMessage: "This account is currently blocked. Contact support." }}
         replace
       />

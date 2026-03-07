@@ -14,7 +14,7 @@ const HospitalProtectedRoute = () => {
 
   useEffect(() => {
     if (hospitalId && !hospital) {
-      dispatch(loadHospitalData(hospitalId));
+      dispatch(loadHospitalData({ hospitalId }));
     }
   }, [hospitalId, hospital, dispatch]);
 

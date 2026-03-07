@@ -1,6 +1,7 @@
 import { DoctorResponseDTO } from "../../dto/doctor/doctor-response.dto.ts";
 import { HospitalResponseDTO, selectedHospitalDto } from "../../dto/hospital/hospital-response.dto.ts";
 import { UpdatePatientDTO } from "../../dto/patient/patient-response.dto.ts";
+import { BookAppointmentDTO, DoctorDailySlotsDTO } from "../../dto/appointment/appointment.dto.ts";
 
 export interface IPatientService {
     getProfile(patientId: string): Promise<unknown>;
@@ -16,4 +17,6 @@ export interface IPatientService {
     selectedHospital(id: string, page?: number, limit?: number, search?: string): Promise<selectedHospitalDto>;
     getDoctorDepartment(id: string, page?: number, limit?: number, search?: string): Promise<{ data: DoctorResponseDTO[]; total: number }>;
     getDoctorById(id: string): Promise<DoctorResponseDTO>;
+    getAvailableSlots(doctorId: string, date: string): Promise<DoctorDailySlotsDTO>;
+    bookAppointment(patientId: string, data: BookAppointmentDTO): Promise<void>;
 }

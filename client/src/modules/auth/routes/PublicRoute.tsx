@@ -39,9 +39,9 @@ const PublicRoute = () => {
     const role = user.role.toLowerCase()
     console.log(role)
     if (role === "superadmin") return <Navigate to={SUPERADMIN_ROUTES.DASHBOARD} replace />
-    if (user.role === "doctor") return <Navigate to={DOCTOR_ROUTES.DOCTORDASHBOARD} replace />;
-    if (user.role === "hospital") return <Navigate to={HOSPITAL_ROUTES.HOSPITALDASHBOARD} replace />;
-    if (user.role === "patient") return <Navigate to={PATIENT_ROUTES.SELECTHOSPITAL} replace />;
+    if (role === "doctor") return <Navigate to={DOCTOR_ROUTES.DOCTORDASHBOARD} replace />;
+    if (role === "hospital") return <Navigate to={HOSPITAL_ROUTES.HOSPITALDASHBOARD} replace />;
+    if (role === "patient") return <Navigate to={PATIENT_ROUTES.SELECTHOSPITAL} replace />;
   }
 
   return <Outlet />;

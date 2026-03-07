@@ -51,6 +51,21 @@ export interface DepartmentResponseDTO {
   doctorCount?: number;
 }
 
+export interface QualificationResponseDTO {
+  _id: string;
+  qualificationName: string;
+  description?: string;
+  image?: string;
+}
+
+export interface SpecializationResponseDTO {
+  _id: string;
+  name: string;
+  description?: string;
+  image?: string;
+  department_id: string;
+}
+
 export interface selectedHospitalDto {
   _id: string;
   hospitalName: string;
@@ -76,6 +91,8 @@ export interface selectedHospitalDto {
   licence?: string;
 
   departments: DepartmentResponseDTO[];
+  qualifications: QualificationResponseDTO[];
+  specializations: SpecializationResponseDTO[];
   totalDepartments: number;
   currentPage: number;
   totalPages: number;

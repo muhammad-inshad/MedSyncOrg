@@ -55,7 +55,7 @@ const doctorSchema = new Schema<IDoctor>(
       trim: true,
     },
 
-    
+
 
     email: {
       type: String,
@@ -208,6 +208,8 @@ const doctorSchema = new Schema<IDoctor>(
       patientsPerDayLimit: {
         type: Number,
         required: false,
+        default: 20,
+        max: [20, 'Maximum tokens per day cannot exceed 20'],
       },
     },
   },

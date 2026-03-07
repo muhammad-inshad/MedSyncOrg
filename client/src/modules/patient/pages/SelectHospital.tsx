@@ -54,7 +54,7 @@ const SelectHospital: React.FC = () => {
 
   const handleSelectHospital = async (hospitalId: string) => {
     if (selecting) return;
-console.log(hospitalId,"hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+    console.log(hospitalId, "hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
     setSelecting(true);
 
     try {
@@ -62,7 +62,7 @@ console.log(hospitalId,"hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
       sessionStorage.setItem("hospitalId", hospitalId);
 
       // load hospital data
-      await dispatch(loadHospitalData(hospitalId));
+      await dispatch(loadHospitalData({ hospitalId }));
 
       // navigate to hospital homepage
       navigate(PATIENT_ROUTES.HOSPITAL_HOMEPAGE);

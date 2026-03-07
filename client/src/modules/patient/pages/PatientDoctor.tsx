@@ -188,16 +188,7 @@ export default function PatientDoctor() {
                   <p className="text-[#1a8fd1] text-[10px] tracking-widest font-black uppercase mb-3">
                     {doc.specialization}
                   </p>
-                  <div className="flex justify-center gap-3">
-                    {[<LinkedInIcon />, <FacebookIcon />, <InstagramIcon />].map((icon, j) => (
-                      <div
-                        key={j}
-                        className="w-8 h-8 rounded-full bg-[#1a8fd1] flex items-center justify-center text-white cursor-pointer hover:bg-[#0d2b4e] transition-colors shadow-sm"
-                      >
-                        {icon}
-                      </div>
-                    ))}
-                  </div>
+              
                 </div>
 
                 {/* Button */}

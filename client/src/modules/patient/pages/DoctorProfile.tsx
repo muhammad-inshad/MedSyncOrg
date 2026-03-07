@@ -123,7 +123,9 @@ export default function DoctorProfile() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
+const handleBookAppointment = (id: string) => {
+  navigate(PATIENT_ROUTES.PATIENT_APPOIMENT.replace(":doctorId", id))
+}
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -233,7 +235,7 @@ export default function DoctorProfile() {
             </div>
 
             {/* Appointment Button */}
-            <button className="w-full bg-[#dbeeff] text-[#1a8fd1] font-bold text-sm py-3 rounded-lg hover:bg-[#1a8fd1] hover:text-white transition-all cursor-pointer shadow-sm">
+            <button onClick={() => handleBookAppointment(doctor._id)} className="w-full bg-[#dbeeff] text-[#1a8fd1] font-bold text-sm py-3 rounded-lg hover:bg-[#1a8fd1] hover:text-white transition-all cursor-pointer shadow-sm">
               Book Appointment
             </button>
 

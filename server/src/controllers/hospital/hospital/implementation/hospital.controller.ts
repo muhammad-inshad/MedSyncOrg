@@ -19,6 +19,22 @@ export class HospitalController implements IHospitalController {
         }
     }
 
+    async getSelectedHospital(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+        try {
+            const { id } = req.params;
+            const { page, limit, search } = req.query;
+            const result = await this._hospitalService.getSelectedHospital(
+                id,
+                page ? Number(page) : undefined,
+                limit ? Number(limit) : undefined,
+                search as string
+            );
+            return ApiResponse.success(res, MESSAGES.ADMIN.FETCH_SUCCESS, result);
+        } catch (error: unknown) {
+            next(error);
+        }
+    }
+
     async reapply(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
             const user = req.user as unknown as ITokenPayload;

@@ -11,6 +11,7 @@ import HospitalProtectedRoute from "./HospitalProtectedRoute";
 import HospitalDepartments from "../pages/HospitalDeprtements";
 import DoctorProfile from "../pages/DoctorProfile";
 
+
 const PatientRouts = () => {
   return (
     <Routes>
@@ -21,7 +22,7 @@ const PatientRouts = () => {
         <Route element={<HospitalProtectedRoute />}>
           <Route path={PATIENT_ROUTES.HOSPITAL_HOMEPAGE} element={<PatientHospitalHome />} />
           <Route path={PATIENT_ROUTES.HOSPITAL_DOCTOR} element={<PatientDoctor />} />
-          <Route path={PATIENT_ROUTES.DOCTOR_APPOIMENT} element={<PatientAppointment />} />
+          <Route path={PATIENT_ROUTES.PATIENT_APPOIMENT} element={<PatientAppointment />} />
           <Route path={PATIENT_ROUTES.HOSPITAL_DEPaRTMENTS} element={<HospitalDepartments />} />
           <Route path={PATIENT_ROUTES.DOCTOR_PROFILE} element={<DoctorProfile />} />
         </Route>

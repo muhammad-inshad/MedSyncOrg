@@ -111,9 +111,33 @@ class PatientController {
   getDoctorById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
-      console.log(id,"hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
       const doctor = await this.patientService.getDoctorById(id);
       return ApiResponse.success(res, MESSAGES.DOCTOR.FETCH_SUCCESS, doctor);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  getAvailableSlots = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { doctorId } = req.params;
+      const { date } = req.query;
+      const slots = await this.patientService.getAvailableSlots(doctorId, date as string);
+      return ApiResponse.success(res, "Slots fetched successfully", slots);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  bookAppointment = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as unknown as ITokenPayload;
+      const patientId = user?.userId;
+      if (!patientId) {
+        ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED || "Unauthorized");
+      }
+      await this.patientService.bookAppointment(patientId, req.body);
+      return ApiResponse.success(res, "Appointment booked successfully", null, HttpStatusCode.CREATED);
     } catch (error) {
       next(error);
     }

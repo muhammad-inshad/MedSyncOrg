@@ -93,9 +93,9 @@ export default function HospitalDepartments() {
         search: searchQuery
       }));
     }
+    
   }, [dispatch, currentPage, searchQuery]);
 
-  // Reset to page 1 when search changes
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery]);

@@ -121,5 +121,8 @@ export const hospitalApi = {
     },
     toggleSpecializationStatus: (id: string) => {
         return api.patch(HOSPITAL_MANAGEMENT.SPECIALIZATION_TOGGLE(id));
+    },
+    getSelectedHospital: (id: string, params?: { page?: number; limit?: number; search?: string }) => {
+        return api.get(HOSPITAL_MANAGEMENT.SELECTED_HOSPITAL(id), { params });
     }
 };

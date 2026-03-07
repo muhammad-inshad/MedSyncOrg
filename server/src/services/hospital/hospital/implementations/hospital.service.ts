@@ -1,8 +1,9 @@
 import { MESSAGES } from "../../../../constants/messages.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.ts";
-import { HospitalResponseDTO, IHospitalUpdateDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
+import { HospitalResponseDTO, IHospitalUpdateDTO, selectedHospitalDto } from "../../../../dto/hospital/hospital-response.dto.ts";
 import { IHospitalService } from "../interfaces/hospital.services.interfaces.ts";
+import { IPatientService } from "../../../patient/patient.service.interfaces.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { HospitalMapper } from "../../../../mappers/hospital.mapper.ts";
 import { IHospital } from "../../../../models/hospital.model.ts";
@@ -14,7 +15,8 @@ export class HospitalService implements IHospitalService {
     constructor(
         private readonly _hospitalRepo: IHospitalRepository,
         private readonly _hospitalMapper: HospitalMapper,
-        private readonly _imageService: ICloudinaryImageService
+        private readonly _imageService: ICloudinaryImageService,
+        private readonly _patientService: IPatientService
     ) { }
 
     async getHospitalProfile(hospitalId: string): Promise<HospitalResponseDTO> {
@@ -24,6 +26,10 @@ export class HospitalService implements IHospitalService {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.ADMIN.NOT_FOUND);
         }
         return this._hospitalMapper.toDTO(hospital!);
+    }
+
+    async getSelectedHospital(hospitalId: string, page?: number, limit?: number, search?: string): Promise<selectedHospitalDto> {
+        return this._patientService.selectedHospital(hospitalId, page, limit, search);
     }
 
     async updateHospitalStatusReapply(hospitalId: string): Promise<HospitalResponseDTO | null> {

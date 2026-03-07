@@ -31,6 +31,7 @@ class patientAuthController implements IPatientAuthController {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         maxAge: Number(process.env.MAX_AGE_REFRESH_TOKEN) || 7 * 24 * 60 * 60 * 1000,
+        path: "/",
       });
 
       res.cookie("accessToken", result.accessToken, {

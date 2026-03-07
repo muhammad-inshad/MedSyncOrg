@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useAppSelector, useAppDispatch } from '@/hooks/redux';
+import { loadHospitalData } from '@/store/selectedHospital/authThunk';
 import * as z from 'zod';
 import {
   Upload,
@@ -13,7 +15,6 @@ import {
   Mail,
   Award,
   Info,
-  Clock,
   CreditCard,
   ChevronLeft
 } from 'lucide-react';
@@ -44,7 +45,10 @@ const doctorEditSchema = z.object({
     commissionPercentage: z.string().optional(),
     fixedSalary: z.string().optional(),
     payoutCycle: z.enum(['weekly', 'monthly']),
-    patientsPerDayLimit: z.string().min(1, 'Limit is required'),
+    patientsPerDayLimit: z.string().refine((val) => {
+      const num = parseInt(val);
+      return !isNaN(num) && num >= 1 && num <= 20;
+    }, 'Limit must be between 1 and 20'),
   }),
   isActive: z.boolean(),
   isAccountVerified: z.boolean(),
@@ -56,6 +60,9 @@ const HospitalDoctorEditpage: React.FC = () => {
   const location = useLocation();
   const doctor = location.state?.doctor as IDoctor;
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
+
 
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [licenseImageFile, setLicenseImageFile] = useState<File | null>(null);
@@ -65,71 +72,18 @@ const HospitalDoctorEditpage: React.FC = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [pendingData, setPendingData] = useState<HospitalDoctorEditFormData | null>(null);
 
-  // Dropdown options
-  const departments = [
-    "General Medicine",
-    "Cardiology",
-    "Neurology",
-    "Pediatrics",
-    "Obstetrics & Gynecology",
-    "Orthopedics",
-    "General Surgery",
-    "ENT",
-    "Dermatology",
-    "Psychiatry",
-    "Radiology",
-    "Anesthesiology",
-    "Ophthalmology",
-    "Gastroenterology",
-    "Urology",
-    "Nephrology",
-    "Oncology",
-    "Pulmonology",
-    "Endocrinology",
-    "Emergency Medicine",
-    "Physiotherapy",
-  ];
+  const hospital = useAppSelector((state) => state.hospital.hospital);
 
-  const qualifications = [
-    "MBBS",
-    "MD",
-    "MS",
-    "DNB",
-    "DM",
-    "MCh",
-    "MBBS, MD",
-    "MBBS, MS",
-    "MBBS, DNB",
-    "MBBS, MD, DM",
-    "MBBS, MS, MCh",
-    "Fellowship",
-    "Diploma",
-  ];
+  // Extract master data from Redux
+  const hospitalDepartments = hospital?.departments || [];
+  const hospitalQualifications = hospital?.qualifications || [];
+  const hospitalSpecializations = hospital?.specializations || [];
 
-  const specializations = [
-    "General Physician",
-    "Cardiologist",
-    "Neurologist",
-    "Pediatrician",
-    "Gynecologist",
-    "Orthopedic Surgeon",
-    "General Surgeon",
-    "ENT Specialist",
-    "Dermatologist",
-    "Psychiatrist",
-    "Radiologist",
-    "Anesthesiologist",
-    "Ophthalmologist",
-    "Gastroenterologist",
-    "Urologist",
-    "Nephrologist",
-    "Oncologist",
-    "Pulmonologist",
-    "Endocrinologist",
-    "Emergency Physician",
-    "Plastic Surgeon",
-    "Neurosurgeon",
-  ];
+
+  const [timePeriods, setTimePeriods] = useState({
+    start: doctor?.consultationTime?.start?.includes('PM') ? 'PM' : 'AM',
+    end: doctor?.consultationTime?.end?.includes('PM') ? 'PM' : 'AM'
+  });
 
   const {
     register,
@@ -149,8 +103,8 @@ const HospitalDoctorEditpage: React.FC = () => {
       specialization: doctor?.specialization || '',
       about: doctor?.about || '',
       consultationTime: {
-        start: doctor?.consultationTime?.start || '',
-        end: doctor?.consultationTime?.end || '',
+        start: doctor?.consultationTime?.start?.replace(/\s?(AM|PM)/g, '') || '',
+        end: doctor?.consultationTime?.end?.replace(/\s?(AM|PM)/g, '') || '',
       },
       payment: {
         type: doctor?.payment?.type || 'commission',
@@ -170,11 +124,24 @@ const HospitalDoctorEditpage: React.FC = () => {
     if (!doctor) {
       showToast.error("No doctor data found");
       navigate(HOSPITAL_ROUTES.HOSPITALDOCTORMANGEMENT);
+      return;
     }
-  }, [doctor, navigate]);
+
+    if ((!hospital || !hospital.departments || !hospital.qualifications) && user?._id) {
+      dispatch(loadHospitalData({ hospitalId: user._id }));
+    }
+  }, [doctor, navigate, hospital, user, dispatch]);
 
   const onFormSubmit = (data: HospitalDoctorEditFormData) => {
-    setPendingData(data);
+    // Combine time with periods
+    const processedData = {
+      ...data,
+      consultationTime: {
+        start: `${data.consultationTime.start} ${timePeriods.start}`,
+        end: `${data.consultationTime.end} ${timePeriods.end}`
+      }
+    };
+    setPendingData(processedData);
     setIsConfirmOpen(true);
   };
 
@@ -398,9 +365,9 @@ const HospitalDoctorEditpage: React.FC = () => {
                         className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium appearance-none"
                       >
                         <option value="">Select Department</option>
-                        {departments.map((dept) => (
-                          <option key={dept} value={dept}>
-                            {dept}
+                        {hospitalDepartments.map((dept) => (
+                          <option key={dept._id} value={dept.departmentName}>
+                            {dept.departmentName}
                           </option>
                         ))}
                       </select>
@@ -442,9 +409,9 @@ const HospitalDoctorEditpage: React.FC = () => {
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium appearance-none"
                     >
                       <option value="">Select Specialization</option>
-                      {specializations.map((spec) => (
-                        <option key={spec} value={spec}>
-                          {spec}
+                      {hospitalSpecializations.map((spec) => (
+                        <option key={spec._id} value={spec.name}>
+                          {spec.name}
                         </option>
                       ))}
                     </select>
@@ -461,9 +428,9 @@ const HospitalDoctorEditpage: React.FC = () => {
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium appearance-none"
                     >
                       <option value="">Select Qualification</option>
-                      {qualifications.map((qual) => (
-                        <option key={qual} value={qual}>
-                          {qual}
+                      {hospitalQualifications.map((qual) => (
+                        <option key={qual._id} value={qual.qualificationName}>
+                          {qual.qualificationName}
                         </option>
                       ))}
                     </select>
@@ -480,30 +447,45 @@ const HospitalDoctorEditpage: React.FC = () => {
                     />
                   </div>
 
-                  {/* Consultation Time Grid */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Availability From</label>
-                      <div className="relative">
-                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                        <input
-                          type="time"
-                          {...register('consultationTime.start')}
-                          className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-xs font-bold"
-                        />
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Consultation Time</label>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 flex gap-1">
+                          <input
+                            type="time"
+                            {...register('consultationTime.start')}
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-xs font-bold"
+                          />
+                          <select
+                            value={timePeriods.start}
+                            onChange={(e) => setTimePeriods(prev => ({ ...prev, start: e.target.value }))}
+                            className="px-2 bg-slate-100 rounded-xl text-[10px] font-bold outline-none"
+                          >
+                            <option value="AM">AM</option>
+                            <option value="PM">PM</option>
+                          </select>
+                        </div>
+                        <span className="text-slate-400 font-bold text-xs uppercase">to</span>
+                        <div className="flex-1 flex gap-1">
+                          <input
+                            type="time"
+                            {...register('consultationTime.end')}
+                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-xs font-bold"
+                          />
+                          <select
+                            value={timePeriods.end}
+                            onChange={(e) => setTimePeriods(prev => ({ ...prev, end: e.target.value }))}
+                            className="px-2 bg-slate-100 rounded-xl text-[10px] font-bold outline-none"
+                          >
+                            <option value="AM">AM</option>
+                            <option value="PM">PM</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">To</label>
-                      <div className="relative">
-                        <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                        <input
-                          type="time"
-                          {...register('consultationTime.end')}
-                          className="w-full pl-9 pr-3 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-xs font-bold"
-                        />
-                      </div>
-                    </div>
+                    {errors.consultationTime?.start && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.consultationTime.start.message}</p>}
+                    {errors.consultationTime?.end && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.consultationTime.end.message}</p>}
                   </div>
                 </div>
 
@@ -572,12 +554,18 @@ const HospitalDoctorEditpage: React.FC = () => {
                   )}
 
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Patients / Day Limit</label>
-                    <input
-                      type="number"
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Tokens / Day Limit (Max 20)</label>
+                    <select
                       {...register('payment.patientsPerDayLimit')}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium"
-                    />
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-bold appearance-none"
+                    >
+                      {Array.from({ length: 20 }, (_, i) => i + 1).map((val) => (
+                        <option key={val} value={val}>{val}</option>
+                      ))}
+                    </select>
+                    {errors.payment?.patientsPerDayLimit && (
+                      <p className="text-[10px] text-rose-500 font-bold px-1">{errors.payment.patientsPerDayLimit.message}</p>
+                    )}
                   </div>
                 </div>
               </div>

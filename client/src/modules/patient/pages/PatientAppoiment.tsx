@@ -1,56 +1,212 @@
-import React from 'react'
-import Navbar from '../components/Navbar'
-import Footer from '../components/Footer'
-import { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import { useAppSelector } from '@/hooks/redux';
+import { patientApi } from '@/constants/backend/patient/patient.api';
+import { PATIENT_ROUTES } from '@/constants/frontend/patient/patient.routes';
+import { toast } from 'react-hot-toast';
+import { format, addDays, startOfToday, isSameDay } from 'date-fns';
 
 interface DaySlot {
   day: string;
   date: number;
+  fullDate: Date;
   status: "Available" | "Filling Fast" | "Fully Booked";
+  bookedTokens: number;
+  maxTokens: number;
 }
 
-const weekDays: DaySlot[] = [
-  { day: "Mon", date: 25, status: "Available" },
-  { day: "Tue", date: 26, status: "Available" },
-  { day: "Wed", date: 27, status: "Filling Fast" },
-  { day: "Thu", date: 28, status: "Fully Booked" },
-  { day: "Fri", date: 29, status: "Available" },
-  { day: "Sat", date: 30, status: "Filling Fast" },
-  { day: "Sun", date: 1,  status: "Available" },
-];
+interface Doctor {
+  _id: string;
+  name: string;
+  specialization: string;
+  consultationTime?: {
+    start: string;
+    end: string;
+  };
+  hospital_id?: string;
+  payment?: {
+    patientsPerDayLimit: number;
+  };
+}
 
 const statusStyle: Record<DaySlot["status"], string> = {
-  Available:    "text-green-500 bg-green-50 border-green-200",
+  Available: "text-green-500 bg-green-50 border-green-200",
   "Filling Fast": "text-orange-500 bg-orange-50 border-orange-200",
   "Fully Booked": "text-red-500 bg-red-50 border-red-300",
 };
 
-
 export default function PatientAppointment() {
-  const [selectedDay, setSelectedDay]         = useState<number>(28);
-  const [serviceType, setServiceType]         = useState<"Offline Visit" | "Online Consultation">("Offline Visit");
-  const [paymentMethod, setPaymentMethod]     = useState<"Pay Online" | "Pay with Cash">("Pay Online");
+  const { doctorId } = useParams();
+  const navigate = useNavigate();
+  const { profileData } = useAppSelector((state) => state.auth);
+
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [hospitalName, setHospitalName] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  const [selectedDate, setSelectedDate] = useState<Date>(startOfToday());
+  const [weekDaysAvailability, setWeekDaysAvailability] = useState<DaySlot[]>([]);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+
+  const [serviceType, setServiceType] = useState<"offline" | "online">("offline");
+  const [paymentMethod, setPaymentMethod] = useState<"online" | "cash">("online");
+
   const [form, setForm] = useState({
-    fullName: "John Doe",
-    age: "25",
-    phone: "+1 (555) 000-0000",
-    email: "john@example.com",
-    address: "123 Main Street, City,\nState, ZIP",
-    bloodPressure: "99",
-    heartRate: "25",
-    weight: "66",
+    fullName: "",
+    age: "",
+    phone: "",
+    email: "",
+    address: "",
+    bloodPressure: "",
+    heartRate: "",
+    weight: "",
   });
+
+  // Pre-fill form from Redux
+  useEffect(() => {
+    if (profileData) {
+      setForm({
+        fullName: profileData.name || "",
+        age: String(profileData.age || ""),
+        phone: String(profileData.phone || ""),
+        email: profileData.email || "",
+        address: profileData.address || "",
+        bloodPressure: "",
+        heartRate: "",
+        weight: "",
+      });
+    }
+  }, [profileData]);
+
+  // Fetch Doctor Details
+  useEffect(() => {
+    const fetchDoctor = async () => {
+      if (!doctorId) {
+        navigate(PATIENT_ROUTES.HOSPITAL_DEPaRTMENTS);
+        return;
+      }
+      try {
+        setLoading(true);
+        const res = await patientApi.getDoctorDetails(doctorId);
+        if (res.data.success) {
+          setDoctor(res.data.data);
+          if (res.data.data.hospital_id) {
+            const hospitalRes = await patientApi.get_hospital(res.data.data.hospital_id);
+            if (hospitalRes.data.success) {
+              setHospitalName(hospitalRes.data.data.hospitalName);
+            }
+          }
+        } else {
+          toast.error("Doctor details not found");
+          navigate(-1);
+        }
+      } catch (error) {
+        console.error("Error fetching doctor:", error);
+        toast.error("Failed to load doctor details");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDoctor();
+  }, [doctorId, navigate]);
+
+  // Fetch Availability for the whole week
+  useEffect(() => {
+    const fetchWeekAvailability = async () => {
+      if (!doctorId) return;
+      try {
+        setAvailabilityLoading(true);
+        const dates = Array.from({ length: 7 }).map((_, i) => addDays(startOfToday(), i));
+
+        const availabilityPromises = dates.map(date =>
+          patientApi.getAvailableSlots(doctorId, format(date, 'yyyy-MM-dd'))
+        );
+
+        const results = await Promise.all(availabilityPromises);
+
+        const availabilityData: DaySlot[] = results.map((res, i) => {
+          const { tokenInfo } = res.data.data;
+          return {
+            day: format(dates[i], 'EEE'),
+            date: dates[i].getDate(),
+            fullDate: dates[i],
+            status: tokenInfo.status,
+            bookedTokens: tokenInfo.bookedTokens,
+            maxTokens: tokenInfo.maxTokens
+          };
+        });
+
+        setWeekDaysAvailability(availabilityData);
+      } catch (error) {
+        console.error("Error fetching week availability:", error);
+        toast.error("Failed to fetch doctor availability");
+      } finally {
+        setAvailabilityLoading(false);
+      }
+    };
+    fetchWeekAvailability();
+  }, [doctorId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const handleBooking = async () => {
+    const currentAvailability = weekDaysAvailability.find(d => isSameDay(d.fullDate, selectedDate));
+
+    if (currentAvailability?.status === "Fully Booked") {
+      toast.error("Doctor is fully booked for this date");
+      return;
+    }
+
+    if (!form.fullName || !form.phone || !form.email) {
+      toast.error("Please fill in required patient information");
+      return;
+    }
+
+    try {
+      const bookingData = {
+        doctorId,
+        hospitalId: doctor?.hospital_id,
+        appointmentDate: selectedDate.toISOString(),
+        mode: serviceType,
+        patientDetails: {
+          ...form,
+          age: Number(form.age)
+        }
+      };
+
+      const res = await patientApi.bookAppointment(bookingData);
+      if (res.data.success) {
+        toast.success("Appointment booked successfully!");
+        navigate(PATIENT_ROUTES.PATIENTPROFILE);
+      } else {
+        toast.error(res.data.message || "Booking failed");
+      }
+    } catch (error: any) {
+      console.error("Booking error:", error);
+      toast.error(error.response?.data?.message || "An error occurred while booking");
+    }
+  };
+
+  const selectedAvailability = weekDaysAvailability.find(d => isSameDay(d.fullDate, selectedDate));
+
   const inputCls =
     "w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-[#1a8fd1] bg-white";
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1a8fd1]"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="font-sans text-gray-800 bg-white">
-<Navbar/>
+      <Navbar />
       {/* ── HERO BANNER ── */}
       <section className="relative h-44 overflow-hidden">
         <div className="absolute inset-0" style={{ background: "linear-gradient(135deg,#c8dff0 0%,#a8cce8 100%)" }} />
@@ -64,10 +220,10 @@ export default function PatientAppointment() {
 
       {/* ── MAIN CONTENT ── */}
       <section className="px-[5%] py-12 bg-[#f4f8fc]">
-        <div className="max-w-6xl mx-auto flex gap-6 items-start">
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-6 items-start">
 
           {/* ── LEFT: Patient Information ── */}
-          <div className="w-[420px] shrink-0 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="w-full lg:w-[420px] shrink-0 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <div className="flex items-center gap-2 mb-1">
               <svg className="w-4 h-4 text-[#1a8fd1]" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
@@ -78,10 +234,10 @@ export default function PatientAppointment() {
 
             <div className="flex flex-col gap-3">
               {[
-                { label: "Full Name",     name: "fullName",      type: "text" },
-                { label: "Age",           name: "age",           type: "number" },
-                { label: "Phone Number",  name: "phone",         type: "tel" },
-                { label: "Email Address", name: "email",         type: "email" },
+                { label: "Full Name", name: "fullName", type: "text" },
+                { label: "Age", name: "age", type: "number" },
+                { label: "Phone Number", name: "phone", type: "tel" },
+                { label: "Email Address", name: "email", type: "email" },
               ].map((f) => (
                 <div key={f.name}>
                   <label className="block text-xs text-gray-500 mb-1">{f.label}</label>
@@ -106,58 +262,58 @@ export default function PatientAppointment() {
                 />
               </div>
 
-              {[
-                { label: "blood pressure", name: "bloodPressure" },
-                { label: "hart rate",      name: "heartRate" },
-                { label: "weight",         name: "weight" },
-              ].map((f) => (
-                <div key={f.name}>
-                  <label className="block text-xs text-gray-500 mb-1">{f.label}</label>
-                  <input
-                    type="text"
-                    name={f.name}
-                    value={form[f.name as keyof typeof form]}
-                    onChange={handleChange}
-                    className={inputCls}
-                  />
-                </div>
-              ))}
-
-              {/* Add New File */}
-              <button className="w-full bg-[#1a8fd1] text-white text-sm font-semibold py-2.5 rounded flex items-center justify-center gap-2 hover:bg-[#1478b0] transition-colors cursor-pointer mt-1">
-                <span className="text-lg leading-none">+</span> Add New File
-              </button>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { label: "Blood Pressure", name: "bloodPressure" },
+                  { label: "Heart Rate", name: "heartRate" },
+                  { label: "Weight", name: "weight" },
+                ].map((f) => (
+                  <div key={f.name}>
+                    <label className="block text-[10px] uppercase font-bold text-gray-400 mb-1">{f.label}</label>
+                    <input
+                      type="text"
+                      name={f.name}
+                      value={form[f.name as keyof typeof form]}
+                      onChange={handleChange}
+                      className={inputCls}
+                    />
+                  </div>
+                ))}
+              </div>
 
               {/* Doctor and Hospital */}
-              <div className="mt-1">
-                <p className="text-xs text-gray-400 mb-2">doctor and hospital</p>
-                <div className="flex flex-col gap-1">
-                  <p className="text-sm text-gray-700">dr mufeed mbbs md ortho</p>
-                  <p className="text-sm text-gray-700">royal hospital kunnamkulam</p>
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                <p className="text-[10px] uppercase font-bold text-blue-400 mb-2">Doctor & Hospital</p>
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-sm font-bold text-[#0d2b4e]">{doctor?.name}</p>
+                  <p className="text-xs text-[#0d2b4e]/70">{doctor?.specialization}</p>
+                  <p className="text-xs text-blue-600 mt-1">{hospitalName}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* ── RIGHT: Calendar + Appointment Details ── */}
-          <div className="flex-1 flex flex-col gap-5">
+          <div className="flex-1 flex flex-col gap-5 w-full">
 
             {/* Week Calendar */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-              <div className="flex items-center gap-3">
-                <button className="text-gray-400 hover:text-[#1a8fd1] text-lg font-bold px-1">‹</button>
-                <div className="flex gap-2 flex-1 justify-between">
-                  {weekDays.map((d) => {
-                    const isSelected = selectedDay === d.date;
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 overflow-x-auto">
+              {availabilityLoading ? (
+                <div className="flex justify-center p-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1a8fd1]"></div>
+                </div>
+              ) : (
+                <div className="flex gap-2 justify-between min-w-[500px]">
+                  {weekDaysAvailability.map((d) => {
+                    const isSelected = isSameDay(selectedDate, d.fullDate);
                     return (
                       <button
-                        key={d.date}
-                        onClick={() => setSelectedDay(d.date)}
-                        className={`flex flex-col items-center gap-1 px-3 py-2.5 rounded-lg border transition-all cursor-pointer flex-1 ${
-                          isSelected
-                            ? "border-[#1a8fd1] bg-[#1a8fd1] text-white shadow-md"
-                            : "border-gray-100 bg-white hover:border-[#1a8fd1]/40"
-                        }`}
+                        key={d.fullDate.toISOString()}
+                        onClick={() => setSelectedDate(d.fullDate)}
+                        className={`flex flex-col items-center gap-1 px-3 py-2.5 rounded-lg border transition-all cursor-pointer flex-1 ${isSelected
+                          ? "border-[#1a8fd1] bg-[#1a8fd1] text-white shadow-md font-bold"
+                          : "border-gray-100 bg-white hover:border-[#1a8fd1]/40"
+                          }`}
                       >
                         <span className={`text-[11px] font-medium ${isSelected ? "text-white/80" : "text-gray-400"}`}>
                           {d.day}
@@ -165,19 +321,17 @@ export default function PatientAppointment() {
                         <span className={`text-xl font-extrabold leading-none ${isSelected ? "text-white" : "text-[#0d2b4e]"}`}>
                           {d.date}
                         </span>
-                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${
-                          isSelected
-                            ? "bg-white/20 border-white/30 text-white"
-                            : statusStyle[d.status]
-                        }`}>
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase ${isSelected
+                          ? "bg-white/20 border-white/30 text-white"
+                          : statusStyle[d.status]
+                          }`}>
                           {d.status}
                         </span>
                       </button>
                     );
                   })}
                 </div>
-                <button className="text-gray-400 hover:text-[#1a8fd1] text-lg font-bold px-1">›</button>
-              </div>
+              )}
             </div>
 
             {/* Appointment Details Card */}
@@ -189,92 +343,86 @@ export default function PatientAppointment() {
                   </svg>
                   <h3 className="font-bold text-[#0d2b4e] text-sm">Appointment Details</h3>
                 </div>
-                <p className="text-xs text-gray-400">doctor working time 8:00am to 9:00pm</p>
+                {doctor?.consultationTime && (
+                  <p className="text-[10px] text-gray-400 font-bold uppercase">
+                    Consultation: {doctor.consultationTime.start} - {doctor.consultationTime.end}
+                  </p>
+                )}
               </div>
-              <p className="text-xs text-gray-400 mb-5">Choose your preferred appointment options</p>
+              <p className="text-xs text-gray-400 mb-5">Token-based booking for {format(selectedDate, 'MMMM d, yyyy')}</p>
 
-              {/* Booking Date & Time */}
-              <div className="grid grid-cols-2 gap-4 mb-5">
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1.5 font-medium">Booking Date</label>
-                  <div className="flex items-center border border-gray-200 rounded px-3 py-2 gap-2">
-                    <span className="text-sm text-gray-700 flex-1">12/4/2044</span>
-                    <span className="text-xs text-orange-400 font-semibold">token full</span>
-                  </div>
+              {/* Token Info */}
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-100 text-center">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Next Token</p>
+                  <p className="text-3xl font-black text-[#0d2b4e]">
+                    {selectedAvailability ? selectedAvailability.bookedTokens + 1 : '--'}
+                  </p>
                 </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1.5 font-medium">Booking Time</label>
-                  <div className="flex items-center border border-gray-200 rounded px-3 py-2 gap-2">
-                    <span className="text-sm text-gray-700 flex-1">5:00 pm</span>
-                    <span className="text-xs text-orange-400 font-semibold">token full</span>
-                  </div>
+                <div className="p-4 bg-gray-50 rounded-lg border border-gray-100 text-center">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase mb-1">Daily Limit</p>
+                  <p className="text-3xl font-black text-[#0d2b4e]">
+                    {selectedAvailability ? selectedAvailability.maxTokens : '--'}
+                  </p>
                 </div>
               </div>
 
               {/* Service Type */}
-              <div className="mb-5">
-                <label className="block text-xs text-gray-500 mb-2 font-medium">Service Type</label>
-                <div className="flex flex-col gap-1.5">
-                  {(["Offline Visit", "Online Consultation"] as const).map((type) => (
-                    <label key={type} className="flex items-center gap-2 cursor-pointer">
-                      <div
-                        onClick={() => setServiceType(type)}
-                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors ${
-                          serviceType === type ? "border-[#1a8fd1]" : "border-gray-300"
-                        }`}
-                      >
-                        {serviceType === type && <div className="w-2 h-2 rounded-full bg-[#1a8fd1]" />}
-                      </div>
-                      <span className="text-sm text-gray-700">{type}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Token */}
-              <div className="grid grid-cols-2 gap-4 mb-5">
-                {[{ label: "token", value: "50" }, { label: "total token", value: "70" }].map((t) => (
-                  <div key={t.label}>
-                    <label className="block text-xs text-gray-500 mb-1.5">{t.label}</label>
-                    <input
-                      type="text"
-                      defaultValue={t.value}
-                      className={inputCls}
-                    />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-3 uppercase">Service Type</label>
+                  <div className="flex flex-col gap-2">
+                    {(["offline", "online"] as const).map((type) => (
+                      <label key={type} className="flex items-center gap-2 cursor-pointer group">
+                        <div
+                          onClick={() => setServiceType(type)}
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors ${serviceType === type ? "border-[#1a8fd1]" : "border-gray-300 group-hover:border-gray-400"
+                            }`}
+                        >
+                          {serviceType === type && <div className="w-2.5 h-2.5 rounded-full bg-[#1a8fd1]" />}
+                        </div>
+                        <span className="text-sm text-gray-700 capitalize">{type} Consultation</span>
+                      </label>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
 
-              {/* Payment Method */}
-              <div className="mb-6">
-                <label className="block text-xs text-gray-500 mb-2 font-medium">Payment Method</label>
-                <div className="flex flex-col gap-1.5">
-                  {(["Pay Online", "Pay with Cash"] as const).map((method) => (
-                    <label key={method} className="flex items-center gap-2 cursor-pointer">
-                      <div
-                        onClick={() => setPaymentMethod(method)}
-                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors ${
-                          paymentMethod === method ? "border-[#1a8fd1]" : "border-gray-300"
-                        }`}
-                      >
-                        {paymentMethod === method && <div className="w-2 h-2 rounded-full bg-[#1a8fd1]" />}
-                      </div>
-                      <span className="text-sm text-gray-700">{method}</span>
-                    </label>
-                  ))}
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-3 uppercase">Payment Method</label>
+                  <div className="flex flex-col gap-2">
+                    {(["online", "cash"] as const).map((method) => (
+                      <label key={method} className="flex items-center gap-2 cursor-pointer group">
+                        <div
+                          onClick={() => setPaymentMethod(method)}
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors ${paymentMethod === method ? "border-[#1a8fd1]" : "border-gray-300 group-hover:border-gray-400"
+                            }`}
+                        >
+                          {paymentMethod === method && <div className="w-2.5 h-2.5 rounded-full bg-[#1a8fd1]" />}
+                        </div>
+                        <span className="text-sm text-gray-700 capitalize">Pay {method === 'online' ? 'Online' : 'with Cash'}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex gap-3 justify-end">
-                <button className="flex items-center gap-1.5 px-5 py-2.5 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">
+              <div className="flex gap-3 justify-end pt-4 border-t border-gray-100">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="flex items-center gap-1.5 px-5 py-2.5 border border-gray-200 rounded text-sm text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
                   ← Cancel
                 </button>
-                <button className="flex items-center gap-1.5 px-6 py-2.5 bg-[#1a8fd1] text-white rounded text-sm font-semibold hover:bg-[#1478b0] transition-colors cursor-pointer">
+                <button
+                  onClick={handleBooking}
+                  className="flex items-center gap-2 px-8 py-2.5 bg-[#1a8fd1] text-white rounded text-sm font-bold hover:bg-[#1478b0] transition-all cursor-pointer shadow-md disabled:opacity-50"
+                  disabled={availabilityLoading || selectedAvailability?.status === "Fully Booked"}
+                >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  Confirm Appointment
+                  {selectedAvailability?.status === "Fully Booked" ? 'Fully Booked' : 'Confirm Appointment'}
                 </button>
               </div>
             </div>
@@ -282,66 +430,7 @@ export default function PatientAppointment() {
         </div>
       </section>
 
-      {/* ── SIDE INFO CARDS (floating right) ── */}
-      <section className="px-[5%] pb-12 bg-[#f4f8fc]">
-        <div className="max-w-6xl mx-auto flex justify-end">
-          <div className="flex flex-col gap-3 w-64">
-            {[
-              {
-                icon: (
-                  <svg className="w-5 h-5 text-[#1a8fd1]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-                  </svg>
-                ),
-                title: "Call Us",
-                value: "+1 (555) 123-4567",
-              },
-              {
-                icon: (
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                  </svg>
-                ),
-                title: "Email Us",
-                value: "info@clinic.com",
-                dark: true,
-              },
-              {
-                icon: (
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                ),
-                title: "Working Hours",
-                value: "Mon-Fri: 9AM-6PM",
-                dark: true,
-              },
-            ].map((card, i) => (
-              <div
-                key={i}
-                className={`flex items-center gap-3 px-4 py-3.5 rounded-lg shadow-sm ${
-                  card.dark ? "bg-[#1a8fd1]" : "bg-white border border-gray-100"
-                }`}
-              >
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                  card.dark ? "bg-white/20" : "bg-[#dbeeff]"
-                }`}>
-                  {card.icon}
-                </div>
-                <div>
-                  <p className={`text-xs font-semibold ${card.dark ? "text-white" : "text-[#0d2b4e]"}`}>
-                    {card.title}
-                  </p>
-                  <p className={`text-xs ${card.dark ? "text-white/80" : "text-gray-500"}`}>
-                    {card.value}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      <Footer/>
+      <Footer />
     </div>
   );
 }
