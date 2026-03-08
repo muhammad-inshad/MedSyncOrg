@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,6 +9,10 @@ import toast from "react-hot-toast";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { HOSPITAL_ROUTES } from '@/constants/frontend/hospital/hospital.routes';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store/store';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { loadHospitalData } from '@/store/selectedHospital/authThunk';
 
 const doctorRegistrationSchema = z.object({
   name: z.string().min(1, 'Doctor name is required'),
@@ -36,79 +40,38 @@ const HospitalAddDoctorpage: React.FC = () => {
   const [licensePreview, setLicensePreview] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
 
-  // Dropdown options - common in Indian hospitals
-  const departments = [
-    "General Medicine",
-    "Cardiology",
-    "Neurology",
-    "Pediatrics",
-    "Obstetrics & Gynecology",
-    "Orthopedics",
-    "General Surgery",
-    "ENT",
-    "Dermatology",
-    "Psychiatry",
-    "Radiology",
-    "Anesthesiology",
-    "Ophthalmology",
-    "Gastroenterology",
-    "Urology",
-    "Nephrology",
-    "Oncology",
-    "Pulmonology",
-    "Endocrinology",
-    "Emergency Medicine",
-  ];
+  const { hospital } = useSelector((state: RootState) => state.hospital);
 
-  const qualifications = [
-    "MBBS",
-    "MBBS, MD",
-    "MBBS, MS",
-    "MD (General Medicine)",
-    "MS (General Surgery)",
-    "MD (Pediatrics)",
-    "MD (Obstetrics & Gynecology)",
-    "MS (Orthopedics)",
-    "MD (Dermatology)",
-    "MD (Radiology)",
-    "DNB",
-    "DM",
-    "MCh",
-    "Diploma",
-  ];
-
-  const specializations = [
-    "General Physician",
-    "Cardiologist",
-    "Neurologist",
-    "Pediatrician",
-    "Gynecologist",
-    "Orthopedic Surgeon",
-    "General Surgeon",
-    "ENT Specialist",
-    "Dermatologist",
-    "Psychiatrist",
-    "Radiologist",
-    "Anesthesiologist",
-    "Ophthalmologist",
-    "Gastroenterologist",
-    "Urologist",
-    "Nephrologist",
-    "Oncologist",
-    "Pulmonologist",
-    "Endocrinologist",
-    "Emergency Physician",
-  ];
+  useEffect(() => {
+    if ((!hospital || !hospital.departments || !hospital.qualifications) && user?._id) {
+      dispatch(loadHospitalData({ hospitalId: user._id }));
+    }
+  }, [hospital, user, dispatch]);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
   } = useForm<HospitalAddDoctorpageFormData>({
     resolver: zodResolver(doctorRegistrationSchema),
   });
+
+  const selectedDepartmentName = watch('department');
+
+  // Dropdown options from Redux hospital data
+  const departments = hospital?.departments || [];
+  const qualifications = hospital?.qualifications || [];
+
+  // Filter specializations based on selected department
+  const selectedDept = departments.find(d => d.departmentName === selectedDepartmentName);
+  const filteredSpecializations = selectedDept
+    ? hospital?.specializations?.filter(spec => spec.department_id === selectedDept._id) || []
+    : [];
 
   const onSubmit = async (data: HospitalAddDoctorpageFormData) => {
     try {
@@ -257,8 +220,8 @@ const HospitalAddDoctorpage: React.FC = () => {
                   >
                     <option value="">Select Department</option>
                     {departments.map((dept) => (
-                      <option key={dept} value={dept}>
-                        {dept}
+                      <option key={dept._id} value={dept.departmentName}>
+                        {dept.departmentName}
                       </option>
                     ))}
                   </select>
@@ -298,8 +261,8 @@ const HospitalAddDoctorpage: React.FC = () => {
                   >
                     <option value="">Select Qualification</option>
                     {qualifications.map((qual) => (
-                      <option key={qual} value={qual}>
-                        {qual}
+                      <option key={qual._id} value={qual.qualificationName}>
+                        {qual.qualificationName}
                       </option>
                     ))}
                   </select>
@@ -332,9 +295,9 @@ const HospitalAddDoctorpage: React.FC = () => {
                       }`}
                   >
                     <option value="">Select Specialization</option>
-                    {specializations.map((spec) => (
-                      <option key={spec} value={spec}>
-                        {spec}
+                    {filteredSpecializations.map((spec) => (
+                      <option key={spec._id} value={spec.name}>
+                        {spec.name}
                       </option>
                     ))}
                   </select>
