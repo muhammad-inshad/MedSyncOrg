@@ -30,6 +30,7 @@ const EditPatientProfile = () => {
     dateOfBirth: undefined,
     address: '',
     bloodGroup: '',
+    age: undefined,
     image: undefined,
     isActive: true,
     currentPassword: '',
@@ -61,6 +62,7 @@ const EditPatientProfile = () => {
         dateOfBirth: patient.dateOfBirth,
         address: patient.address || '',
         bloodGroup: patient.bloodGroup || '',
+        age: patient.age,
         image: undefined,
         isActive: patient.isActive ?? true,
         currentPassword: '',
@@ -161,12 +163,13 @@ const EditPatientProfile = () => {
         ...formData,
         willRemoveImage,
         phone: formData.phone ? Number(formData.phone) : undefined,
+        age: formData.age ? Number(formData.age) : undefined,
       };
 
       // Remove sensitive/password fields from profile update payload
-      delete (profilePayload ).confirmNewPassword;
-      delete (profilePayload ).currentPassword;
-      delete (profilePayload ).newPassword;
+      delete (profilePayload).confirmNewPassword;
+      delete (profilePayload).currentPassword;
+      delete (profilePayload).newPassword;
 
       let profileUpdated = false;
       let passwordUpdated = false;
@@ -320,6 +323,17 @@ const EditPatientProfile = () => {
                   className={`w-full px-4 py-2 rounded-lg border outline-none transition-all ${errors.phone ? 'border-red-500 ring-1 ring-red-100' : 'border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500'}`}
                 />
                 {errors.phone && <p className="text-xs text-red-500 font-medium">{errors.phone}</p>}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-gray-700">Age</label>
+                <input
+                  type="number"
+                  name="age"
+                  value={formData.age || ''}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                />
               </div>
 
               <div className="space-y-1">

@@ -11,7 +11,11 @@ import {
     Info,
     CreditCard,
     ChevronLeft,
-    Lock
+    Lock,
+    MapPin,
+    Briefcase,
+    Phone,
+    Mail
 } from 'lucide-react';
 import { doctorApi } from '@/constants/backend/doctor/doctor.api';
 import { useNavigate } from 'react-router-dom';
@@ -43,7 +47,14 @@ const doctorUpdateSchema = z.object({
         commissionPercentage: z.string().optional(),
         fixedSalary: z.string().optional(),
         payoutCycle: z.enum(['weekly', 'monthly']),
-        patientsPerDayLimit: z.string().min(1, 'Limit is required'),
+        patientsPerDayLimit: z.string()
+            .min(1, 'Limit is required')
+            .refine((val) => {
+                const num = parseInt(val);
+                return !isNaN(num) && num >= 1 && num <= 20;
+            }, {
+                message: "Maximum 20 patients per day allowed"
+            }),
     }),
     currentPassword: z.string().optional(),
     newPassword: z.string().optional(),
@@ -82,15 +93,61 @@ const DoctorEditProfile: React.FC = () => {
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [pendingData, setPendingData] = useState<DoctorUpdateFormData | null>(null);
 
-    const departments = ["General Medicine", "Cardiology", "Neurology", "Pediatrics", "Obstetrics & Gynecology", "Orthopedics", "General Surgery", "ENT", "Dermatology", "Psychiatry", "Radiology", "Anesthesiology", "Ophthalmology", "Gastroenterology", "Urology", "Nephrology", "Oncology", "Pulmonology", "Endocrinology", "Emergency Medicine"];
-    const qualifications = ["MBBS", "MBBS, MD", "MBBS, MS", "MD Medicine", "MD Pediatrics", "MD Dermatology", "MD Radiology", "MS General Surgery", "MS Orthopedics", "MS Obstetrics & Gynecology", "DNB", "DM Cardiology", "DM Neurology", "MCh Neurosurgery", "Diploma"];
-    const specializations = ["General Physician", "Cardiologist", "Neurologist", "Pediatrician", "Gynecologist", "Orthopedic Surgeon", "General Surgeon", "ENT Specialist", "Dermatologist", "Psychiatrist", "Radiologist", "Anesthesiologist", "Ophthalmologist", "Gastroenterologist", "Urologist", "Nephrologist", "Oncologist", "Pulmonologist", "Endocrinologist", "Emergency Physician"];
+    const [hospitalDepartments, setHospitalDepartments] = useState<{ _id: string, departmentName: string }[]>([]);
+    const [hospitalQualifications, setHospitalQualifications] = useState<{ _id: string, name: string, qualificationName: string }[]>([]);
+    const [hospitalSpecializations, setHospitalSpecializations] = useState<{ _id: string, name: string }[]>([]);
+    const [isLoadingData, setIsLoadingData] = useState(false);
+
+    const [timePeriods, setTimePeriods] = useState({
+        start: 'AM',
+        end: 'AM'
+    });
 
     const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<DoctorUpdateFormData>({
         resolver: zodResolver(doctorUpdateSchema),
     });
 
     const paymentType = watch('payment.type');
+
+    useEffect(() => {
+        const fetchHospitalData = async () => {
+            console.log("Current userData:", userData);
+            console.log("Hospital ID used for fetching:", userData?.hospital_id);
+
+            if (userData?.hospital_id) {
+                try {
+                    setIsLoadingData(true);
+                    const [deptRes, qualRes, specRes] = await Promise.all([
+                        doctorApi.getHospitalDepartments(userData.hospital_id),
+                        doctorApi.getHospitalQualifications(userData.hospital_id),
+                        doctorApi.getHospitalSpecializations(userData.hospital_id)
+                    ]);
+
+                    console.log("Fetched Departments Response:", deptRes.data);
+                    console.log("Fetched Qualifications Response:", qualRes.data);
+                    console.log("Fetched Specializations Response:", specRes.data);
+
+                    if (deptRes.data.success && Array.isArray(deptRes.data.data)) {
+                        setHospitalDepartments(deptRes.data.data);
+                    }
+                    if (qualRes.data.success && Array.isArray(qualRes.data.data)) {
+                        setHospitalQualifications(qualRes.data.data);
+                    }
+                    if (specRes.data.success && Array.isArray(specRes.data.data)) {
+                        setHospitalSpecializations(specRes.data.data);
+                    }
+                } catch (error) {
+                    console.error('Error fetching hospital data:', error);
+                    toast.error("Failed to load hospital-specific data");
+                } finally {
+                    setIsLoadingData(false);
+                }
+            } else {
+                console.warn("No hospital_id found for current doctor profile");
+            }
+        };
+        fetchHospitalData();
+    }, [userData?.hospital_id]);
 
     useEffect(() => {
         if (userData) {
@@ -105,8 +162,8 @@ const DoctorEditProfile: React.FC = () => {
                 specialization: userData.specialization || '',
                 about: userData.about || '',
                 consultationTime: {
-                    start: userData.consultationTime?.start || '',
-                    end: userData.consultationTime?.end || '',
+                    start: userData.consultationTime?.start?.replace(/\s?(AM|PM)/g, '') || '',
+                    end: userData.consultationTime?.end?.replace(/\s?(AM|PM)/g, '') || '',
                 },
                 payment: {
                     type: userData.payment?.type || 'commission',
@@ -116,6 +173,12 @@ const DoctorEditProfile: React.FC = () => {
                     patientsPerDayLimit: userData.payment?.patientsPerDayLimit?.toString() || '20',
                 },
             });
+
+            setTimePeriods({
+                start: userData.consultationTime?.start?.includes('PM') ? 'PM' : 'AM',
+                end: userData.consultationTime?.end?.includes('PM') ? 'PM' : 'AM'
+            });
+
             if (userData.profileImage) setProfilePreview(userData.profileImage);
             if (userData.licence) setLicensePreview(userData.licence);
         }
@@ -133,19 +196,28 @@ const DoctorEditProfile: React.FC = () => {
             setIsSubmitting(true);
             const formData = new FormData();
 
+            // Combine time with periods
+            const processedData = {
+                ...pendingData,
+                consultationTime: {
+                    start: `${pendingData.consultationTime.start} ${timePeriods.start}`,
+                    end: `${pendingData.consultationTime.end} ${timePeriods.end}`
+                }
+            };
+
             const flatFields = ['name', 'email', 'phone', 'address', 'qualification', 'experience', 'department', 'specialization', 'about'];
             flatFields.forEach(key => {
-                formData.append(key, String(pendingData[key as keyof DoctorUpdateFormData]));
+                formData.append(key, String(processedData[key as keyof DoctorUpdateFormData]));
             });
 
             // Append password only if newPassword exists
-            if (pendingData.newPassword && pendingData.currentPassword) {
-                formData.append('currentPassword', pendingData.currentPassword);
-                formData.append('newPassword', pendingData.newPassword);
+            if (processedData.newPassword && processedData.currentPassword) {
+                formData.append('currentPassword', processedData.currentPassword);
+                formData.append('newPassword', processedData.newPassword);
             }
 
-            formData.append('consultationTime', JSON.stringify(pendingData.consultationTime));
-            formData.append('payment', JSON.stringify(pendingData.payment));
+            formData.append('consultationTime', JSON.stringify(processedData.consultationTime));
+            formData.append('payment', JSON.stringify(processedData.payment));
 
             if (profileImageFile) formData.append('profileImage', profileImageFile);
             if (licenseImageFile) formData.append('license', licenseImageFile);
@@ -156,17 +228,17 @@ const DoctorEditProfile: React.FC = () => {
             navigate(COMMON_ROUTES.REVIEWPENDING, { replace: true });
         } catch (error: unknown) {
             console.error('ERROR:', error);
-    
-    let errorMessage = 'Update failed';
 
-    // Type Guard: Check if the error is specifically an Axios error
-    if (axios.isAxiosError(error)) {
-        errorMessage = error.response?.data?.message || error.message;
-    } else if (error instanceof Error) {
-        errorMessage = error.message;
-    }
+            let errorMessage = 'Update failed';
 
-    toast.error(errorMessage);
+            // Type Guard: Check if the error is specifically an Axios error
+            if (axios.isAxiosError(error)) {
+                errorMessage = error.response?.data?.message || error.message;
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+
+            toast.error(errorMessage);
         } finally {
             setIsSubmitting(false);
             setIsConfirmOpen(false);
@@ -221,7 +293,7 @@ const DoctorEditProfile: React.FC = () => {
 
                 <form id="doctor-edit-form" onSubmit={handleSubmit(onFormSubmit)} className="space-y-8">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                        
+
                         {/* PHOTO UPLOADS */}
                         <div className="lg:col-span-4 space-y-6">
                             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center">
@@ -250,17 +322,42 @@ const DoctorEditProfile: React.FC = () => {
 
                         {/* FORM CONTENT */}
                         <div className="lg:col-span-8 space-y-8">
-                            
+
                             {/* Personal Information */}
                             <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
                                 <div className="flex items-center gap-3 mb-8"><div className="p-3 bg-blue-50 text-blue-600 rounded-2xl"><User className="w-5 h-5" /></div><h2 className="text-xl font-bold text-slate-900">Personal Information</h2></div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Full Name</label><input {...register('name')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" />{errors.name && <p className="text-[10px] text-rose-500 font-bold">{errors.name.message}</p>}</div>
-                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Email</label><input {...register('email')} readOnly className="w-full px-4 py-3 bg-slate-50/50 border border-slate-100 rounded-2xl text-slate-500 cursor-not-allowed text-sm" /></div>
-                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Phone</label><input {...register('phone')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" />{errors.phone && <p className="text-[10px] text-rose-500 font-bold">{errors.phone.message}</p>}</div>
-                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Department</label><select {...register('department')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm">{departments.map(d => <option key={d} value={d}>{d}</option>)}</select></div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Full Name</label>
+                                        <div className="relative"><User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><input {...register('name')} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none text-sm font-medium" /></div>
+                                        {errors.name && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.name.message}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Email</label>
+                                        <div className="relative"><Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><input {...register('email')} readOnly className="w-full pl-11 pr-4 py-3 bg-slate-50/50 border border-slate-100 rounded-2xl text-slate-500 cursor-not-allowed text-sm font-medium" /></div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Phone</label>
+                                        <div className="relative"><Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" /><input {...register('phone')} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none text-sm font-medium" /></div>
+                                        {errors.phone && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.phone.message}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Department</label>
+                                        <div className="relative">
+                                            <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                            <select {...register('department')} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none text-sm font-medium appearance-none" disabled={isLoadingData}>
+                                                <option value="">Select Department</option>
+                                                {Array.isArray(hospitalDepartments) && hospitalDepartments.map(d => <option key={d._id} value={d._id}>{d.departmentName}</option>)}
+                                            </select>
+                                        </div>
+                                        {errors.department && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.department.message}</p>}
+                                    </div>
                                 </div>
-                                <div className="mt-6 space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Address</label><textarea {...register('address')} rows={2} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl resize-none text-sm" /></div>
+                                <div className="mt-6 space-y-2">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Address</label>
+                                    <div className="relative"><MapPin className="absolute left-4 top-4 w-4 h-4 text-slate-400" /><textarea {...register('address')} rows={2} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none resize-none text-sm font-medium" /></div>
+                                    {errors.address && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.address.message}</p>}
+                                </div>
                             </div>
 
                             {/* --- PASSWORD SECURITY (6 CHAR MIN) --- */}
@@ -293,15 +390,46 @@ const DoctorEditProfile: React.FC = () => {
                             <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
                                 <div className="flex items-center gap-3 mb-8"><div className="p-3 bg-amber-50 text-amber-600 rounded-2xl"><Award className="w-5 h-5" /></div><h2 className="text-xl font-bold text-slate-900">Expertise & Schedule</h2></div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Specialization</label><select {...register('specialization')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm">{specializations.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
-                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Qualification</label><select {...register('qualification')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm">{qualifications.map(q => <option key={q} value={q}>{q}</option>)}</select></div>
-                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Experience (Years)</label><input {...register('experience')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" /></div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">From</label><input type="time" {...register('consultationTime.start')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold" /></div>
-                                        <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">To</label><input type="time" {...register('consultationTime.end')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold" /></div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Specialization</label>
+                                        <select {...register('specialization')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none text-sm font-medium appearance-none" disabled={isLoadingData}>
+                                            <option value="">Select Specialization</option>
+                                            {Array.isArray(hospitalSpecializations) && hospitalSpecializations.map(s => <option key={s._id} value={s.name}>{s.name}</option>)}
+                                        </select>
+                                        {errors.specialization && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.specialization.message}</p>}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Qualification</label>
+                                        <select {...register('qualification')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none text-sm font-medium appearance-none" disabled={isLoadingData}>
+                                            <option value="">Select Qualification</option>
+                                            {Array.isArray(hospitalQualifications) && hospitalQualifications.map(q => <option key={q._id} value={q.name}>{q.name}</option>)}
+                                        </select>
+                                        {errors.qualification && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.qualification.message}</p>}
+                                    </div>
+                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Experience (Years)</label><input {...register('experience')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none text-sm font-medium" /></div>
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Consultation Time</label>
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex-1 flex gap-1">
+                                                <input type="time" {...register('consultationTime.start')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold" />
+                                                <select value={timePeriods.start} onChange={(e) => setTimePeriods(prev => ({ ...prev, start: e.target.value }))} className="px-2 bg-slate-100 rounded-xl text-[10px] font-bold outline-none">
+                                                    <option value="AM">AM</option>
+                                                    <option value="PM">PM</option>
+                                                </select>
+                                            </div>
+                                            <span className="text-slate-400 font-bold text-xs uppercase">to</span>
+                                            <div className="flex-1 flex gap-1">
+                                                <input type="time" {...register('consultationTime.end')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-bold" />
+                                                <select value={timePeriods.end} onChange={(e) => setTimePeriods(prev => ({ ...prev, end: e.target.value }))} className="px-2 bg-slate-100 rounded-xl text-[10px] font-bold outline-none">
+                                                    <option value="AM">AM</option>
+                                                    <option value="PM">PM</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        {(errors.consultationTime?.start || errors.consultationTime?.end) && <p className="text-[10px] text-rose-500 font-bold px-1">Consultation time is required</p>}
                                     </div>
                                 </div>
-                                <div className="mt-6 space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Bio</label><textarea {...register('about')} rows={4} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl resize-none text-sm" /></div>
+                                <div className="mt-6 space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Bio</label><textarea {...register('about')} rows={4} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl resize-none text-sm font-medium" /></div>
                             </div>
 
                             {/* Payment Config */}
@@ -314,7 +442,7 @@ const DoctorEditProfile: React.FC = () => {
                                     ) : (
                                         <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Fixed Salary (₹)</label><input type="number" {...register('payment.fixedSalary')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" /></div>
                                     )}
-                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Patients / Day</label><input type="number" {...register('payment.patientsPerDayLimit')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" /></div>
+                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Patients / Day</label><input type="number" {...register('payment.patientsPerDayLimit')} max={20} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" />{errors.payment?.patientsPerDayLimit && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.payment.patientsPerDayLimit.message}</p>}</div>
                                 </div>
                             </div>
 

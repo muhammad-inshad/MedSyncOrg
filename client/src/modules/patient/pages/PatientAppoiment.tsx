@@ -6,7 +6,8 @@ import { useAppSelector } from '@/hooks/redux';
 import { patientApi } from '@/constants/backend/patient/patient.api';
 import { PATIENT_ROUTES } from '@/constants/frontend/patient/patient.routes';
 import { toast } from 'react-hot-toast';
-import { format, addDays, startOfToday, isSameDay } from 'date-fns';
+import { format, addDays, startOfToday, isSameDay, parseISO } from 'date-fns';
+import { Calendar } from 'lucide-react';
 
 interface DaySlot {
   day: string;
@@ -47,6 +48,7 @@ export default function PatientAppointment() {
   const [loading, setLoading] = useState(true);
 
   const [selectedDate, setSelectedDate] = useState<Date>(startOfToday());
+  const [pickerBaseDate, setPickerBaseDate] = useState<Date>(startOfToday());
   const [weekDaysAvailability, setWeekDaysAvailability] = useState<DaySlot[]>([]);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
 
@@ -118,7 +120,7 @@ export default function PatientAppointment() {
       if (!doctorId) return;
       try {
         setAvailabilityLoading(true);
-        const dates = Array.from({ length: 7 }).map((_, i) => addDays(startOfToday(), i));
+        const dates = Array.from({ length: 7 }).map((_, i) => addDays(pickerBaseDate, i));
 
         const availabilityPromises = dates.map(date =>
           patientApi.getAvailableSlots(doctorId, format(date, 'yyyy-MM-dd'))
@@ -147,7 +149,7 @@ export default function PatientAppointment() {
       }
     };
     fetchWeekAvailability();
-  }, [doctorId]);
+  }, [doctorId, pickerBaseDate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -223,7 +225,7 @@ export default function PatientAppointment() {
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-6 items-start">
 
           {/* ── LEFT: Patient Information ── */}
-          <div className="w-full lg:w-[420px] shrink-0 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="w-full lg:w-105 shrink-0 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <div className="flex items-center gap-2 mb-1">
               <svg className="w-4 h-4 text-[#1a8fd1]" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
@@ -298,12 +300,40 @@ export default function PatientAppointment() {
 
             {/* Week Calendar */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 overflow-x-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-[#0d2b4e] text-sm flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-[#1a8fd1]" />
+                  Available Dates
+                </h3>
+                <div className="relative">
+                  <button
+                    onClick={() => (document.getElementById('hidden-date-picker') as HTMLInputElement)?.showPicker()}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-[#1a8fd1] rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors cursor-pointer"
+                  >
+                    <Calendar className="w-3.5 h-3.5" />
+                    Select Date
+                  </button>
+                  <input
+                    id="hidden-date-picker"
+                    type="date"
+                    min={format(startOfToday(), 'yyyy-MM-dd')}
+                    className="absolute opacity-0 pointer-events-none inset-0"
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        const newDate = parseISO(e.target.value);
+                        setSelectedDate(newDate);
+                        setPickerBaseDate(newDate);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
               {availabilityLoading ? (
                 <div className="flex justify-center p-4">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1a8fd1]"></div>
                 </div>
               ) : (
-                <div className="flex gap-2 justify-between min-w-[500px]">
+                <div className="flex gap-2 justify-between min-w-125">
                   {weekDaysAvailability.map((d) => {
                     const isSelected = isSameDay(selectedDate, d.fullDate);
                     return (

@@ -13,12 +13,17 @@ import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { DoctorResponseDTO, UpdateDoctorDTO } from "../../../../dto/doctor/doctor-response.dto.ts";
 import { DoctorMapper } from "../../../../mappers/doctor.mapper.ts";
 import { DoctorDTO } from "../../../../dto/auth/signup.dto.ts";
-
+import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.ts";
+import { CloudinaryImageService } from "../../../image/implementation/cloudinary.image.service.ts";
 export class DoctorManagementService implements IDoctorManagementService {
+    private readonly _cloudinary: CloudinaryImageService;
     constructor(
         private readonly _doctorRepo: IDoctorRepository,
-        private readonly _doctorMapper: DoctorMapper
-    ) { }
+        private readonly _doctorMapper: DoctorMapper,
+        private readonly _departmentRepo: IDepartmentRepository
+    ) {
+        this._cloudinary = new CloudinaryImageService();
+    }
 
     async getAllDoctors(options: IDoctorListOptions): Promise<IPaginationResult<DoctorResponseDTO>> {
         const { page, limit, search, filter } = options;
@@ -29,8 +34,27 @@ export class DoctorManagementService implements IDoctorManagementService {
             searchFields: ["name", "email", "specialization"],
             filter,
         });
+
+        const hospitalId = (filter as any)?.hospital_id;
+        const departmentMap = new Map<string, string>();
+
+        if (hospitalId) {
+            const { data: departments } = await this._departmentRepo.findByHospitalId(hospitalId, 1, 100);
+            departments.forEach(dept => {
+                departmentMap.set(dept._id.toString(), dept.departmentName);
+            });
+        }
+
+        const doctors = result.data.map(doc => {
+            const dto = this._doctorMapper.toDTO(doc);
+            if (departmentMap.has(dto.department)) {
+                dto.department = departmentMap.get(dto.department)!;
+            }
+            return dto;
+        });
+
         return {
-            data: result.data.map(doc => this._doctorMapper.toDTO(doc)),
+            data: doctors,
             total: result.total,
             page: result.page,
             limit: result.limit
@@ -97,7 +121,7 @@ export class DoctorManagementService implements IDoctorManagementService {
         return updated ? this._doctorMapper.toDTO(updated) : null;
     }
 
-    async registerDoctor(data: DoctorDTO, files: DoctorUploadFiles): Promise<DoctorResponseDTO> {
+    async registerDoctor(data: DoctorDTO, files: DoctorUploadFiles, hospital_id: string): Promise<DoctorResponseDTO> {
         let profileImageUrl = "";
         let licenseUrl = "";
 
@@ -127,6 +151,7 @@ export class DoctorManagementService implements IDoctorManagementService {
             name: data.name,
             email: data.email,
             password: hashedPassword,
+            hospital_id: new Types.ObjectId(hospital_id),
             phone: data.phone,
             address: data.address,
             specialization: data.specialization,
@@ -137,8 +162,8 @@ export class DoctorManagementService implements IDoctorManagementService {
             licence: licenseUrl,
             profileImage: profileImageUrl,
             isActive: true,
-            isAccountVerified: false,
-            reviewStatus: "pending",
+            isAccountVerified: true,
+            reviewStatus: "approved",
             consultationTime: {
                 start: "09:00 AM",
                 end: "05:00 PM",

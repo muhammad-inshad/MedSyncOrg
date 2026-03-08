@@ -1,7 +1,7 @@
 
-export interface IPatient  {
-    
-  _id: string; 
+export interface IPatient {
+
+  _id: string;
   name: string;
   email: string;
   phone: number;
@@ -12,9 +12,10 @@ export interface IPatient  {
   gender?: "male" | "female" | "other";
   dateOfBirth?: Date;
   address?: string;
-  isActive:boolean;
+  isActive: boolean;
   image?: string;
   bloodGroup?: string;
+  age?: number;
 
   walletBalance: number;
   medicalReports: string[];

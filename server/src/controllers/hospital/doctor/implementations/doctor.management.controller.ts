@@ -19,16 +19,16 @@ export class DoctorManagementController implements IDoctorManagementController {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 5;
       const search = req.query.search as string;
-      // const hospital = req.user as AuthHOspitalPayload;
-      // const hospital_id = hospital?.userId;
+      const hospital = req.user as any;
+      const hospital_id = hospital?.userId;
 
       const filter: IDoctorFilter = {
         reviewStatus: "approved"
       };
 
-      // if (hospital_id) {
-      //   filter.hospital_id = hospital_id.toString();
-      // }
+      if (hospital_id) {
+        filter.hospital_id = hospital_id.toString();
+      }
       const result = await this._doctorManagementService.getAllDoctors({ page, limit, search, filter });
       console.log(result)
       return ApiResponse.success(res, "Doctors fetched successfully", result.data, HttpStatusCode.OK, {
@@ -49,17 +49,17 @@ export class DoctorManagementController implements IDoctorManagementController {
       const search = req.query.search as string;
       // const reviewStatus = req.query.filter as string; // 'all' | 'pending' | 'revision' | 'rejected'
 
-      // const hospital = req.user as any;
-      // const hospital_id = hospital?.userId;
+      const hospital = req.user as any;
+      const hospital_id = hospital?.userId;
 
       const filter: FilterQuery<IDoctor> = {
         licence: { $exists: true, $ne: "" },
         reviewStatus: { $ne: "approved" }
       };
 
-      // if (hospital_id) {
-      //   filter.hospital_id = hospital_id.toString();
-      // }
+      if (hospital_id) {
+        filter.hospital_id = hospital_id.toString();
+      }
 
       const result = await this._doctorManagementService.getAllDoctors({ page, limit, search, filter });
       return ApiResponse.success(res, "KYC Doctors fetched successfully", result.data, HttpStatusCode.OK, {
@@ -120,16 +120,17 @@ export class DoctorManagementController implements IDoctorManagementController {
       const files = req.files as unknown as DoctorUploadFiles;
       const doctorData = req.body as DoctorDTO;
 
-      // const hospital = req.user as any;
-      // const hospital_id = hospital?.userId;
+      const hospital = req.user as any;
+      const hospital_id = hospital?.userId;
 
-      // if (!hospital_id) {
-      //   return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Hospital ID not found");
-      // }
+      if (!hospital_id) {
+        return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Hospital ID not found");
+      }
 
       const doctor = await this._doctorManagementService.registerDoctor(
         doctorData,
         files,
+        hospital_id.toString()
       );
 
       return ApiResponse.created(res, MESSAGES.DOCTOR.REGISTER_SUCCESS, doctor);

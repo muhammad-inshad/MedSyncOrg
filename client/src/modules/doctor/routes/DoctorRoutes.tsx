@@ -4,6 +4,8 @@ import DoctorEditProfile from "../pages/DoctorEditProfile";
 import DoctorProfile from "../pages/DoctorProfile";
 import { Routes, Route } from "react-router-dom";
 import DoctorProtectedRoute from "./DoctorProtectedRoute";
+import UpcomingAppointments from "../pages/UpcomingAppointments";
+import DoctorLeaveManagement from "../pages/DoctorLeaveManagement";
 
 
 const DoctorRoutes = () => {
@@ -13,6 +15,8 @@ const DoctorRoutes = () => {
         <Route path={DOCTOR_ROUTES.DOCTORDASHBOARD} element={<DoctorDashboard />} />
         <Route path={DOCTOR_ROUTES.DOCTOREDITPROFILE} element={<DoctorEditProfile />} />
         <Route path={DOCTOR_ROUTES.DOCTORPROFILE} element={<DoctorProfile />} />
+        <Route path={DOCTOR_ROUTES.UPCOMING_APPOINTMENTS} element={<UpcomingAppointments />} />
+        <Route path={DOCTOR_ROUTES.APPLY_LEAVE} element={<DoctorLeaveManagement />} />
       </Route>
     </Routes>
   );

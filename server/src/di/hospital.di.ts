@@ -19,6 +19,8 @@ import { HospitalController } from "../controllers/hospital/hospital/implementat
 import { HospitalAuthMiddleware } from "../middleware/hospital.auth.middleware.ts";
 import { CloudinaryImageService } from "../services/image/implementation/cloudinary.image.service.ts";
 import { patientContainer } from "./patient.di.ts";
+import { DepartmentRepository } from "../repositories/hospital/implementation/department.repository.ts";
+import DepartmentModel from "../models/department.model.ts";
 
 export const hospitalContainer = () => {
     const hospitalRepo = new HospitalRepository(HospitalModel);
@@ -27,6 +29,7 @@ export const hospitalContainer = () => {
     const doctorRepo = new DoctorRepository(DoctorModel);
     const doctorMapper = new DoctorMapper();
     const patientMapper = new PatientMapper();
+    const departmentRepo = new DepartmentRepository(DepartmentModel);
 
     const hospitalMapper = new HospitalMapper();
     const hospitalAuthService = new HospitalAuthService(
@@ -45,7 +48,8 @@ export const hospitalContainer = () => {
     // Doctor management: only doctor toggle/accept/reject/revision
     const doctorManagementService = new DoctorManagementService(
         doctorRepo,
-        doctorMapper
+        doctorMapper,
+        departmentRepo
     );
     const doctorManagement = new DoctorManagementController(
         doctorManagementService

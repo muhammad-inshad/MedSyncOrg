@@ -38,6 +38,8 @@ export const MESSAGES = {
         FETCH_SUCCESS: "Patient profile fetched successfully",
         UPDATE_SUCCESS: "Patient updated successfully",
         NOT_FOUND: "Patient not found",
+        ALREADYBOOKED:"An appointment with these patient details already exists for this date.",
+        NOAVILABLETOKEN:"No tokens available for the selected date"
     },
     VALIDATION: {
         REQUIRED_FIELD: "This field is required",

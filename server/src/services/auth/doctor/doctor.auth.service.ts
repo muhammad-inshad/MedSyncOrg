@@ -147,11 +147,16 @@ export class DoctorAuthService implements IDoctorAuthService {
     }
 
     async getHospitalDepartments(hospitalId: string) {
-        return this._departmentRepo.findByHospitalId(hospitalId);
+        const result = await this._departmentRepo.findByHospitalId(hospitalId);
+        return result.data; // Return only the array of departments
     }
-
     async getHospitalQualifications(hospitalId: string) {
-        return this._qualificationRepo.findByHospitalId(hospitalId);
+        const qualifications = await this._qualificationRepo.findByHospitalId(hospitalId);
+        return qualifications.map(q => ({
+            _id: q._id,
+            name: q.name,
+            qualificationName: q.name // Keep for backward compatibility
+        }));
     }
 
     async getHospitalSpecializations(hospitalId: string, departmentId?: string) {

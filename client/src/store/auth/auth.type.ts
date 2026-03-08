@@ -16,9 +16,9 @@ export interface BaseUser {
   gender?: string;
   age?: number | string;
   address?: string;
-  logo?:string;
-  pincode?:string;
-   since: number;
+  logo?: string;
+  pincode?: string;
+  since: number;
 }
 
 export interface PatientProfile extends BaseUser {
@@ -48,6 +48,7 @@ export interface DoctorProfile extends BaseUser {
     payoutCycle?: "weekly" | "monthly";
     patientsPerDayLimit?: number;
   };
+  hospital_id?: string;
 }
 
 export interface HospitalProfile extends BaseUser {

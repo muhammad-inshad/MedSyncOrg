@@ -44,7 +44,7 @@ const DoctorRegistrationForm: React.FC = () => {
   const [specializations, setSpecializations] = useState<ISpecialization[]>([]);
 
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     const selectedHospitalId = getHospitalSession();
     if (!selectedHospitalId) {
@@ -70,15 +70,19 @@ const DoctorRegistrationForm: React.FC = () => {
       if (!hospitalId) return;
 
       try {
-        const [deptRes, qualRes] = await Promise.all([
+        const [deptRes, qualRes, specRes] = await Promise.all([
           authApi.getHospitalDepartments(hospitalId),
-          authApi.getHospitalQualifications(hospitalId)
+          authApi.getHospitalQualifications(hospitalId),
+          authApi.getHospitalSpecializations(hospitalId, selectedDepartment)
         ]);
+
         setDepartments(deptRes.data.data?.data ?? deptRes.data.data ?? []);
         setQualifications(qualRes.data.data ?? []);
+        setSpecializations(specRes.data.data ?? []);
+
       } catch (error) {
-        console.error("Error fetching departments/qualifications:", error);
-        toast.error("Failed to load departments or qualifications.");
+        console.error("Error fetching master data:", error);
+        toast.error("Failed to load clinical data.");
       }
     };
     fetchMasterData();
@@ -219,7 +223,9 @@ const DoctorRegistrationForm: React.FC = () => {
                 <select {...register('qualification')} className={inputClass(!!errors.qualification)}>
                   <option value="">{AUTH_MESSAGES.SIGNUP.SELECT}</option>
                   {qualifications.map(q => (
-                    <option key={q._id} value={q.name}>{q.name}</option>
+                    <option key={q._id} value={q.name || (q as any).qualificationName}>
+                      {q.name || (q as any).qualificationName}
+                    </option>
                   ))}
                 </select>
                 {errors.qualification && <p className={errorClass}>{errors.qualification.message}</p>}

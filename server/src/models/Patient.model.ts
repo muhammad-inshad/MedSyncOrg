@@ -14,6 +14,7 @@ export interface IPatient extends Document {
   isActive: boolean;
   image?: string;
   bloodGroup?: string;
+  age?: number;
 
   walletBalance: number;
   medicalReports: string[];
@@ -41,6 +42,7 @@ const patientSchema = new Schema<IPatient>(
     isActive: { type: Boolean },
     image: { type: String },
     bloodGroup: { type: String },
+    age: { type: Number },
 
     walletBalance: { type: Number, default: 0 },
 

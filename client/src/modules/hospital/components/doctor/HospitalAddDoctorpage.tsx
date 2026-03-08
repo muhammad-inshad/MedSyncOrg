@@ -61,14 +61,12 @@ const HospitalAddDoctorpage: React.FC = () => {
     resolver: zodResolver(doctorRegistrationSchema),
   });
 
-  const selectedDepartmentName = watch('department');
+  const selectedDepartmentId = watch('department');
 
-  // Dropdown options from Redux hospital data
   const departments = hospital?.departments || [];
   const qualifications = hospital?.qualifications || [];
 
-  // Filter specializations based on selected department
-  const selectedDept = departments.find(d => d.departmentName === selectedDepartmentName);
+  const selectedDept = departments.find(d => d._id === selectedDepartmentId);
   const filteredSpecializations = selectedDept
     ? hospital?.specializations?.filter(spec => spec.department_id === selectedDept._id) || []
     : [];
@@ -220,7 +218,7 @@ const HospitalAddDoctorpage: React.FC = () => {
                   >
                     <option value="">Select Department</option>
                     {departments.map((dept) => (
-                      <option key={dept._id} value={dept.departmentName}>
+                      <option key={dept._id} value={dept._id}>
                         {dept.departmentName}
                       </option>
                     ))}
@@ -261,8 +259,8 @@ const HospitalAddDoctorpage: React.FC = () => {
                   >
                     <option value="">Select Qualification</option>
                     {qualifications.map((qual) => (
-                      <option key={qual._id} value={qual.qualificationName}>
-                        {qual.qualificationName}
+                      <option key={qual._id} value={qual.name}>
+                        {qual.name}
                       </option>
                     ))}
                   </select>

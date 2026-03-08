@@ -366,7 +366,7 @@ const HospitalDoctorEditpage: React.FC = () => {
                       >
                         <option value="">Select Department</option>
                         {hospitalDepartments.map((dept) => (
-                          <option key={dept._id} value={dept.departmentName}>
+                          <option key={dept._id} value={dept._id}>
                             {dept.departmentName}
                           </option>
                         ))}
@@ -429,8 +429,8 @@ const HospitalDoctorEditpage: React.FC = () => {
                     >
                       <option value="">Select Qualification</option>
                       {hospitalQualifications.map((qual) => (
-                        <option key={qual._id} value={qual.qualificationName}>
-                          {qual.qualificationName}
+                        <option key={qual._id} value={qual.name}>
+                          {qual.name}
                         </option>
                       ))}
                     </select>

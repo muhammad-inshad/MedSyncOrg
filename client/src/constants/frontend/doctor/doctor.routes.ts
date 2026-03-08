@@ -3,4 +3,6 @@ export const DOCTOR_ROUTES = {
     DOCTOREDITPROFILE: "/doctor/edit-profile",
     DOCTORPROFILE: "/doctor/profile",
     DOCTOREDITFORREVIEW: "/doctor/edit-for-review",
+    UPCOMING_APPOINTMENTS:"/doctor/upcoming-appointments",
+    APPLY_LEAVE:"/doctor/apply-leave"
 };

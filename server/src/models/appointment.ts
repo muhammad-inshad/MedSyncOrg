@@ -2,8 +2,7 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 
 export enum AppointmentStatus {
   PENDING = "pending",
-  ACCEPTED = "accepted",
-  REJECTED = "rejected",
+  COMPLETED="completed",
   CANCELLED = "cancelled"
 }
 
@@ -13,7 +12,7 @@ export enum AppointmentMode {
 }
 
 export interface IAppointment extends Document {
-  patientId: Types.ObjectId;
+  bookedBy: Types.ObjectId;
   doctorId: Types.ObjectId;
   hospitalId: Types.ObjectId;
 
@@ -27,15 +26,25 @@ export interface IAppointment extends Document {
 
   status: AppointmentStatus;
 
-  rejectionReason?: string;
+  patientDetails: {
+    name: string;
+    age: number;
+    phone: string;
+    email?: string;
+    address?: string;
+  };
 
+  rejectionReason?: string;
+  bloodPressure?: string;
+  heartRate?: string;
+  weight?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const appointmentSchema = new Schema<IAppointment>(
   {
-    patientId: {
+    bookedBy: {
       type: Schema.Types.ObjectId,
       ref: "Patient",
       required: true,
@@ -78,8 +87,24 @@ const appointmentSchema = new Schema<IAppointment>(
       enum: Object.values(AppointmentStatus),
       default: AppointmentStatus.PENDING,
     },
+    patientDetails: {
+      name: { type: String, required: true },
+      age: { type: Number, required: true },
+      phone: { type: String, required: true },
+      email: { type: String },
+      address: { type: String },
+    },
 
     rejectionReason: {
+      type: String,
+    },
+    bloodPressure: {
+      type: String,
+    },
+    heartRate: {
+      type: String,
+    },
+    weight: {
       type: String,
     },
   },

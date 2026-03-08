@@ -24,17 +24,17 @@ import { ISpecialization } from "../../models/specialization.model.ts";
 
 export class PatientService implements IPatientService {
     constructor(
-        private readonly userRepo: IUserRepository,
-        private readonly hospitalRepo: IHospitalRepository,
-        private readonly departmentRepo: IDepartmentRepository,
-        private readonly doctorRepo: IDoctorRepository,
-        private readonly appointmentRepo: IAppointmentRepository,
-        private readonly qualificationRepo: IQualificationRepository,
-        private readonly specializationRepo: ISpecializationRepository
+        private readonly _userRepo: IUserRepository,
+        private readonly _hospitalRepo: IHospitalRepository,
+        private readonly _departmentRepo: IDepartmentRepository,
+        private readonly _doctorRepo: IDoctorRepository,
+        private readonly _appointmentRepo: IAppointmentRepository,
+        private readonly _qualificationRepo: IQualificationRepository,
+        private readonly _specializationRepo: ISpecializationRepository
     ) { }
 
     async getProfile(userId: string) {
-        const patient = await this.userRepo.findById(userId);
+        const patient = await this._userRepo.findById(userId);
 
         if (!patient) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Patient not found");
@@ -48,7 +48,7 @@ export class PatientService implements IPatientService {
 
     async getAllPatient(options: { page: number; limit: number; search?: string; filter?: object }) {
         const { page, limit, search, filter } = options;
-        return await this.userRepo.findWithPagination({
+        return await this._userRepo.findWithPagination({
             page,
             limit,
             search,
@@ -58,7 +58,7 @@ export class PatientService implements IPatientService {
     }
 
     async updateProfile(id: string, updateData: UpdatePatientDTO) {
-        const existingPatient = await this.userRepo.findById(id);
+        const existingPatient = await this._userRepo.findById(id);
         if (!existingPatient) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Patient not found");
         }
@@ -90,12 +90,12 @@ export class PatientService implements IPatientService {
             updateData.isActive = String(updateData.isActive) === 'true';
         }
 
-        return await this.userRepo.update(id, updateData);
+        return await this._userRepo.update(id, updateData);
     }
 
     async gethospitals(page: number, limit: number, search: string) {
 
-        const result = await this.hospitalRepo.findWithPagination({
+        const result = await this._hospitalRepo.findWithPagination({
             page,
             limit,
             search,
@@ -117,7 +117,7 @@ export class PatientService implements IPatientService {
         };
     }
     async changePassword(id: string, currentPassword: string, newPassword: string) {
-        const patient = await this.userRepo.findByIdWithPassword(id);
+        const patient = await this._userRepo.findByIdWithPassword(id);
         if (!patient) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Patient not found");
         }
@@ -130,26 +130,24 @@ export class PatientService implements IPatientService {
         const salt = await bcrypt.genSalt(10);
         const hashedNewPassword = await bcrypt.hash(newPassword, salt);
 
-        await this.userRepo.update(id, { password: hashedNewPassword });
+        await this._userRepo.update(id, { password: hashedNewPassword });
     }
 
     async selectedHospital(id: string, page: number = 1, limit: number = 6, search: string = "") {
-        const hospital = await this.hospitalRepo.findById(id)
+        const hospital = await this._hospitalRepo.findById(id)
         if (!hospital) {
             ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, MESSAGES.ADMIN.NOT_FOUND)
         }
 
         const hospitalObj = hospital.toObject ? hospital.toObject() : hospital
-        const { data: departments, total } = await this.departmentRepo.findByHospitalId(id, page, limit, search);
-
-        // Fetch all active qualifications and specializations for the hospital
+        const { data: departments, total } = await this._departmentRepo.findByHospitalId(id, page, limit, search);
         const [qualifications, specializations] = await Promise.all([
-            this.qualificationRepo.findByHospitalId(id),
-            this.specializationRepo.findByHospitalId(id)
+            this._qualificationRepo.findByHospitalId(id),
+            this._specializationRepo.findByHospitalId(id)
         ]);
 
         const departmentsWithCount = await Promise.all(departments.map(async (dept: IDepartment) => {
-            const doctorCount = await this.doctorRepo.countByDepartment(id, dept._id.toString());
+            const doctorCount = await this._doctorRepo.countByDepartment(id, dept._id.toString());
             return {
                 ...dept.toObject(),
                 doctorCount
@@ -160,7 +158,8 @@ export class PatientService implements IPatientService {
             .filter(q => q.isActive)
             .map(q => ({
                 _id: q._id.toString(),
-                qualificationName: q.name, // The model has 'name', but DTO has 'qualificationName'
+                name: q.name,
+                qualificationName: q.name,
                 description: q.description,
                 image: q.image
             })) as QualificationResponseDTO[];
@@ -193,7 +192,7 @@ export class PatientService implements IPatientService {
         limit: number,
         search: string
     ) {
-        const department = await this.departmentRepo.findById(id);
+        const department = await this._departmentRepo.findById(id);
 
         if (!department) {
             ApiResponse.throwError(
@@ -202,7 +201,7 @@ export class PatientService implements IPatientService {
             );
         }
 
-        const result = await this.doctorRepo.findWithPagination({
+        const result = await this._doctorRepo.findWithPagination({
             page,
             limit,
             search,
@@ -232,7 +231,7 @@ export class PatientService implements IPatientService {
     }
 
     async getDoctorById(id: string) {
-        const doctor = await this.doctorRepo.findById(id);
+        const doctor = await this._doctorRepo.findById(id);
 
         if (!doctor || !doctor.isActive || doctor.reviewStatus !== "approved") {
             ApiResponse.throwError(
@@ -252,13 +251,13 @@ export class PatientService implements IPatientService {
         } as unknown as DoctorResponseDTO;
     }
     async getAvailableSlots(doctorId: string, date: string): Promise<DoctorDailySlotsDTO> {
-        const doctor = await this.doctorRepo.findById(doctorId);
+        const doctor = await this._doctorRepo.findById(doctorId);
         if (!doctor) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
         }
 
         const appointmentDate = new Date(date);
-        const bookedTokens = await this.appointmentRepo.countByDoctorAndDate(doctorId, appointmentDate);
+        const bookedTokens = await this._appointmentRepo.countByDoctorAndDate(doctorId, appointmentDate);
         const maxTokens = doctor.payment?.patientsPerDayLimit || 20;
 
         let status: "Available" | "Filling Fast" | "Fully Booked" = "Available";
@@ -284,30 +283,55 @@ export class PatientService implements IPatientService {
     async bookAppointment(patientId: string, data: BookAppointmentDTO): Promise<void> {
         const appointmentDate = new Date(data.appointmentDate);
 
-        const doctor = await this.doctorRepo.findById(data.doctorId);
+        const doctor = await this._doctorRepo.findById(data.doctorId);
         if (!doctor) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
         }
 
-        const bookedTokens = await this.appointmentRepo.countByDoctorAndDate(data.doctorId, appointmentDate);
+        const existingAppointment = await this._appointmentRepo.findDuplicate(
+        data.doctorId,
+        appointmentDate,
+        {
+            name: data.patientDetails.fullName,
+            age: data.patientDetails.age,
+            email: data.patientDetails.email
+        }
+    );
+
+    if (existingAppointment) {
+        ApiResponse.throwError(
+            HttpStatusCode.BAD_REQUEST, 
+            MESSAGES.PATIENT.ALREADYBOOKED
+        );
+    }
+
+        const bookedTokens = await this._appointmentRepo.countByDoctorAndDate(data.doctorId, appointmentDate);
         const maxTokens = doctor.payment?.patientsPerDayLimit || 20;
 
         if (bookedTokens >= maxTokens) {
-            ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "No tokens available for the selected date");
+            ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, MESSAGES.PATIENT.NOAVILABLETOKEN);
         }
-
-        // Generate token number
         const tokenNumber = bookedTokens + 1;
 
-        await this.appointmentRepo.create({
-            patientId: patientId as any,
+        await this._appointmentRepo.create({
+            bookedBy: patientId as any,
             doctorId: data.doctorId as any,
             hospitalId: data.hospitalId as any,
             appointmentDate,
             tokenNumber,
             visitTime: data.visitTime,
             mode: data.mode as any,
-            status: AppointmentStatus.PENDING
+            status: AppointmentStatus.PENDING,
+            patientDetails: {
+                name: data.patientDetails.fullName,
+                age: data.patientDetails.age,
+                phone: data.patientDetails.phone,
+                email: data.patientDetails.email,
+                address: data.patientDetails.address
+            },
+            bloodPressure: data.patientDetails.bloodPressure,
+            heartRate: data.patientDetails.heartRate,
+            weight: data.patientDetails.weight
         });
     }
 }

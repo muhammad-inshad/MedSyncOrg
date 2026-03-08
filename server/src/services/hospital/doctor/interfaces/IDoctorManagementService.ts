@@ -9,6 +9,6 @@ export interface IDoctorManagementService {
     acceptDoctor(id: string): Promise<DoctorResponseDTO | null>;
     rejectDoctor(id: string): Promise<DoctorResponseDTO | null>;
     requestRevisionDoctor(id: string): Promise<DoctorResponseDTO | null>;
-    registerDoctor(data: DoctorDTO, files: DoctorUploadFiles): Promise<DoctorResponseDTO>;
+    registerDoctor(data: DoctorDTO, files: DoctorUploadFiles, hospital_id: string): Promise<DoctorResponseDTO>;
     updateDoctor(id: string, data: UpdateDoctorDTO, files: DoctorUploadFiles): Promise<DoctorResponseDTO | null>;
 }

@@ -53,6 +53,7 @@ export interface DepartmentResponseDTO {
 
 export interface QualificationResponseDTO {
   _id: string;
+  name: string;
   qualificationName: string;
   description?: string;
   image?: string;

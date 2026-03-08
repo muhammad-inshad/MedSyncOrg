@@ -1,7 +1,7 @@
 import { DoctorAuthController } from "../controllers/auth/doctor/doctor.auth.controller.ts";
 import { DoctorAuthService } from "../services/auth/doctor/doctor.auth.service.ts";
 import DoctorController from "../controllers/doctor/doctor.controller.ts";
-import { DoctorService } from "../services/doctor/doctor.service.ts";
+import { DoctorService } from "../services/doctor/implementations/doctor.service.ts";
 import { DoctorRepository } from "../repositories/doctor/doctor.repository.ts";
 import { TokenService } from "../services/token/token.service.ts";
 import { DoctorModel } from "../models/doctor.model.ts";
@@ -16,6 +16,11 @@ import { QualificationRepository } from "../repositories/hospital/implementation
 import QualificationModel from "../models/qualification.model.ts";
 import { SpecializationRepository } from "../repositories/hospital/implementation/specialization.repository.ts";
 import SpecializationModel from "../models/specialization.model.ts";
+import { AppointmentRepository } from "../repositories/appointment/appointment.repository.ts";
+import { AppointmentController } from "../controllers/doctor/appointment.controller.ts";
+import { AppointmentService } from "../services/doctor/implementations/appointment.service.ts";
+import { LeaveRepository } from "../repositories/leave/leave.repository.ts";
+import DoctorLeaveModel from "../models/doctorLeave.model.ts";
 
 export const doctorContainer = () => {
   const doctorRepository = new DoctorRepository(DoctorModel);
@@ -25,10 +30,15 @@ export const doctorContainer = () => {
   const departmentRepo = new DepartmentRepository(DepartmentModel);
   const qualificationRepo = new QualificationRepository(QualificationModel);
   const specializationRepo = new SpecializationRepository();
+  const leaveRepo = new LeaveRepository();
+
+  const appointmentRepo = new AppointmentRepository();
 
   const doctorService = new DoctorService(
     doctorRepository,
-    tokenService
+    tokenService,
+    appointmentRepo,
+    leaveRepo
   );
 
   const doctorMapper = new DoctorMapper();
@@ -43,17 +53,19 @@ export const doctorContainer = () => {
     specializationRepo
   );
 
-
-
   const doctorcontroller = new DoctorController(doctorService);
   const doctorAuthController = new DoctorAuthController(doctorAuthService);
   const doctorAuthMiddleware = new DoctorAuthMiddleware(tokenService, doctorRepository);
+
+  const appointmentService = new AppointmentService(appointmentRepo);
+  const appoimentController = new AppointmentController(appointmentService);
 
   return {
     tokenService,
     doctorcontroller,
     doctorAuthController,
     doctorRepository,
-    doctorAuthMiddleware
+    doctorAuthMiddleware,
+    appoimentController
   };
 };

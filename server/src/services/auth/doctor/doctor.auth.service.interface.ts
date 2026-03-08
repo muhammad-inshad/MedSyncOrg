@@ -16,7 +16,7 @@ export interface IDoctorAuthService {
     registerDoctor(data: DoctorDTO, files: DoctorUploadFiles): Promise<IDoctor>;
     loginDoctor(data: LoginDTO): Promise<DoctorAuthResponse>;
     getAvailableHospitals(page: number, limit: number, search: string): Promise<{ hospitals: HospitalResponseDTO[]; total: number; totalPages: number; }>;
-    getHospitalDepartments(hospitalId: string): Promise<IDepartment[]>;
-    getHospitalQualifications(hospitalId: string): Promise<IQualification[]>;
-    getHospitalSpecializations(hospitalId: string, departmentId?: string): Promise<ISpecialization[]>;
+    getHospitalDepartments(hospitalId: string): Promise<any[]>;
+    getHospitalQualifications(hospitalId: string): Promise<any[]>;
+    getHospitalSpecializations(hospitalId: string, departmentId?: string): Promise<any[]>;
 }
