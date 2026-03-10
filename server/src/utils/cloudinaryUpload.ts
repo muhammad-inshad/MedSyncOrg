@@ -35,3 +35,14 @@ export const extractPublicId = (url: string): string => {
     return '';
   }
 };
+
+export const deleteFromCloudinary = async (url: string): Promise<void> => {
+  const publicId = extractPublicId(url);
+  if (!publicId) return;
+
+  try {
+    await cloudinary.uploader.destroy(publicId);
+  } catch (error) {
+    console.error(`Failed to delete image with public ID ${publicId}:`, error);
+  }
+};

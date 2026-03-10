@@ -4,6 +4,8 @@ import { SuperAdminDashboardController } from "../controllers/superAdmin/dashboa
 import { SuperAdminDashboardService } from "../services/superAdmin/dashboard/implementation/dashboard.service.ts";
 import { SuperAdminKycController } from "../controllers/superAdmin/kycManagement/implementation/kyc.controller.ts";
 import { SuperAdminKycService } from "../services/superAdmin/kycManagement/implementation/kyc.service.ts";
+import { SuperAdminPatientManagementService } from "../services/superAdmin/patient/implementations/patient.management.service.ts";
+import { SuperAdminPatientManagementController } from "../controllers/superAdmin/patient/implementation/patient.management.controller.ts";
 import { TokenService } from "../services/token/token.service.ts";
 
 import { SuperAdminModel } from "../models/superAdmin.model.ts";
@@ -18,6 +20,7 @@ import { DoctorRepository } from "../repositories/doctor/doctor.repository.ts";
 import { DoctorModel } from "../models/doctor.model.ts";
 import { UserRepository } from "../repositories/patient/user.repository.ts";
 import { Patient } from "../models/Patient.model.ts";
+import { PatientMapper } from "../mappers/patient.mapper.ts";
 import { SuperAdminRepository } from "../repositories/superAdmin/implements/superAdmin.repository.ts";
 
 export const superAdminContainer = () => {
@@ -48,11 +51,17 @@ export const superAdminContainer = () => {
   const superAdminAuthService = new SuperAdminAuthService(superAdminRepo, tokenService, superAdminMapper);
   const superAdminAuthController = new SuperAdminAuthController(superAdminAuthService);
 
+  // Patient Management Module
+  const patientMapper = new PatientMapper();
+  const patientManagementService = new SuperAdminPatientManagementService(patientRepo, patientMapper);
+  const patientManagementController = new SuperAdminPatientManagementController(patientManagementService);
+
   return {
     tokenService,
     dashboardController,
     hospitalController,
     kycController,
-    superAdminAuthController
+    superAdminAuthController,
+    patientManagementController
   };
 };

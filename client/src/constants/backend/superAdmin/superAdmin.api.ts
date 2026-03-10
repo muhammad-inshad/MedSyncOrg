@@ -44,4 +44,15 @@ export const superAdminApi = {
 
     setHospitalActive: (data: SetHospitalActiveData) =>
         api.patch(SUPERADMIN_MANAGEMENT.SET_ACTIVE, data),
+
+   getPatientManagement: (params: PaginationParams) =>
+    api.get(SUPERADMIN_MANAGEMENT.GET_PATINET, { params }),
+
+  togglePatient: (data: { id: string; isActive: boolean }) =>
+  api.patch(SUPERADMIN_MANAGEMENT.TOGGLEPATIENT, data),
+
+  addPatient: (data: FormData) =>
+        api.post(SUPERADMIN_MANAGEMENT.PATIENT_ADD, data),
+   editPatient: (id: string, data: FormData) =>
+        api.patch(SUPERADMIN_MANAGEMENT.EDIT_PATIENT(id), data),
 };

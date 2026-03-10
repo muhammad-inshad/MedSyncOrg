@@ -6,6 +6,9 @@ import ProtectedRoute from './ProtectedRoute'
 import EditHospital from '../components/EditHospital'
 import SuperAdminAddHospital from '../components/SuperAdminAddHospital'
 import KycManagement from '../pages/KycManagement'
+import PatientMangement from '../pages/PatientMangement'
+import SuperAddpatient from '../components/patient/SuperAddpatient'
+import SuperEditpatient from '../components/patient/SuperEditpatient'
 
 const SuperAdminRoutes = () => {
   return (
@@ -16,6 +19,9 @@ const SuperAdminRoutes = () => {
         <Route path={SUPERADMIN_ROUTES.EDITHOSPITAL} element={<EditHospital />} />
         <Route path={SUPERADMIN_ROUTES.ADDHOSPITAL} element={<SuperAdminAddHospital />} />
         <Route path={SUPERADMIN_ROUTES.KYC} element={<KycManagement />} />
+        <Route path={SUPERADMIN_ROUTES.ADDPATIENT} element={<SuperAddpatient/>}/> 
+        <Route path={SUPERADMIN_ROUTES.PATIENT}element={<PatientMangement/>}/>
+          <Route path={SUPERADMIN_ROUTES.EDITPATIENT}element={<SuperEditpatient/>}/>
       </Route>
     </Routes>
   )

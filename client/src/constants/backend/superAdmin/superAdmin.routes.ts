@@ -13,4 +13,8 @@ export const SUPERADMIN_MANAGEMENT = {
     EDIT_HOSPITAL: (id: string) => `/api/superadmin/hospitals/${id}`,
     DELETE_HOSPITAL: (id: string) => `/api/superadmin/hospitals/${id}`,
     DASHBOARD_STATS: "/api/superadmin/dashboard-stats",
+    TOGGLEPATIENT:"/api/superadmin/setPatientActive",
+    GET_PATINET:"/api/superadmin/getPatientManagement",
+    PATIENT_ADD:"/api/superadmin/patientAdd",
+    EDIT_PATIENT: (id: string) => `/api/superadmin/patientEdit/${id}`,
 };

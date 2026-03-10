@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { IPatientManagementService } from "../interfaces/patient.management.service.interface.ts";
 import { IPatient } from "../../../../models/Patient.model.ts";
-import { uploadBufferToCloudinary } from "../../../../utils/cloudinaryUpload.ts";
+import { deleteFromCloudinary, uploadBufferToCloudinary } from "../../../../utils/cloudinaryUpload.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { PatientResponseDTO } from "../../../../dto/patient/patient-response.dto.ts";
@@ -51,24 +51,35 @@ export class PatientManagementService implements IPatientManagementService {
         return updated ? this._patientMapper.toDTO(updated) : null;
     }
 
-    async updatePatient(id: string, data: Partial<IPatient>, file?: Express.Multer.File): Promise<PatientResponseDTO | null> {
-        const patient = await this._userRepo.findById(id);
-        if (!patient) {
-            ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Patient not found");
-        }
-
-        let imageUrl = patient.image || "";
-        if (file) {
-            imageUrl = await uploadBufferToCloudinary(file.buffer, "patients/profile");
-        }
-
-        const updated = await this._userRepo.update(id, {
-            ...data,
-            image: imageUrl,
-        } as Partial<IPatient>);
-        return updated ? this._patientMapper.toDTO(updated) : null;
-    }
-
+    async updatePatient(id: string, data: Partial<IPatient> & { willRemoveImage?: string | boolean }, file?: Express.Multer.File): Promise<PatientResponseDTO | null> {
+           const patient = await this._userRepo.findById(id);
+           if (!patient) {
+               ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Patient not found");
+           }
+   
+           let imageUrl = patient.image || "";
+           const shouldRemoveImage = data.willRemoveImage === "true" || data.willRemoveImage === true;
+   
+           if (file || shouldRemoveImage) {
+               if (patient.image) {
+                   await deleteFromCloudinary(patient.image);
+               }
+               imageUrl = "";
+           }
+   
+           if (file) {
+               imageUrl = await uploadBufferToCloudinary(file.buffer, "patients/profile");
+           }
+   
+           const updateData = { ...data };
+           delete updateData.willRemoveImage;
+   
+           const updated = await this._userRepo.update(id, {
+               ...updateData,
+               image: imageUrl,
+           });
+           return updated ? this._patientMapper.toDTO(updated) : null;
+       }
     async getAllPatient(options: { page: number; limit: number; search?: string; filter?: object }): Promise<IPaginationResult<PatientResponseDTO>> {
         const { page, limit, search } = options;
         const result = await this._userRepo.findWithPagination({
