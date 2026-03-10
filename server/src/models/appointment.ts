@@ -2,13 +2,13 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 
 export enum AppointmentStatus {
   PENDING = "pending",
-  COMPLETED="completed",
-  CANCELLED = "cancelled"
+  COMPLETED = "completed",
+  CANCELLED = "cancelled",
 }
 
 export enum AppointmentMode {
   ONLINE = "online",
-  OFFLINE = "offline"
+  OFFLINE = "offline",
 }
 
 export interface IAppointment extends Document {
@@ -33,7 +33,7 @@ export interface IAppointment extends Document {
     email?: string;
     address?: string;
   };
-
+  cancelReason?: string;
   rejectionReason?: string;
   bloodPressure?: string;
   heartRate?: string;
@@ -98,6 +98,9 @@ const appointmentSchema = new Schema<IAppointment>(
     rejectionReason: {
       type: String,
     },
+    cancelReason: {
+      type: String,
+    },
     bloodPressure: {
       type: String,
     },
@@ -110,10 +113,10 @@ const appointmentSchema = new Schema<IAppointment>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const AppointmentModel = mongoose.model<IAppointment>(
   "Appointment",
-  appointmentSchema
+  appointmentSchema,
 );

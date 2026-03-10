@@ -91,7 +91,6 @@ const doctorSchema = new Schema<IDoctor>(
       required: [true, 'Qualification is required'],
     },
 
-    // CHANGED: String instead of Number to match frontend
     experience: {
       type: String,
       required: [true, 'Experience is required'],

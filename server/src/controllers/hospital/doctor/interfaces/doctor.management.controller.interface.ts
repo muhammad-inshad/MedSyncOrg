@@ -9,4 +9,6 @@ export interface IDoctorManagementController {
     requestRevisionDoctor(req: Request, res: Response, next: NextFunction): Promise<Response | void>;
     registerDoctor(req: Request, res: Response, next: NextFunction): Promise<Response | void>;
     updateDoctor(req: Request, res: Response, next: NextFunction): Promise<Response | void>;
+    getLeaveDoctors(req: Request, res: Response, next: NextFunction): Promise<Response | void>;
+    updateLeaveStatus(req: Request, res: Response, next: NextFunction): Promise<Response | void>;
 }

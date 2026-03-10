@@ -19,7 +19,7 @@ export class AppointmentController {
         limit,
         search,
         date
-      }) as { appointments: any[]; total: number };
+      });
 
       return ApiResponse.success(res, "Upcoming appointments fetched successfully", appointments, HttpStatusCode.OK, {
         page,

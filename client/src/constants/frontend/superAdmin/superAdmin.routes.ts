@@ -5,5 +5,6 @@ export const SUPERADMIN_ROUTES = {
     ADDHOSPITAL: "/superadmin/addhospital",
     SUBSCRIPTIONS: '/superadmin/subscriptions',
     KYC: '/superadmin/kyc',
-    CHAT: '/superadmin/chat'
+    CHAT: '/superadmin/chat',
+    PATIENT:'/superadmin/patient'
 };

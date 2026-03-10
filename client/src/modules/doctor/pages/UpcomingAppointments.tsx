@@ -3,18 +3,14 @@ import {
   Calendar,
   Clock,
   Search,
-  Filter,
   ChevronDown,
   Video,
   MapPin,
   Phone,
-  MoreVertical,
   CheckCircle,
   XCircle,
   AlertCircle,
   User,
-  FileText,
-  MessageSquare,
   RefreshCw,
 } from 'lucide-react';
 import DoctorSidebar from '../components/DoctorSidebar';
@@ -39,6 +35,7 @@ interface Appointment {
   status: AppointmentStatus;
   type: AppointmentType;
   reason: string;
+  cancelReason?: string;
   isNew: boolean;
   bloodPressure?: string;
   heartRate?: string;
@@ -72,18 +69,14 @@ function groupByDate(appointments: Appointment[]) {
   }, {});
 }
 
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-}
+
 
 export default function UpcomingAppointments() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<'All' | AppointmentStatus>('All');
+  const [statusFilter] = useState<'All' | AppointmentStatus>('All');
   const [typeFilter, setTypeFilter] = useState<'All' | AppointmentType>('All');
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -127,6 +120,7 @@ export default function UpcomingAppointments() {
             status: item.status === 'pending' ? 'Confirmed' : item.status === 'completed' ? 'Confirmed' : 'Canceled', // Map pending/completed to Confirmed/Upcoming for doc
             type: item.mode === 'online' ? 'Video' : 'In-Person',
             reason: item.reason || 'General Consultation',
+            cancelReason: item.cancelReason || '',
             isNew: item.status === 'pending',
             bloodPressure: item.bloodPressure,
             heartRate: item.heartRate,
@@ -178,12 +172,7 @@ export default function UpcomingAppointments() {
     canceled: appointments.filter((a) => a.status === 'Canceled').length,
   };
 
-  const handleStatusChange = (id: string, status: AppointmentStatus) => {
-    setAppointments((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, status } : a))
-    );
-    setOpenMenu(null);
-  };
+
 
   return (
     <div className="min-h-screen bg-slate-50 flex" style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -359,6 +348,14 @@ export default function UpcomingAppointments() {
                                 <span className="text-slate-400 italic">No vitals recorded</span>
                               )}
                             </div>
+
+                            {/* Cancellation Reason */}
+                            {appt.status === 'Canceled' && appt.cancelReason && (
+                              <div className="mt-2 p-2 bg-red-50 border border-red-100 rounded-lg">
+                                <p className="text-[10px] font-bold text-red-400 uppercase mb-0.5">Cancellation Reason</p>
+                                <p className="text-xs text-red-600 italic">"{appt.cancelReason}"</p>
+                              </div>
+                            )}
                           </div>
 
                           {/* Time */}
@@ -382,20 +379,17 @@ export default function UpcomingAppointments() {
 
                           {/* Action Buttons */}
                           <div className="flex items-center gap-2 ml-2">
-                            {appt.status !== 'Canceled' && (
-                              <>
-                                <button
-                                  title="View profile"
-                                  onClick={() => {
-                                    setSelectedAppointment(appt);
-                                    setIsModalOpen(true);
-                                  }}
-                                  className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
-                                >
-                                  <User className="w-4 h-4" />
-                                </button>
-                              </>
-                            )}
+
+                            <button
+                              title="View profile"
+                              onClick={() => {
+                                setSelectedAppointment(appt);
+                                setIsModalOpen(true);
+                              }}
+                              className="p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+                            >
+                              <User className="w-4 h-4" />
+                            </button>
                           </div>
                         </div>
                       </div>

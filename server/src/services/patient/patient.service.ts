@@ -1,4 +1,4 @@
-
+import { Types } from "mongoose";
 import cloudinary from "../../config/cloudinary.ts";
 import { ApiResponse } from "../../utils/apiResponse.utils.ts";
 import { IHospitalRepository } from "../../repositories/hospital/hospital.repository.interface.ts";
@@ -16,11 +16,10 @@ import { IDoctor } from "../../models/doctor.model.ts";
 import { DoctorResponseDTO } from "../../dto/doctor/doctor-response.dto.ts";
 import { BookAppointmentDTO, DoctorDailySlotsDTO } from "../../dto/appointment/appointment.dto.ts";
 import { IAppointmentRepository } from "../../repositories/appointment/appointment.repository.interface.ts";
-import { AppointmentModel, AppointmentStatus } from "../../models/appointment.ts";
+import { IAppointment, AppointmentStatus, AppointmentMode } from "../../models/appointment.ts";
 import { IQualificationRepository } from "../../repositories/hospital/qualification.repository.interface.ts";
 import { ISpecializationRepository } from "../../repositories/hospital/specialization.repository.interface.ts";
-import { IQualification } from "../../models/qualification.model.ts";
-import { ISpecialization } from "../../models/specialization.model.ts";
+
 
 export class PatientService implements IPatientService {
     constructor(
@@ -289,21 +288,21 @@ export class PatientService implements IPatientService {
         }
 
         const existingAppointment = await this._appointmentRepo.findDuplicate(
-        data.doctorId,
-        appointmentDate,
-        {
-            name: data.patientDetails.fullName,
-            age: data.patientDetails.age,
-            email: data.patientDetails.email
-        }
-    );
-
-    if (existingAppointment) {
-        ApiResponse.throwError(
-            HttpStatusCode.BAD_REQUEST, 
-            MESSAGES.PATIENT.ALREADYBOOKED
+            data.doctorId,
+            appointmentDate,
+            {
+                name: data.patientDetails.fullName,
+                age: data.patientDetails.age,
+                email: data.patientDetails.email
+            }
         );
-    }
+
+        if (existingAppointment) {
+            ApiResponse.throwError(
+                HttpStatusCode.BAD_REQUEST,
+                MESSAGES.PATIENT.ALREADYBOOKED
+            );
+        }
 
         const bookedTokens = await this._appointmentRepo.countByDoctorAndDate(data.doctorId, appointmentDate);
         const maxTokens = doctor.payment?.patientsPerDayLimit || 20;
@@ -314,13 +313,13 @@ export class PatientService implements IPatientService {
         const tokenNumber = bookedTokens + 1;
 
         await this._appointmentRepo.create({
-            bookedBy: patientId as any,
-            doctorId: data.doctorId as any,
-            hospitalId: data.hospitalId as any,
+            bookedBy: new Types.ObjectId(patientId),
+            doctorId: new Types.ObjectId(data.doctorId),
+            hospitalId: new Types.ObjectId(data.hospitalId),
             appointmentDate,
             tokenNumber,
             visitTime: data.visitTime,
-            mode: data.mode as any,
+            mode: data.mode as AppointmentMode,
             status: AppointmentStatus.PENDING,
             patientDetails: {
                 name: data.patientDetails.fullName,
@@ -333,5 +332,39 @@ export class PatientService implements IPatientService {
             heartRate: data.patientDetails.heartRate,
             weight: data.patientDetails.weight
         });
+    }
+
+    async getAppoimentHistory(patientId: string, options: { page: number; limit: number; search?: string }): Promise<{ data: IAppointment[]; total: number }> {
+        const result = await this._appointmentRepo.findPatientAppointments(patientId, options);
+        return {
+            data: result.appointments,
+            total: result.total
+        };
+    }
+
+      async cancelAppointment(data: { id: string; reason: string }): Promise<IAppointment | null> {
+        const appointment = await this._appointmentRepo.findById(data.id);
+        if (!appointment) {
+            ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Appointment not found");
+        }
+              const today = new Date();
+    const appointmentDate = new Date(appointment!.appointmentDate);
+    today.setHours(0,0,0,0);
+    appointmentDate.setHours(0,0,0,0);
+      const diffInDays =
+        (appointmentDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (diffInDays <= 1) {
+       return ApiResponse.throwError(
+            HttpStatusCode.BAD_REQUEST,
+            "Cancellation not allowed on the same day or the day before the appointment. Booking is confirmed and non-refundable."
+        );
+    }
+        const updated = await this._appointmentRepo.update(data.id, {
+            status: AppointmentStatus.CANCELLED,
+            cancelReason: data.reason
+        } as Partial<IAppointment>);
+
+        return updated;
     }
 }

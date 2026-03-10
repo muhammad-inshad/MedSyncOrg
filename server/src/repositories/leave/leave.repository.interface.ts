@@ -9,4 +9,14 @@ export interface ILeaveRepository extends IBaseRepository<IDoctorLeave> {
         startDate?: Date;
         endDate?: Date
     }): Promise<{ data: IDoctorLeave[]; total: number; page: number; limit: number }>;
+
+    findHospitalLeaves(options: {
+        hospitalId: string;
+        page: number;
+        limit: number;
+        search?: string;
+        date?: Date;
+    }): Promise<{ data: IDoctorLeave[]; total: number; page: number; limit: number }>;
+
+    updateStatus(id: string, status: 'approved' | 'rejected', rejectedReason?: string): Promise<IDoctorLeave | null>;
 }

@@ -9,6 +9,7 @@ import avathar from '../../../assets/images/avatar.png';
 import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
 import { authApi } from '@/constants/backend/auth/auth.api';
 import { toast } from "react-hot-toast";
+import { removeHospitalSession } from '@/utils/session';
 
 const PatientProfile: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -30,6 +31,7 @@ const PatientProfile: React.FC = () => {
     try {
       await authApi.logout();
       dispatch(logout());
+      removeHospitalSession()
       localStorage.removeItem("role");
       toast.success("Logged out successfully!");
       navigate("/", { replace: true });
@@ -40,6 +42,10 @@ const PatientProfile: React.FC = () => {
       navigate("/", { replace: true });
     }
   };
+
+  const handileViwHistory=()=>{
+    navigate(PATIENT_ROUTES.VIEW_APPOIMENTS_HISTORY)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -217,7 +223,7 @@ const PatientProfile: React.FC = () => {
                 </div>
                 <h3 className="text-base font-semibold text-gray-800">Appointment</h3>
               </div>
-              <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
+              <button onClick={()=>handileViwHistory()}  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
                 View History
               </button>
             </div>

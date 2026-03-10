@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, User, Phone, Mail, MapPin, Activity, Calendar, Clock, Hash, Shield } from 'lucide-react';
+import { X, User, Phone, Mail, MapPin, Activity, Calendar, Clock, Hash, Shield, FileText, XCircle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
 interface PatientDetailsModalProps {
@@ -14,6 +14,8 @@ interface PatientDetailsModalProps {
         time: string;
         type: string;
         reason: string;
+        cancelReason?: string;
+        status: string;
         bloodPressure?: string;
         heartRate?: string;
         weight?: string;
@@ -24,9 +26,10 @@ interface PatientDetailsModalProps {
 }
 
 const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({ isOpen, onClose, appointment }) => {
-    if (!isOpen || !appointment) return null;
     const location = useLocation();
     const isUpcomingPage = location.pathname === '/doctor/upcoming-appointments';
+
+    if (!isOpen || !appointment) return null;
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
@@ -147,11 +150,30 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({ isOpen, onClo
                     </div>
 
                     {/* Reason Section */}
-                    <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                        <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2">Reason for Visit</h3>
-                        <p className="text-sm text-slate-600 leading-relaxed italic">
-                            {appointment.reason || 'No specific reason provided for this consultation.'}
-                        </p>
+                    <div className="grid grid-cols-1 gap-6">
+                        {appointment.reason && (
+                            <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                                <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <FileText className="w-3 h-3 text-slate-400" />
+                                    Reason for Visit
+                                </h3>
+                                <p className="text-sm text-slate-600 leading-relaxed italic">
+                                    "{appointment.reason}"
+                                </p>
+                            </div>
+                        )}
+
+                        {appointment.cancelReason && (
+                            <div className="p-4 bg-red-50 rounded-xl border border-red-100">
+                                <h3 className="text-xs font-black text-red-900 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                    <XCircle className="w-3 h-3 text-red-400" />
+                                    Cancellation Reason
+                                </h3>
+                                <p className="text-sm text-red-600 leading-relaxed italic">
+                                    "{appointment.cancelReason}"
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -163,16 +185,16 @@ const PatientDetailsModal: React.FC<PatientDetailsModalProps> = ({ isOpen, onClo
                     >
                         Close Profile
                     </button>
-                  <div>
-      
-      {!isUpcomingPage && (
-        <button
-          className="px-6 py-2 rounded-xl text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
-        >
-          Start Consultation
-        </button>
-      )}
-    </div>
+                    <div>
+
+                        {!isUpcomingPage && appointment.status === 'Confirmed' && (
+                            <button
+                                className="px-6 py-2 rounded-xl text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
+                            >
+                                Start Consultation
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

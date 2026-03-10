@@ -14,7 +14,7 @@ export class AppointmentService implements IAppointments {
             search?: string;
             date?: string;
         }
-    ) {
+    ): Promise<{ appointments: import("../../../models/appointment.ts").IAppointment[]; total: number }> {
         const { page, limit, search, date } = options;
 
         const res = await this._appointmentRepo.findUpcomingAppointments(doctorId, {

@@ -19,6 +19,9 @@ export interface BaseUser {
   logo?: string;
   pincode?: string;
   since: number;
+  fatherName?:string;
+  bloodGroup?:string
+  
 }
 
 export interface PatientProfile extends BaseUser {

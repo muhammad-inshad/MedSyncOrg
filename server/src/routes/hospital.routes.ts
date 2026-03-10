@@ -31,6 +31,8 @@ router.patch("/doctorsToggle/:id", doctorManagement.doctorsToggle.bind(doctorMan
 router.patch("/doctorAccept/:id", doctorManagement.acceptDoctor.bind(doctorManagement));
 router.patch("/doctorReject/:id", doctorManagement.rejectDoctor.bind(doctorManagement));
 router.patch("/doctorRevision/:id", doctorManagement.requestRevisionDoctor.bind(doctorManagement));
+router.get("/getLeaveDoctors/:id", doctorManagement.getLeaveDoctors.bind(doctorManagement));
+router.patch("/leave-status/:id", doctorManagement.updateLeaveStatus.bind(doctorManagement));
 
 router.post("/register-doctor", upload.fields([
     { name: "profileImage", maxCount: 1 },
@@ -41,6 +43,7 @@ router.patch("/PatientsToggle/:id", patientManagement.patientsToggle.bind(patien
 router.get("/getallpatients", patientManagement.getAllPatient.bind(patientManagement));
 router.post("/patientAdd", upload.single('image'), patientManagement.addPatient.bind(patientManagement));
 router.patch("/patientEdit/:id", upload.single('image'), patientManagement.updatePatient.bind(patientManagement));
+
 
 router.post("/createDepartment", upload.single("image"), departmentManagement.createDepartment.bind(departmentManagement));
 router.get("/department", departmentManagement.getDepartments.bind(departmentManagement));

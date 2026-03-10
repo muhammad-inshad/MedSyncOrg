@@ -4,7 +4,7 @@ import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { IPatientManagementController } from "../interfaces/patient.management.controller.interface.ts";
 import { MESSAGES } from "../../../../constants/messages.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
-// import { IPatientFilter } from "../../../../types/hospital.types.ts";
+import { IPatientFilter } from "../../../../types/hospital.types.ts";
 import { AuthHOspitalPayload } from "../../../../dto/hospital/hospital-response.dto.ts";
 
 export class PatientManagementController implements IPatientManagementController {
@@ -56,9 +56,9 @@ export class PatientManagementController implements IPatientManagementController
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 5;
       const search = (req.query.search as string) || "";
-      // const hospital = req.user as any;
-      // const hospital_id = hospital?.userId;
-      // const filter: IPatientFilter = hospital_id ? { hospital_id: hospital_id.toString() } : {};
+      const hospital = req.user as AuthHOspitalPayload;
+      const hospital_id = hospital?.userId;
+      const filter: IPatientFilter = hospital_id ? { hospital_id: hospital_id.toString() } : {};
 
       const result = await this._patientManagementService.getAllPatient({ page, limit, search });
 
@@ -72,4 +72,5 @@ export class PatientManagementController implements IPatientManagementController
       next(error);
     }
   };
+
 }

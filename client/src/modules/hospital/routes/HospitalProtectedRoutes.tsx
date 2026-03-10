@@ -28,7 +28,6 @@ const HospitalProtectedRoute = () => {
       return;
     }
 
-    // Always re-verify on navigation to catch "blocked" status in real-time
     dispatch(initializeAuth(savedRole));
 
   }, [dispatch, location.pathname]);

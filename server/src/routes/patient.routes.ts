@@ -16,5 +16,7 @@ router.get("/get-department-doctors/:id", patientController.getDoctorDepartment.
 router.get("/doctor-details/:id", patientController.getDoctorById.bind(patientController));
 router.get("/available-slots/:doctorId", patientController.getAvailableSlots.bind(patientController));
 router.post("/book-appointment", patientController.bookAppointment.bind(patientController));
+router.get("/appoimentHistory/:patientID",patientController.getAppoimentHistory.bind(patientController))
+router.patch("/appointment/cancel/:id",patientController.appoinmentCancel.bind(patientController))
 
 export default router;

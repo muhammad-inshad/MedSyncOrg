@@ -72,16 +72,23 @@ export default function HospitalDepartments() {
   const [hoveredDept, setHoveredDept] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const limit = 6;
-  const navigate = useNavigate()
-  const handileDepartment = (id: string) => {
-  navigate(PATIENT_ROUTES.HOSPITAL_DOCTOR.replace(":departmentId", id));
-};
+  const navigate = useNavigate();
+  const handleDepartment = (id: string) => {
+    navigate(PATIENT_ROUTES.HOSPITAL_DOCTOR.replace(":departmentId", id));
+  };
 
   const hospital = useAppSelector(
     (state) => state.hospital.hospital
   ) as (Hospital & { totalPages: number; totalDepartments: number }) | null;
 
   const searchQuery = useAppSelector((state) => state.search.query);
+
+  // ── Sync Page with Search ──
+  const [prevSearchQuery, setPrevSearchQuery] = useState(searchQuery);
+  if (searchQuery !== prevSearchQuery) {
+    setPrevSearchQuery(searchQuery);
+    setCurrentPage(1);
+  }
 
   useEffect(() => {
     const hospitalId = getHospitalSession();
@@ -93,12 +100,7 @@ export default function HospitalDepartments() {
         search: searchQuery
       }));
     }
-    
   }, [dispatch, currentPage, searchQuery]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
 
   const hospitalName = hospital?.hospitalName ?? "MedSync";
   const departments = hospital?.departments && hospital.departments.length > 0
@@ -149,7 +151,7 @@ export default function HospitalDepartments() {
               <div
                 key={dept._id}
                 onMouseEnter={() => setHoveredDept(dept._id)}
-                onClick={() => handileDepartment(dept._id)}
+                onClick={() => handleDepartment(dept._id)}
                 onMouseLeave={() => setHoveredDept(null)}
                 className="group bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer"
               >

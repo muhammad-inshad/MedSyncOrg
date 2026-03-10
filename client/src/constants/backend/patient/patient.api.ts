@@ -21,5 +21,11 @@ export const patientApi = {
     },
     bookAppointment: (data: any) => {
         return api.post(PATIENT_MANAGEMENT.BOOK_APPOINTMENT, data)
+    },
+    getAppoimentHistory: (patientID: string, page: number = 1, limit: number = 5, search: string = "") => {
+        return api.get(`${PATIENT_MANAGEMENT.APPOIMENTHISTORY(patientID)}?page=${page}&limit=${limit}&search=${search}`)
+    },
+    cancelAppointment: (appointmentId: string, data: { reason: string }) => {
+        return api.patch(PATIENT_MANAGEMENT.CANCEL_APPOINTMENT(appointmentId), data);
     }
 };

@@ -9,6 +9,7 @@ import { DoctorDTO } from "../../../../dto/auth/signup.dto.ts";
 import { MESSAGES } from "../../../../constants/messages.ts";
 import { FilterQuery } from 'mongoose';
 import { IDoctor } from "../../../../models/doctor.model.ts";
+import { id } from "zod/locales";
 // import { AuthHOspitalPayload } from "../../../../dto/hospital/hospital-response.dto.ts";
 
 export class DoctorManagementController implements IDoctorManagementController {
@@ -19,7 +20,7 @@ export class DoctorManagementController implements IDoctorManagementController {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 5;
       const search = req.query.search as string;
-      const hospital = req.user as any;
+      const hospital = req.user;
       const hospital_id = hospital?.userId;
 
       const filter: IDoctorFilter = {
@@ -49,7 +50,7 @@ export class DoctorManagementController implements IDoctorManagementController {
       const search = req.query.search as string;
       // const reviewStatus = req.query.filter as string; // 'all' | 'pending' | 'revision' | 'rejected'
 
-      const hospital = req.user as any;
+      const hospital = req.user;
       const hospital_id = hospital?.userId;
 
       const filter: FilterQuery<IDoctor> = {
@@ -120,7 +121,7 @@ export class DoctorManagementController implements IDoctorManagementController {
       const files = req.files as unknown as DoctorUploadFiles;
       const doctorData = req.body as DoctorDTO;
 
-      const hospital = req.user as any;
+      const hospital = req.user;
       const hospital_id = hospital?.userId;
 
       if (!hospital_id) {
@@ -147,6 +148,50 @@ export class DoctorManagementController implements IDoctorManagementController {
 
       const result = await this._doctorManagementService.updateDoctor(id, doctorData, files);
       return ApiResponse.success(res, "Doctor profile updated successfully", result);
+    } catch (error: unknown) {
+      next(error);
+    }
+  }
+
+  async getLeaveDoctors(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+      const hospitalId = req.params.id;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 5;
+      const search = req.query.search as string;
+      const dateStr = req.query.date as string;
+      const date = dateStr ? new Date(dateStr) : undefined;
+
+      const result = await this._doctorManagementService.getLeaveDoctors({
+        hospitalId,
+        page,
+        limit,
+        search,
+        date
+      });
+
+      return ApiResponse.success(res, "Doctor leaves fetched successfully", result.data, HttpStatusCode.OK, {
+        page: result.page,
+        limit: result.limit,
+        totalItems: result.total,
+        totalPages: Math.ceil(result.total / result.limit),
+      });
+    } catch (error: unknown) {
+      next(error);
+    }
+  }
+
+  async updateLeaveStatus(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
+    try {
+      const { id } = req.params;
+      const { status, rejectedReason } = req.body;
+
+      if (!status || !['approved', 'rejected'].includes(status)) {
+        return ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Invalid status");
+      }
+
+      const result = await this._doctorManagementService.updateLeaveStatus(id, status, rejectedReason);
+      return ApiResponse.success(res, `Leave ${status} successfully`, result);
     } catch (error: unknown) {
       next(error);
     }

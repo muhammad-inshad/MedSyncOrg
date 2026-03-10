@@ -1,3 +1,4 @@
+import { IAppointment } from "../../../models/appointment.ts";
 
 export interface IAppointments {
     getUpcomingAppointments(
@@ -8,5 +9,5 @@ export interface IAppointments {
             search?: string;
             date?: string;
         }
-    ): Promise<unknown>;
+    ): Promise<{ appointments: IAppointment[]; total: number }>;
 }

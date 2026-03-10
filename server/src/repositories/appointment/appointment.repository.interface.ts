@@ -13,9 +13,17 @@ export interface IAppointmentRepository extends IBaseRepository<IAppointment> {
             date?: Date
         }
     ): Promise<{ appointments: IAppointment[]; total: number }>;
-   findDuplicate(
-        doctorId: string, 
-        date: Date, 
+    findDuplicate(
+        doctorId: string,
+        date: Date,
         patient: { name: string; age: number; email?: string }
     ): Promise<IAppointment | null>;
+    findPatientAppointments(
+        patientId: string,
+        options: {
+            page: number;
+            limit: number;
+            search?: string;
+        }
+    ): Promise<{ appointments: IAppointment[]; total: number }>;
 }

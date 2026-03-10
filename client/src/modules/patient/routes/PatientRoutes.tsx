@@ -10,6 +10,7 @@ import PatientAppointment from "../pages/PatientAppoiment";
 import HospitalProtectedRoute from "./HospitalProtectedRoute";
 import HospitalDepartments from "../pages/HospitalDeprtements";
 import DoctorProfile from "../pages/DoctorProfile";
+import AppointmentHistory from "../pages/AppointmentHistory";
 
 
 const PatientRouts = () => {
@@ -18,6 +19,7 @@ const PatientRouts = () => {
       <Route element={<ProtectedRoute allowedRoles={["patient"]} />}>
         <Route path={PATIENT_ROUTES.SELECTHOSPITAL} element={<SelectHospital />} />
         <Route path={PATIENT_ROUTES.PATIENTPROFILE} element={<PatientProfile />} />
+        <Route path={PATIENT_ROUTES.VIEW_APPOIMENTS_HISTORY} element={<AppointmentHistory />} />
         <Route path={PATIENT_ROUTES.PATIENTEDIT} element={<EditPatientProfile />} />
         <Route element={<HospitalProtectedRoute />}>
           <Route path={PATIENT_ROUTES.HOSPITAL_HOMEPAGE} element={<PatientHospitalHome />} />

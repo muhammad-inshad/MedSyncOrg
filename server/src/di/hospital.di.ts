@@ -21,6 +21,8 @@ import { CloudinaryImageService } from "../services/image/implementation/cloudin
 import { patientContainer } from "./patient.di.ts";
 import { DepartmentRepository } from "../repositories/hospital/implementation/department.repository.ts";
 import DepartmentModel from "../models/department.model.ts";
+import { LeaveRepository } from "../repositories/leave/leave.repository.ts";
+import { AppointmentRepository } from "../repositories/appointment/appointment.repository.ts";
 
 export const hospitalContainer = () => {
     const hospitalRepo = new HospitalRepository(HospitalModel);
@@ -30,6 +32,8 @@ export const hospitalContainer = () => {
     const doctorMapper = new DoctorMapper();
     const patientMapper = new PatientMapper();
     const departmentRepo = new DepartmentRepository(DepartmentModel);
+    const leaveRepo = new LeaveRepository();
+    const appointmentRepo = new AppointmentRepository();
 
     const hospitalMapper = new HospitalMapper();
     const hospitalAuthService = new HospitalAuthService(
@@ -49,7 +53,8 @@ export const hospitalContainer = () => {
     const doctorManagementService = new DoctorManagementService(
         doctorRepo,
         doctorMapper,
-        departmentRepo
+        departmentRepo,
+        leaveRepo
     );
     const doctorManagement = new DoctorManagementController(
         doctorManagementService
@@ -58,7 +63,8 @@ export const hospitalContainer = () => {
     // Patient management: only patient toggle/signup
     const patientManagementService = new PatientManagementService(
         userRepo,
-        patientMapper
+        patientMapper,
+        appointmentRepo
     );
     const patientManagement = new PatientManagementController(
         patientManagementService

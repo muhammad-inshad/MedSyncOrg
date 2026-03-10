@@ -15,12 +15,15 @@ import { DoctorMapper } from "../../../../mappers/doctor.mapper.ts";
 import { DoctorDTO } from "../../../../dto/auth/signup.dto.ts";
 import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.ts";
 import { CloudinaryImageService } from "../../../image/implementation/cloudinary.image.service.ts";
+import { ILeaveRepository } from "../../../../repositories/leave/leave.repository.interface.ts";
+import { IDoctorLeave } from "../../../../models/doctorLeave.model.ts";
 export class DoctorManagementService implements IDoctorManagementService {
     private readonly _cloudinary: CloudinaryImageService;
     constructor(
         private readonly _doctorRepo: IDoctorRepository,
         private readonly _doctorMapper: DoctorMapper,
-        private readonly _departmentRepo: IDepartmentRepository
+        private readonly _departmentRepo: IDepartmentRepository,
+        private readonly _leaveRepo: ILeaveRepository
     ) {
         this._cloudinary = new CloudinaryImageService();
     }
@@ -35,7 +38,7 @@ export class DoctorManagementService implements IDoctorManagementService {
             filter,
         });
 
-        const hospitalId = (filter as any)?.hospital_id;
+        const hospitalId = filter?.hospital_id;
         const departmentMap = new Map<string, string>();
 
         if (hospitalId) {
@@ -245,4 +248,17 @@ export class DoctorManagementService implements IDoctorManagementService {
         return updated ? this._doctorMapper.toDTO(updated) : null;
     }
 
+    async getLeaveDoctors(options: {
+        hospitalId: string;
+        page: number;
+        limit: number;
+        search?: string;
+        date?: Date;
+    }): Promise<{ data: IDoctorLeave[]; total: number; page: number; limit: number }> {
+        return await this._leaveRepo.findHospitalLeaves(options);
+    }
+
+    async updateLeaveStatus(leaveId: string, status: 'approved' | 'rejected', reason?: string): Promise<IDoctorLeave | null> {
+        return await this._leaveRepo.updateStatus(leaveId, status, reason);
+    }
 }

@@ -8,5 +8,7 @@ export const PATIENT_MANAGEMENT = {
     GET_DOCTOR_DEPARTMENT: (id: string) => `/api/patient/get-department-doctors/${id}`,
     GET_DOCTOR_DETAILS: (id: string) => `/api/patient/doctor-details/${id}`,
     GET_AVAILABLE_SLOTS: (doctorId: string) => `/api/patient/available-slots/${doctorId}`,
-    BOOK_APPOINTMENT: "/api/patient/book-appointment"
+    BOOK_APPOINTMENT: "/api/patient/book-appointment",
+    APPOIMENTHISTORY:(patientID:string)=>`/api/patient/appoimentHistory/${patientID}`,
+    CANCEL_APPOINTMENT: (id: string) => `/api/patient/appointment/cancel/${id}`,
 };

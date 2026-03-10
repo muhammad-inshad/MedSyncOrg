@@ -6,6 +6,7 @@ import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
 import { useDispatch } from "react-redux";
 import { setSearchQuery } from "@/store/search/searchSlice";
 import { useAppSelector } from "@/hooks/redux";
+import { removeHospitalSession } from "@/utils/session";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -24,6 +25,11 @@ const Navbar = () => {
     location.pathname.includes("/register") ||
     location.pathname.includes("/profile");
   
+
+const handleSelectHospital = () => {
+  removeHospitalSession(); // remove hospitalId from session
+  navigate(PATIENT_ROUTES.SELECTHOSPITAL); // go to select hospital page
+};
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
@@ -113,7 +119,8 @@ const Navbar = () => {
           <nav className="flex items-center gap-8 text-white font-medium">
            {!isDoctor && (
   <>
-    <NavLink to="/patient/dashboard" current={location.pathname} onClick={closeMobileMenu}>
+    <NavLink to={PATIENT_ROUTES.HOSPITAL_HOMEPAGE}  current={location.pathname}
+  onClick={closeMobileMenu}>
       Home
     </NavLink>
 
@@ -129,9 +136,7 @@ const Navbar = () => {
   Department
 </NavLink>
 
-    <NavLink to="/doctors" current={location.pathname} onClick={closeMobileMenu}>
-      Doctors
-    </NavLink>
+   
 
     <NavLink to="/contact" current={location.pathname} onClick={closeMobileMenu}>
       Contact
@@ -141,9 +146,12 @@ const Navbar = () => {
           </nav>
          
           {!isHiddenPath && (
-            <button className="bg-blue-400 hover:bg-blue-500 text-white px-6 py-2 rounded-full font-medium transition-colors">
-              {isDoctor?"          ":"Book Appointment"}
-            </button>
+          <button
+  onClick={handleSelectHospital}
+  className="bg-blue-400 hover:bg-blue-500 text-white px-6 py-2 rounded-full font-medium transition-colors"
+>
+  {isDoctor ? "" : "select hospital"}
+</button>
           )}
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { Model } from "mongoose";
+import { Model, FilterQuery, Types } from "mongoose";
 import { IDepartment } from "../../../models/department.model.ts";
 import { BaseRepository } from "../../IBase/BaseRepository.ts";
 import { IDepartmentRepository } from "../department.repository.interface.ts";
@@ -9,10 +9,15 @@ export class DepartmentRepository extends BaseRepository<IDepartment> implements
     }
 
     async findByHospitalId(hospitalId: string, page: number = 1, limit: number = 6, search: string = ""): Promise<{ data: IDepartment[], total: number }> {
-        const query: any = { hospital_id: hospitalId };
+        const query: FilterQuery<IDepartment> = {
+            hospital_id: new Types.ObjectId(hospitalId)
+        };
 
         if (search) {
-            query.departmentName = { $regex: search, $options: "i" };
+            query.$or = [
+                { departmentName: { $regex: search, $options: "i" } },
+                { description: { $regex: search, $options: "i" } }
+            ];
         }
 
         const skip = (page - 1) * limit;

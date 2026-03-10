@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store/store";
@@ -89,7 +89,14 @@ export default function PatientDoctor() {
   const { departmentId } = useParams();
   const searchQuery = useSelector((state: RootState) => state.search.query);
 
-  const getDoctors = async (id: string, page: number, query: string) => {
+  // ── Sync Page with Search ──
+  const [prevSearchQuery, setPrevSearchQuery] = useState(searchQuery);
+  if (searchQuery !== prevSearchQuery) {
+    setPrevSearchQuery(searchQuery);
+    setCurrentPage(1);
+  }
+
+  const getDoctors = useCallback(async (id: string, page: number, query: string) => {
     try {
       const res = await patientApi.getDoctorsByDepartment(id, page, limit, query);
       if (res.data.success) {
@@ -100,7 +107,7 @@ export default function PatientDoctor() {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [limit]);
 
   useEffect(() => {
     if (!departmentId) {
@@ -108,11 +115,12 @@ export default function PatientDoctor() {
       return;
     }
     getDoctors(departmentId, currentPage, searchQuery);
-  }, [departmentId, currentPage, searchQuery]);
+  }, [departmentId, currentPage, searchQuery, navigate, getDoctors]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
+
 
 
   return (
@@ -168,7 +176,7 @@ export default function PatientDoctor() {
                   <p className="text-[#1a8fd1] text-[10px] tracking-widest font-black uppercase mb-3">
                     {doc.specialization}
                   </p>
-              
+
                 </div>
 
                 {/* Button */}
@@ -210,8 +218,8 @@ export default function PatientDoctor() {
                   key={i}
                   onClick={() => handlePageChange(i + 1)}
                   className={`w-10 h-10 rounded-lg text-sm font-bold transition-all ${currentPage === i + 1
-                      ? "bg-[#1a8fd1] text-white shadow-lg"
-                      : "bg-white border border-gray-200 text-[#0d2b4e] hover:bg-gray-50"
+                    ? "bg-[#1a8fd1] text-white shadow-lg"
+                    : "bg-white border border-gray-200 text-[#0d2b4e] hover:bg-gray-50"
                     }`}
                 >
                   {i + 1}

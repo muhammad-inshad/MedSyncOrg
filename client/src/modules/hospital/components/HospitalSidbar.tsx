@@ -52,12 +52,12 @@ const HospitalSidbar = ({ isOpen, setIsOpen }: HospitalSidebarProps) => {
     { icon: Building2, label: 'Department',path:HOSPITAL_ROUTES.HOSPITAL_DEPARTMENT_MANGEMENT},
     {icon:HeartPulse,label:"Specilaization",path:HOSPITAL_ROUTES.HOSPITAL_SPECIALIZATION_MANGEMENT},
     {icon:GraduationCap ,label:"Qualification",path:HOSPITAL_ROUTES.HOSPITAL_QULIFICATION_MANGEMENT},
+     { icon: Umbrella, label: 'DoctorLeaveManagement',path:HOSPITAL_ROUTES.DOCTOR_LEAVE_MANAGEMENT},
     { icon: DollarSign, label: 'Finance' },
     { icon: Wallet, label: 'Payout Management' },
     { icon: RefreshCw, label: 'Return Payment' },
     { icon: BadgeDollarSign, label: 'Doctor Salary Inc' },
     { icon: UserCheck, label: 'Doctor Selection' },
-    { icon: Umbrella, label: 'Doctor Leave Management' },
     { icon: User, label: 'Profile' },
     { icon: SquareStack, label: 'Chat' },
     { icon: Bell, label: 'Subscription' },
@@ -92,7 +92,7 @@ const HospitalSidbar = ({ isOpen, setIsOpen }: HospitalSidebarProps) => {
       {/* Mobile Overlay: darkens background when sidebar is open */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-[60] md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-60 md:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -121,7 +121,6 @@ const HospitalSidbar = ({ isOpen, setIsOpen }: HospitalSidebarProps) => {
               <p className="text-[10px] text-gray-400">Admin</p>
             </div>
           </div>
-          {/* Close button for mobile */}
           <button className="md:hidden" onClick={() => setIsOpen(false)}>
             <X className="w-6 h-6 text-gray-400" />
           </button>

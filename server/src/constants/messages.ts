@@ -13,6 +13,7 @@ export const MESSAGES = {
         ACCOUNT_BLOCKED: "Your account has been deactivated. Contact support.",
         INVALID_TOKEN: "Invalid token",
         LOGOUT_SUCCESS: "Logout successful",
+        FAILED:"failed"
     },
     DOCTOR: {
         REGISTER_SUCCESS: "Doctor registered successfully",
@@ -51,5 +52,8 @@ export const MESSAGES = {
         ERROR: "An unexpected error occurred",
         NOT_FOUND: "Resource not found",
         INTERNAL_ERROR: "Internal Server Error",
+    },
+    UPDATION:{
+        UPDATE:" successfully updated"
     }
 };

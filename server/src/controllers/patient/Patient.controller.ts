@@ -134,7 +134,7 @@ class PatientController {
       const user = req.user as unknown as ITokenPayload;
       const patientId = user?.userId;
       if (!patientId) {
-        ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED || "Unauthorized");
+        return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED || "Unauthorized");
       }
       await this.patientService.bookAppointment(patientId, req.body);
       return ApiResponse.success(res, "Appointment booked successfully", null, HttpStatusCode.CREATED);
@@ -143,6 +143,41 @@ class PatientController {
     }
   };
 
+  getAppoimentHistory = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const patientId = req.params.patientID;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 5;
+      const search = (req.query.search as string) || "";
+
+      if (!patientId) {
+        return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
+      }
+      const result = await this.patientService.getAppoimentHistory(patientId, { page, limit, search });
+      return ApiResponse.success(res, "Appointment history fetched successfully", result.data, HttpStatusCode.OK, {
+        page,
+        limit,
+        totalItems: result.total,
+        totalPages: Math.ceil(result.total / limit),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  appoinmentCancel = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = req.params.id;
+      const { reason } = req.body;
+      await this.patientService.cancelAppointment({ id, reason });
+      return ApiResponse.success(res, MESSAGES.UPDATION.UPDATE)
+    } catch (error) {
+      next(error)
+    }
+  }
+
 }
+
+
 
 export default PatientController;

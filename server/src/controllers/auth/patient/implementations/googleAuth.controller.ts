@@ -1,9 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { ITokenService } from '../../../../services/token/token.service.interface.ts';
 import { IPatient } from '../../../../models/Patient.model.ts';
-interface AuthRequest extends Request {
-  user?: IPatient;
-}
 export class GoogleAuthController {
   private tokenService: ITokenService;
 
@@ -13,13 +10,12 @@ export class GoogleAuthController {
 
   public async handleCallback(req: Request, res: Response, next: NextFunction) {
     try {
-      const authReq = req as AuthRequest;
-      if (!authReq.user) {
+      const user = (req as any).user as IPatient;
+      if (!user) {
         return res.redirect(`${process.env.FRONTEND_URL}/login?error=no_user`);
       }
 
-      const userDoc = authReq.user as IPatient;
-      const userPayload = userDoc.toObject ? userDoc.toObject() : userDoc;
+      const userPayload = user.toObject ? user.toObject() : user;
 
       // Get role from state, default to 'patient'
       const role = (req.query.state as string) || 'patient';

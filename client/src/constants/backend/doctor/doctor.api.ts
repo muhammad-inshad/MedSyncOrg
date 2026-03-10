@@ -30,4 +30,6 @@ export const doctorApi = {
 
     getDoctorLeaves: (params?: { page?: number; limit?: number; startDate?: string; endDate?: string }) =>
         api.get(DOCTOR_MANAGEMENT.GET_LEAVES, { params })
+
+
 };

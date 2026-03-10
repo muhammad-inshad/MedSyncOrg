@@ -12,5 +12,6 @@ export const HOSPITAL_ROUTES = {
     HOSPITALEDITFORREVIEW: "/hospital/edit-for-review",
     HOSPITAL_DEPARTMENT_MANGEMENT:"/hospital/department-mangement",
     HOSPITAL_SPECIALIZATION_MANGEMENT:"/hospital/specialization-mangement",
-    HOSPITAL_QULIFICATION_MANGEMENT:"/hospital/qulification-mangement"
+    HOSPITAL_QULIFICATION_MANGEMENT:"/hospital/qulification-mangement",
+    DOCTOR_LEAVE_MANAGEMENT:"/hospital/doctor-leave-menagement"
 };

@@ -1,5 +1,6 @@
 import { UpdateDoctorDTO } from "../../../dto/doctor/doctor-response.dto.ts";
 import { IDoctor } from "../../../models/doctor.model.ts";
+import { IDoctorLeave } from "../../../models/doctorLeave.model.ts";
 
 export interface IDoctorService {
 
@@ -13,5 +14,5 @@ export interface IDoctorService {
         limit: number;
         startDate?: Date;
         endDate?: Date
-    }): Promise<{ data: any[]; total: number; page: number; limit: number }>;
+    }): Promise<{ data: IDoctorLeave[]; total: number; page: number; limit: number }>;
 }

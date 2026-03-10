@@ -10,5 +10,6 @@ export const PATIENT_ROUTES = {
     HOSPITAL_DOCTOR: "/patient/hospital/doctors/:departmentId",
     HOSPITAL_DEPaRTMENTS: "/patient/hospital/deprtment",
     DOCTOR_PROFILE: `/patient/doctor-profile/:doctorId`,
-    PATIENT_APPOIMENT: `/patient/appoiment/:doctorId`
+    PATIENT_APPOIMENT: `/patient/appoiment/:doctorId`,
+    VIEW_APPOIMENTS_HISTORY:`/patient/view-appoiments-history`
 };

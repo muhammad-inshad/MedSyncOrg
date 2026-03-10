@@ -8,11 +8,14 @@ import { PatientResponseDTO } from "../../../../dto/patient/patient-response.dto
 import { PatientMapper } from "../../../../mappers/patient.mapper.ts";
 import { IPaginationResult } from "../../../../types/hospital.types.ts";
 import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
+import { IAppointment, AppointmentStatus } from "../../../../models/appointment.ts";
+import { IAppointmentRepository } from "../../../../repositories/appointment/appointment.repository.interface.ts";
 
 export class PatientManagementService implements IPatientManagementService {
     constructor(
         private readonly _userRepo: IUserRepository,
-        private readonly _patientMapper: PatientMapper
+        private readonly _patientMapper: PatientMapper,
+        private readonly _appointmentRepo: IAppointmentRepository
     ) { }
 
     async addPatient(data: Partial<IPatient>, hospital_id: string, file?: Express.Multer.File): Promise<PatientResponseDTO> {
@@ -82,4 +85,6 @@ export class PatientManagementService implements IPatientManagementService {
             limit: result.limit
         };
     }
+
+  
 }
