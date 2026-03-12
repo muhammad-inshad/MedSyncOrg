@@ -250,12 +250,7 @@ const PatientManagement = () => {
                       <th className="text-left px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Blood Group
                       </th>
-                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Hospital
-                      </th>
-                      <th className="text-left px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Last Visit
-                      </th>
+                    
                       <th className="text-left px-6 py-4 text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Registered
                       </th>
@@ -352,15 +347,6 @@ const PatientManagement = () => {
                             )}
                           </td>
 
-                          {/* Hospital */}
-                          <td className="px-6 py-4 text-gray-700 text-sm max-w-[160px]">
-                            <span className="truncate block">{patient.hospitalName || '—'}</span>
-                          </td>
-
-                          {/* Last Visit */}
-                          <td className="px-6 py-4 text-gray-700 text-sm">
-                            {formatDate(patient.lastVisit)}
-                          </td>
 
                           {/* Registered */}
                           <td className="px-6 py-4 text-gray-700 text-sm">

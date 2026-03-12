@@ -99,7 +99,8 @@ export class DoctorManagementController implements IDoctorManagementController {
   async rejectDoctor(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params;
-      const result = await this._doctorManagementService.rejectDoctor(id);
+      const  {reason}=req.body
+      const result = await this._doctorManagementService.rejectDoctor(id,reason);
       return ApiResponse.success(res, "Doctor rejected successfully", result);
     } catch (error: unknown) {
       next(error);
@@ -109,7 +110,8 @@ export class DoctorManagementController implements IDoctorManagementController {
   async requestRevisionDoctor(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
       const { id } = req.params;
-      const result = await this._doctorManagementService.requestRevisionDoctor(id);
+      const  {reason}=req.body
+      const result = await this._doctorManagementService.requestRevisionDoctor(id,reason);
       return ApiResponse.success(res, "Doctor revision requested successfully", result);
     } catch (error: unknown) {
       next(error);

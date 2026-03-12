@@ -4,19 +4,19 @@ import { patientContainer } from "../di/patient.di.ts";
 const { patientController } = patientContainer();
 const router = Router();
 
-router.get("/getme", patientController.getMe.bind(patientController));
+router.get("/me", patientController.getMe.bind(patientController));
 
 router.get("/hospitals", patientController.getHospitals.bind(patientController));
-router.get("/getAllPatient", patientController.getAllPatient.bind(patientController))
-router.patch("/patientEdit/:id", patientController.updatePatient.bind(patientController));
-router.patch("/changePassword/:id", patientController.changePassword.bind(patientController));
-router.get("/selected_hospital/:id", patientController.selectedHospital.bind(patientController));
-router.get("/getdepartments", patientController.getdepartments.bind(patientController))
-router.get("/get-department-doctors/:id", patientController.getDoctorDepartment.bind(patientController))
-router.get("/doctor-details/:id", patientController.getDoctorById.bind(patientController));
-router.get("/available-slots/:doctorId", patientController.getAvailableSlots.bind(patientController));
-router.post("/book-appointment", patientController.bookAppointment.bind(patientController));
-router.get("/appoimentHistory/:patientID",patientController.getAppoimentHistory.bind(patientController))
-router.patch("/appointment/cancel/:id",patientController.appoinmentCancel.bind(patientController))
+router.get("/patients", patientController.getAllPatient.bind(patientController))
+router.patch("/patients/:id", patientController.updatePatient.bind(patientController));
+router.patch("/patients/:id/password", patientController.changePassword.bind(patientController));
+router.get("/hospitals/:id", patientController.selectedHospital.bind(patientController));
+router.get("/departments", patientController.getdepartments.bind(patientController))
+router.get("/departments/:id/doctors", patientController.getDoctorDepartment.bind(patientController))
+router.get("/doctors/:id", patientController.getDoctorById.bind(patientController));
+router.get("/doctors/:doctorId/slots", patientController.getAvailableSlots.bind(patientController));
+router.post("/appointments", patientController.bookAppointment.bind(patientController));
+router.get("/patients/:patientID/appointments",patientController.getAppoimentHistory.bind(patientController))
+router.patch("/appointments/:id/cancel",patientController.appoinmentCancel.bind(patientController))
 
 export default router;

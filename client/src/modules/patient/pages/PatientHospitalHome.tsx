@@ -18,7 +18,6 @@ const HeartIcon = () => (
     />
   </svg>
 );
-
 const specialties: string[] = [
   "Neurology", "Bones", "Oncology", "Otorhinolaryngology",
   "Ophthalmology", "Cardiovascular", "Pulmonology", "Renal Medicine",
@@ -54,7 +53,7 @@ const contactCards: ContactCard[] = [
 export default function PatientHospitalHome() {
   const [activeDoctor, setActiveDoctor] = useState<number>(1);
   const hospital = useAppSelector((state) => state.hospital.hospital);
-  console.log(hospital)
+
   return (
     <div className="font-serif text-gray-800 bg-white">
 <Navbar/>
@@ -145,31 +144,27 @@ export default function PatientHospitalHome() {
             <h3 className="font-bold text-[#0d2b4e] text-lg mb-5">
               A passion for putting patients first.
             </h3>
-            <div className="grid grid-cols-2 gap-x-5 gap-y-2.5 mb-6">
-              {hospital?.images?.services.map((s) => (
-                <div key={s} className="flex items-center gap-2 font-sans text-sm text-gray-600">
-                  <span className="text-[#1a8fd1] text-base">●</span>
-                  {s}
-                </div>
-              ))}
-            </div>
+           
             <p className="font-sans text-sm text-gray-500 leading-relaxed">
               MedSync is an all-in-one healthcare platform designed to make medical care simple,
               fast, and accessible for everyone. Whether you're a patient, doctor, or hospital
               admin, MedSync brings everything together in one seamless system.
             </p>
           </div>
-          <div className="flex flex-col gap-4">
-            {[{ bg: "#c8dff0" }, { bg: "#b0cfea" }].map((img, i) => (
-              <div
-                key={i}
-                className="h-36 rounded-lg flex items-center justify-center font-sans text-sm"
-                style={{ background: img.bg, color: "#7aa8c7" }}
-              >
-                Service Image
-              </div>
-            ))}
-          </div>
+       <div className="flex flex-col gap-4">
+  {hospital?.images?.services?.map((img, i) => (
+    <div
+      key={i}
+      className="h-36 rounded-lg overflow-hidden"
+    >
+      <img
+        src={img}
+        alt={`Service ${i + 1}`}
+        className="w-full h-full object-cover rounded-lg"
+      />
+    </div>
+  ))}
+</div>
         </div>
       </section>
 
@@ -225,115 +220,7 @@ export default function PatientHospitalHome() {
         </div>
       </section>
 
-      {/* ── OUR DOCTORS ── */}
-      <section className="px-[7%] py-[72px] bg-[#f4f8fc]">
-        <div className="text-center mb-12">
-          <p className="text-[#1a8fd1] font-sans text-xs tracking-[0.15em] font-bold">
-            TRUSTED CARE
-          </p>
-          <h2 className="text-[clamp(22px,3vw,34px)] font-extrabold text-[#0d2b4e] mt-2">
-            Our Doctors
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-3 gap-6 max-w-3xl mx-auto mb-8">
-          {doctors.map((doc, i) => (
-            <div key={i} className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow">
-              {/* Photo area */}
-              <div
-                className="h-44 flex items-end justify-center"
-                style={{ background: "linear-gradient(180deg,#c8dff0,#a8cce8)" }}
-              >
-                <div
-                  className="w-24 h-36 rounded-t-[50px]"
-                  style={{ background: "rgba(255,255,255,0.3)" }}
-                />
-              </div>
-
-              {/* Info bar */}
-              <div className="bg-[#1a8fd1] px-4 py-3.5 text-center">
-                <p className="text-white font-bold text-sm font-sans mb-0.5">{doc.name}</p>
-                <p className="text-white/80 font-sans text-[11px] tracking-widest mb-3">
-                  {doc.specialty}
-                </p>
-                <div className="flex justify-center gap-3">
-                  {["f", "t", "in"].map((icon) => (
-                    <div
-                      key={icon}
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-white font-sans text-xs font-bold cursor-pointer hover:bg-white/40 transition-colors"
-                      style={{ background: "rgba(255,255,255,0.25)" }}
-                    >
-                      {icon}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* View Profile */}
-              <div className="bg-white px-4 py-3 text-center">
-                <button className="w-full bg-[#0d2b4e] text-white font-sans text-sm font-semibold py-2 rounded hover:bg-[#163a68] transition-colors cursor-pointer">
-                  View Profile
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Pagination dots */}
-        <div className="flex justify-center gap-2">
-          {[0, 1].map((d) => (
-            <button
-              key={d}
-              onClick={() => setActiveDoctor(d)}
-              className={`w-2.5 h-2.5 rounded-full transition-colors cursor-pointer border-0 ${
-                activeDoctor === d ? "bg-[#1a8fd1]" : "bg-[#c5dded]"
-              }`}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* ── CONTACT ── */}
-      <section className="px-[7%] py-[72px] bg-white">
-        <div className="text-center mb-12">
-          <p className="text-[#1a8fd1] font-sans text-xs tracking-[0.15em] font-bold">
-            GET IN TOUCH
-          </p>
-          <h2 className="text-[clamp(22px,3vw,34px)] font-extrabold text-[#0d2b4e] mt-2">
-            Contact
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-4 gap-4 max-w-4xl mx-auto">
-          {contactCards.map((card, i) => (
-            <div
-              key={i}
-              className={`rounded-lg px-5 py-7 text-center ${
-                i === 1 ? "bg-[#0d2b4e]" : "bg-[#f4f8fc]"
-              }`}
-            >
-              <div className="text-3xl mb-3">{card.icon}</div>
-              <p
-                className={`font-sans text-[11px] tracking-widest font-bold mb-2.5 ${
-                  i === 1 ? "text-white/70" : "text-[#1a8fd1]"
-                }`}
-              >
-                {card.label}
-              </p>
-              {card.lines.map((line, j) => (
-                <p
-                  key={j}
-                  className={`font-sans text-xs ${
-                    i === 1 ? "text-white" : "text-gray-600"
-                  }`}
-                >
-                  {line}
-                </p>
-              ))}
-            </div>
-          ))}
-        </div>
-      </section>
+  
       <Footer/>
     </div>
   );

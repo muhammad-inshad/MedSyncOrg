@@ -15,11 +15,11 @@ const { googleAuthController } = userContainer();
 const router = Router();
 
 router.post('/send-otp', otpController.sendOtp.bind(otpController));
-router.post("/RegistorDoctor", upload.fields([
+router.post("/doctor/register", upload.fields([
   { name: "profileImage", maxCount: 1 },
   { name: "license", maxCount: 1 }
 ]), doctorAuthController.registerDoctor.bind(doctorAuthController));
-router.post("/Superadmin/login", superAdminAuthController.login.bind(superAdminAuthController));
+router.post("/superadmin/login", superAdminAuthController.login.bind(superAdminAuthController));
 router.post('/hospital/login', hospitalAuthController.loginHospital.bind(hospitalAuthController))
 router.post("/hospital/signup", upload.fields([{ name: "logo", maxCount: 1 }, { name: "licence", maxCount: 1 },]), hospitalAuthController.signup.bind(hospitalAuthController));
 router.post('/verify-otp', otpController.verifyOtp.bind(otpController));

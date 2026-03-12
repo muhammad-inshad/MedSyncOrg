@@ -17,6 +17,7 @@ import { IDepartmentRepository } from "../../../../repositories/hospital/departm
 import { CloudinaryImageService } from "../../../image/implementation/cloudinary.image.service.ts";
 import { ILeaveRepository } from "../../../../repositories/leave/leave.repository.interface.ts";
 import { IDoctorLeave } from "../../../../models/doctorLeave.model.ts";
+import { resolve } from "dns";
 export class DoctorManagementService implements IDoctorManagementService {
     private readonly _cloudinary: CloudinaryImageService;
     constructor(
@@ -94,7 +95,7 @@ export class DoctorManagementService implements IDoctorManagementService {
         return updated ? this._doctorMapper.toDTO(updated) : null;
     }
 
-    async rejectDoctor(id: string): Promise<DoctorResponseDTO | null> {
+    async rejectDoctor(id: string,reason:string): Promise<DoctorResponseDTO | null> {
         const doctor = await this._doctorRepo.findById(id);
         if (!doctor) {
             Logger.warn(`Reject Doctor failed: Doctor not found with ID ${id}`);
@@ -105,21 +106,22 @@ export class DoctorManagementService implements IDoctorManagementService {
         const updated = await this._doctorRepo.update(id, {
             reviewStatus: "rejected",
             isActive: true,
+             rejectionReason:reason
         } as Partial<IDoctor>);
         return updated ? this._doctorMapper.toDTO(updated) : null;
     }
 
-    async requestRevisionDoctor(id: string): Promise<DoctorResponseDTO | null> {
+    async requestRevisionDoctor(id: string, reason:string): Promise<DoctorResponseDTO | null> {
         const doctor = await this._doctorRepo.findById(id);
         if (!doctor) {
             Logger.warn(`Request Revision failed: Doctor not found with ID ${id}`);
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Doctor not found");
         }
-
         Logger.info(`Doctor revision requested: ${id}`);
         const updated = await this._doctorRepo.update(id, {
             reviewStatus: "revision",
             isActive: true,
+            rejectionReason:reason
         } as Partial<IDoctor>);
         return updated ? this._doctorMapper.toDTO(updated) : null;
     }
@@ -166,7 +168,7 @@ export class DoctorManagementService implements IDoctorManagementService {
             profileImage: profileImageUrl,
             isActive: true,
             isAccountVerified: true,
-            reviewStatus: "approved",
+            reviewStatus: "pending",
             consultationTime: {
                 start: "09:00 AM",
                 end: "05:00 PM",

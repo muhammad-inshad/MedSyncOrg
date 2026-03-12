@@ -28,17 +28,7 @@ const DoctorDashboard = () => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await authApi.logout();
-      localStorage.removeItem('role');
-      toast.success('logout success');
-      window.location.href = '/login/doctor';
-    } catch (error) {
-      console.error('Logout failed', error);
-    }
-  };
-
+ 
   const maxEarning = Math.max(...earningsData);
 
   return (
@@ -56,7 +46,6 @@ const DoctorDashboard = () => {
               <div className="flex items-center space-x-8">
                 <nav className="hidden md:flex space-x-8">
                   <Link to={DOCTOR_ROUTES.DOCTORDASHBOARD} className="text-gray-900 font-medium">Home</Link>
-                  <Link to={DOCTOR_ROUTES.DOCTORPROFILE} className="text-gray-500 hover:text-gray-900 font-medium transition-colors">Profile</Link>
                 </nav>
               </div>
 
@@ -80,13 +69,7 @@ const DoctorDashboard = () => {
                 >
                   <User className="w-6 h-6 text-gray-600" />
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                  title="Logout"
-                >
-                  <LogOut className="w-6 h-6" />
-                </button>
+               
               </div>
             </div>
           </div>

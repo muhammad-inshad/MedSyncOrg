@@ -33,7 +33,7 @@ const AdminReviewPending: React.FC = () => {
   const status = userData?.reviewStatus;
 
   const rejectionReason = userData?.rejectionReason;
-
+console.log(rejectionReason)
   const handleLogout = () => {
     dispatch(logout());
     localStorage.removeItem("role");

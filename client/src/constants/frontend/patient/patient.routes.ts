@@ -1,5 +1,4 @@
 export const PATIENT_ROUTES = {
-    ROOT: "/",
     LOGIN: "/login/:role",
     SIGNUP: "/patient/signup",
     OTP: '/otp',

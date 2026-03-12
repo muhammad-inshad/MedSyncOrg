@@ -14,14 +14,7 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route element={<PublicRoute />}>
-        <Route
-          path={PATIENT_ROUTES.ROOT}
-          element={
-            <Navigate
-              to={PATIENT_ROUTES.LOGIN.replace(":role", "patient")}
-            />
-          }
-        />
+      
         <Route path={PATIENT_ROUTES.LOGIN} element={<LogIn />} />
         <Route path={PATIENT_ROUTES.SIGNUP} element={<SignUp />} />
         <Route path={PATIENT_ROUTES.OTP} element={<OtpPage />} />

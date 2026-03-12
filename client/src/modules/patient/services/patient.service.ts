@@ -3,7 +3,7 @@ import type { IPatient } from '@/interfaces/IPatient';
 
 export const PatientService = {
     updateProfile: async (id: string, data: Partial<IPatient> & { willRemoveImage?: boolean }) => {
-        const response = await api.patch(`/api/patient/patientEdit/${id}`, data);
+        const response = await api.patch(`/api/patient/patients/${id}`, data);
         return response.data;
     },
 

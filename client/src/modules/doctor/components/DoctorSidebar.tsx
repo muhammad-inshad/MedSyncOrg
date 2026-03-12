@@ -10,9 +10,12 @@ import {
   ChevronLeft,
   ChevronRight,
   Stethoscope,
+  LogOut,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { DOCTOR_ROUTES } from '@/constants/frontend/doctor/doctor.routes';
+import { authApi } from '@/constants/backend/auth/auth.api';
+import toast from 'react-hot-toast';
 
 interface SidebarItem {
   label: string;
@@ -62,6 +65,17 @@ const sidebarItems: SidebarItem[] = [
 const DoctorSidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+   const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      localStorage.removeItem('role');
+      toast.success('logout success');
+      window.location.href = '/login/doctor';
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
+  };
+
 
   return (
     <aside
@@ -137,6 +151,13 @@ const DoctorSidebar = () => {
           : <ChevronLeft className="w-3 h-3 text-gray-500" />
         }
       </button>
+ <button
+  onClick={handleLogout}
+  className="p-2 bg-red-500 text-white  hover:bg-red-600 transition-colors"
+  title="Logout"
+>
+  LOGOUT
+</button>
     </aside>
   );
 };

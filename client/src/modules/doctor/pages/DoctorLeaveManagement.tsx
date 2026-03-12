@@ -31,7 +31,7 @@ interface LeaveRecord {
     leaveSession?: LeaveSession;
     reason?: string;
     photo?: string;
-    rejectedReason?: string;
+    rejectedReson?: string;
     status: LeaveStatus;
     createdAt: string;
 }
@@ -129,6 +129,7 @@ export default function DoctorLeaveManagement() {
             });
 
             if (response.data.success) {
+               
                 setLeaves(response.data.data.data);
                 setTotalPages(Math.ceil(response.data.data.total / 5));
                 setTotalRequests(response.data.data.total);
@@ -450,16 +451,17 @@ export default function DoctorLeaveManagement() {
                                                         <p className="text-sm text-slate-600 mb-1">{leave.reason}</p>
                                                     )}
 
-                                                    {leave.status === 'rejected' && leave.rejectedReason && (
+                                                    {leave.status === 'rejected' && leave.rejectedReson && (
                                                         <div className="flex items-start gap-2 mt-2 text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
                                                             <XCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
-                                                            <span><strong>Rejection reason:</strong> {leave.rejectedReason}</span>
+                                                            <span><strong>Rejection reason:</strong> {leave.rejectedReson}</span>
                                                         </div>
                                                     )}
-
                                                     <p className="text-xs text-slate-400 mt-2">
                                                         Submitted on {formatDate(leave.createdAt)}
                                                     </p>
+                                                  
+                                                    
                                                 </div>
 
                                                 {/* Right: status + actions */}

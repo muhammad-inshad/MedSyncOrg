@@ -6,10 +6,12 @@ import EditHospital from "./hospital/Hospital_edit";
 import { HOSPITAL_ROUTES } from "@/constants/frontend/hospital/hospital.routes";
 import { DOCTOR_ROUTES } from "@/constants/frontend/doctor/doctor.routes";
 import Doctor_edit from "./doctor/Doctor_edit";
+import HomeLanding from "./HomeLanding";
 
 const CommonRoutes = () => {
   return (
     <Routes>
+      <Route path={COMMON_ROUTES.HOMELANDING} element={<HomeLanding />} />
       <Route element={<AdminProtectedRoute />}>
         <Route path={COMMON_ROUTES.REVIEWPENDING} element={<AdminReviewPending />} />
         <Route path={DOCTOR_ROUTES.DOCTOREDITFORREVIEW} element={<Doctor_edit />} />

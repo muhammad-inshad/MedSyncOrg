@@ -8,7 +8,7 @@ export const initializeAuth = createAsyncThunk(
     async (role: string, { rejectWithValue }) => {
         try {
             const apiRole = role;
-            const response = await api.get(`/api/${apiRole}/getme`);
+            const response = await api.get(`/api/${apiRole}/me`);
             const userData = response.data.user || response.data.data;
             return {
                 user: { ...userData, role: role },
