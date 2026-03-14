@@ -8,5 +8,7 @@ export const SUPERADMIN_ROUTES = {
     CHAT: '/superadmin/chat',
     PATIENT:'/superadmin/patient',
     ADDPATIENT:'/superadmin/addpatient',
-    EDITPATIENT:'/superadmin/editpatient'
+    EDITPATIENT:'/superadmin/editpatient',
+    ADDSUBSCRIPTION:"/superadmin/addsubscription",
+    EDITSUBSCRIPTION:"/superadmin/editsubscription"
 };

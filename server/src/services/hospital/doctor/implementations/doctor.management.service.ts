@@ -18,13 +18,16 @@ import { CloudinaryImageService } from "../../../image/implementation/cloudinary
 import { ILeaveRepository } from "../../../../repositories/leave/leave.repository.interface.ts";
 import { IDoctorLeave } from "../../../../models/doctorLeave.model.ts";
 import { resolve } from "dns";
+import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.ts";
+
 export class DoctorManagementService implements IDoctorManagementService {
     private readonly _cloudinary: CloudinaryImageService;
     constructor(
         private readonly _doctorRepo: IDoctorRepository,
         private readonly _doctorMapper: DoctorMapper,
         private readonly _departmentRepo: IDepartmentRepository,
-        private readonly _leaveRepo: ILeaveRepository
+        private readonly _leaveRepo: ILeaveRepository,
+        private readonly _subscriptionService: IHospitalSubscriptionService
     ) {
         this._cloudinary = new CloudinaryImageService();
     }
@@ -127,9 +130,12 @@ export class DoctorManagementService implements IDoctorManagementService {
     }
 
     async registerDoctor(data: DoctorDTO, files: DoctorUploadFiles, hospital_id: string): Promise<DoctorResponseDTO> {
+        await this._subscriptionService.checkSubscriptionLimit(hospital_id, "maxDoctors");
+
         let profileImageUrl = "";
         let licenseUrl = "";
 
+        
         const existingDoctor = await this._doctorRepo.findByEmail(data.email);
         if (existingDoctor) {
             ApiResponse.throwError(HttpStatusCode.CONFLICT, MESSAGES.AUTH.ALREADY_EXISTS);

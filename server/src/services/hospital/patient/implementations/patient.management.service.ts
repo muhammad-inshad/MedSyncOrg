@@ -11,14 +11,18 @@ import { IUserRepository } from "../../../../repositories/patient/user.repositor
 import { IAppointment, AppointmentStatus } from "../../../../models/appointment.ts";
 import { IAppointmentRepository } from "../../../../repositories/appointment/appointment.repository.interface.ts";
 
+import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.ts";
+
 export class PatientManagementService implements IPatientManagementService {
     constructor(
         private readonly _userRepo: IUserRepository,
         private readonly _patientMapper: PatientMapper,
-        private readonly _appointmentRepo: IAppointmentRepository
+        private readonly _appointmentRepo: IAppointmentRepository,
+        private readonly _subscriptionService: IHospitalSubscriptionService
     ) { }
 
     async addPatient(data: Partial<IPatient>, hospital_id: string, file?: Express.Multer.File): Promise<PatientResponseDTO> {
+        await this._subscriptionService.checkSubscriptionLimit(hospital_id, "maxPatients");
         const existingPatient = await this._userRepo.findByEmail(data.email!);
         if (existingPatient) {
             ApiResponse.throwError(HttpStatusCode.CONFLICT, "Patient already exists with this email");

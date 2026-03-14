@@ -21,6 +21,8 @@ import { IQualificationRepository } from "../../repositories/hospital/qualificat
 import { ISpecializationRepository } from "../../repositories/hospital/specialization.repository.interface.ts";
 
 
+import { ISubscriptionRepository } from "../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.ts";
+
 export class PatientService implements IPatientService {
     constructor(
         private readonly _userRepo: IUserRepository,
@@ -29,7 +31,8 @@ export class PatientService implements IPatientService {
         private readonly _doctorRepo: IDoctorRepository,
         private readonly _appointmentRepo: IAppointmentRepository,
         private readonly _qualificationRepo: IQualificationRepository,
-        private readonly _specializationRepo: ISpecializationRepository
+        private readonly _specializationRepo: ISpecializationRepository,
+        private readonly _subscriptionRepo: ISubscriptionRepository
     ) { }
 
     async getProfile(userId: string) {
@@ -140,10 +143,34 @@ export class PatientService implements IPatientService {
 
         const hospitalObj = hospital.toObject ? hospital.toObject() : hospital
         const { data: departments, total } = await this._departmentRepo.findByHospitalId(id, page, limit, search);
-        const [qualifications, specializations] = await Promise.all([
+        
+        // Fetch counts and limits
+        const [qualifications, specializations, doctorCountGlobal, patientCountGlobal, departmentCountGlobal] = await Promise.all([
             this._qualificationRepo.findByHospitalId(id),
-            this._specializationRepo.findByHospitalId(id)
+            this._specializationRepo.findByHospitalId(id),
+            this._doctorRepo.countDocuments({ hospital_id: id }),
+            this._userRepo.countDocuments({ hospital_id: id }),
+            this._departmentRepo.countDocuments({ hospital_id: id })
         ]);
+
+        const currentCounts = {
+            doctors: doctorCountGlobal,
+            patients: patientCountGlobal,
+            departments: departmentCountGlobal
+        };
+
+        let limits: selectedHospitalDto['subscription']['limits'] | undefined;
+        if (hospital!.subscription?.plan) {
+            const planName = hospital!.subscription.plan.charAt(0).toUpperCase() + hospital!.subscription.plan.slice(1);
+            const planDetails = await this._subscriptionRepo.findByPlanName(planName);
+            if (planDetails?.limits) {
+                limits = {
+                    maxPatients: planDetails.limits.maxPatients,
+                    maxDoctors: planDetails.limits.maxDoctors,
+                    maxDepartments: planDetails.limits.maxDepartments
+                };
+            }
+        }
 
         const departmentsWithCount = await Promise.all(departments.map(async (dept: IDepartment) => {
             const doctorCount = await this._doctorRepo.countByDepartment(id, dept._id.toString());
@@ -176,6 +203,15 @@ export class PatientService implements IPatientService {
         return {
             ...hospitalObj,
             _id: hospitalObj._id.toString(),
+            subscription: {
+                plan: (hospitalObj.subscription?.plan as "free" | "basic" | "premium") || "free",
+                amount: hospitalObj.subscription?.amount || 0,
+                status: hospitalObj.subscription?.status || "active",
+                startDate: hospitalObj.subscription?.startDate,
+                endDate: hospitalObj.subscription?.endDate,
+                limits: limits
+            },
+            currentCounts: currentCounts,
             departments: departmentsWithCount,
             qualifications: qualificationData,
             specializations: specializationData,

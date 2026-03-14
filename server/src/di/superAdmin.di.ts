@@ -7,6 +7,9 @@ import { SuperAdminKycService } from "../services/superAdmin/kycManagement/imple
 import { SuperAdminPatientManagementService } from "../services/superAdmin/patient/implementations/patient.management.service.ts";
 import { SuperAdminPatientManagementController } from "../controllers/superAdmin/patient/implementation/patient.management.controller.ts";
 import { TokenService } from "../services/token/token.service.ts";
+import { SubscriptionRepository } from "../repositories/superAdmin/subscription/implements/subscription.repository.ts";
+import { SubscriptionService } from "../services/superAdmin/subscription/implementation/subscription.service.ts";
+import { SubscriptionController } from "../controllers/superAdmin/subscription/implementation/subscription.controller.ts";
 
 import { SuperAdminModel } from "../models/superAdmin.model.ts";
 import { KycRepository } from "../repositories/superAdmin/implements/superAdminKyc.repository.ts";
@@ -29,6 +32,7 @@ export const superAdminContainer = () => {
 
   const kycRepo = new KycRepository(HospitalModel);
   const hospitalRepo = new HospitalRepository(HospitalModel);
+  const subscriptionRepo = new SubscriptionRepository();
   const doctorRepo = new DoctorRepository(DoctorModel);
   const patientRepo = new UserRepository(Patient);
   const hospitalMapper = new HospitalMapper();
@@ -38,7 +42,7 @@ export const superAdminContainer = () => {
   const dashboardController = new SuperAdminDashboardController(dashboardService);
 
   // Hospital Management Module
-  const hospitalService = new SuperAdminHospitalService(kycRepo, hospitalRepo, hospitalMapper);
+  const hospitalService = new SuperAdminHospitalService(kycRepo, hospitalRepo, hospitalMapper, subscriptionRepo);
   const hospitalController = new SuperAdminHospitalController(hospitalService);
 
   // KYC Management Module
@@ -56,12 +60,17 @@ export const superAdminContainer = () => {
   const patientManagementService = new SuperAdminPatientManagementService(patientRepo, patientMapper);
   const patientManagementController = new SuperAdminPatientManagementController(patientManagementService);
 
+  // Subscription Module
+  const subscriptionService = new SubscriptionService(subscriptionRepo);
+  const subscriptionController = new SubscriptionController(subscriptionService);
+
   return {
     tokenService,
     dashboardController,
     hospitalController,
     kycController,
     superAdminAuthController,
-    patientManagementController
+    patientManagementController,
+    subscriptionController
   };
 };

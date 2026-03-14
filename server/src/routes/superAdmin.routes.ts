@@ -3,7 +3,7 @@ import { superAdminContainer } from "../di/superAdmin.di.ts";
 import { upload } from "../middleware/multer.middleware.ts";
 
 const router = express.Router();
-const { dashboardController, hospitalController, kycController, patientManagementController } = superAdminContainer();
+const { dashboardController, hospitalController, kycController, patientManagementController, subscriptionController } = superAdminContainer();
 
 // Dashboard
 router.get("/dashboard/stats", dashboardController.getDashboardStats.bind(dashboardController));
@@ -24,5 +24,11 @@ router.get("/patients", patientManagementController.getPatients.bind(patientMana
 router.patch("/patients/active", patientManagementController.togglePatientActive.bind(patientManagementController));
 router.post("/patients", upload.single('image'), patientManagementController.addPatient.bind(patientManagementController));
 router.patch("/patients/:id", upload.single('image'), patientManagementController.updatePatient.bind(patientManagementController));
+
+// Subscription Management
+router.get("/subscription", subscriptionController.getSubscriptions.bind(subscriptionController));
+router.post("/subscription", subscriptionController.addSubscription.bind(subscriptionController));
+router.patch("/subscription/toggle", subscriptionController.toggleSubscription.bind(subscriptionController));
+router.patch("/subscription/:id", subscriptionController.updateSubscription.bind(subscriptionController));
 
 export default router;

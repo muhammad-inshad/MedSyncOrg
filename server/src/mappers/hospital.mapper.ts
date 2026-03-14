@@ -3,7 +3,11 @@ import { IHospital } from "../models/hospital.model.ts";
 import { HospitalResponseDTO } from "../dto/hospital/hospital-response.dto.ts";
 
 export class HospitalMapper implements IMapper<IHospital, HospitalResponseDTO> {
-    toDTO(hospital: IHospital): HospitalResponseDTO {
+    toDTO(
+        hospital: IHospital, 
+        limits?: HospitalResponseDTO['subscription']['limits'],
+        currentCounts?: HospitalResponseDTO['currentCounts']
+    ): HospitalResponseDTO {
         return {
             id: hospital._id.toString(),
             _id: hospital._id.toString(),
@@ -29,12 +33,14 @@ export class HospitalMapper implements IMapper<IHospital, HospitalResponseDTO> {
             reapplyDate: hospital.reapplyDate,
             rejectionReason: hospital.rejectionReason,
             subscription: {
-                plan: hospital.subscription?.plan || "free",
+                plan: (hospital.subscription?.plan as "free" | "basic" | "premium") || "free",
                 amount: hospital.subscription?.amount || 0,
                 status: hospital.subscription?.status || "active",
                 startDate: hospital.subscription?.startDate,
                 endDate: hospital.subscription?.endDate,
+                limits: limits,
             },
+            currentCounts: currentCounts,
             createdAt: hospital.createdAt,
             updatedAt: hospital.updatedAt,
         };

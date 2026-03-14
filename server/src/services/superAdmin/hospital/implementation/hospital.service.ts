@@ -8,12 +8,14 @@ import { HospitalMapper } from "../../../../mappers/hospital.mapper.ts";
 import bcrypt from "bcryptjs";
 import { ISuperAdminKYCRepository } from "../../../../repositories/superAdmin/interfaces/superAdminkyc.repository.interface.ts";
 import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.ts";
+import { ISubscriptionRepository } from "../../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.ts";
 
 export class SuperAdminHospitalService implements ISuperAdminHospitalService {
     constructor(
         private readonly kycRepo: ISuperAdminKYCRepository,
         private readonly hospitalRepo: IHospitalRepository,
-        private readonly hospitalMapper: HospitalMapper
+        private readonly hospitalMapper: HospitalMapper,
+        private readonly subscriptionRepo: ISubscriptionRepository
     ) { }
 
     async hospitalManagement(options: { page: number; limit: number; search?: string }): Promise<IHospitalManagementResult> {
@@ -87,6 +89,19 @@ export class SuperAdminHospitalService implements ISuperAdminHospitalService {
 
         const hashedPassword = await bcrypt.hash(password!, 10);
 
+        // Calculate subscription end date if plan is provided
+        if (data.subscription && data.subscription.plan) {
+            const planDetails = await this.subscriptionRepo.findByPlanName(data.subscription.plan);
+            if (planDetails) {
+                const startDate = data.subscription.startDate ? new Date(data.subscription.startDate) : new Date();
+                const duration = planDetails.duration || 1;
+                const durationUnit = planDetails.durationUnit || 'months';
+                
+                data.subscription.startDate = startDate;
+                data.subscription.endDate = this.calculateSubscriptionEndDate(startDate, duration, durationUnit);
+            }
+        }
+
         const created = await this.hospitalRepo.create({
             ...data,
             since: Number(since),
@@ -120,7 +135,38 @@ export class SuperAdminHospitalService implements ISuperAdminHospitalService {
             updateData.since = Number(updateData.since);
         }
 
+        // Calculate subscription end date if plan is provided
+        if (updateData.subscription && updateData.subscription.plan) {
+            const planDetails = await this.subscriptionRepo.findByPlanName(updateData.subscription.plan);
+            if (planDetails) {
+                const startDate = updateData.subscription.startDate ? new Date(updateData.subscription.startDate) : new Date();
+                const duration = planDetails.duration || 1;
+                const durationUnit = planDetails.durationUnit || 'months';
+                
+                updateData.subscription.startDate = startDate;
+                updateData.subscription.endDate = this.calculateSubscriptionEndDate(startDate, duration, durationUnit);
+            }
+        }
+
         const updated = await this.hospitalRepo.update(id, updateData);
         return updated ? this.hospitalMapper.toDTO(updated) : null;
+    }
+
+    private calculateSubscriptionEndDate(startDate: Date, duration: number, unit: string): Date {
+        const endDate = new Date(startDate);
+        switch (unit) {
+            case 'days':
+                endDate.setDate(endDate.getDate() + duration);
+                break;
+            case 'months':
+                endDate.setMonth(endDate.getMonth() + duration);
+                break;
+            case 'years':
+                endDate.setFullYear(endDate.getFullYear() + duration);
+                break;
+            default:
+                endDate.setMonth(endDate.getMonth() + duration);
+        }
+        return endDate;
     }
 }

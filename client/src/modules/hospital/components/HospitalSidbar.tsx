@@ -53,14 +53,9 @@ const HospitalSidbar = ({ isOpen, setIsOpen }: HospitalSidebarProps) => {
     {icon:HeartPulse,label:"Specilaization",path:HOSPITAL_ROUTES.HOSPITAL_SPECIALIZATION_MANGEMENT},
     {icon:GraduationCap ,label:"Qualification",path:HOSPITAL_ROUTES.HOSPITAL_QULIFICATION_MANGEMENT},
      { icon: Umbrella, label: 'DoctorLeaveManagement',path:HOSPITAL_ROUTES.DOCTOR_LEAVE_MANAGEMENT},
-    { icon: DollarSign, label: 'Finance' },
-    { icon: Wallet, label: 'Payout Management' },
-    { icon: RefreshCw, label: 'Return Payment' },
-    { icon: BadgeDollarSign, label: 'Doctor Salary Inc' },
-    { icon: UserCheck, label: 'Doctor Selection' },
     { icon: User, label: 'Profile' },
     { icon: SquareStack, label: 'Chat' },
-    { icon: Bell, label: 'Subscription' },
+    { icon: Bell, label: 'Subscription',path:HOSPITAL_ROUTES.HOSPITAL_SUBSCRIPTION},
   ];
  
   const handleClick = (item: MenuItem) => {

@@ -1,6 +1,7 @@
 import api from "@/lib/api";
 import { SUPERADMIN_MANAGEMENT } from "./superAdmin.routes";
 import type { LoginData, PaginationParams, HospitalStatusUpdateData, KycStatusUpdateData, SetHospitalActiveData } from "@/interfaces/api.interfaces";
+import type { SubscriptionForm } from "@/interfaces/ISubscription";
 
 export const superAdminApi = {
     login: (data: LoginData) =>
@@ -55,4 +56,16 @@ export const superAdminApi = {
         api.post(SUPERADMIN_MANAGEMENT.PATIENT_ADD, data),
    editPatient: (id: string, data: FormData) =>
         api.patch(SUPERADMIN_MANAGEMENT.EDIT_PATIENT(id), data),
+        
+   getSubscriptionManagement: (params: PaginationParams & { search?: string; status?: string }) =>
+        api.get(SUPERADMIN_MANAGEMENT.GET_SUBSCRIPTIONS, { params }),
+
+   addSubscription: (data: SubscriptionForm) =>
+        api.post(SUPERADMIN_MANAGEMENT.ADD_SUBSCRIPTION, data),
+
+   editSubscription: (id: string, data: SubscriptionForm) =>
+        api.patch(SUPERADMIN_MANAGEMENT.EDIT_SUBSCRIPTION(id), data),
+
+   toggleSubscription: (data: { id: string; isActive: boolean }) =>
+        api.patch(SUPERADMIN_MANAGEMENT.TOGGLE_SUBSCRIPTION, data),
 };

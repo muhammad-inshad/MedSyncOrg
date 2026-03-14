@@ -7,10 +7,10 @@ const HomeLanding = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const openModal = (e) => {
-    e.preventDefault();
-    setIsModalOpen(true);
-  };
+const openModal = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  e.preventDefault();
+  setIsModalOpen(true);
+};
 
   const closeModal = () => {
     setIsModalOpen(false);

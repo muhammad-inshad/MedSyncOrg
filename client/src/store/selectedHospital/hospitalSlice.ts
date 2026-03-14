@@ -29,9 +29,13 @@ const hospitalSlice = createSlice({
         state.loading = false;
         state.hospital = action.payload;
       })
-      .addCase(loadHospitalData.rejected, (state) => {
+      .addCase(loadHospitalData.rejected, (state, action) => {
         state.loading = false;
-        state.hospital = null;  // ✅ Reset on error
+        // Keep the existing hospital data if it's a 402 error so the modal can show it
+        const payload = action.payload as any;
+        if (payload?.status !== 402) {
+          state.hospital = null;
+        }
       });
   },
 });

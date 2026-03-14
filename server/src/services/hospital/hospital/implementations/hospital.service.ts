@@ -11,12 +11,21 @@ import Logger from "../../../../utils/logger.ts";
 import bcrypt from "bcryptjs";
 import { ICloudinaryImageService } from "../../../image/interfaces/cloudinary.service.interface.ts";
 
+import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
+import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.ts";
+import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
+import { ISubscriptionRepository } from "../../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.ts";
+
 export class HospitalService implements IHospitalService {
     constructor(
         private readonly _hospitalRepo: IHospitalRepository,
         private readonly _hospitalMapper: HospitalMapper,
         private readonly _imageService: ICloudinaryImageService,
-        private readonly _patientService: IPatientService
+        private readonly _patientService: IPatientService,
+        private readonly _doctorRepo: IDoctorRepository,
+        private readonly _departmentRepo: IDepartmentRepository,
+        private readonly _userRepo: IUserRepository,
+        private readonly _subscriptionRepo: ISubscriptionRepository
     ) { }
 
     async getHospitalProfile(hospitalId: string): Promise<HospitalResponseDTO> {
@@ -25,7 +34,31 @@ export class HospitalService implements IHospitalService {
         if (!hospital) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.ADMIN.NOT_FOUND);
         }
-        return this._hospitalMapper.toDTO(hospital!);
+
+        // Fetch counts
+        const [doctors, patients, departments] = await Promise.all([
+            this._doctorRepo.countDocuments({ hospital_id: hospitalId }),
+            this._userRepo.countDocuments({ hospital_id: hospitalId }),
+            this._departmentRepo.countDocuments({ hospital_id: hospitalId })
+        ]);
+
+        const currentCounts = { doctors, patients, departments };
+
+        // Fetch limits
+        let limits: HospitalResponseDTO['subscription']['limits'] | undefined;
+        if (hospital!.subscription?.plan) {
+            const planName = hospital!.subscription.plan.charAt(0).toUpperCase() + hospital!.subscription.plan.slice(1);
+            const planDetails = await this._subscriptionRepo.findByPlanName(planName);
+            if (planDetails?.limits) {
+                limits = {
+                    maxPatients: planDetails.limits.maxPatients,
+                    maxDoctors: planDetails.limits.maxDoctors,
+                    maxDepartments: planDetails.limits.maxDepartments
+                };
+            }
+        }
+
+        return this._hospitalMapper.toDTO(hospital!, limits, currentCounts);
     }
 
     async getSelectedHospital(hospitalId: string, page?: number, limit?: number, search?: string): Promise<selectedHospitalDto> {
@@ -133,9 +166,41 @@ export class HospitalService implements IHospitalService {
             updatePayload.isActive = String(updatePayload.isActive) === 'true' || updatePayload.isActive === true;
         }
 
+        // 3. Subscription Handling - Calculate End Date based on duration
+        if (updatePayload.subscription && (updatePayload.subscription as any).plan) {
+            const subscription = updatePayload.subscription as any;
+            const planDetails = await this._subscriptionRepo.findByPlanName(subscription.plan);
+            if (planDetails) {
+                const startDate = subscription.startDate ? new Date(subscription.startDate) : new Date();
+                const duration = planDetails.duration || 1;
+                const durationUnit = planDetails.durationUnit || 'months';
+                
+                subscription.startDate = startDate;
+                subscription.endDate = this.calculateSubscriptionEndDate(startDate, duration, durationUnit);
+            }
+        }
+
         Logger.info(`Updating hospital profile for ID: ${hospitalId}`);
         const updatedHospital = await this._hospitalRepo.update(hospitalId, updatePayload as Partial<IHospital>);
 
         return updatedHospital ? this._hospitalMapper.toDTO(updatedHospital) : null;
+    }
+
+    private calculateSubscriptionEndDate(startDate: Date, duration: number, unit: string): Date {
+        const endDate = new Date(startDate);
+        switch (unit) {
+            case 'days':
+                endDate.setDate(endDate.getDate() + duration);
+                break;
+            case 'months':
+                endDate.setMonth(endDate.getMonth() + duration);
+                break;
+            case 'years':
+                endDate.setFullYear(endDate.getFullYear() + duration);
+                break;
+            default:
+                endDate.setMonth(endDate.getMonth() + duration);
+        }
+        return endDate;
     }
 }

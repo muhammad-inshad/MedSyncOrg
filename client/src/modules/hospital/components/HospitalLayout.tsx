@@ -1,10 +1,50 @@
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react'; // Hamburger icon
 import HospitalSidbar from './HospitalSidbar';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store/store';
+import SubscriptionExpiredModal from './SubscriptionExpiredModal';
+import { useAppDispatch } from '@/hooks/redux';
+import { loadHospitalData } from '@/store/selectedHospital/authThunk';
 
 const HospitalLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { hospital } = useSelector((state: RootState) => state.hospital);
+  const { user } = useSelector((state: RootState) => state.auth);
+  const dispatch = useAppDispatch();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!hospital && user?._id) {
+      dispatch(loadHospitalData({ hospitalId: user._id }));
+    }
+  }, [hospital, user, dispatch]);
+console.log(hospital?.subscription,"inshad")
+  const isExpired = useMemo(() => {
+    if (!hospital?.subscription) return false;
+    
+    if (hospital.subscription.status === 'expired') return true;
+
+    if (hospital.subscription.endDate) {
+      const endDate = new Date(hospital.subscription.endDate);
+      return endDate < new Date();
+    }
+
+    return false;
+  }, [hospital]);
+
+  const isSubscriptionPage = location.pathname.toLowerCase().includes('/hospital/subscription');
+  const showModal = isExpired && !isSubscriptionPage;
+  
+
+  if (showModal) {
+    return (
+      <div className="h-screen w-screen overflow-hidden">
+        <SubscriptionExpiredModal />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">

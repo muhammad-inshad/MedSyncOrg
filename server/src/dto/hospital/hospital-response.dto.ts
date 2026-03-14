@@ -30,6 +30,16 @@ export interface HospitalResponseDTO {
     status: "active" | "expired" | "cancelled";
     startDate?: Date;
     endDate?: Date;
+    limits?: {
+      maxPatients: number;
+      maxDoctors: number;
+      maxDepartments: number;
+    };
+  };
+  currentCounts?: {
+    doctors: number;
+    patients: number;
+    departments: number;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -91,6 +101,23 @@ export interface selectedHospitalDto {
   about?: string;
   licence?: string;
 
+  subscription: {
+    plan: "free" | "basic" | "premium";
+    amount: number;
+    status: "active" | "expired" | "cancelled";
+    startDate?: Date;
+    endDate?: Date;
+    limits?: {
+      maxPatients: number;
+      maxDoctors: number;
+      maxDepartments: number;
+    };
+  };
+  currentCounts?: {
+    doctors: number;
+    patients: number;
+    departments: number;
+  };
   departments: DepartmentResponseDTO[];
   qualifications: QualificationResponseDTO[];
   specializations: SpecializationResponseDTO[];

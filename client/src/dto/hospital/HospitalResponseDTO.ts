@@ -51,4 +51,21 @@ export interface HospitalResponseDTO {
   totalDepartments: number;
   currentPage: number;
   totalPages: number;
+  subscription?: {
+    plan: "free" | "basic" | "premium";
+    amount: number;
+    status: "active" | "expired" | "cancelled";
+    startDate?: string | Date;
+    endDate?: string | Date;
+    limits?: {
+      maxPatients: number;
+      maxDoctors: number;
+      maxDepartments: number;
+    };
+  };
+  currentCounts?: {
+    doctors: number;
+    patients: number;
+    departments: number;
+  };
 }

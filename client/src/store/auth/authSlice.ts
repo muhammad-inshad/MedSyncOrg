@@ -56,7 +56,19 @@ const authSlice = createSlice({
                 state.isActive = user.isActive;
                 state.loading = false;
             })
-            .addCase(initializeAuth.rejected, (state) => {
+            .addCase(initializeAuth.rejected, (state, action) => {
+                // If it's a 402 error, we don't want to log the user out!
+                // We just want to stop the loading state.
+                const errorMessage = action.payload as string;
+                if (
+                    (errorMessage?.includes("Subscription limit reached") || 
+                     errorMessage?.includes("expired") ||
+                     errorMessage?.includes("No active subscription"))
+                ) {
+                    state.loading = false;
+                    return;
+                }
+
                 state.user = null;
                 state.profileData = null;
                 state.userRole = null;

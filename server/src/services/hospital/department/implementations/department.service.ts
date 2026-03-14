@@ -4,10 +4,13 @@ import { IDepartmentService } from "../interfaces/department.service.interface.t
 import { ICloudinaryImageService } from "../../../image/interfaces/cloudinary.service.interface.ts";
 import { Types } from "mongoose";
 
+import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.ts";
+
 export class DepartmentService implements IDepartmentService {
     constructor(
         private readonly _departmentRepo: IDepartmentRepository,
-        private readonly _imageService: ICloudinaryImageService
+        private readonly _imageService: ICloudinaryImageService,
+        private readonly _subscriptionService: IHospitalSubscriptionService
     ) { }
 
     async getDepartments(hospitalId: string, page: number, limit: number, search?: string): Promise<{ data: IDepartment[]; total: number; page: number; limit: number }> {
@@ -21,6 +24,8 @@ export class DepartmentService implements IDepartmentService {
     }
 
     async createDepartment(hospitalId: string, data: Partial<IDepartment>, file?: Express.Multer.File): Promise<IDepartment> {
+        await this._subscriptionService.checkSubscriptionLimit(hospitalId, "maxDepartments");
+        
         const departmentData: Partial<IDepartment> = {
             ...data,
             hospital_id: new Types.ObjectId(hospitalId) as unknown as Types.ObjectId

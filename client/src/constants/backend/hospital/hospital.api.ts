@@ -129,5 +129,7 @@ export const hospitalApi = {
     },
     updateLeaveStatus: (id: string, data: { status: 'approved' | 'rejected'; rejectedReason?: string }) => {
         return api.patch(HOSPITAL_MANAGEMENT.UPDATE_LEAVE_STATUS(id), data);
-    }
+    },
+    getsubscription: (params?: { page?: number; limit?: number; search?: string }) =>
+        api.get(HOSPITAL_MANAGEMENT.GETSUBSCRIPTION(), { params }),
 };

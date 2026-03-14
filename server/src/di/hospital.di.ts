@@ -23,6 +23,9 @@ import { DepartmentRepository } from "../repositories/hospital/implementation/de
 import DepartmentModel from "../models/department.model.ts";
 import { LeaveRepository } from "../repositories/leave/leave.repository.ts";
 import { AppointmentRepository } from "../repositories/appointment/appointment.repository.ts";
+import { SubscriptionRepository } from "../repositories/superAdmin/subscription/implements/subscription.repository.ts";
+import { HospitalSubscriptionService } from "../services/hospital/subscription/implementation/subscription.service.ts";
+import { HospitalSubscriptionController } from "../controllers/hospital/subscription/implementation/subscription.controller.ts";
 
 export const hospitalContainer = () => {
     const hospitalRepo = new HospitalRepository(HospitalModel);
@@ -34,8 +37,19 @@ export const hospitalContainer = () => {
     const departmentRepo = new DepartmentRepository(DepartmentModel);
     const leaveRepo = new LeaveRepository();
     const appointmentRepo = new AppointmentRepository();
+    const subscriptionRepo = new SubscriptionRepository();
 
     const hospitalMapper = new HospitalMapper();
+
+    const hospitalSubscriptionService = new HospitalSubscriptionService(
+        subscriptionRepo,
+        hospitalRepo,
+        doctorRepo,
+        departmentRepo,
+        userRepo
+    );
+    const hospitalSubscriptionController = new HospitalSubscriptionController(hospitalSubscriptionService);
+
     const hospitalAuthService = new HospitalAuthService(
         hospitalRepo,
         tokenService,
@@ -46,7 +60,16 @@ export const hospitalContainer = () => {
     // Hospital profile (getme)
     const imageService = new CloudinaryImageService();
     const { patientService } = patientContainer();
-    const hospitalService = new HospitalService(hospitalRepo, hospitalMapper, imageService, patientService);
+    const hospitalService = new HospitalService(
+        hospitalRepo, 
+        hospitalMapper, 
+        imageService, 
+        patientService,
+        doctorRepo,
+        departmentRepo,
+        userRepo,
+        subscriptionRepo
+    );
     const hospitalController = new HospitalController(hospitalService);
 
     // Doctor management: only doctor toggle/accept/reject/revision
@@ -54,17 +77,18 @@ export const hospitalContainer = () => {
         doctorRepo,
         doctorMapper,
         departmentRepo,
-        leaveRepo
+        leaveRepo,
+        hospitalSubscriptionService
     );
     const doctorManagement = new DoctorManagementController(
         doctorManagementService
     );
 
-    // Patient management: only patient toggle/signup
     const patientManagementService = new PatientManagementService(
         userRepo,
         patientMapper,
-        appointmentRepo
+        appointmentRepo,
+        hospitalSubscriptionService
     );
     const patientManagement = new PatientManagementController(
         patientManagementService
@@ -74,6 +98,7 @@ export const hospitalContainer = () => {
         tokenService,
         hospitalRepo
     );
+
     return {
         tokenService,
         hospitalAuthController,
@@ -83,6 +108,7 @@ export const hospitalContainer = () => {
         hospitalRepo,
         patientManagement,
         patientManagementService,
-        hospitalAuthMiddleware
+        hospitalAuthMiddleware,
+        hospitalSubscriptionController
     };
-};
+}

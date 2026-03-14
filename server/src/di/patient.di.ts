@@ -16,6 +16,8 @@ import QualificationModel from "../models/qualification.model.ts";
 import { SpecializationRepository } from "../repositories/hospital/implementation/specialization.repository.ts";
 import SpecializationModel from "../models/specialization.model.ts";
 
+import { SubscriptionRepository } from "../repositories/superAdmin/subscription/implements/subscription.repository.ts";
+
 export const patientContainer = () => {
   const tokenService = new TokenService();
   const userRepository = new UserRepository(Patient);
@@ -25,6 +27,7 @@ export const patientContainer = () => {
   const appointmentRepository = new AppointmentRepository();
   const qualificationRepository = new QualificationRepository(QualificationModel);
   const specializationRepository = new SpecializationRepository();
+  const subscriptionRepository = new SubscriptionRepository();
 
   const patientService = new PatientService(
     userRepository,
@@ -33,7 +36,8 @@ export const patientContainer = () => {
     doctorRepository,
     appointmentRepository,
     qualificationRepository,
-    specializationRepository
+    specializationRepository,
+    subscriptionRepository
   );
   const patientController = new PatientController(patientService);
   const patientAuthMiddleware = new PatientAuthMiddleware(tokenService, userRepository);

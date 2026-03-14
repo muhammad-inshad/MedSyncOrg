@@ -19,7 +19,16 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Handle Subscription Limit / Expiry
+    if (error.response?.status === 402) {
+      const message = error.response.data.message || "Subscription limit reached. Please upgrade your plan.";
+      localStorage.setItem("pending_toast", JSON.stringify({ message, type: 'error' }));
+      window.location.href = "/hospital/subscription";
+      return new Promise(() => { }); // Stop further propagation
+    }
+
     if (error.response?.status === 403) {
+      console.warn("403 Forbidden detected. Logging out.", error.response?.data);
       localStorage.removeItem("role");
       store.dispatch(logout());
 

@@ -32,7 +32,7 @@ export interface IHospital extends Document {
   rejectionReason?: string;
 
   subscription: {
-    plan: "free" | "basic" | "premium";
+    plan: string;
     amount: number;
     status: "active" | "expired" | "cancelled";
     startDate?: Date;
@@ -165,7 +165,6 @@ const HospitalSchema = new Schema<IHospital>(
 
     reviewStatus: {
       type: String,
-      enum: ["pending", "approved", "revision", "rejected"],
       default: "pending",
     },
 

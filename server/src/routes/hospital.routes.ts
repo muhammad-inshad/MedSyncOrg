@@ -8,7 +8,7 @@ const router = express.Router();
 const { specializationManagement } = specializationContainer()
 const { qualificationManagement } = qualificationContainer()
 const { departmentManagement } = departmentContiner()
-const { doctorManagement, patientManagement, hospitalController } = hospitalContainer();
+const { doctorManagement, patientManagement, hospitalController, hospitalSubscriptionController } = hospitalContainer();
 
 
 router.get("/me", hospitalController.getHospitalProfile.bind(hospitalController));
@@ -59,5 +59,7 @@ router.get("/specializations", specializationManagement.getSpecializations.bind(
 router.post("/specializations", upload.single("image"), specializationManagement.createSpecialization.bind(specializationManagement));
 router.patch("/specializations/:id/toggle", specializationManagement.toggleStatus.bind(specializationManagement));
 router.patch("/specializations/:id", upload.single("image"), specializationManagement.updateSpecialization.bind(specializationManagement));
+
+router.get("/subscription", hospitalSubscriptionController.getActiveSubscriptions.bind(hospitalSubscriptionController));
 
 export default router;
