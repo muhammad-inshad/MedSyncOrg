@@ -83,7 +83,6 @@ export default function HospitalDepartments() {
 
   const searchQuery = useAppSelector((state) => state.search.query);
 
-  // ── Sync Page with Search ──
   const [prevSearchQuery, setPrevSearchQuery] = useState(searchQuery);
   if (searchQuery !== prevSearchQuery) {
     setPrevSearchQuery(searchQuery);

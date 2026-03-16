@@ -47,6 +47,10 @@ const PatientProfile: React.FC = () => {
     navigate(PATIENT_ROUTES.VIEW_APPOIMENTS_HISTORY)
   }
 
+  const livetoken=()=>{
+    navigate(PATIENT_ROUTES.LIVETOKEN)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -130,9 +134,9 @@ const PatientProfile: React.FC = () => {
 
 
             {/* Live Token */}
-            <div className="bg-teal-50 rounded-xl p-5 shadow-sm ">
+            <div className="bg-teal-50 rounded-xl p-5 shadow-sm " >
               {/* ... same structure ... */}
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-3" onClick={()=>livetoken()}>
                 <div className="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path

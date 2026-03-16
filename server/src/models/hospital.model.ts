@@ -183,7 +183,6 @@ const HospitalSchema = new Schema<IHospital>(
     subscription: {
       plan: {
         type: String,
-        enum: ["free", "basic", "premium"],
         default: "free",
       },
 

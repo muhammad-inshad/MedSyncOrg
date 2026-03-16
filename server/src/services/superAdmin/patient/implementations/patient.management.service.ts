@@ -1,4 +1,5 @@
 import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
+import bcrypt from "bcryptjs";
 import { PatientMapper } from "../../../../mappers/patient.mapper.ts";
 import { IPaginationResult } from "../../../../types/hospital.types.ts";
 import { PatientResponseDTO } from "../../../../dto/patient/patient-response.dto.ts";
@@ -61,8 +62,11 @@ export class SuperAdminPatientManagementService implements ISuperAdminPatientMan
             imageUrl = await uploadBufferToCloudinary(file.buffer, "patients/profile");
         }
 
+        const hashedPassword = data.password ? await bcrypt.hash(data.password, 10) : "";
+
         const patientData = {
             ...data,
+            password: hashedPassword,
             hospital_id: new Types.ObjectId(hospital_id),
             image: imageUrl,
             isActive: true,

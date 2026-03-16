@@ -11,6 +11,7 @@ import HospitalProtectedRoute from "./HospitalProtectedRoute";
 import HospitalDepartments from "../pages/HospitalDeprtements";
 import DoctorProfile from "../pages/DoctorProfile";
 import AppointmentHistory from "../pages/AppointmentHistory";
+import Livetoken from "../pages/Livetoken";
 
 
 const PatientRouts = () => {
@@ -21,6 +22,7 @@ const PatientRouts = () => {
         <Route path={PATIENT_ROUTES.PATIENTPROFILE} element={<PatientProfile />} />
         <Route path={PATIENT_ROUTES.VIEW_APPOIMENTS_HISTORY} element={<AppointmentHistory />} />
         <Route path={PATIENT_ROUTES.PATIENTEDIT} element={<EditPatientProfile />} />
+        <Route path={PATIENT_ROUTES.LIVETOKEN} element={<Livetoken/>}/>
         <Route element={<HospitalProtectedRoute />}>
           <Route path={PATIENT_ROUTES.HOSPITAL_HOMEPAGE} element={<PatientHospitalHome />} />
           <Route path={PATIENT_ROUTES.HOSPITAL_DOCTOR} element={<PatientDoctor />} />

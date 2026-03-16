@@ -32,3 +32,12 @@ export interface DoctorDailySlotsDTO {
     date: string;
     tokenInfo: DailyTokenStatusDTO;
 }
+
+export interface IPrescriptionData {
+  medicines: {
+    name: string;
+    dosage: string;
+    duration: string;
+  }[];
+  notes: string;
+}

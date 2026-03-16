@@ -41,6 +41,26 @@ const BillingModal = ({ plan, onClose }: { plan: ISubscription; onClose: () => v
   const taxAmount = plan.amount * taxRate;
   const totalAmount = plan.amount + taxAmount;
 
+  const handlePayment = async () => {
+  try {
+
+    showToast.success("Redirecting to payment gateway...");
+
+    const res = await hospitalApi.createPaymentSession({
+      planId: plan._id
+    });
+
+    if (res.data?.url) {
+     
+      window.location.href = res.data.url;
+    }
+
+  } catch (error) {
+    console.error(error);
+    showToast.error("Payment failed. Please try again.");
+  }
+};
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className=" rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all animate-in zoom-in-95 duration-200">
@@ -84,15 +104,12 @@ const BillingModal = ({ plan, onClose }: { plan: ISubscription; onClose: () => v
 
         {/* Modal Footer */}
         <div className="p-8 pt-0 bg-white space-y-3">
-          <button 
-            onClick={() => showToast.success("Redirecting to payment gateway...")}
-            className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            Pay Securely
-          </button>
+         <button 
+  onClick={handlePayment}
+  className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+>
+  Pay Securely
+</button>
           <button 
             onClick={onClose}
             className="w-full text-slate-400 py-2 text-sm font-medium hover:text-slate-600 transition"

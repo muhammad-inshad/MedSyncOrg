@@ -132,4 +132,8 @@ export const hospitalApi = {
     },
     getsubscription: (params?: { page?: number; limit?: number; search?: string }) =>
         api.get(HOSPITAL_MANAGEMENT.GETSUBSCRIPTION(), { params }),
+
+    createPaymentSession: (data?: any) =>
+    api.post("/api/payment/checkout", data),
+
 };

@@ -6,7 +6,6 @@ import { patientApi } from "@/constants/backend/patient/patient.api";
 import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
 import { toast } from "react-hot-toast";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 
 interface Review {
   _id: string;

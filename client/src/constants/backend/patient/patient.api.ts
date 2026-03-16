@@ -27,5 +27,11 @@ export const patientApi = {
     },
     cancelAppointment: (appointmentId: string, data: { reason: string }) => {
         return api.patch(PATIENT_MANAGEMENT.CANCEL_APPOINTMENT(appointmentId), data);
+    },
+    getliveToken: (doctorId?: string) => {
+        return api.get(`${PATIENT_MANAGEMENT.LIVETOKEN}${doctorId ? `?doctorId=${doctorId}` : ""}`);
+    },
+    getTodayAppointments: () => {
+        return api.get(PATIENT_MANAGEMENT.TODAY_APPOINTMENTS);
     }
 };

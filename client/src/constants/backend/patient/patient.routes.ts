@@ -11,4 +11,6 @@ export const PATIENT_MANAGEMENT = {
     BOOK_APPOINTMENT: "/api/patient/appointments",
     APPOIMENTHISTORY:(patientID:string)=>`/api/patient/patients/${patientID}/appointments`,
     CANCEL_APPOINTMENT: (id: string) => `/api/patient/appointments/${id}/cancel`,
+    LIVETOKEN: "/api/patient/livetoken",
+    TODAY_APPOINTMENTS: "/api/patient/appointments/today"
 };

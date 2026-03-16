@@ -3,7 +3,7 @@ import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.ts";
 import { HospitalResponseDTO, IHospitalUpdateDTO, selectedHospitalDto } from "../../../../dto/hospital/hospital-response.dto.ts";
 import { IHospitalService } from "../interfaces/hospital.services.interfaces.ts";
-import { IPatientService } from "../../../patient/patient.service.interfaces.ts";
+import { IPatientService } from "../../../../services/patient/interfaces/patient.service.interfaces.ts"
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { HospitalMapper } from "../../../../mappers/hospital.mapper.ts";
 import { IHospital } from "../../../../models/hospital.model.ts";
@@ -61,7 +61,7 @@ export class HospitalService implements IHospitalService {
         return this._hospitalMapper.toDTO(hospital!, limits, currentCounts);
     }
 
-    async getSelectedHospital(hospitalId: string, page?: number, limit?: number, search?: string): Promise<selectedHospitalDto> {
+    async getSelectedHospital(hospitalId: string, page: number = 1, limit: number = 10, search: string = ""): Promise<selectedHospitalDto> {
         return this._patientService.selectedHospital(hospitalId, page, limit, search);
     }
 
@@ -86,7 +86,6 @@ export class HospitalService implements IHospitalService {
 
         const updatePayload: IHospitalUpdateDTO = { ...hospitalData };
 
-        // 1. Password Handling
         if (updatePayload.password && updatePayload.password.trim() !== "") {
             const salt = await bcrypt.genSalt(10);
             updatePayload.password = await bcrypt.hash(updatePayload.password, salt);
@@ -97,14 +96,14 @@ export class HospitalService implements IHospitalService {
 
         // 2. Data Parsing (as they come from FormData as strings)
         try {
-            if (typeof hospitalData.subscription === 'string') {
-                updatePayload.subscription = JSON.parse(hospitalData.subscription);
+            if (typeof updatePayload.subscription === 'string') {
+                updatePayload.subscription = JSON.parse(updatePayload.subscription);
             }
-            if (typeof hospitalData.images === 'string') {
-                updatePayload.images = JSON.parse(hospitalData.images);
+            if (typeof updatePayload.images === 'string') {
+                updatePayload.images = JSON.parse(updatePayload.images);
             }
-            if (typeof hospitalData.since === 'string') {
-                updatePayload.since = parseInt(hospitalData.since, 10);
+            if (typeof updatePayload.since === 'string') {
+                updatePayload.since = parseInt(updatePayload.since, 10);
             }
         } catch (e) {
             Logger.error("Failed to parse nested JSON fields in Hospital Update", e);
@@ -166,9 +165,8 @@ export class HospitalService implements IHospitalService {
             updatePayload.isActive = String(updatePayload.isActive) === 'true' || updatePayload.isActive === true;
         }
 
-        // 3. Subscription Handling - Calculate End Date based on duration
-        if (updatePayload.subscription && (updatePayload.subscription as any).plan) {
-            const subscription = updatePayload.subscription as any;
+        if (updatePayload.subscription && typeof updatePayload.subscription !== 'string' && updatePayload.subscription.plan) {
+            const subscription = updatePayload.subscription;
             const planDetails = await this._subscriptionRepo.findByPlanName(subscription.plan);
             if (planDetails) {
                 const startDate = subscription.startDate ? new Date(subscription.startDate) : new Date();

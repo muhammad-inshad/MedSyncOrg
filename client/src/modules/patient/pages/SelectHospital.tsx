@@ -54,17 +54,12 @@ const SelectHospital: React.FC = () => {
 
   const handleSelectHospital = async (hospitalId: string) => {
     if (selecting) return;
-    console.log(hospitalId, "hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
     setSelecting(true);
 
     try {
-      // store hospital id in session
+   
       sessionStorage.setItem("hospitalId", hospitalId);
-
-      // load hospital data
       await dispatch(loadHospitalData({ hospitalId }));
-
-      // navigate to hospital homepage
       navigate(PATIENT_ROUTES.HOSPITAL_HOMEPAGE);
     } catch (error) {
       console.error("Failed to load hospital:", error);
@@ -105,12 +100,12 @@ const SelectHospital: React.FC = () => {
                     />
                   </div>
 
-                  <div className="p-5 sm:p-6 flex flex-col flex-grow">
+                  <div className="p-5 sm:p-6 flex flex-col grow">
                     <h3 className="text-lg sm:text-xl font-semibold text-indigo-900 mb-3 capitalize">
                       {hospital.hospitalName}
                     </h3>
 
-                    <p className="text-gray-600 text-sm sm:text-base mb-4 leading-relaxed line-clamp-3 flex-grow">
+                    <p className="text-gray-600 text-sm sm:text-base mb-4 leading-relaxed line-clamp-3 grow">
                       {hospital.about || "No description available."}
                     </p>
 

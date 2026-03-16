@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Stethoscope,
   LogOut,
+  Ticket,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { DOCTOR_ROUTES } from '@/constants/frontend/doctor/doctor.routes';
@@ -41,19 +42,15 @@ const sidebarItems: SidebarItem[] = [
     path: DOCTOR_ROUTES.APPLY_LEAVE, // e.g. '/doctor/leave'
   },
   {
-    label: 'Manage Token',
-    icon: <Hash className="w-5 h-5" />,
-    path: DOCTOR_ROUTES.MANAGE_TOKEN, // e.g. '/doctor/token'
+    label: 'conseltation',
+    icon: <Ticket className="w-5 h-5" />,
+    path: DOCTOR_ROUTES.CONSELTATION, // e.g. '/doctor/token'
   },
+  
   {
     label: 'Patient Chat',
     icon: <MessageSquare className="w-5 h-5" />,
     path: DOCTOR_ROUTES.PATIENT_CHAT, // e.g. '/doctor/chat'
-  },
-  {
-    label: 'Lab Results',
-    icon: <FileText className="w-5 h-5" />,
-    path: DOCTOR_ROUTES.LAB_RESULTS, // e.g. '/doctor/lab-results'
   },
   {
     label: 'Wallet',

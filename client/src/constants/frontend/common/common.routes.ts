@@ -5,5 +5,6 @@ export const COMMON_ROUTES = {
     RESETPASSWORD: '/reset-password',
     DOCTORREGISTRATIONFORM: "/doctor/signup",
     DOCTORSELECTHOSPITAL:"/doctor/select/hospital",
-    HOMELANDING:"/"
+    HOMELANDING:"/",
+    PAY_SUCCESS:"/payment/success"
 };

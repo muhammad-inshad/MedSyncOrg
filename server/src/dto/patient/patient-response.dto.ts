@@ -35,3 +35,16 @@ export interface UpdatePatientDTO {
 
   isActive?: boolean;
 }
+
+export interface CreatePatientDTO {
+  name: string;
+  email: string;
+  phone?: number;
+  password?: string;
+  fatherName?: string;
+  gender?: "male" | "female" | "other";
+  dateOfBirth?: Date;
+  address?: string;
+  bloodGroup?: string;
+  image?: string;
+}

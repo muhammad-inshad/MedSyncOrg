@@ -6,5 +6,7 @@ export const DOCTOR_MANAGEMENT = {
     REAPPLY: (id: string) => `/api/doctor/reapply/${id}`,
     UPCOMING_APPOINTMENTS: (id: string) => `/api/doctor/appointments/upcoming/${id}`,
     DOCTOR_APPLAY_LEAVE: "/api/doctor/leaves",
-    GET_LEAVES: "/api/doctor/leaves"
+    GET_LEAVES: "/api/doctor/leaves",
+    GET_APPOIMENTS:"/api/doctor/consultation",
+    SAVE_PRISCRIPTION:"/api/doctor/prescription"
 };

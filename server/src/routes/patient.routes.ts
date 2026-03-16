@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { patientContainer } from "../di/patient.di.ts";
 
-const { patientController } = patientContainer();
+const { patientController,liveToken} = patientContainer();
 const router = Router();
 
 router.get("/me", patientController.getMe.bind(patientController));
@@ -17,6 +17,7 @@ router.get("/doctors/:id", patientController.getDoctorById.bind(patientControlle
 router.get("/doctors/:doctorId/slots", patientController.getAvailableSlots.bind(patientController));
 router.post("/appointments", patientController.bookAppointment.bind(patientController));
 router.get("/patients/:patientID/appointments",patientController.getAppoimentHistory.bind(patientController))
+router.get("/appointments/today", patientController.getTodayAppointments.bind(patientController));
 router.patch("/appointments/:id/cancel",patientController.appoinmentCancel.bind(patientController))
-
+router.get("/livetoken", liveToken.getToken.bind(liveToken));
 export default router;

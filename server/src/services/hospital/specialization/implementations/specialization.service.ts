@@ -31,7 +31,7 @@ export class SpecializationService implements ISpecializationService {
     ): Promise<ISpecialization> {
         const data: Partial<ISpecialization> = {
             ...specializationData,
-            hospital_id: new Types.ObjectId(hospitalId) as any,
+            hospital_id: new Types.ObjectId(hospitalId) ,
         };
 
         if (file) {

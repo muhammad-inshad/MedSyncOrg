@@ -140,6 +140,12 @@ export interface IHospitalUpdateDTO {
   isActive?: boolean | string;
   password?: string;
   confirmPassword?: string;
-  subscription?: string | IHospital['subscription'];
+  subscription?: string | {
+    plan: string;
+    amount: number;
+    status: "active" | "expired" | "cancelled";
+    startDate?: Date | string;
+    endDate?: Date | string;
+  };
   images?: string | IHospital['images'];
 }

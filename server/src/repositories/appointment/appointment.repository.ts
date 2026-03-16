@@ -8,21 +8,42 @@ export class AppointmentRepository extends BaseRepository<IAppointment> implemen
         super(AppointmentModel);
     }
 
-    async findByDoctorAndDate(doctorId: string, date: Date): Promise<IAppointment[]> {
+    async findByDoctorAndDate(doctorId: string, date: Date, options?: { page: number; limit: number }): Promise<{ appointments: IAppointment[]; total: number }> {
         const startOfDay = new Date(date);
         startOfDay.setHours(0, 0, 0, 0);
 
         const endOfDay = new Date(date);
         endOfDay.setHours(23, 59, 59, 999);
 
-        return await this.model.find({
+        const query = {
             doctorId: doctorId,
             appointmentDate: {
                 $gte: startOfDay,
                 $lte: endOfDay
             },
-            status: { $nin: [AppointmentStatus.COMPLETED, AppointmentStatus.CANCELLED] }
-        }).exec();
+            status: { $nin: [AppointmentStatus.CANCELLED] }
+        };
+
+        if (options) {
+            const { page, limit } = options;
+            const skip = (page - 1) * limit;
+
+            const [appointments, total] = await Promise.all([
+                this.model.find(query)
+                    .sort({ tokenNumber: 1 })
+                    .skip(skip)
+                    .limit(limit)
+                    .exec(),
+                this.model.countDocuments(query).exec()
+            ]);
+
+            return { appointments, total };
+        }
+
+        const appointments = await this.model.find(query).sort({ tokenNumber: 1 }).exec();
+        const total = appointments.length;
+
+        return { appointments, total };
     }
 
     async countByDoctorAndDate(doctorId: string, date: Date): Promise<number> {
@@ -143,5 +164,68 @@ export class AppointmentRepository extends BaseRepository<IAppointment> implemen
         ]);
 
         return { appointments, total };
+    }
+
+    async findLiveToken(doctorId: string): Promise<IAppointment | null> {
+        const today = new Date();
+        const startOfDay = new Date(today);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(today);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        return await this.model.findOne({
+            doctorId: doctorId,
+            appointmentDate: {
+                $gte: startOfDay,
+                $lte: endOfDay
+            },
+            status: AppointmentStatus.PENDING
+        })
+        .sort({ tokenNumber: 1 })
+        .exec();
+    }
+
+    async findDoctorByPatientToday(patientId: string): Promise<string | null> {
+        const today = new Date();
+        const startOfDay = new Date(today);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(today);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const appointment = await this.model.findOne({
+            bookedBy: new Types.ObjectId(patientId),
+            appointmentDate: {
+                $gte: startOfDay,
+                $lte: endOfDay
+            },
+            status: { $nin: [AppointmentStatus.CANCELLED] }
+        })
+        .select("doctorId")
+        .exec();
+
+        return appointment ? appointment.doctorId.toString() : null;
+    }
+
+    async findPatientAppointmentsToday(patientId: string): Promise<IAppointment[]> {
+        const today = new Date();
+        const startOfDay = new Date(today);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(today);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        return await this.model.find({
+            bookedBy: new Types.ObjectId(patientId),
+            appointmentDate: {
+                $gte: startOfDay,
+                $lte: endOfDay
+            },
+            status: { $nin: [AppointmentStatus.CANCELLED] }
+        })
+        .populate("doctorId", "name specialization department profileImage")
+        .sort({ tokenNumber: 1 })
+        .exec();
     }
 }

@@ -1,5 +1,6 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import bcrypt from 'bcryptjs';
 import { Patient } from '../models/Patient.model.ts';
 import { HospitalModel } from '../models/hospital.model.ts';
 import { DoctorModel } from '../models/doctor.model.ts';
@@ -41,8 +42,7 @@ passport.use(new GoogleStrategy({
         if (role === 'patient') {
           user = await Patient.create(createData);
         } else if (role === 'hospital') {
-          // Hospitals have more required fields, this might fail without schema adjustments
-          // or we might need to handle partial registration
+          const hashedPlaceholder = await bcrypt.hash('google-auth-placeholder', 10);
           user = await HospitalModel.create({
             hospitalName: profile.displayName,
             email,
@@ -50,14 +50,15 @@ passport.use(new GoogleStrategy({
             phone: '0000000000',
             since: new Date().getFullYear(),
             pincode: '000000',
-            password: 'google-auth-placeholder',
+            password: hashedPlaceholder,
             reviewStatus: 'pending'
           });
         } else if (role === 'doctor') {
+          const hashedPlaceholder = await bcrypt.hash('google-auth-placeholder', 10);
           user = await DoctorModel.create({
             name: profile.displayName,
             email,
-            password: 'google-auth-placeholder',
+            password: hashedPlaceholder,
             phone: '0000000000',
             address: 'Pending Google Auth',
             specialization: 'Pending',

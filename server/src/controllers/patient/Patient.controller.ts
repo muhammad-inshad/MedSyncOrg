@@ -3,7 +3,7 @@ import { ApiResponse } from "../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../constants/enums.ts";
 import { MESSAGES } from "../../constants/messages.ts";
 
-import { IPatientService } from "../../services/patient/patient.service.interfaces.ts";
+import { IPatientService } from "../../services/patient/interfaces/patient.service.interfaces.ts";
 import { ITokenPayload } from "../../services/token/token.service.interface.ts";
 
 class PatientController {
@@ -57,8 +57,11 @@ class PatientController {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 6;
       const search = (req.query.search as string) || "";
-      const hospitals = await this.patientService.gethospitals(page, limit, search);
-      return ApiResponse.success(res, MESSAGES.ADMIN.FETCH_SUCCESS, hospitals);
+      const result = await this.patientService.gethospitals(page, limit, search);
+      return ApiResponse.success(res, MESSAGES.ADMIN.FETCH_SUCCESS, {
+        hospitals: result.data,
+        totalPages: Math.ceil(result.total / limit),
+      });
     } catch (error: unknown) {
       next(error);
     }
@@ -160,6 +163,20 @@ class PatientController {
         totalItems: result.total,
         totalPages: Math.ceil(result.total / limit),
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+ 
+  getTodayAppointments = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = req.user as unknown as ITokenPayload;
+      const patientId = user?.userId;
+      if (!patientId) {
+        return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
+      }
+      const appointments = await this.patientService.getTodayAppointments(patientId);
+      return ApiResponse.success(res, "Today's appointments fetched successfully", appointments);
     } catch (error) {
       next(error);
     }

@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
 import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.ts";
 import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
@@ -49,7 +49,6 @@ export class PatientAuthService implements IPatientAuthService {
     if (!user?.password) {
       ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.LOGIN_FAILED);
     }
-
     const isPasswordValid = await bcrypt.compare(data.password, user!.password!);
     if (!isPasswordValid) {
       ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.LOGIN_FAILED);

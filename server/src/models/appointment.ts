@@ -11,6 +11,18 @@ export enum AppointmentMode {
   OFFLINE = "offline",
 }
 
+export interface IMedicine {
+  name: string;
+  dosage: string;
+  duration: string;
+}
+
+export interface IPrescription {
+  medicines: IMedicine[];
+  notes?: string;
+  prescribedAt: Date;
+}
+
 export interface IAppointment extends Document {
   bookedBy: Types.ObjectId;
   doctorId: Types.ObjectId;
@@ -23,7 +35,7 @@ export interface IAppointment extends Document {
   visitTime: string;
 
   mode: AppointmentMode;
-
+  prescription?: IPrescription;
   status: AppointmentStatus;
 
   patientDetails: {
@@ -97,6 +109,17 @@ const appointmentSchema = new Schema<IAppointment>(
 
     rejectionReason: {
       type: String,
+    },
+    prescription: {
+      medicines: [
+        {
+          name: { type: String, required: true },
+          dosage: { type: String, required: true },
+          duration: { type: String, required: true },
+        }
+      ],
+      notes: { type: String },
+      prescribedAt: { type: Date, default: Date.now }
     },
     cancelReason: {
       type: String,

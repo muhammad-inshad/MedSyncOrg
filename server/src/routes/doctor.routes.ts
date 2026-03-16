@@ -2,7 +2,7 @@ import { Router } from "express";
 import { doctorContainer } from "../di/doctor.di.ts";
 import { upload } from "../middleware/multer.middleware.ts";
 
-const { doctorcontroller, appoimentController } = doctorContainer()
+const { doctorcontroller, appoimentController,consultation } = doctorContainer()
 const router = Router()
 
 
@@ -15,4 +15,9 @@ router.patch("/profile/:id", upload.fields([
 router.post("/leaves", upload.single("photo"), doctorcontroller.applyLeave.bind(doctorcontroller))
 router.get("/leaves", doctorcontroller.getDoctorLeaves.bind(doctorcontroller))
 router.get("/appointments/upcoming/:id", appoimentController.getUpcomingAppointments.bind(appoimentController))
+
+router.get("/consultation", consultation.getConsultation.bind(consultation))
+router.patch("/consultation/:id/status", consultation.markAsCompleted.bind(consultation))
+router.post("/prescription",consultation.prescription.bind(consultation))
+
 export default router

@@ -6,6 +6,7 @@ import { Routes, Route } from "react-router-dom";
 import DoctorProtectedRoute from "./DoctorProtectedRoute";
 import UpcomingAppointments from "../pages/UpcomingAppointments";
 import DoctorLeaveManagement from "../pages/DoctorLeaveManagement";
+import DoctorConsultation from "../pages/DoctorConseltation";
 
 
 const DoctorRoutes = () => {
@@ -17,6 +18,7 @@ const DoctorRoutes = () => {
         <Route path={DOCTOR_ROUTES.DOCTORPROFILE} element={<DoctorProfile />} />
         <Route path={DOCTOR_ROUTES.UPCOMING_APPOINTMENTS} element={<UpcomingAppointments />} />
         <Route path={DOCTOR_ROUTES.APPLY_LEAVE} element={<DoctorLeaveManagement />} />
+        <Route path={DOCTOR_ROUTES.CONSELTATION} element={<DoctorConsultation/>}/>
       </Route>
     </Routes>
   );

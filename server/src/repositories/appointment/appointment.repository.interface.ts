@@ -2,7 +2,7 @@ import { IAppointment } from "../../models/appointment.ts";
 import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
 
 export interface IAppointmentRepository extends IBaseRepository<IAppointment> {
-    findByDoctorAndDate(doctorId: string, date: Date): Promise<IAppointment[]>;
+    findByDoctorAndDate(doctorId: string, date: Date, options?: { page: number; limit: number }): Promise<{ appointments: IAppointment[]; total: number }>;
     countByDoctorAndDate(doctorId: string, date: Date): Promise<number>;
     findUpcomingAppointments(
         doctorId: string,
@@ -26,4 +26,7 @@ export interface IAppointmentRepository extends IBaseRepository<IAppointment> {
             search?: string;
         }
     ): Promise<{ appointments: IAppointment[]; total: number }>;
+        findLiveToken(doctorId: string): Promise<IAppointment | null>;
+    findDoctorByPatientToday(patientId: string): Promise<string | null>;
+    findPatientAppointmentsToday(patientId: string): Promise<IAppointment[]>;
 }

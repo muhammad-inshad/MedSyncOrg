@@ -1,105 +1,63 @@
-import { Types } from "mongoose";
-import { IPatientManagementService } from "../interfaces/patient.management.service.interface.ts";
 import { IPatient } from "../../../../models/Patient.model.ts";
-import { deleteFromCloudinary, uploadBufferToCloudinary } from "../../../../utils/cloudinaryUpload.ts";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../../../constants/enums.ts";
-import { PatientResponseDTO } from "../../../../dto/patient/patient-response.dto.ts";
-import { PatientMapper } from "../../../../mappers/patient.mapper.ts";
-import { IPaginationResult } from "../../../../types/hospital.types.ts";
+import { IPatientManagementService } from "../interfaces/patient.management.service.interface.ts";
 import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
-import { IAppointment, AppointmentStatus } from "../../../../models/appointment.ts";
+import { PatientMapper } from "../../../../mappers/patient.mapper.ts";
 import { IAppointmentRepository } from "../../../../repositories/appointment/appointment.repository.interface.ts";
-
+import { PatientResponseDTO, CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.ts";
+import { Types } from "mongoose";
 
 export class PatientManagementService implements IPatientManagementService {
     constructor(
         private readonly _userRepo: IUserRepository,
         private readonly _patientMapper: PatientMapper,
         private readonly _appointmentRepo: IAppointmentRepository,
-        private readonly _subscriptionService: IHospitalSubscriptionService
-    ) { }
+        private readonly _hospitalSubscriptionService: IHospitalSubscriptionService
+    ) {}
 
-    async addPatient(data: Partial<IPatient>, hospital_id: string, file?: Express.Multer.File): Promise<PatientResponseDTO> {
-        await this._subscriptionService.checkSubscriptionLimit(hospital_id, "maxPatients");
-        const existingPatient = await this._userRepo.findByEmail(data.email!);
-        if (existingPatient) {
-            ApiResponse.throwError(HttpStatusCode.CONFLICT, "Patient already exists with this email");
-        }
-
-        let imageUrl = "";
-        if (file) {
-            imageUrl = await uploadBufferToCloudinary(file.buffer, "patients/profile");
-        }
-
-        const patientData = {
-            ...data,
+    async addPatient(patientData: CreatePatientDTO, hospital_id: string, patientFile?: Express.Multer.File): Promise<PatientResponseDTO> {
+        const patient = await this._userRepo.create({
+            ...patientData,
             hospital_id: new Types.ObjectId(hospital_id),
-            image: imageUrl,
-            isActive: true,
-            isProfileComplete: true,
-        };
-
-        const created = await this._userRepo.create(patientData);
-        return this._patientMapper.toDTO(created);
+            image: patientFile?.path || undefined,
+            isActive: true
+        } as Partial<IPatient>);
+        return this._patientMapper.toDTO(patient);
     }
 
-    async patientsToggle(id: string): Promise<PatientResponseDTO | null> {
+    async patientsToggle(id: string): Promise<IPatient> {
         const patient = await this._userRepo.findById(id);
         if (!patient) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Patient not found");
         }
-        const newStatus = !patient.isActive;
-        const updated = await this._userRepo.update(id, { isActive: newStatus } as Partial<IPatient>);
-        return updated ? this._patientMapper.toDTO(updated) : null;
+        const updated = await this._userRepo.update(id, { isActive: !patient!.isActive });
+        return updated!;
     }
 
-    async updatePatient(id: string, data: Partial<IPatient> & { willRemoveImage?: string | boolean }, file?: Express.Multer.File): Promise<PatientResponseDTO | null> {
-           const patient = await this._userRepo.findById(id);
-           if (!patient) {
-               ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Patient not found");
-           }
-   
-           let imageUrl = patient.image || "";
-           const shouldRemoveImage = data.willRemoveImage === "true" || data.willRemoveImage === true;
-   
-           if (file || shouldRemoveImage) {
-               if (patient.image) {
-                   await deleteFromCloudinary(patient.image);
-               }
-               imageUrl = "";
-           }
-   
-           if (file) {
-               imageUrl = await uploadBufferToCloudinary(file.buffer, "patients/profile");
-           }
-   
-           const updateData = { ...data };
-           delete updateData.willRemoveImage;
-   
-           const updated = await this._userRepo.update(id, {
-               ...updateData,
-               image: imageUrl,
-           });
-           return updated ? this._patientMapper.toDTO(updated) : null;
-       }
-    async getAllPatient(options: { page: number; limit: number; search?: string; filter?: object }): Promise<IPaginationResult<PatientResponseDTO>> {
-        const { page, limit, search } = options;
+    async updatePatient(id: string, patientData: UpdatePatientDTO, patientFile?: Express.Multer.File): Promise<PatientResponseDTO> {
+        const updatePayload: Partial<IPatient> = { ...patientData } as Partial<IPatient>;
+        if (patientFile) {
+            updatePayload.image = patientFile.path;
+        }
+        const updated = await this._userRepo.update(id, updatePayload);
+        if (!updated) {
+            ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Patient not found");
+        }
+        return this._patientMapper.toDTO(updated!);
+    }
+
+    async getAllPatient(query: { page: number; limit: number; search: string }): Promise<{ data: PatientResponseDTO[]; total: number }> {
         const result = await this._userRepo.findWithPagination({
-            page,
-            limit,
-            search,
-            searchFields: ["name", "email"],
+            page: query.page,
+            limit: query.limit,
+            search: query.search,
+            searchFields: ["name", "email", "phone"]
         });
-        console.log(result)
         return {
             data: result.data.map(p => this._patientMapper.toDTO(p)),
-            total: result.total,
-            page: result.page,
-            limit: result.limit
+            total: result.total
         };
     }
-
-  
 }

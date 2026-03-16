@@ -17,6 +17,7 @@ import QualificationManagement from '../components/master/qualification/Qualific
 import SpecializationManagement from '../components/master/specialization/SpecializationManagement'
 import DoctorLeaveManagement from '../pages/DoctorLeaveMenagement'
 import Subscription from '../pages/HospitalSubscription'
+import PaymentSuccess from '../pages/PaymentSuccess'
 
 
 const HospitalRoutes = () => {
@@ -39,6 +40,7 @@ const HospitalRoutes = () => {
                       <Route path={HOSPITAL_ROUTES.HOSPITAL_SPECIALIZATION_MANGEMENT} element={<SpecializationManagement/>}/>
                       <Route path={HOSPITAL_ROUTES.DOCTOR_LEAVE_MANAGEMENT}element={<DoctorLeaveManagement/>}/>
                       <Route path={HOSPITAL_ROUTES.HOSPITAL_SUBSCRIPTION} element={<Subscription/>}/>
+                      <Route path={HOSPITAL_ROUTES.HOSPITAL_PAYMENT_SUCCESS} element={<PaymentSuccess />} />
                 </Route>
             </Route>
         </Routes>

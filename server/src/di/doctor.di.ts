@@ -21,6 +21,7 @@ import { AppointmentController } from "../controllers/doctor/appointment.control
 import { AppointmentService } from "../services/doctor/implementations/appointment.service.ts";
 import { LeaveRepository } from "../repositories/leave/leave.repository.ts";
 import DoctorLeaveModel from "../models/doctorLeave.model.ts";
+import { Consultation } from "../controllers/doctor/consultation.controller.ts";
 
 export const doctorContainer = () => {
   const doctorRepository = new DoctorRepository(DoctorModel);
@@ -31,8 +32,11 @@ export const doctorContainer = () => {
   const qualificationRepo = new QualificationRepository(QualificationModel);
   const specializationRepo = new SpecializationRepository();
   const leaveRepo = new LeaveRepository();
-
   const appointmentRepo = new AppointmentRepository();
+
+  const appointmentService = new AppointmentService(appointmentRepo);
+  const consultation = new Consultation(appointmentService);
+
 
   const doctorService = new DoctorService(
     doctorRepository,
@@ -57,7 +61,6 @@ export const doctorContainer = () => {
   const doctorAuthController = new DoctorAuthController(doctorAuthService);
   const doctorAuthMiddleware = new DoctorAuthMiddleware(tokenService, doctorRepository);
 
-  const appointmentService = new AppointmentService(appointmentRepo);
   const appoimentController = new AppointmentController(appointmentService);
 
   return {
@@ -66,6 +69,7 @@ export const doctorContainer = () => {
     doctorAuthController,
     doctorRepository,
     doctorAuthMiddleware,
-    appoimentController
+    appoimentController,
+    consultation
   };
 };

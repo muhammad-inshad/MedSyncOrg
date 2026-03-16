@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import { DOCTOR_MANAGEMENT } from "./doctor.routes";
+import type { IPrescriptionData } from "@/interfaces/IAppointment";
 
 export const doctorApi = {
     editProfile: (id: string, data: FormData) =>
@@ -29,7 +30,17 @@ export const doctorApi = {
     },
 
     getDoctorLeaves: (params?: { page?: number; limit?: number; startDate?: string; endDate?: string }) =>
-        api.get(DOCTOR_MANAGEMENT.GET_LEAVES, { params })
+        api.get(DOCTOR_MANAGEMENT.GET_LEAVES, { params }),
 
+    getConsultation: (params?: { page?: number; limit?: number }) => 
+        api.get(DOCTOR_MANAGEMENT.GET_APPOIMENTS, { params }),
 
+    updateAppointmentStatus: (id: string) =>
+        api.patch(`/api/doctor/consultation/${id}/status`),
+
+   savePrescription: (id: string, data: IPrescriptionData) =>
+        api.post(DOCTOR_MANAGEMENT.SAVE_PRISCRIPTION, { 
+            appointmentId: id, 
+            ...data 
+        })
 };
