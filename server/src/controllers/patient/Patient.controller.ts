@@ -134,6 +134,7 @@ class PatientController {
 
   bookAppointment = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      console.log("[PatientController.bookAppointment] Direct booking endpoint hit!");
       const user = req.user as unknown as ITokenPayload;
       const patientId = user?.userId;
       if (!patientId) {
@@ -145,6 +146,17 @@ class PatientController {
       next(error);
     }
   };
+
+  checkDuplicateAppointment = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { doctorId, date, patient } = req.body;
+      const duplicate = await this.patientService.checkDuplicateAppointment(doctorId, date, patient);
+      return ApiResponse.success(res, "Duplicate check completed", duplicate);
+    } catch (error) {
+      next(error);
+    }
+  };
+
 
   getAppoimentHistory = async (req: Request, res: Response, next: NextFunction) => {
     try {

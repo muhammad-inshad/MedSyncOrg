@@ -1,7 +1,7 @@
 import express from "express";
 import cors from 'cors';
 import cookieParser from "cookie-parser";
-import dotenv from "dotenv";
+import "dotenv/config";
 import passport from "passport";
 import authRoutes from './routes/auth.routes.ts';
 import patientRoutes from './routes/patient.routes.ts';
@@ -20,7 +20,7 @@ const { patientAuthMiddleware } = patientContainer();
 const { hospitalAuthMiddleware } = hospitalContainer();
 const { doctorAuthMiddleware } = doctorContainer();
 
-dotenv.config();
+
 const app = express();
 app.use(passport.initialize());
 app.use(cookieParser());

@@ -7,16 +7,13 @@ import { HOSPITAL_ROUTES } from "@/constants/frontend/hospital/hospital.routes";
 import { DOCTOR_ROUTES } from "@/constants/frontend/doctor/doctor.routes";
 import Doctor_edit from "./doctor/Doctor_edit";
 import HomeLanding from "./HomeLanding";
-import PaymentSuccess from "./payment/PaymentSuccess";
+
 
 const CommonRoutes = () => {
   return (
     <Routes>
       <Route path={COMMON_ROUTES.HOMELANDING} element={<HomeLanding />} />
       <Route element={<AdminProtectedRoute />}>
-      <Route path={COMMON_ROUTES.PAY_SUCCESS}element={<PaymentSuccess isOpen={false} onClose={function (): void {
-          throw new Error("Function not implemented.");
-        } }/>}/>
         <Route path={COMMON_ROUTES.REVIEWPENDING} element={<AdminReviewPending />} />
         <Route path={DOCTOR_ROUTES.DOCTOREDITFORREVIEW} element={<Doctor_edit />} />
         <Route path={HOSPITAL_ROUTES.HOSPITALEDITFORREVIEW} element={<EditHospital />} />

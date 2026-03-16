@@ -8,7 +8,7 @@ import { patientApi } from "@/constants/backend/patient/patient.api";
 import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
 
 interface Doctor {
-  id: string;
+  _id: string;
   name: string;
   specialization: string;
   profileImage: string;
@@ -182,7 +182,7 @@ export default function PatientDoctor() {
                 {/* Button */}
                 <div className="bg-white px-4 py-4 mt-auto">
                   <button
-                    onClick={() => navigate(`/patient/doctor-profile/${doc.id}`)}
+                    onClick={() => navigate(`/patient/doctor-profile/${doc._id}`)}
                     className="w-full bg-[#0d2b4e] text-white text-sm font-bold py-2.5 rounded-lg hover:bg-[#163a68] transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer shadow-md"
                   >
                     View Profile

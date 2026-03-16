@@ -99,7 +99,8 @@ const PaymentSuccess = () => {
 
     /* countdown + redirect */
     useEffect(() => {
-        if (!sessionId) { navigate(HOSPITAL_ROUTES.HOSPITAL_SUBSCRIPTION); return; }
+        const isFreePlan = searchParams.get('plan') === 'free';
+        if (!sessionId && !isFreePlan) { navigate(HOSPITAL_ROUTES.HOSPITAL_SUBSCRIPTION); return; }
         showToast.success("Payment successful! Your subscription has been updated.");
 
         const iv = setInterval(() => {

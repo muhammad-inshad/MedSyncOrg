@@ -9,7 +9,7 @@ export const createCheckoutSession = async () => {
     line_items: [
       {
         price_data: {
-          currency: "usd",
+          currency: "inr",
           product_data: {
             name: "Hospital Subscription",
           },

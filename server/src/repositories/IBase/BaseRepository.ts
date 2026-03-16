@@ -18,13 +18,11 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     }
 
     async update(id: string, data: Partial<T>): Promise<T | null> {
-        console.log(`[BaseRepository] Updating document ${id}`, data);
         const updateData = { ...data } as Partial<T>;
         delete updateData._id;
         delete updateData.id;
 
         const updated = await this.model.findByIdAndUpdate(id, updateData as UpdateQuery<T>, { new: true }).exec();
-        console.log(`[BaseRepository] Update result for ${id}:`, updated ? "Success" : "Failed (returned null/undefined)");
         return updated;
     }
 

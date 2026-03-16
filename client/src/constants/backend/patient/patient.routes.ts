@@ -9,6 +9,7 @@ export const PATIENT_MANAGEMENT = {
     GET_DOCTOR_DETAILS: (id: string) => `/api/patient/doctors/${id}`,
     GET_AVAILABLE_SLOTS: (doctorId: string) => `/api/patient/doctors/${doctorId}/slots`,
     BOOK_APPOINTMENT: "/api/patient/appointments",
+    CHECK_DUPLICATE_APPOINTMENT: "/api/patient/appointments/check-duplicate",
     APPOIMENTHISTORY:(patientID:string)=>`/api/patient/patients/${patientID}/appointments`,
     CANCEL_APPOINTMENT: (id: string) => `/api/patient/appointments/${id}/cancel`,
     LIVETOKEN: "/api/patient/livetoken",

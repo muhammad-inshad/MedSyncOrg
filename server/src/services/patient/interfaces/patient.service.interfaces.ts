@@ -14,8 +14,9 @@ export interface IPatientService {
   selectedHospital(id: string, page: number, limit: number, search: string): Promise<selectedHospitalDto>;
   getDoctorDepartment(id: string, page: number, limit: number, search: string): Promise<IPaginationResult<IDoctor>>;
   getDoctorById(id: string): Promise<IDoctor>;
-  getAvailableSlots(doctorId: string, date: string): Promise<{ availableSlots: number; totalSlots: number; bookedCount: number }>;
+  getAvailableSlots(doctorId: string, date: string): Promise<{ tokenInfo: { availableSlots: number; totalSlots: number; bookedTokens: number; maxTokens: number; status: "Available" | "Filling Fast" | "Fully Booked" } }>;
   bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<void>;
+  checkDuplicateAppointment(doctorId: string, date: string, patient: { name: string; age: number; email?: string }): Promise<IAppointment | null>;
   getAppoimentHistory(patientId: string, query: { page: number; limit: number; search: string }): Promise<{ data: IAppointment[]; total: number }>;
   getTodayAppointments(patientId: string): Promise<IAppointment[]>;
   cancelAppointment(data: { id: string; reason: string }): Promise<void>;

@@ -41,3 +41,21 @@ export interface IPrescriptionData {
   }[];
   notes: string;
 }
+
+export interface IAppointmentCheckoutData {
+    doctorId: string;
+    hospitalId: string;
+    appointmentDate: string;
+    mode: "online" | "offline";
+    patientDetails: {
+        name: string;
+        age: number;
+        phone: string;
+        email?: string;
+        address?: string;
+    };
+    bloodPressure?: string;
+    heartRate?: string;
+    weight?: string;
+    doctorName?: string;
+}

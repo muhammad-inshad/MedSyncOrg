@@ -15,7 +15,7 @@ const { googleAuthController } = userContainer();
 const router = Router();
 
 router.post('/send-otp', otpController.sendOtp.bind(otpController));
-router.post("/doctor/register", upload.fields([
+router.post("/RegistorDoctor", upload.fields([
   { name: "profileImage", maxCount: 1 },
   { name: "license", maxCount: 1 }
 ]), doctorAuthController.registerDoctor.bind(doctorAuthController));

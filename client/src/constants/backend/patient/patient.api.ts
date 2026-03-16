@@ -22,6 +22,9 @@ export const patientApi = {
     bookAppointment: (data: any) => {
         return api.post(PATIENT_MANAGEMENT.BOOK_APPOINTMENT, data)
     },
+    checkDuplicateAppointment: (data: { doctorId: string, date: string, patient: { name: string, age: number, email?: string } }) => {
+        return api.post(PATIENT_MANAGEMENT.CHECK_DUPLICATE_APPOINTMENT, data)
+    },
     getAppoimentHistory: (patientID: string, page: number = 1, limit: number = 5, search: string = "") => {
         return api.get(`${PATIENT_MANAGEMENT.APPOIMENTHISTORY(patientID)}?page=${page}&limit=${limit}&search=${search}`)
     },
@@ -33,5 +36,8 @@ export const patientApi = {
     },
     getTodayAppointments: () => {
         return api.get(PATIENT_MANAGEMENT.TODAY_APPOINTMENTS);
-    }
+    },
+      
+      createAppointmentPaymentSession: (data: any) =>
+    api.post("/api/payment/appointment-checkout", data),
 };

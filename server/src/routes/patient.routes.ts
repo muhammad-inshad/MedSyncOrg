@@ -15,6 +15,7 @@ router.get("/departments", patientController.getdepartments.bind(patientControll
 router.get("/departments/:id/doctors", patientController.getDoctorDepartment.bind(patientController))
 router.get("/doctors/:id", patientController.getDoctorById.bind(patientController));
 router.get("/doctors/:doctorId/slots", patientController.getAvailableSlots.bind(patientController));
+router.post("/appointments/check-duplicate", patientController.checkDuplicateAppointment.bind(patientController));
 router.post("/appointments", patientController.bookAppointment.bind(patientController));
 router.get("/patients/:patientID/appointments",patientController.getAppoimentHistory.bind(patientController))
 router.get("/appointments/today", patientController.getTodayAppointments.bind(patientController));

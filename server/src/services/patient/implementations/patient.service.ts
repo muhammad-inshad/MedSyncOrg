@@ -136,49 +136,82 @@ export class PatientService implements IPatientService {
 
   async getDoctorById(id: string): Promise<IDoctor> {
     const doctor = await this._doctorRepo.findById(id);
+
     if (!doctor) {
       ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
     }
     return doctor;
   }
 
-  async getAvailableSlots(doctorId: string, date: string): Promise<{ availableSlots: number; totalSlots: number; bookedCount: number }> {
+  async getAvailableSlots(doctorId: string, date: string): Promise<{ tokenInfo: { availableSlots: number; totalSlots: number; bookedTokens: number; maxTokens: number; status: "Available" | "Filling Fast" | "Fully Booked" } }> {
     const appointmentDate = new Date(date);
-    const bookedCount = await this._appointmentRepo.countByDoctorAndDate(doctorId, appointmentDate);
-    
-    // Default to 20 but could be dynamic based on doctor limit
-    const TOTAL_SLOTS = 20;
-    const availableSlots = TOTAL_SLOTS - bookedCount;
-    
+    const [doctor, bookedTokens] = await Promise.all([
+      this._doctorRepo.findById(doctorId),
+      this._appointmentRepo.countByDoctorAndDate(doctorId, appointmentDate)
+    ]);
+
+    if (!doctor) {
+      ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
+    }
+
+    const maxTokens = doctor.payment?.patientsPerDayLimit || 20;
+    const availableSlots = maxTokens - bookedTokens;
+
+    let status: "Available" | "Filling Fast" | "Fully Booked" = "Available";
+    if (bookedTokens >= maxTokens) {
+      status = "Fully Booked";
+    } else if (bookedTokens >= maxTokens * 0.8) {
+      status = "Filling Fast";
+    }
+
     return {
-      availableSlots: availableSlots > 0 ? availableSlots : 0,
-      totalSlots: TOTAL_SLOTS,
-      bookedCount
+      tokenInfo: {
+        availableSlots: availableSlots > 0 ? availableSlots : 0,
+        totalSlots: maxTokens,
+        bookedTokens,
+        maxTokens,
+        status
+      }
     };
   }
 
   async bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<void> {
     const { doctorId, appointmentDate, patientDetails } = data;
-    
+   
     if (!doctorId || !appointmentDate || !patientDetails) {
+        console.error("[PatientService.bookAppointment] Error: Missing critical details:", { doctorId, appointmentDate, patientDetails });
         ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Missing appointment details");
     }
 
-    const duplicate = await this._appointmentRepo.findDuplicate(doctorId!.toString(), new Date(appointmentDate!), patientDetails!);
+    const dateObj = new Date(appointmentDate!);
+
+    const duplicate = await this._appointmentRepo.findDuplicate(doctorId!.toString(), dateObj, patientDetails!);
     if (duplicate) {
       ApiResponse.throwError(HttpStatusCode.CONFLICT, MESSAGES.PATIENT.ALREADYBOOKED);
     }
 
-    const count = await this._appointmentRepo.countByDoctorAndDate(doctorId!.toString(), new Date(appointmentDate!));
+    const count = await this._appointmentRepo.countByDoctorAndDate(doctorId!.toString(), dateObj);
     const tokenNumber = count + 1;
+    
+    const appointmentData: Partial<IAppointment> = { ...data };
+    if (appointmentData.bloodPressure === "") delete appointmentData.bloodPressure;
+    if (appointmentData.heartRate === "") delete appointmentData.heartRate;
+    if (appointmentData.weight === "") delete appointmentData.weight;
 
-    await this._appointmentRepo.create({
-      ...data,
+    const result = await this._appointmentRepo.create({
+      ...appointmentData,
       bookedBy: new Types.ObjectId(patientId),
       tokenNumber,
       status: AppointmentStatus.PENDING
     });
+    console.log(`[PatientService.bookAppointment] SUCCESS! Appointment created with ID: ${result._id}`);
   }
+
+  async checkDuplicateAppointment(doctorId: string, date: string, patient: { name: string; age: number; email?: string }): Promise<IAppointment | null> {
+    const dateObj = new Date(date);
+    return await this._appointmentRepo.findDuplicate(doctorId, dateObj, patient);
+  }
+
 
   async getAppoimentHistory(patientId: string, query: { page: number; limit: number; search: string }): Promise<{ data: IAppointment[]; total: number }> {
     const result = await this._appointmentRepo.findPatientAppointments(patientId, query);

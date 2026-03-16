@@ -42,7 +42,7 @@ export default function PatientAppointment() {
   const { doctorId } = useParams();
   const navigate = useNavigate();
   const { profileData } = useAppSelector((state) => state.auth);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [hospitalName, setHospitalName] = useState("");
   const [loading, setLoading] = useState(true);
@@ -156,7 +156,9 @@ export default function PatientAppointment() {
   };
 
   const handleBooking = async () => {
-    const currentAvailability = weekDaysAvailability.find(d => isSameDay(d.fullDate, selectedDate));
+    const currentAvailability = weekDaysAvailability.find(d =>
+      isSameDay(d.fullDate, selectedDate)
+    );
 
     if (currentAvailability?.status === "Fully Booked") {
       toast.error("Doctor is fully booked for this date");
@@ -169,30 +171,69 @@ export default function PatientAppointment() {
     }
 
     try {
+      const checkData = {
+        doctorId: doctorId!,
+        date: selectedDate.toISOString(),
+        patient: {
+          name: form.fullName,
+          age: Number(form.age),
+          email: form.email
+        }
+      };
+
+      const dupRes = await patientApi.checkDuplicateAppointment(checkData);
+      if (dupRes.data.success && dupRes.data.data) {
+        toast.error("patient already book the sloate");
+        return;
+      }
+
+      // Proceed to booking directly
       const bookingData = {
         doctorId,
         hospitalId: doctor?.hospital_id,
         appointmentDate: selectedDate.toISOString(),
         mode: serviceType,
         patientDetails: {
-          ...form,
-          age: Number(form.age)
-        }
+          name: form.fullName,
+          age: Number(form.age),
+          phone: form.phone,
+          email: form.email,
+          address: form.address
+        },
+        bloodPressure: form.bloodPressure,
+        heartRate: form.heartRate,
+        weight: form.weight
       };
 
-      const res = await patientApi.bookAppointment(bookingData);
-      if (res.data.success) {
-        toast.success("Appointment booked successfully!");
-        navigate(PATIENT_ROUTES.PATIENTPROFILE);
-      } else {
-        toast.error(res.data.message || "Booking failed");
+      if (paymentMethod === "cash") {
+        const res = await patientApi.bookAppointment(bookingData);
+        if (res.data.success) {
+          toast.success("Appointment booked successfully!");
+          navigate(PATIENT_ROUTES.PATIENTPROFILE);
+        } else {
+          toast.error(res.data.message);
+        }
       }
+
+      if (paymentMethod === "online") {
+        const res = await patientApi.createAppointmentPaymentSession({
+          bookingData: {
+            ...bookingData,
+            doctorName: doctor?.name
+          }
+        });
+        if (res.data.success) {
+          window.location.href = res.data.url;
+        } else {
+          toast.error("Payment failed");
+        }
+      }
+
     } catch (error: any) {
-      console.error("Booking error:", error);
-      toast.error(error.response?.data?.message || "An error occurred while booking");
+      console.error(error);
+      toast.error("Something went wrong");
     }
   };
-
   const selectedAvailability = weekDaysAvailability.find(d => isSameDay(d.fullDate, selectedDate));
 
   const inputCls =
