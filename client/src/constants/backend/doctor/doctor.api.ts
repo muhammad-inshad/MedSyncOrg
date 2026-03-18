@@ -3,8 +3,8 @@ import { DOCTOR_MANAGEMENT } from "./doctor.routes";
 import type { IPrescriptionData } from "@/interfaces/IAppointment";
 
 export const doctorApi = {
-    editProfile: (id: string, data: FormData) =>
-        api.patch(DOCTOR_MANAGEMENT.EDIT_PROFILE(id), data, {
+    editProfile: (data: FormData) =>
+        api.patch(DOCTOR_MANAGEMENT.EDIT_PROFILE(), data, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },

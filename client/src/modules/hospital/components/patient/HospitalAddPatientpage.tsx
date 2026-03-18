@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, X } from 'lucide-react';
+import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { hospitalApi } from '../../../../constants/backend/hospital/hospital.api';
@@ -82,27 +83,33 @@ const HospitalAddPatientpage = () => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof PatientFormData, string>> = {};
+    const patientSchema = z.object({
+      name: z.string().min(1, 'Name is required'),
+      email: z.string().email('Invalid email format'),
+      phone: z.string().regex(/^\d{10}$/, 'Phone number must be 10 digits'),
+      password: z.string().min(6, 'Password must be at least 6 characters'),
+      fatherName: z.string().optional(),
+      gender: z.enum(['male', 'female', 'other', '']).optional(),
+      dateOfBirth: z.string().optional(),
+      address: z.string().optional(),
+      bloodGroup: z.string().optional(),
+      isActive: z.boolean(),
+      image: z.any().nullable()
+    });
 
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
-    }
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    } else if (!/^\d{10}$/.test(formData.phone)) {
-      newErrors.phone = 'Phone number must be 10 digits';
-    }
-    if (!formData.password.trim()) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    const validation = patientSchema.safeParse(formData);
+
+    if (!validation.success) {
+      const newErrors: Partial<Record<keyof PatientFormData, string>> = {};
+      validation.error.issues.forEach(issue => {
+        newErrors[issue.path[0] as keyof PatientFormData] = issue.message;
+      });
+      setErrors(newErrors);
+      return false;
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors({});
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

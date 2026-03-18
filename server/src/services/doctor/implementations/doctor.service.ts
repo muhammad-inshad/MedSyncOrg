@@ -1,4 +1,3 @@
-
 import bcrypt from "bcryptjs";
 import { uploadBufferToCloudinary } from "../../../utils/cloudinaryUpload.ts";
 import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
@@ -7,37 +6,38 @@ import { extractPublicId } from "../../../utils/cloudinaryUpload.ts";
 import { ITokenService } from "../../token/token.service.interface.ts";
 import { HttpStatusCode } from "../../../constants/enums.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
-import { UpdateDoctorDTO } from "../../../dto/doctor/doctor-response.dto.ts";
+import { UpdateDoctorDTO, DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.ts";
+import { DoctorLeaveResponseDTO } from "../../../dto/doctor/doctor-leave-response.dto.ts";
 import { IDoctor } from "../../../models/doctor.model.ts";
 import { IDoctorRepository } from "../../../repositories/doctor/doctor.repository.interface.ts";
 import { IAppointmentRepository } from "../../../repositories/appointment/appointment.repository.interface.ts";
 import { ILeaveRepository } from "../../../repositories/leave/leave.repository.interface.ts";
 import { IDoctorService } from "../interfaces/doctor.service.interfaces.ts";
 import { Types } from "mongoose";
+import { DoctorMapper } from "../../../mappers/doctor.mapper.ts";
+import { DoctorLeaveMapper } from "../../../mappers/doctor-leave.mapper.ts";
+import { IDoctorLeave } from "../../../models/doctorLeave.model.ts";
 
 export class DoctorService implements IDoctorService {
     constructor(
         private readonly _doctorRepo: IDoctorRepository,
         private readonly _tokenService: ITokenService,
         private readonly _appointmentRepo: IAppointmentRepository,
-        private readonly _leaveRepo: ILeaveRepository
+        private readonly _leaveRepo: ILeaveRepository,
+        private readonly _doctorMapper: DoctorMapper,
+        private readonly _leaveMapper: DoctorLeaveMapper
     ) {
     }
 
-
-
-    async getDoctorProfile(doctorId: string) {
+    async getDoctorProfile(doctorId: string): Promise<DoctorResponseDTO> {
         const doctor = await this._doctorRepo.findById(doctorId);
         if (!doctor) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
         }
-        return {
-            ...doctor.toObject(),
-            role: "doctor"
-        };
+        return this._doctorMapper.toDTO(doctor);
     }
 
-    async updateDoctorProfile(id: string, updateData: UpdateDoctorDTO) {
+    async updateDoctorProfile(id: string, updateData: UpdateDoctorDTO): Promise<DoctorResponseDTO> {
         const existingDoctor = await this._doctorRepo.findById(id);
         if (!existingDoctor) ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
 
@@ -99,10 +99,11 @@ export class DoctorService implements IDoctorService {
             delete updateData.newPassword;
         }
 
-        return await this._doctorRepo.update(id, updateData as UpdateDoctorDTO as Partial<IDoctor>);
+        const updated = await this._doctorRepo.update(id, updateData as UpdateDoctorDTO as Partial<IDoctor>);
+        return this._doctorMapper.toDTO(updated!);
     }
 
-    async reapply(doctorId: string) {
+    async reapply(doctorId: string): Promise<DoctorResponseDTO> {
         const doctor = await this._doctorRepo.findById(doctorId);
         if (!doctor) ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
 
@@ -112,10 +113,11 @@ export class DoctorService implements IDoctorService {
             reapplyDate: new Date(),
         };
 
-        return await this._doctorRepo.update(doctorId, updateData);
+        const updated = await this._doctorRepo.update(doctorId, updateData as Partial<IDoctor>);
+        return this._doctorMapper.toDTO(updated!);
     }
 
-    async applyLeave(doctorId: string, leaveData: { startDate: Date; endDate: Date; leaveSession?: "morning" | "afternoon" | "evening" | "night"; reason?: string; photo?: string | Express.Multer.File }) {
+    async applyLeave(doctorId: string, leaveData: { startDate: Date; endDate: Date; leaveSession?: "morning" | "afternoon" | "evening" | "night"; reason?: string; photo?: string | Express.Multer.File }): Promise<DoctorLeaveResponseDTO> {
         let photoUrl = "";
         if (leaveData.photo) {
             if (typeof leaveData.photo === 'string' && leaveData.photo.startsWith('data:image')) {
@@ -131,7 +133,7 @@ export class DoctorService implements IDoctorService {
             }
         }
 
-        return await this._leaveRepo.create({
+        const leave = await this._leaveRepo.create({
             doctorId: doctorId as unknown as Types.ObjectId,
             startDate: leaveData.startDate,
             endDate: leaveData.endDate,
@@ -140,6 +142,8 @@ export class DoctorService implements IDoctorService {
             photo: photoUrl,
             status: "pending"
         });
+
+        return this._leaveMapper.toDTO(leave as IDoctorLeave);
     }
 
     async getDoctorLeaves(options: {
@@ -148,8 +152,11 @@ export class DoctorService implements IDoctorService {
         limit: number;
         startDate?: Date;
         endDate?: Date
-    }) {
-        return await this._leaveRepo.findDoctorLeaves(options);
+    }): Promise<{ data: DoctorLeaveResponseDTO[]; total: number; page: number; limit: number }> {
+        const res = await this._leaveRepo.findDoctorLeaves(options);
+        return {
+            ...res,
+            data: res.data.map(l => this._leaveMapper.toDTO(l))
+        };
     }
-
 }

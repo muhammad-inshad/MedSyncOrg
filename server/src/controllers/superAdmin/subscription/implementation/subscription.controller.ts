@@ -1,13 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import { ISubscriptionController } from "../interfaces/subscription.controller.interface.ts";
 import { ISubscriptionService } from "../../../../services/superAdmin/subscription/interfaces/subscription.service.interface.ts";
+import { CreateSubscriptionDTO, UpdateSubscriptionDTO } from "../../../../dto/subscription/subscription-response.dto.ts";
 
 export class SubscriptionController implements ISubscriptionController {
     constructor(private readonly subscriptionService: ISubscriptionService) {}
 
     async addSubscription(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const payload = req.body;
+            const payload = req.body as CreateSubscriptionDTO;
             
             const subscription = await this.subscriptionService.addSubscription(payload);
             
@@ -63,7 +64,7 @@ export class SubscriptionController implements ISubscriptionController {
     async updateSubscription(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { id } = req.params;
-            const updateData = req.body;
+            const updateData = req.body as UpdateSubscriptionDTO;
             
             const updatedSubscription = await this.subscriptionService.updateSubscription(id, updateData);
             

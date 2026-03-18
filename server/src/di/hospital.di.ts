@@ -12,7 +12,9 @@ import { HospitalAuthService } from "../services/auth/hospital/hospital.auth.ser
 import { HospitalAuthController } from "../controllers/auth/hospital/hospital.auth.controller.ts";
 import { HospitalMapper } from "../mappers/hospital.mapper.ts";
 import { DoctorMapper } from "../mappers/doctor.mapper.ts";
+import { DoctorLeaveMapper } from "../mappers/doctor-leave.mapper.ts";
 import { PatientMapper } from "../mappers/patient.mapper.ts";
+import { SubscriptionMapper } from "../mappers/subscription.mapper.ts";
 import { TokenService } from "../services/token/token.service.ts";
 import { HospitalService } from "../services/hospital/hospital/implementations/hospital.service.ts";
 import { HospitalController } from "../controllers/hospital/hospital/implementation/hospital.controller.ts";
@@ -26,6 +28,13 @@ import { AppointmentRepository } from "../repositories/appointment/appointment.r
 import { SubscriptionRepository } from "../repositories/superAdmin/subscription/implements/subscription.repository.ts";
 import { HospitalSubscriptionService } from "../services/hospital/subscription/implementation/subscription.service.ts";
 import { HospitalSubscriptionController } from "../controllers/hospital/subscription/implementation/subscription.controller.ts";
+import { QualificationService } from "../services/hospital/qualification/implementations/qualification.service.ts";
+import { QualificationRepository } from "../repositories/hospital/implementation/qualification.repository.ts";
+import QualificationModel from "../models/qualification.model.ts";
+import { QualificationMapper } from "../mappers/qualification.mapper.ts";
+import { SpecializationService } from "../services/hospital/specialization/implementations/specialization.service.ts";
+import { SpecializationMapper } from "../mappers/specialization.mapper.ts";
+import { SpecializationRepository } from "../repositories/hospital/implementation/specialization.repository.ts";
 
 export const hospitalContainer = () => {
     const hospitalRepo = new HospitalRepository(HospitalModel);
@@ -33,11 +42,17 @@ export const hospitalContainer = () => {
     const tokenService = new TokenService();
     const doctorRepo = new DoctorRepository(DoctorModel);
     const doctorMapper = new DoctorMapper();
+    const doctorLeaveMapper = new DoctorLeaveMapper();
     const patientMapper = new PatientMapper();
     const departmentRepo = new DepartmentRepository(DepartmentModel);
     const leaveRepo = new LeaveRepository();
     const appointmentRepo = new AppointmentRepository();
     const subscriptionRepo = new SubscriptionRepository();
+    const subscriptionMapper = new SubscriptionMapper();
+    const qualificationRepo = new QualificationRepository(QualificationModel);
+    const qualificationMapper = new QualificationMapper();
+    const specializationRepo = new SpecializationRepository();
+    const specializationMapper = new SpecializationMapper();
 
     const hospitalMapper = new HospitalMapper();
 
@@ -46,7 +61,8 @@ export const hospitalContainer = () => {
         hospitalRepo,
         doctorRepo,
         departmentRepo,
-        userRepo
+        userRepo,
+        subscriptionMapper
     );
     const hospitalSubscriptionController = new HospitalSubscriptionController(hospitalSubscriptionService);
 
@@ -78,7 +94,8 @@ export const hospitalContainer = () => {
         doctorMapper,
         departmentRepo,
         leaveRepo,
-        hospitalSubscriptionService
+        hospitalSubscriptionService,
+        doctorLeaveMapper
     );
     const doctorManagement = new DoctorManagementController(
         doctorManagementService
@@ -92,6 +109,18 @@ export const hospitalContainer = () => {
     );
     const patientManagement = new PatientManagementController(
         patientManagementService
+    );
+
+    const qualificationService = new QualificationService(
+        qualificationRepo,
+        imageService,
+        qualificationMapper
+    );
+
+    const specializationService = new SpecializationService(
+        specializationRepo,
+        imageService,
+        specializationMapper
     );
 
     const hospitalAuthMiddleware = new HospitalAuthMiddleware(
@@ -109,6 +138,8 @@ export const hospitalContainer = () => {
         patientManagement,
         patientManagementService,
         hospitalAuthMiddleware,
-        hospitalSubscriptionController
+        hospitalSubscriptionController,
+        qualificationService,
+        specializationService
     };
 }

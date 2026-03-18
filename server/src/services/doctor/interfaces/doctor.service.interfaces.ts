@@ -1,18 +1,16 @@
-import { UpdateDoctorDTO } from "../../../dto/doctor/doctor-response.dto.ts";
-import { IDoctor } from "../../../models/doctor.model.ts";
-import { IDoctorLeave } from "../../../models/doctorLeave.model.ts";
+import { UpdateDoctorDTO, DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.ts";
+import { DoctorLeaveResponseDTO } from "../../../dto/doctor/doctor-leave-response.dto.ts";
 
 export interface IDoctorService {
-
-    getDoctorProfile(doctorId: string): Promise<unknown>;
-    updateDoctorProfile(doctorId: string, updateData: UpdateDoctorDTO): Promise<IDoctor | null>;
-    reapply(doctorId: string): Promise<unknown>;
-    applyLeave(doctorId: string, leaveData: { startDate: Date; endDate: Date; leaveSession?: "morning" | "afternoon" | "evening" | "night"; reason?: string; photo?: string | Express.Multer.File }): Promise<unknown>;
+    getDoctorProfile(doctorId: string): Promise<DoctorResponseDTO>;
+    updateDoctorProfile(doctorId: string, updateData: UpdateDoctorDTO): Promise<DoctorResponseDTO>;
+    reapply(doctorId: string): Promise<DoctorResponseDTO>;
+    applyLeave(doctorId: string, leaveData: { startDate: Date; endDate: Date; leaveSession?: "morning" | "afternoon" | "evening" | "night"; reason?: string; photo?: string | Express.Multer.File }): Promise<DoctorLeaveResponseDTO>;
     getDoctorLeaves(options: {
         doctorId: string;
         page: number;
         limit: number;
         startDate?: Date;
         endDate?: Date
-    }): Promise<{ data: IDoctorLeave[]; total: number; page: number; limit: number }>;
+    }): Promise<{ data: DoctorLeaveResponseDTO[]; total: number; page: number; limit: number }>;
 }

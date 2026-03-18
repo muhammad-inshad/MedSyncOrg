@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { z } from 'zod';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -113,22 +114,31 @@ const HospitalPatientEdit = () => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof PatientFormData, string>> = {};
+    const patientEditSchema = z.object({
+      name: z.string().min(1, 'Name is required'),
+      email: z.string().email('Invalid email format'),
+      phone: z.string().regex(/^\d{10}$/, 'Phone must be exactly 10 digits'),
+      fatherName: z.string().optional(),
+      gender: z.string().optional(),
+      dateOfBirth: z.string().optional(),
+      address: z.string().optional(),
+      bloodGroup: z.string().optional(),
+      isActive: z.boolean(),
+    });
 
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
-    }
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    } else if (!/^\d{10}$/.test(formData.phone)) {
-      newErrors.phone = 'Phone must be exactly 10 digits';
+    const validation = patientEditSchema.safeParse(formData);
+
+    if (!validation.success) {
+      const newErrors: Partial<Record<keyof PatientFormData, string>> = {};
+      validation.error.issues.forEach((issue) => {
+        newErrors[issue.path[0] as keyof PatientFormData] = issue.message;
+      });
+      setErrors(newErrors);
+      return false;
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors({});
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -26,7 +26,10 @@ class PatientController {
 
   updatePatient = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.params;
+        if (!req.user) {
+      return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
+    }
+    const id = req.user.userId;
       const updatedPatient = await this.patientService.updateProfile(id, req.body);
       return ApiResponse.success(res, MESSAGES.PATIENT.UPDATE_SUCCESS, updatedPatient);
     } catch (error: unknown) {
@@ -39,7 +42,6 @@ class PatientController {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 5;
       const search = (req.query.search as string) || "";
-      console.log("-------------------------")
       const result = await this.patientService.getAllPatient({ page, limit, search });
       return ApiResponse.success(res, MESSAGES.PATIENT.FETCH_SUCCESS, result.data, HttpStatusCode.OK, {
         page,
@@ -69,7 +71,10 @@ class PatientController {
 
   changePassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.params;
+        if (!req.user) {
+      return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
+    }
+    const id = req.user.userId;
       const { currentPassword, newPassword } = req.body;
       await this.patientService.changePassword(id, currentPassword, newPassword);
       return ApiResponse.success(res, "Password changed successfully");
@@ -134,7 +139,7 @@ class PatientController {
 
   bookAppointment = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log("[PatientController.bookAppointment] Direct booking endpoint hit!");
+      
       const user = req.user as unknown as ITokenPayload;
       const patientId = user?.userId;
       if (!patientId) {
@@ -160,7 +165,10 @@ class PatientController {
 
   getAppoimentHistory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const patientId = req.params.patientID;
+      if (!req.user) {
+      return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
+    }
+    const patientId = req.user.userId;
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 5;
       const search = (req.query.search as string) || "";

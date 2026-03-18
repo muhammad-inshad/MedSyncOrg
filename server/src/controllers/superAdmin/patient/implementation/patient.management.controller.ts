@@ -5,6 +5,7 @@ import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { MESSAGES } from "../../../../constants/messages.ts";
 import { AuthHOspitalPayload } from "../../../../dto/hospital/hospital-response.dto.ts";
+import { CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.ts";
 
 export class SuperAdminPatientManagementController implements ISuperAdminPatientManagementController {
     constructor(private readonly _patientService: ISuperAdminPatientManagementService) { }
@@ -50,7 +51,7 @@ export class SuperAdminPatientManagementController implements ISuperAdminPatient
             return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Hospital ID not found");
           }
     
-          const patientData = req.body;
+          const patientData = req.body as CreatePatientDTO;
           const patientFile = req.file;
     
           const result = await this._patientService.addPatient(patientData, hospital_id, patientFile);
@@ -63,7 +64,7 @@ export class SuperAdminPatientManagementController implements ISuperAdminPatient
        async updatePatient(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
           try {
             const { id } = req.params;
-            const patientData = req.body;
+            const patientData = req.body as UpdatePatientDTO;
             const patientFile = req.file;
             const result = await this._patientService.updatePatient(id, patientData, patientFile);
             return ApiResponse.success(res, "Patient updated successfully", result);

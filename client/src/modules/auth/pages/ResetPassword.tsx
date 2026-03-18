@@ -4,6 +4,7 @@ import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { authApi } from '@/constants/backend/auth/auth.api';
 import axios from 'axios';
+import { z } from "zod";
 import { AUTH_MESSAGES } from '@/constants/frontend/auth/auth.messages';
 
 const ResetPassword = () => {
@@ -25,12 +26,21 @@ const ResetPassword = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(role, "      inshad")
-    if (password.length < 6) {
-      return toast.error(AUTH_MESSAGES.COMMON.PASSWORD_LENGTH);
-    }
-    if (password !== confirmPassword) {
-      return toast.error(AUTH_MESSAGES.COMMON.PASSWORDS_NOT_MATCH);
+    
+    const resetPasswordSchema = z
+      .object({
+        password: z.string().min(6, AUTH_MESSAGES.COMMON.PASSWORD_LENGTH),
+        confirmPassword: z.string(),
+      })
+      .refine((data) => data.password === data.confirmPassword, {
+        message: AUTH_MESSAGES.COMMON.PASSWORDS_NOT_MATCH,
+        path: ["confirmPassword"],
+      });
+
+    const validation = resetPasswordSchema.safeParse({ password, confirmPassword });
+
+    if (!validation.success) {
+      return toast.error(validation.error.issues[0].message);
     }
 
     setLoading(true);

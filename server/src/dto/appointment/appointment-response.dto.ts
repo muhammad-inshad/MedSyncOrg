@@ -1,0 +1,30 @@
+import { z } from 'zod';
+import { AppointmentStatus, AppointmentMode } from '../../models/appointment.ts';
+
+export const AppointmentResponseSchema = z.object({
+    id: z.string(),
+    patientName: z.string(),
+    patientAge: z.number(),
+    patientPhone: z.string(),
+    appointmentDate: z.string(), // ISO string
+    visitTime: z.string().optional(),
+    status: z.nativeEnum(AppointmentStatus),
+    mode: z.nativeEnum(AppointmentMode),
+    tokenNumber: z.number(),
+    prescription: z.object({
+        medicines: z.array(z.object({
+            name: z.string(),
+            dosage: z.string(),
+            duration: z.string(),
+        })),
+        notes: z.string().optional(),
+        prescribedAt: z.string().optional(),
+    }).optional(),
+    bloodPressure: z.string().optional(),
+    heartRate: z.string().optional(),
+    weight: z.string().optional(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+});
+
+export type AppointmentResponseDTO = z.infer<typeof AppointmentResponseSchema>;

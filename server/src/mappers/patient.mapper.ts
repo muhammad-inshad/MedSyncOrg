@@ -1,12 +1,11 @@
 import { IMapper } from "../interfaces/mapper.interface.ts";
 import { IPatient } from "../models/Patient.model.ts";
-import { PatientResponseDTO } from "../dto/patient/patient-response.dto.ts";
+import { PatientResponseDTO, PatientResponseSchema } from "../dto/patient/patient-response.dto.ts";
 
 export class PatientMapper implements IMapper<IPatient, PatientResponseDTO> {
     toDTO(patient: IPatient): PatientResponseDTO {
-        return {
+        const dto = {
             id: patient._id.toString(),
-            _id: patient._id.toString(),
             name: patient.name || patient.email,
             email: patient.email,
             phone: patient.phone,
@@ -28,5 +27,7 @@ export class PatientMapper implements IMapper<IPatient, PatientResponseDTO> {
             createdAt: patient.createdAt,
             updatedAt: patient.updatedAt,
         };
+
+        return PatientResponseSchema.parse(dto);
     }
 }

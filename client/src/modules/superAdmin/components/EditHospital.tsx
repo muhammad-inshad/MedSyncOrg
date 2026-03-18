@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { z } from 'zod';
 import { Upload, Building2, Mail, Phone, MapPin, Calendar, CreditCard, Save, X, ArrowLeft, Trash2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { IHospital } from '@/interfaces/IHospital';
@@ -184,24 +185,32 @@ const EditHospital = () => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
+    const hospitalSchema = z.object({
+      hospitalName: z.string().min(1, 'Hospital name is required'),
+      email: z.string().email('Invalid email format'),
+      phone: z.string().min(1, 'Phone is required'),
+      pincode: z.string().min(1, 'Pincode is required'),
+      address: z.string().min(1, 'Address is required'),
+      since: z.number()
+        .min(1900, 'Invalid year (too old)')
+        .max(new Date().getFullYear(), 'Invalid year (future)'),
+      about: z.string().optional(),
+      isActive: z.boolean(),
+    });
 
-    if (!formData.hospitalName?.trim()) newErrors.hospitalName = 'Hospital name is required';
-    if (!formData.address?.trim()) newErrors.address = 'Address is required';
-    if (!formData.email?.trim()) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email format';
-    if (!formData.phone?.trim()) newErrors.phone = 'Phone is required';
-    if (!formData.pincode?.trim()) newErrors.pincode = 'Pincode is required';
-    const sinceYear = Number(formData.since);
-    const currentYear = new Date().getFullYear();
+    const validation = hospitalSchema.safeParse(formData);
 
-    if (!sinceYear || isNaN(sinceYear) || sinceYear < 1900 || sinceYear > currentYear) {
-      newErrors.since = 'Invalid year';
+    if (!validation.success) {
+      const newErrors: FormErrors = {};
+      validation.error.issues.forEach((issue) => {
+        newErrors[issue.path[0] as string] = issue.message;
+      });
+      setErrors(newErrors);
+      return false;
     }
 
-    console.log("Validation errors:", newErrors);
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors({});
+    return true;
   };
 
   const handleSubmit = async () => {

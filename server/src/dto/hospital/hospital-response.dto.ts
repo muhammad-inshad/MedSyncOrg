@@ -1,49 +1,51 @@
+import { z } from 'zod';
 import { IHospital } from "../../models/hospital.model.ts";
 
-export interface HospitalResponseDTO {
-  id: string;
-  _id: string;
-  hospitalName: string;
-  logo?: string;
-  address: string;
-  isActive: boolean;
-  autoDisabled: boolean;
-  email: string;
-  phone: string;
-  since: number;
-  pincode: string;
-  about?: string;
-  licence?: string;
-  income: number;
-  images: {
-    landscape: string[];
-    medicalTeam: string[];
-    patientCare: string[];
-    services: string[];
-  };
-  reviewStatus: "pending" | "approved" | "revision" | "rejected";
-  reapplyDate?: Date;
-  rejectionReason?: string;
-  subscription: {
-    plan: "free" | "basic" | "premium";
-    amount: number;
-    status: "active" | "expired" | "cancelled";
-    startDate?: Date;
-    endDate?: Date;
-    limits?: {
-      maxPatients: number;
-      maxDoctors: number;
-      maxDepartments: number;
-    };
-  };
-  currentCounts?: {
-    doctors: number;
-    patients: number;
-    departments: number;
-  };
-  createdAt: Date;
-  updatedAt: Date;
-}
+export const HospitalResponseSchema = z.object({
+    id: z.string(),
+    hospitalName: z.string(),
+    logo: z.string().optional(),
+    address: z.string(),
+    isActive: z.boolean(),
+    autoDisabled: z.boolean(),
+    email: z.string().email(),
+    phone: z.string(),
+    since: z.number(),
+    pincode: z.string(),
+    about: z.string().optional(),
+    licence: z.string().optional(),
+    income: z.number(),
+    images: z.object({
+        landscape: z.array(z.string()),
+        medicalTeam: z.array(z.string()),
+        patientCare: z.array(z.string()),
+        services: z.array(z.string()),
+    }),
+    reviewStatus: z.enum(["pending", "approved", "revision", "rejected"]),
+    reapplyDate: z.union([z.date(), z.string()]).optional(),
+    rejectionReason: z.string().optional(),
+    subscription: z.object({
+        plan: z.enum(["free", "basic", "premium"]),
+        amount: z.number(),
+        status: z.enum(["active", "expired", "cancelled"]),
+        startDate: z.union([z.date(), z.string()]).optional(),
+        endDate: z.union([z.date(), z.string()]).optional(),
+        limits: z.object({
+            maxPatients: z.number(),
+            maxDoctors: z.number(),
+            maxDepartments: z.number(),
+        }).optional(),
+    }),
+    currentCounts: z.object({
+        doctors: z.number(),
+        patients: z.number(),
+        departments: z.number(),
+    }).optional(),
+    createdAt: z.union([z.date(), z.string()]),
+    updatedAt: z.union([z.date(), z.string()]),
+});
+
+export type HospitalResponseDTO = z.infer<typeof HospitalResponseSchema>;
 
 export interface AuthHOspitalPayload {
   userId: string;
@@ -53,99 +55,113 @@ export interface AuthHOspitalPayload {
   exp: number;
 }
 
-export interface DepartmentResponseDTO {
-  _id: string;
-  departmentName: string;
-  description?: string;
-  image?: string;
-  doctorCount?: number;
-}
+export const DepartmentResponseSchema = z.object({
+  _id: z.string(),
+  departmentName: z.string(),
+  description: z.string().optional(),
+  image: z.string().optional(),
+  doctorCount: z.number().optional(),
+});
+export type DepartmentResponseDTO = z.infer<typeof DepartmentResponseSchema>;
 
-export interface QualificationResponseDTO {
-  _id: string;
-  name: string;
-  qualificationName: string;
-  description?: string;
-  image?: string;
-}
+export const QualificationResponseSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  qualificationName: z.string(),
+  description: z.string().optional(),
+  image: z.string().optional(),
+});
+export type QualificationResponseDTO = z.infer<typeof QualificationResponseSchema>;
 
-export interface SpecializationResponseDTO {
-  _id: string;
-  name: string;
-  description?: string;
-  image?: string;
-  department_id: string;
-}
+export const SpecializationResponseSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  image: z.string().optional(),
+  department_id: z.string(),
+});
+export type SpecializationResponseDTO = z.infer<typeof SpecializationResponseSchema>;
 
-export interface selectedHospitalDto {
-  _id: string;
-  hospitalName: string;
-  logo?: string;
-  address: string;
+export const SelectedHospitalSchema = z.object({
+  _id: z.string(),
+  hospitalName: z.string(),
+  logo: z.string().optional(),
+  address: z.string(),
 
-  isActive: boolean;
-  autoDisabled: boolean;
+  isActive: z.boolean(),
+  autoDisabled: z.boolean(),
 
-  images: {
-    landscape: string[];
-    medicalTeam: string[];
-    patientCare: string[];
-    services: string[];
-  };
+  images: z.object({
+    landscape: z.array(z.string()),
+    medicalTeam: z.array(z.string()),
+    patientCare: z.array(z.string()),
+    services: z.array(z.string()),
+  }),
 
-  email: string;
-  phone: string;
+  email: z.string().email(),
+  phone: z.string(),
 
-  since: number;
-  pincode: string;
-  about?: string;
-  licence?: string;
+  since: z.number(),
+  pincode: z.string(),
+  about: z.string().optional(),
+  licence: z.string().optional(),
 
-  subscription: {
-    plan: "free" | "basic" | "premium";
-    amount: number;
-    status: "active" | "expired" | "cancelled";
-    startDate?: Date;
-    endDate?: Date;
-    limits?: {
-      maxPatients: number;
-      maxDoctors: number;
-      maxDepartments: number;
-    };
-  };
-  currentCounts?: {
-    doctors: number;
-    patients: number;
-    departments: number;
-  };
-  departments: DepartmentResponseDTO[];
-  qualifications: QualificationResponseDTO[];
-  specializations: SpecializationResponseDTO[];
-  totalDepartments: number;
-  currentPage: number;
-  totalPages: number;
-}
+  subscription: z.object({
+    plan: z.enum(["free", "basic", "premium"]),
+    amount: z.number(),
+    status: z.enum(["active", "expired", "cancelled"]),
+    startDate: z.union([z.date(), z.string()]).optional(),
+    endDate: z.union([z.date(), z.string()]).optional(),
+    limits: z.object({
+      maxPatients: z.number(),
+      maxDoctors: z.number(),
+      maxDepartments: z.number(),
+    }).optional(),
+  }),
+  currentCounts: z.object({
+    doctors: z.number(),
+    patients: z.number(),
+    departments: z.number(),
+  }).optional(),
+  departments: z.array(DepartmentResponseSchema),
+  qualifications: z.array(QualificationResponseSchema),
+  specializations: z.array(SpecializationResponseSchema),
+  totalDepartments: z.number(),
+  currentPage: z.number(),
+  totalPages: z.number(),
+});
+
+export type selectedHospitalDto = z.infer<typeof SelectedHospitalSchema>;
 
 
-export interface IHospitalUpdateDTO {
-  hospitalName?: string;
-  logo?: string;
-  address?: string;
-  email?: string;
-  phone?: string;
-  since?: number | string;
-  pincode?: string;
-  about?: string;
-  licence?: string;
-  isActive?: boolean | string;
-  password?: string;
-  confirmPassword?: string;
-  subscription?: string | {
-    plan: string;
-    amount: number;
-    status: "active" | "expired" | "cancelled";
-    startDate?: Date | string;
-    endDate?: Date | string;
-  };
-  images?: string | IHospital['images'];
-}
+export const HospitalStatusUpdateResponseSchema = HospitalResponseSchema.extend({
+    message: z.string(),
+});
+export type HospitalStatusUpdateResponseDTO = z.infer<typeof HospitalStatusUpdateResponseSchema>;
+
+export const CreateHospitalSchema = z.object({
+  hospitalName: z.string(),
+  email: z.string().email(),
+  password: z.string().min(6),
+  phone: z.string(),
+  address: z.string(),
+  since: z.number().or(z.string()),
+  pincode: z.string(),
+  about: z.string().optional(),
+  logo: z.string().optional(),
+  licence: z.string().optional(),
+  subscription: z.object({
+    plan: z.enum(["free", "basic", "premium"]),
+    amount: z.number().optional(),
+    status: z.enum(["active", "expired", "cancelled"]).optional(),
+    startDate: z.union([z.date(), z.string()]).optional(),
+    endDate: z.union([z.date(), z.string()]).optional(),
+  }).optional(),
+});
+export type CreateHospitalDTO = z.infer<typeof CreateHospitalSchema>;
+
+export const UpdateHospitalSchema = CreateHospitalSchema.partial().extend({
+  isActive: z.boolean().optional(),
+  images: z.any().optional(),
+});
+export type UpdateHospitalDTO = z.infer<typeof UpdateHospitalSchema>;

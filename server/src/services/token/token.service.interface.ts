@@ -1,13 +1,5 @@
-
-export interface IRefreshTokenPayload extends ITokenPayload {
-    jti: string;
-}
-export interface ITokenPayload {
-    userId: string;
-    email: string;
-    role: string;
-}
-export type IAccessTokenPayload = ITokenPayload
+import { IAccessTokenPayload, IRefreshTokenPayload, ITokenPayload } from "../../dto/auth/token-payload.dto.ts";
+export { IAccessTokenPayload, IRefreshTokenPayload, ITokenPayload };
 
 export interface ITokenService {
     generateAccessToken(payload: IAccessTokenPayload): string;

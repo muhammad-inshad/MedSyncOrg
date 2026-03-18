@@ -222,7 +222,7 @@ const DoctorEditProfile: React.FC = () => {
             if (profileImageFile) formData.append('profileImage', profileImageFile);
             if (licenseImageFile) formData.append('license', licenseImageFile);
 
-            await doctorApi.editProfile(userData._id, formData);
+            await doctorApi.editProfile(formData);
 
             toast.success("Profile updated successfully!");
             navigate(COMMON_ROUTES.REVIEWPENDING, { replace: true });

@@ -5,6 +5,8 @@ import { IHospitalRepository } from "../../../../repositories/hospital/hospital.
 import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
 import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.ts";
 import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
+import { SubscriptionResponseDTO } from "../../../../dto/subscription/subscription-response.dto.ts";
+import { SubscriptionMapper } from "../../../../mappers/subscription.mapper.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
 
@@ -14,16 +16,20 @@ export class HospitalSubscriptionService implements IHospitalSubscriptionService
         private readonly hospitalRepository: IHospitalRepository,
         private readonly doctorRepository: IDoctorRepository,
         private readonly departmentRepository: IDepartmentRepository,
-        private readonly userRepository: IUserRepository
+        private readonly userRepository: IUserRepository,
+        private readonly subscriptionMapper: SubscriptionMapper
     ) {}
 
-    async getActiveSubscriptions(page: number, limit: number, search: string): Promise<{ data: ISubscription[]; total: number }> {
+    async getActiveSubscriptions(page: number, limit: number, search: string): Promise<{ data: SubscriptionResponseDTO[]; total: number }> {
         const skip = (page - 1) * limit;
         const [data, total] = await Promise.all([
             this.subscriptionRepository.findAllWithPagination(skip, limit, search, "Active"),
             this.subscriptionRepository.count(search, "Active")
         ]);
-        return { data, total };
+        return { 
+            data: data.map(s => this.subscriptionMapper.toDTO(s as ISubscription)), 
+            total 
+        };
     }
 
     async checkSubscriptionLimit(hospitalId: string, type: "maxDoctors" | "maxPatients" | "maxDepartments"): Promise<void> {

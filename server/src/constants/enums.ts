@@ -15,3 +15,12 @@ export enum HttpStatusCode {
     BAD_GATEWAY = 502,
     SERVICE_UNAVAILABLE = 503,
 }
+
+
+
+export enum Role {
+  DOCTOR = "doctor",
+  PATIENT = "patient",
+  HOSPITAL = "hospital",
+  SUPER_ADMIN = "superadmin",
+}

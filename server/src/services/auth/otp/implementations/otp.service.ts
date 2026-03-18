@@ -8,6 +8,7 @@ import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { IEmailService } from "../interfaces/email.otp.interface.ts";
 import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.ts";
 import { IOtpRepository } from "../../../../repositories/otp/otp.repository.interface.ts";
+import { SuccessResponseDTO, SuccessResponseSchema } from "../../../../dto/auth/success-response.dto.ts";
 
 export class OtpService implements IPatientOtpAuthService {
   constructor(
@@ -18,7 +19,7 @@ export class OtpService implements IPatientOtpAuthService {
     private readonly doctorRepo: DoctorRepository
   ) { }
 
-  async sendOtp(email: string, purpose: string, role: string): Promise<void> {
+  async sendOtp(email: string, purpose: string, role: string): Promise<SuccessResponseDTO> {
     const cleanEmail = email.trim().toLowerCase();
     let existingUser = null;
     console.log(role)
@@ -46,9 +47,14 @@ export class OtpService implements IPatientOtpAuthService {
     await this.otpRepository.saveOtp(cleanEmail, otp);
 
     await this.emailService.sendOtpEmail(cleanEmail, otp);
+
+    return SuccessResponseSchema.parse({
+        success: true,
+        message: "OTP sent successfully",
+    });
   }
 
-  async verifyOtp(email: string, userOtp: string): Promise<void> {
+  async verifyOtp(email: string, userOtp: string): Promise<SuccessResponseDTO> {
     const cleanEmail = email.trim().toLowerCase();
 
     const storedOtp = await this.otpRepository.getOtpByEmail(cleanEmail);
@@ -61,5 +67,10 @@ export class OtpService implements IPatientOtpAuthService {
       ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Invalid OTP code");
     }
     await this.otpRepository.deleteOtpByEmail(cleanEmail);
+
+    return SuccessResponseSchema.parse({
+        success: true,
+        message: "OTP verified successfully",
+    });
   }
 }

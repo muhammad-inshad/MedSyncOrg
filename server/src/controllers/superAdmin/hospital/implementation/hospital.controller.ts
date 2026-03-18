@@ -3,7 +3,7 @@ import { ISuperAdminHospitalController } from "../interfaces/hospital.controller
 import { ISuperAdminHospitalService } from "../../../../services/superAdmin/hospital/interfaces/hospital.service.interface.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
-import { IHospital } from "../../../../models/hospital.model.ts";
+import { CreateHospitalDTO, UpdateHospitalDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
 
 export class SuperAdminHospitalController implements ISuperAdminHospitalController {
     constructor(private readonly service: ISuperAdminHospitalService) { }
@@ -61,7 +61,7 @@ export class SuperAdminHospitalController implements ISuperAdminHospitalControll
 
     addHospital = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const hospitalData = req.body as Partial<IHospital>;
+            const hospitalData = req.body as CreateHospitalDTO;
             const files = req.files as {
                 logo?: Express.Multer.File[];
                 licence?: Express.Multer.File[];
@@ -79,7 +79,7 @@ export class SuperAdminHospitalController implements ISuperAdminHospitalControll
     editHospital = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const { id } = req.params;
-            const updateData = req.body as Partial<IHospital>;
+            const updateData = req.body as UpdateHospitalDTO;
             const files = req.files as {
                 logo?: Express.Multer.File[];
                 licence?: Express.Multer.File[];

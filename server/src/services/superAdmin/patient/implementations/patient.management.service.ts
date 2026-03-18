@@ -2,7 +2,7 @@ import { IUserRepository } from "../../../../repositories/patient/user.repositor
 import bcrypt from "bcryptjs";
 import { PatientMapper } from "../../../../mappers/patient.mapper.ts";
 import { IPaginationResult } from "../../../../types/hospital.types.ts";
-import { PatientResponseDTO } from "../../../../dto/patient/patient-response.dto.ts";
+import { PatientResponseDTO, CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.ts";
 import { ISuperAdminPatientManagementService } from "../interfaces/patient.management.service.interface.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
@@ -51,7 +51,7 @@ export class SuperAdminPatientManagementService implements ISuperAdminPatientMan
         return updated ? this._patientMapper.toDTO(updated) : null;
     }
 
-    async addPatient(data: Partial<IPatient>, hospital_id: string, file?: Express.Multer.File): Promise<PatientResponseDTO> {
+    async addPatient(data: CreatePatientDTO, hospital_id: string, file?: Express.Multer.File): Promise<PatientResponseDTO> {
         const existingPatient = await this._userRepo.findByEmail(data.email!);
         if (existingPatient) {
             ApiResponse.throwError(HttpStatusCode.CONFLICT, "Patient already exists with this email");
@@ -73,11 +73,11 @@ export class SuperAdminPatientManagementService implements ISuperAdminPatientMan
             isProfileComplete: true,
         };
 
-        const created = await this._userRepo.create(patientData);
+        const created = await this._userRepo.create(patientData as IPatient);
         return this._patientMapper.toDTO(created);
     }
 
-    async updatePatient(id: string, data: Partial<IPatient> & { willRemoveImage?: string | boolean }, file?: Express.Multer.File): Promise<PatientResponseDTO | null> {
+    async updatePatient(id: string, data: UpdatePatientDTO, file?: Express.Multer.File): Promise<PatientResponseDTO | null> {
         const patient = await this._userRepo.findById(id);
         if (!patient) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Patient not found");
@@ -103,7 +103,7 @@ export class SuperAdminPatientManagementService implements ISuperAdminPatientMan
         const updated = await this._userRepo.update(id, {
             ...updateData,
             image: imageUrl,
-        });
+        } as Partial<IPatient>);
         return updated ? this._patientMapper.toDTO(updated) : null;
     }
 }

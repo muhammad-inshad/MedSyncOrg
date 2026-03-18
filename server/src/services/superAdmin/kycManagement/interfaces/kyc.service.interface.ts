@@ -1,7 +1,7 @@
-import { HospitalResponseDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
+import { KycHospitalResponseDTO } from "../../../../dto/superAdmin/kyc/kyc-hospital-response.dto.ts";
 
 export interface IKycHospitalsResult {
-    data: HospitalResponseDTO[];
+    data: KycHospitalResponseDTO[];
     total: number;
     page: number;
     limit: number;

@@ -12,7 +12,7 @@ class DoctorController {
   getme = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as unknown as ITokenPayload;
-      const doctorID = user?.userId;
+      const doctorID = user?.doctorID || user?.userId;
       if (!doctorID) {
         ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Unauthorized");
       }
@@ -28,7 +28,11 @@ class DoctorController {
 
   updateDoctor = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.params;
+      const id = req.user?.doctorID || req.user?.userId;
+
+      if (!id) {
+        return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Unauthorized");
+      }
       const files = req.files as DoctorUploadFiles | undefined;
       const updateData = { ...req.body };
       if (typeof updateData.consultationTime === 'string') {
@@ -82,7 +86,7 @@ class DoctorController {
   applyLeave = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as unknown as ITokenPayload;
-      const doctorId = user?.userId;
+      const doctorId = user?.doctorID || user?.userId;
 
       if (!doctorId) {
         return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Unauthorized");
@@ -109,7 +113,7 @@ class DoctorController {
   getDoctorLeaves = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as unknown as ITokenPayload;
-      const doctorId = user?.userId;
+      const doctorId = user?.doctorID || user?.userId;
 
       if (!doctorId) {
         return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Unauthorized");

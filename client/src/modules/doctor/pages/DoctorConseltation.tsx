@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import DoctorSidebar from '../components/DoctorSidebar';
+import { z } from 'zod';
 import { 
   User, 
   Phone, 
@@ -62,6 +63,24 @@ const DoctorConsultation = () => {
 
   const handleSavePrescription = async (prescriptionData: IPrescriptionData) => {
     if (!currentAppointment?._id) return;
+    
+    const prescriptionSchema = z.object({
+      symptoms: z.string().min(1, "Symptoms are required"),
+      diagnosis: z.string().min(1, "Diagnosis is required"),
+      medicines: z.array(z.object({
+        name: z.string().min(1, "Medicine name is required"),
+        dosage: z.string().min(1, "Dosage is required"),
+        duration: z.string().min(1, "Duration is required"),
+        instruction: z.string().optional()
+      })).min(1, "At least one medicine is required")
+    });
+
+    const validation = prescriptionSchema.safeParse(prescriptionData);
+    if (!validation.success) {
+      toast.error(validation.error.issues[0].message);
+      return;
+    }
+
     try {
       setLoading(true);
       await doctorApi.savePrescription(currentAppointment._id, prescriptionData);

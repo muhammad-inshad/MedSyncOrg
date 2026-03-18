@@ -1,50 +1,44 @@
-export interface PatientResponseDTO {
-  id: string;
-  _id: string;
-  name: string;
-  email: string;
-  phone?: number;
-  isGoogleAuth: boolean;
-  fatherName?: string;
-  gender?: "male" | "female" | "other";
-  dateOfBirth?: Date;
-  address?: string;
-  isActive?: boolean;
-  image?: string;
-  bloodGroup?: string;
-  walletBalance: number;
-  medicalReports: string[];
-  hospital_id?: string;
-  appointmentHistory: string[];
-  isProfileComplete: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-export interface UpdatePatientDTO {
-  name?: string;
-  phone?: number;
-  email: string;
-  fatherName?: string;
-  gender?: "male" | "female" | "other";
-  dateOfBirth?: Date;
-  address?: string;
-  bloodGroup?: string;
+import { z } from 'zod';
 
-  image?: string;
-  willRemoveImage?: boolean;
+export const PatientResponseSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string().email(),
+    phone: z.number().optional(),
+    isGoogleAuth: z.boolean(),
+    fatherName: z.string().optional(),
+    gender: z.enum(["male", "female", "other"]).optional(),
+    dateOfBirth: z.union([z.date(), z.string()]).optional(),
+    address: z.string().optional(),
+    isActive: z.boolean().optional(),
+    image: z.string().optional(),
+    bloodGroup: z.string().optional(),
+    walletBalance: z.number(),
+    medicalReports: z.array(z.string()),
+    hospital_id: z.string().optional(),
+    appointmentHistory: z.array(z.string()),
+    isProfileComplete: z.boolean(),
+    createdAt: z.union([z.date(), z.string()]),
+    updatedAt: z.union([z.date(), z.string()]),
+});
 
-  isActive?: boolean;
-}
+export type PatientResponseDTO = z.infer<typeof PatientResponseSchema>;
+export const CreatePatientSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  phone: z.number().optional(),
+  password: z.string().optional(),
+  fatherName: z.string().optional(),
+  gender: z.enum(["male", "female", "other"]).optional(),
+  dateOfBirth: z.union([z.date(), z.string()]).optional(),
+  address: z.string().optional(),
+  bloodGroup: z.string().optional(),
+  image: z.string().optional(),
+});
+export type CreatePatientDTO = z.infer<typeof CreatePatientSchema>;
 
-export interface CreatePatientDTO {
-  name: string;
-  email: string;
-  phone?: number;
-  password?: string;
-  fatherName?: string;
-  gender?: "male" | "female" | "other";
-  dateOfBirth?: Date;
-  address?: string;
-  bloodGroup?: string;
-  image?: string;
-}
+export const UpdatePatientSchema = CreatePatientSchema.partial().extend({
+  willRemoveImage: z.boolean().or(z.string()).optional(),
+  isActive: z.boolean().optional(),
+});
+export type UpdatePatientDTO = z.infer<typeof UpdatePatientSchema>;

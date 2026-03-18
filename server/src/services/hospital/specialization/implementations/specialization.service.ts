@@ -2,36 +2,44 @@ import { ISpecialization } from "../../../../models/specialization.model.ts";
 import { ISpecializationRepository } from "../../../../repositories/hospital/specialization.repository.interface.ts";
 import { ISpecializationService } from "../interfaces/specialization.service.interface.ts";
 import { ICloudinaryImageService } from "../../../image/interfaces/cloudinary.service.interface.ts";
+import { SpecializationResponseDTO } from "../../../../dto/hospital/specialization-response.dto.ts";
+import { SpecializationMapper } from "../../../../mappers/specialization.mapper.ts";
 import { Types } from "mongoose";
 
 export class SpecializationService implements ISpecializationService {
     constructor(
         private readonly _specializationRepo: ISpecializationRepository,
-        private readonly _imageService: ICloudinaryImageService
+        private readonly _imageService: ICloudinaryImageService,
+        private readonly _specializationMapper: SpecializationMapper
     ) { }
 
     async getSpecializations(
         hospitalId: string,
         params: { page: number; limit: number; search?: string }
-    ): Promise<{ data: ISpecialization[]; total: number; limit: number; page: number }> {
+    ): Promise<{ data: SpecializationResponseDTO[]; total: number; limit: number; page: number }> {
         const { page, limit, search } = params;
-        return await this._specializationRepo.findWithPagination({
+        const result = await this._specializationRepo.findWithPagination({
             page,
             limit,
             search,
             searchFields: ["name", "description"],
             filter: { hospital_id: new Types.ObjectId(hospitalId) },
         });
+
+        return {
+            ...result,
+            data: result.data.map(s => this._specializationMapper.toDTO(s as ISpecialization))
+        };
     }
 
     async createSpecialization(
         hospitalId: string,
         specializationData: Partial<ISpecialization>,
         file?: Express.Multer.File
-    ): Promise<ISpecialization> {
+    ): Promise<SpecializationResponseDTO> {
         const data: Partial<ISpecialization> = {
             ...specializationData,
-            hospital_id: new Types.ObjectId(hospitalId) ,
+            hospital_id: new Types.ObjectId(hospitalId),
         };
 
         if (file) {
@@ -40,14 +48,15 @@ export class SpecializationService implements ISpecializationService {
             data.image = await this._imageService.uploadImage(specializationData.image, "hospital/specializations");
         }
 
-        return await this._specializationRepo.create(data);
+        const created = await this._specializationRepo.create(data);
+        return this._specializationMapper.toDTO(created);
     }
 
     async updateSpecialization(
         id: string,
         specializationData: Partial<ISpecialization>,
         file?: Express.Multer.File
-    ): Promise<ISpecialization | null> {
+    ): Promise<SpecializationResponseDTO | null> {
         const specialization = await this._specializationRepo.findById(id);
         if (!specialization) return null;
 
@@ -64,12 +73,14 @@ export class SpecializationService implements ISpecializationService {
             updateData.image = "";
         }
 
-        return await this._specializationRepo.update(id, updateData);
+        const updated = await this._specializationRepo.update(id, updateData);
+        return updated ? this._specializationMapper.toDTO(updated) : null;
     }
 
-    async toggleStatus(id: string): Promise<ISpecialization | null> {
+    async toggleStatus(id: string): Promise<SpecializationResponseDTO | null> {
         const specialization = await this._specializationRepo.findById(id);
         if (!specialization) return null;
-        return await this._specializationRepo.update(id, { isActive: !specialization.isActive });
+        const updated = await this._specializationRepo.update(id, { isActive: !specialization.isActive });
+        return updated ? this._specializationMapper.toDTO(updated) : null;
     }
 }

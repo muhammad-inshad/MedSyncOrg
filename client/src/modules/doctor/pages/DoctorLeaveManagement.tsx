@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { z } from 'zod';
 import {
     CalendarOff,
     CalendarDays,
@@ -148,13 +149,33 @@ export default function DoctorLeaveManagement() {
 
     // Form validation
     const validate = (): boolean => {
-        const e: typeof errors = {};
-        if (!form.startDate) e.startDate = 'Start date is required';
-        if (!form.endDate) e.endDate = 'End date is required';
-        if (form.startDate && form.endDate && form.endDate < form.startDate)
-            e.endDate = 'End date must be after start date';
-        setErrors(e);
-        return Object.keys(e).length === 0;
+        const leaveSchema = z.object({
+            startDate: z.string().min(1, 'Start date is required'),
+            endDate: z.string().min(1, 'End date is required'),
+            leaveSession: z.string().optional(),
+            reason: z.string().optional(),
+        }).refine(data => {
+            if (data.startDate && data.endDate) {
+                return new Date(data.endDate) >= new Date(data.startDate);
+            }
+            return true;
+        }, {
+            message: 'End date must be after start date',
+            path: ['endDate'],
+        });
+
+        const validation = leaveSchema.safeParse(form);
+        if (!validation.success) {
+            const newErrors: Partial<Record<keyof FormState, string>> = {};
+            validation.error.issues.forEach(issue => {
+                const path = issue.path[0] as keyof FormState;
+                newErrors[path] = issue.message;
+            });
+            setErrors(newErrors);
+            return false;
+        }
+        setErrors({});
+        return true;
     };
 
     const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,11 +1,11 @@
 import bcrypt from "bcryptjs";
 import { ISuperAdminAuthService } from "./superAdmin.auth.service.interface.ts";
 import { ITokenService } from "../../token/token.service.interface.ts";
-
 import { ISuperAdminRepository } from "../../../repositories/superAdmin/interfaces/superAdmin.repository.interface.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
 import { HttpStatusCode } from "../../../constants/enums.ts";
 import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
+import { AuthResponse } from "../../../interfaces/auth.types.ts";
 import { SuperAdminMapper } from "../../../mappers/superAdmin.mapper.ts";
 
 export class SuperAdminAuthService implements ISuperAdminAuthService {
@@ -17,7 +17,7 @@ export class SuperAdminAuthService implements ISuperAdminAuthService {
 
     }
 
-    async login(email: string, password: string) {
+    async login(email: string, password: string): Promise<AuthResponse> {
         const superAdmin = await this._SuperAdminRepo.findByEmailWithPassword(email);
         if (!superAdmin) {
             ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.LOGIN_FAILED);

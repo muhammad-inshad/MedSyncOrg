@@ -54,16 +54,13 @@ const AppointmentHistory = () => {
     const [cancelReason, setCancelReason] = useState('');
     const [isCancelling, setIsCancelling] = useState(false);
 
-    const user = useAppSelector((state) => state.auth.user);
-    const patientId = user?._id;
-
-    // ── Fetch appointments ──
+   
     useEffect(() => {
-        if (!patientId) return;
+     
         const fetch = async () => {
             setIsLoading(true);
             try {
-                const result = await patientApi.getAppoimentHistory(patientId, currentPage, limit, searchQuery);
+                const result = await patientApi.getAppoimentHistory( currentPage, limit, searchQuery);
                 const responseData = result.data;
                 if (responseData.success) {
                     setAppointments(Array.isArray(responseData.data) ? responseData.data : []);
@@ -79,7 +76,7 @@ const AppointmentHistory = () => {
             }
         };
         fetch();
-    }, [patientId, currentPage, searchQuery]);
+    }, [ currentPage, searchQuery]);
 
     useEffect(() => {
         setCurrentPage(1);

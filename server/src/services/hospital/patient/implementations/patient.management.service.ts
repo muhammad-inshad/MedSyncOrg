@@ -27,13 +27,13 @@ export class PatientManagementService implements IPatientManagementService {
         return this._patientMapper.toDTO(patient);
     }
 
-    async patientsToggle(id: string): Promise<IPatient> {
+    async patientsToggle(id: string): Promise<PatientResponseDTO> {
         const patient = await this._userRepo.findById(id);
         if (!patient) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Patient not found");
         }
         const updated = await this._userRepo.update(id, { isActive: !patient!.isActive });
-        return updated!;
+        return this._patientMapper.toDTO(updated!);
     }
 
     async updatePatient(id: string, patientData: UpdatePatientDTO, patientFile?: Express.Multer.File): Promise<PatientResponseDTO> {

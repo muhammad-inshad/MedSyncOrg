@@ -17,7 +17,14 @@ import { IDoctor } from "../../../models/doctor.model.ts";
 import { IAppointment, AppointmentStatus } from "../../../models/appointment.ts";
 import { IPaginationResult } from "../../../types/hospital.types.ts";
 import bcrypt from "bcryptjs";
-import { selectedHospitalDto, DepartmentResponseDTO, QualificationResponseDTO, SpecializationResponseDTO } from "../../../dto/hospital/hospital-response.dto.ts";
+import { selectedHospitalDto, DepartmentResponseDTO, QualificationResponseDTO, SpecializationResponseDTO, HospitalResponseDTO, SelectedHospitalSchema } from "../../../dto/hospital/hospital-response.dto.ts";
+import { PatientResponseDTO } from "../../../dto/patient/patient-response.dto.ts";
+import { DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.ts";
+import { AppointmentResponseDTO } from "../../../dto/appointment/appointment-response.dto.ts";
+import { PatientMapper } from "../../../mappers/patient.mapper.ts";
+import { HospitalMapper } from "../../../mappers/hospital.mapper.ts";
+import { DoctorMapper } from "../../../mappers/doctor.mapper.ts";
+import { AppointmentMapper } from "../../../mappers/appointment.mapper.ts";
 import { Types } from "mongoose";
 
 export class PatientService implements IPatientService {
@@ -29,36 +36,43 @@ export class PatientService implements IPatientService {
     private readonly _appointmentRepo: IAppointmentRepository,
     private readonly _qualificationRepo: IQualificationRepository,
     private readonly _specializationRepo: ISpecializationRepository,
-    private readonly _subscriptionRepo: ISubscriptionRepository
+    private readonly _subscriptionRepo: ISubscriptionRepository,
+    private readonly _patientMapper: PatientMapper,
+    private readonly _hospitalMapper: HospitalMapper,
+    private readonly _doctorMapper: DoctorMapper,
+    private readonly _appointmentMapper: AppointmentMapper
   ) {}
 
-  async getProfile(userId: string): Promise<IPatient | null> {
+  async getProfile(userId: string): Promise<PatientResponseDTO | null> {
     const patient = await this._userRepo.findById(userId);
     if (!patient) {
       ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.PATIENT.NOT_FOUND);
     }
-    return patient;
+    return this._patientMapper.toDTO(patient!);
   }
 
-  async updateProfile(id: string, data: Partial<IPatient>): Promise<IPatient | null> {
+  async updateProfile(id: string, data: Partial<IPatient>): Promise<PatientResponseDTO | null> {
     const updated = await this._userRepo.update(id, data);
     if (!updated) {
       ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.PATIENT.NOT_FOUND);
     }
-    return updated;
+    return this._patientMapper.toDTO(updated!);
   }
 
-  async getAllPatient(query: { page: number; limit: number; search: string }): Promise<{ data: IPatient[]; total: number }> {
+  async getAllPatient(query: { page: number; limit: number; search: string }): Promise<{ data: PatientResponseDTO[]; total: number }> {
     const result = await this._userRepo.findWithPagination({
       page: query.page,
       limit: query.limit,
       search: query.search,
       searchFields: ["name", "email", "phone"]
     });
-    return { data: result.data, total: result.total };
+    return { 
+      data: result.data.map(p => this._patientMapper.toDTO(p)), 
+      total: result.total 
+    };
   }
 
-  async gethospitals(page: number, limit: number, search: string): Promise<IPaginationResult<IHospital>> {
+  async gethospitals(page: number, limit: number, search: string): Promise<IPaginationResult<HospitalResponseDTO>> {
     const result = await this._hospitalRepo.findWithPagination({
       page,
       limit,
@@ -66,7 +80,11 @@ export class PatientService implements IPatientService {
       searchFields: ["hospitalName", "address", "email"],
       filter: { isActive: true, reviewStatus: "approved" }
     });
-    return result as IPaginationResult<IHospital>;
+    
+    return {
+      ...result,
+      data: result.data.map(h => this._hospitalMapper.toDTO(h))
+    } as IPaginationResult<HospitalResponseDTO>;
   }
 
   async changePassword(id: string, current: string, newP: string): Promise<void> {
@@ -109,7 +127,7 @@ export class PatientService implements IPatientService {
       })
     );
 
-    const result: selectedHospitalDto = {
+    const selectedHospitalData: selectedHospitalDto = {
       ...hospital!.toObject(),
       _id: hospital!._id.toString(),
       departments: departmentsWithCounts,
@@ -119,11 +137,11 @@ export class PatientService implements IPatientService {
       currentPage: page,
       totalPages: Math.ceil(departmentsResult.total / limit)
     };
-
-    return result;
+    
+    return SelectedHospitalSchema.parse(selectedHospitalData);
   }
 
-  async getDoctorDepartment(id: string, page: number, limit: number, search: string): Promise<IPaginationResult<IDoctor>> {
+  async getDoctorDepartment(id: string, page: number, limit: number, search: string): Promise<IPaginationResult<DoctorResponseDTO>> {
     const result = await this._doctorRepo.findWithPagination({
       page,
       limit,
@@ -131,16 +149,19 @@ export class PatientService implements IPatientService {
       searchFields: ["name", "specialization"],
       filter: { department: id, isActive: true, reviewStatus: "approved" }
     });
-    return result as IPaginationResult<IDoctor>;
+    return {
+      ...result,
+      data: result.data.map(d => this._doctorMapper.toDTO(d))
+    } as IPaginationResult<DoctorResponseDTO>;
   }
 
-  async getDoctorById(id: string): Promise<IDoctor> {
+  async getDoctorById(id: string): Promise<DoctorResponseDTO> {
     const doctor = await this._doctorRepo.findById(id);
 
     if (!doctor) {
       ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
     }
-    return doctor;
+    return this._doctorMapper.toDTO(doctor!);
   }
 
   async getAvailableSlots(doctorId: string, date: string): Promise<{ tokenInfo: { availableSlots: number; totalSlots: number; bookedTokens: number; maxTokens: number; status: "Available" | "Filling Fast" | "Fully Booked" } }> {
@@ -207,19 +228,24 @@ export class PatientService implements IPatientService {
     console.log(`[PatientService.bookAppointment] SUCCESS! Appointment created with ID: ${result._id}`);
   }
 
-  async checkDuplicateAppointment(doctorId: string, date: string, patient: { name: string; age: number; email?: string }): Promise<IAppointment | null> {
+  async checkDuplicateAppointment(doctorId: string, date: string, patient: { name: string; age: number; email?: string }): Promise<AppointmentResponseDTO | null> {
     const dateObj = new Date(date);
-    return await this._appointmentRepo.findDuplicate(doctorId, dateObj, patient);
+    const result = await this._appointmentRepo.findDuplicate(doctorId, dateObj, patient);
+    return result ? this._appointmentMapper.toDTO(result) : null;
   }
 
 
-  async getAppoimentHistory(patientId: string, query: { page: number; limit: number; search: string }): Promise<{ data: IAppointment[]; total: number }> {
+  async getAppoimentHistory(patientId: string, query: { page: number; limit: number; search: string }): Promise<{ data: AppointmentResponseDTO[]; total: number }> {
     const result = await this._appointmentRepo.findPatientAppointments(patientId, query);
-    return { data: result.appointments, total: result.total };
+    return { 
+      data: result.appointments.map(a => this._appointmentMapper.toDTO(a)), 
+      total: result.total 
+    };
   }
 
-  async getTodayAppointments(patientId: string): Promise<IAppointment[]> {
-    return await this._appointmentRepo.findPatientAppointmentsToday(patientId);
+  async getTodayAppointments(patientId: string): Promise<AppointmentResponseDTO[]> {
+    const result = await this._appointmentRepo.findPatientAppointmentsToday(patientId);
+    return result.map(a => this._appointmentMapper.toDTO(a));
   }
 
   async cancelAppointment(data: { id: string; reason: string }): Promise<void> {

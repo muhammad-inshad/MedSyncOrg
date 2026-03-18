@@ -1,6 +1,4 @@
-
 import { randomUUID } from "crypto";
-
 import jwt, { SignOptions } from "jsonwebtoken";
 import Logger from "../../utils/logger.ts";
 import { ApiResponse } from "../../utils/apiResponse.utils.ts";
@@ -71,4 +69,4 @@ export class TokenService implements ITokenService {
       ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Authentication failed");
     }
   }
-}
+}

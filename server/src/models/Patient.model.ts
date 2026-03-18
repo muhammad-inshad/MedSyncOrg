@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { Role } from "../constants/enums.ts";
 
 export interface IPatient extends Document {
   name: string;
@@ -6,7 +7,7 @@ export interface IPatient extends Document {
   phone: number;
   password: string;
   isGoogleAuth: boolean;
-
+   role: Role;   
   fatherName?: string;
   gender?: "male" | "female" | "other";
   dateOfBirth?: Date;
@@ -43,7 +44,11 @@ const patientSchema = new Schema<IPatient>(
     image: { type: String },
     bloodGroup: { type: String },
     age: { type: Number },
-
+    role: {
+  type: String,
+  enum: Object.values(Role),
+  default: Role.PATIENT,
+},
     walletBalance: { type: Number, default: 0 },
 
     medicalReports: { type: [String], default: [] },

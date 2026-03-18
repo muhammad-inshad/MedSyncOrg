@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Building2, Mail, Phone, MapPin, Calendar, Save, X, ArrowLeft, Trash2, Image as ImageIcon } from 'lucide-react';
+import { z } from 'zod';
+import { Upload, Building2, Mail, Phone, MapPin, Calendar, CreditCard, Save, X, Eye, EyeOff, Shield, Image as ImageIcon, Trash2, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { IHospital } from '@/interfaces/IHospital';
 
@@ -20,8 +21,8 @@ interface IHospitalFormData {
   about: string;
   licence: string;
   isActive: boolean;
-  password: string;
-  confirmPassword: string;
+  password?: string;
+  confirmPassword?: string;
   subscription: {
     plan: "free" | "basic" | "premium";
     amount: number;
@@ -253,32 +254,51 @@ const HospitalEdit = () => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.hospitalName?.trim()) newErrors.hospitalName = 'Hospital name is required';
-    if (!formData.address?.trim()) newErrors.address = 'Address is required';
-    if (!formData.email?.trim()) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email format';
-    if (!formData.phone?.trim()) newErrors.phone = 'Phone is required';
-    if (!formData.pincode?.trim()) newErrors.pincode = 'Pincode is required';
-    if (!formData.since || formData.since < 1900 || formData.since > new Date().getFullYear()) {
-      newErrors.since = 'Invalid year';
-    }
-    if (formData.password) {
-      if (formData.password.length < 6) {
-        newErrors.password = 'Password must be at least 6 characters';
+    const hospitalEditSchema = z.object({
+      hospitalName: z.string().min(1, 'Hospital name is required'),
+      email: z.string().email('Invalid email format'),
+      phone: z.string().min(1, 'Phone is required'),
+      pincode: z.string().min(1, 'Pincode is required'),
+      address: z.string().min(1, 'Address is required'),
+      since: z.number().min(1900, 'Invalid year').max(new Date().getFullYear(), 'Invalid year'),
+      password: z.string().optional(),
+      confirmPassword: z.string().optional(),
+    }).refine((data) => {
+      if (data.password) {
+        if (data.password.length < 6) return false;
+        if (data.password !== data.confirmPassword) return false;
       }
-      if (!formData.confirmPassword) {
-        newErrors.confirmPassword = 'Please confirm your password';
-      } else if (formData.password !== formData.confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match';
+      return true;
+    }, {
+      message: "Password validation failed",
+      path: ["password"]
+    });
+
+    const validation = hospitalEditSchema.safeParse(formData);
+
+    if (!validation.success) {
+      const newErrors: Record<string, string> = {};
+      validation.error.issues.forEach((issue) => {
+        if (issue.code === z.ZodIssueCode.custom && issue.path.length === 0) {
+           if (formData.password && formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+           if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+        } else {
+          newErrors[issue.path[0] as string] = issue.message;
+        }
+      });
+
+      // Explicitly check password match if not caught by refine paths correctly
+      if (formData.password) {
+        if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
+        if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
       }
-    } else if (formData.confirmPassword) {
-      newErrors.password = 'Please enter a password first';
+
+      setErrors(newErrors);
+      return false;
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors({});
+    return true;
   };
 
   const handleSubmit = async () => {

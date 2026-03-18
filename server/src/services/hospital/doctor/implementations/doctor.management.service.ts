@@ -12,12 +12,13 @@ import { DoctorUploadFiles } from "../../../../types/doctor.types.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { DoctorResponseDTO, UpdateDoctorDTO } from "../../../../dto/doctor/doctor-response.dto.ts";
 import { DoctorMapper } from "../../../../mappers/doctor.mapper.ts";
+import { DoctorLeaveMapper } from "../../../../mappers/doctor-leave.mapper.ts";
+import { DoctorLeaveResponseDTO } from "../../../../dto/doctor/doctor-leave-response.dto.ts";
 import { DoctorDTO } from "../../../../dto/auth/signup.dto.ts";
 import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.ts";
 import { CloudinaryImageService } from "../../../image/implementation/cloudinary.image.service.ts";
 import { ILeaveRepository } from "../../../../repositories/leave/leave.repository.interface.ts";
 import { IDoctorLeave } from "../../../../models/doctorLeave.model.ts";
-import { resolve } from "dns";
 import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.ts";
 
 export class DoctorManagementService implements IDoctorManagementService {
@@ -27,7 +28,8 @@ export class DoctorManagementService implements IDoctorManagementService {
         private readonly _doctorMapper: DoctorMapper,
         private readonly _departmentRepo: IDepartmentRepository,
         private readonly _leaveRepo: ILeaveRepository,
-        private readonly _subscriptionService: IHospitalSubscriptionService
+        private readonly _subscriptionService: IHospitalSubscriptionService,
+        private readonly _leaveMapper: DoctorLeaveMapper
     ) {
         this._cloudinary = new CloudinaryImageService();
     }
@@ -98,7 +100,7 @@ export class DoctorManagementService implements IDoctorManagementService {
         return updated ? this._doctorMapper.toDTO(updated) : null;
     }
 
-    async rejectDoctor(id: string,reason:string): Promise<DoctorResponseDTO | null> {
+    async rejectDoctor(id: string, reason: string): Promise<DoctorResponseDTO | null> {
         const doctor = await this._doctorRepo.findById(id);
         if (!doctor) {
             Logger.warn(`Reject Doctor failed: Doctor not found with ID ${id}`);
@@ -109,12 +111,12 @@ export class DoctorManagementService implements IDoctorManagementService {
         const updated = await this._doctorRepo.update(id, {
             reviewStatus: "rejected",
             isActive: true,
-             rejectionReason:reason
+            rejectionReason: reason
         } as Partial<IDoctor>);
         return updated ? this._doctorMapper.toDTO(updated) : null;
     }
 
-    async requestRevisionDoctor(id: string, reason:string): Promise<DoctorResponseDTO | null> {
+    async requestRevisionDoctor(id: string, reason: string): Promise<DoctorResponseDTO | null> {
         const doctor = await this._doctorRepo.findById(id);
         if (!doctor) {
             Logger.warn(`Request Revision failed: Doctor not found with ID ${id}`);
@@ -124,7 +126,7 @@ export class DoctorManagementService implements IDoctorManagementService {
         const updated = await this._doctorRepo.update(id, {
             reviewStatus: "revision",
             isActive: true,
-            rejectionReason:reason
+            rejectionReason: reason
         } as Partial<IDoctor>);
         return updated ? this._doctorMapper.toDTO(updated) : null;
     }
@@ -135,7 +137,7 @@ export class DoctorManagementService implements IDoctorManagementService {
         let profileImageUrl = "";
         let licenseUrl = "";
 
-        
+
         const existingDoctor = await this._doctorRepo.findByEmail(data.email);
         if (existingDoctor) {
             ApiResponse.throwError(HttpStatusCode.CONFLICT, MESSAGES.AUTH.ALREADY_EXISTS);
@@ -262,11 +264,16 @@ export class DoctorManagementService implements IDoctorManagementService {
         limit: number;
         search?: string;
         date?: Date;
-    }): Promise<{ data: IDoctorLeave[]; total: number; page: number; limit: number }> {
-        return await this._leaveRepo.findHospitalLeaves(options);
+    }): Promise<{ data: DoctorLeaveResponseDTO[]; total: number; page: number; limit: number }> {
+        const res = await this._leaveRepo.findHospitalLeaves(options);
+        return {
+            ...res,
+            data: res.data.map(leave => this._leaveMapper.toDTO(leave))
+        };
     }
 
-    async updateLeaveStatus(leaveId: string, status: 'approved' | 'rejected', reason?: string): Promise<IDoctorLeave | null> {
-        return await this._leaveRepo.updateStatus(leaveId, status, reason);
+    async updateLeaveStatus(leaveId: string, status: 'approved' | 'rejected', reason?: string): Promise<DoctorLeaveResponseDTO | null> {
+        const leave = await this._leaveRepo.updateStatus(leaveId, status, reason);
+        return leave ? this._leaveMapper.toDTO(leave as IDoctorLeave) : null;
     }
 }

@@ -8,7 +8,7 @@ const router = Router()
 
 router.get("/me", doctorcontroller.getme.bind(doctorcontroller))
 router.patch("/reapply/:id", doctorcontroller.reapplyDoctor.bind(doctorcontroller))
-router.patch("/profile/:id", upload.fields([
+router.patch("/profile", upload.fields([
     { name: "profileImage", maxCount: 1 },
     { name: "license", maxCount: 1 }
 ]), doctorcontroller.updateDoctor.bind(doctorcontroller));

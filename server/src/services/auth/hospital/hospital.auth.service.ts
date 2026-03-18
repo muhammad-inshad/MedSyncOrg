@@ -99,7 +99,8 @@ export class HospitalAuthService implements IHospitalAuthService {
         });
 
         Logger.info(`Hospital logged in: ${loginData.email}`);
-
-        return { user: this._hospitalMapper.toDTO(hospital) as UnifiedUser, accessToken, refreshToken };
+        
+        const userDto = this._hospitalMapper.toDTO(hospital);
+        return { user: userDto as UnifiedUser, accessToken, refreshToken };
     }
 }

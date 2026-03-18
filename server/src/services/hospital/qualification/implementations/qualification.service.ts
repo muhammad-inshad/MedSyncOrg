@@ -2,25 +2,33 @@ import { IQualification } from "../../../../models/qualification.model.ts";
 import { IQualificationRepository } from "../../../../repositories/hospital/qualification.repository.interface.ts";
 import { IQualificationService } from "../interfaces/qualification.service.interface.ts";
 import { ICloudinaryImageService } from "../../../image/interfaces/cloudinary.service.interface.ts";
+import { QualificationResponseDTO } from "../../../../dto/hospital/qualification-response.dto.ts";
+import { QualificationMapper } from "../../../../mappers/qualification.mapper.ts";
 import { Types } from "mongoose";
 
 export class QualificationService implements IQualificationService {
     constructor(
         private readonly _qualificationRepo: IQualificationRepository,
-        private readonly _imageService: ICloudinaryImageService
+        private readonly _imageService: ICloudinaryImageService,
+        private readonly _qualificationMapper: QualificationMapper
     ) { }
 
-    async getQualifications(hospitalId: string, page: number, limit: number, search?: string): Promise<{ data: IQualification[]; total: number; page: number; limit: number }> {
-        return await this._qualificationRepo.findWithPagination({
+    async getQualifications(hospitalId: string, page: number, limit: number, search?: string): Promise<{ data: QualificationResponseDTO[]; total: number; page: number; limit: number }> {
+        const result = await this._qualificationRepo.findWithPagination({
             page,
             limit,
             search,
             searchFields: ["name", "abbreviation", "description"],
             filter: { hospital_id: new Types.ObjectId(hospitalId) }
         });
+
+        return {
+            ...result,
+            data: result.data.map(q => this._qualificationMapper.toDTO(q as IQualification))
+        };
     }
 
-    async createQualification(hospitalId: string, data: Partial<IQualification>, file?: Express.Multer.File): Promise<IQualification> {
+    async createQualification(hospitalId: string, data: Partial<IQualification>, file?: Express.Multer.File): Promise<QualificationResponseDTO> {
         const qualificationData: Partial<IQualification> = {
             ...data,
             hospital_id: new Types.ObjectId(hospitalId) as unknown as Types.ObjectId
@@ -32,10 +40,11 @@ export class QualificationService implements IQualificationService {
             qualificationData.image = await this._imageService.uploadImage(data.image, "hospital/qualifications");
         }
 
-        return await this._qualificationRepo.create(qualificationData);
+        const created = await this._qualificationRepo.create(qualificationData);
+        return this._qualificationMapper.toDTO(created);
     }
 
-    async updateQualification(id: string, data: Partial<IQualification>, file?: Express.Multer.File): Promise<IQualification | null> {
+    async updateQualification(id: string, data: Partial<IQualification>, file?: Express.Multer.File): Promise<QualificationResponseDTO | null> {
         const qualification = await this._qualificationRepo.findById(id);
         if (!qualification) return null;
 
@@ -52,12 +61,14 @@ export class QualificationService implements IQualificationService {
             updateData.image = "";
         }
 
-        return await this._qualificationRepo.update(id, updateData);
+        const updated = await this._qualificationRepo.update(id, updateData);
+        return updated ? this._qualificationMapper.toDTO(updated) : null;
     }
 
-    async toggleStatus(id: string): Promise<IQualification | null> {
+    async toggleStatus(id: string): Promise<QualificationResponseDTO | null> {
         const qualification = await this._qualificationRepo.findById(id);
         if (!qualification) return null;
-        return await this._qualificationRepo.update(id, { isActive: !qualification.isActive });
+        const updated = await this._qualificationRepo.update(id, { isActive: !qualification.isActive });
+        return updated ? this._qualificationMapper.toDTO(updated) : null;
     }
 }

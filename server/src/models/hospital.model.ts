@@ -1,11 +1,12 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { Role } from "../constants/enums.ts";
 
 export interface IHospital extends Document {
   hospitalName: string;
   logo?: string;
   address: string;
   password: string;
-
+   role: Role;   
   isActive: boolean;
   autoDisabled: boolean;
 
@@ -70,7 +71,11 @@ const HospitalSchema = new Schema<IHospital>(
       required: true,
       trim: true,
     },
-
+    role: {
+  type: String,
+  enum: Object.values(Role),
+  default: Role.HOSPITAL,
+},
     password: {
       type: String,
       required: true,

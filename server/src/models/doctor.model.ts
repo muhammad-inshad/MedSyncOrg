@@ -1,4 +1,5 @@
 import { Schema, model, Document, Types } from "mongoose";
+import { Role } from "../constants/enums.ts";
 
 export interface IDoctor extends Document {
   name: string;
@@ -6,7 +7,7 @@ export interface IDoctor extends Document {
   password: string;
   phone: string;
   address: string;
-
+  role: Role;   
   specialization: string;
   qualification: string;
   experience: string;
@@ -106,6 +107,12 @@ const doctorSchema = new Schema<IDoctor>(
       ref: "Hospital",
       required: false,
     },
+
+    role: {
+  type: String,
+  enum: Object.values(Role),
+  default: Role.DOCTOR,
+},
 
     licence: {
       type: String,

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { z } from 'zod';
 import {
   CreditCard, Calendar, DollarSign, Tag,
   ArrowLeft, Save, X, PencilLine, Users
@@ -95,12 +96,38 @@ const EditSubscription = () => {
   };
 
   const validate = (): boolean => {
-    const newErrors: FormErrors = {};
-    if (!form.plan.trim()) newErrors.plan = 'Plan name is required';
-    if (form.amount < 0) newErrors.amount = 'Amount cannot be negative';
-    if (form.duration <= 0) newErrors.duration = 'Duration must be positive';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const subscriptionSchema = z.object({
+      plan: z.string().min(1, 'Plan name is required'),
+      amount: z.number().nonnegative('Amount must be zero or positive'),
+      status: z.enum(['active', 'expired', 'cancelled']),
+      duration: z.number().positive('Duration must be positive'),
+      durationUnit: z.enum(['months', 'years']),
+      paymentId: z.string().optional(),
+      paymentMethod: z.string().optional(),
+      limits: z.object({
+        maxPatients: z.number().int().nonnegative('Max patients must be a non-negative integer'),
+        maxDoctors: z.number().int().nonnegative('Max doctors must be a non-negative integer'),
+        maxDepartments: z.number().int().nonnegative('Max departments must be a non-negative integer'),
+      }),
+    });
+
+    const validation = subscriptionSchema.safeParse(form);
+
+    if (!validation.success) {
+      const newErrors: FormErrors = {};
+      validation.error.issues.forEach((issue) => {
+        if (issue.path.length > 1) {
+          newErrors[issue.path.join('.')] = issue.message;
+        } else {
+          newErrors[issue.path[0] as keyof SubscriptionForm] = issue.message;
+        }
+      });
+      setErrors(newErrors);
+      return false;
+    }
+
+    setErrors({});
+    return true;
   };
 
   const handleSubmit = async () => {

@@ -13,6 +13,11 @@ import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { MESSAGES } from "../../../../constants/messages.ts";
 import { PatientMapper } from "../../../../mappers/patient.mapper.ts";
 
+import { SuccessResponseDTO, SuccessResponseSchema } from "../../../../dto/auth/success-response.dto.ts";
+import { TokenResponseDTO, TokenResponseSchema } from "../../../../dto/auth/token-response.dto.ts";
+
+import { Role } from "../../../../constants/enums.ts";
+
 export class PatientAuthService implements IPatientAuthService {
   constructor(
     private readonly _userRepository: IUserRepository,
@@ -32,6 +37,7 @@ export class PatientAuthService implements IPatientAuthService {
     const newUser = await this._userRepository.create({
       ...signupData,
       password: hashedPassword,
+      role: signupData.role as unknown as Role,
     });
 
     return this.mapToResponse(newUser);
@@ -70,7 +76,7 @@ export class PatientAuthService implements IPatientAuthService {
     };
   }
 
-  async resetPassword(email: string, pass: string, role: string): Promise<{ success: boolean; message: string }> {
+  async resetPassword(email: string, pass: string, role: string): Promise<SuccessResponseDTO> {
     let repo: IUserRepository | IHospitalRepository | IDoctorRepository = this._userRepository;
 
     if (role === 'hospital') {
@@ -87,18 +93,18 @@ export class PatientAuthService implements IPatientAuthService {
 
     await repo.update(user!._id.toString(), { password: hashedPassword });
 
-    return { success: true, message: "Password updated successfully" };
+    return SuccessResponseSchema.parse({ success: true, message: "Password updated successfully" });
   }
 
 
-  async refreshAccessToken(refreshToken: string): Promise<{ accessToken: string }> {
+  async refreshAccessToken(refreshToken: string): Promise<TokenResponseDTO> {
     const payload = this._tokenService.verifyRefreshToken(refreshToken);
     const newAccessToken = this._tokenService.generateAccessToken({
       userId: payload.userId,
       email: payload.email,
       role: payload.role
     });
-    return { accessToken: newAccessToken };
+    return TokenResponseSchema.parse({ accessToken: newAccessToken });
   }
 
   private mapToResponse(user: IPatient): PatientResponseDTO {

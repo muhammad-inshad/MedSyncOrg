@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { authApi } from '@/constants/backend/auth/auth.api';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import { z } from "zod";
 import { AUTH_MESSAGES } from '@/constants/frontend/auth/auth.messages';
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -12,14 +13,17 @@ const ForgotPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  
   const role = searchParams.get('role') || 'patient';
 
   const handleEmailSubmit = async () => {
     setLoading(true);
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email.trim())) {
-      toast.error(AUTH_MESSAGES.FORGOT_PASSWORD.INVALID_EMAIL);
+    const emailSchema = z.string().email(AUTH_MESSAGES.FORGOT_PASSWORD.INVALID_EMAIL);
+    const result = emailSchema.safeParse(email.trim());
+
+    if (!result.success) {
+      toast.error(result.error.issues[0].message);
       setLoading(false);
       return;
     }

@@ -18,6 +18,14 @@ import { Types } from "mongoose";
 import { IDepartmentRepository } from "../../../repositories/hospital/department.repository.interface.ts";
 import { IQualificationRepository } from "../../../repositories/hospital/qualification.repository.interface.ts";
 import { ISpecializationRepository } from "../../../repositories/hospital/specialization.repository.interface.ts";
+import { IMapper } from "../../../interfaces/mapper.interface.ts";
+import { IDepartment } from "../../../models/department.model.ts";
+import { DepartmentResponseDTO } from "../../../dto/hospital/department-response.dto.ts";
+import { IQualification } from "../../../models/qualification.model.ts";
+import { QualificationResponseDTO } from "../../../dto/hospital/qualification-response.dto.ts";
+import { ISpecialization } from "../../../models/specialization.model.ts";
+import { SpecializationResponseDTO } from "../../../dto/hospital/specialization-response.dto.ts";
+import { DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.ts";
 
 
 export class DoctorAuthService implements IDoctorAuthService {
@@ -29,10 +37,13 @@ export class DoctorAuthService implements IDoctorAuthService {
         private readonly _hospitalMapper: HospitalMapper,
         private readonly _departmentRepo: IDepartmentRepository,
         private readonly _qualificationRepo: IQualificationRepository,
-        private readonly _specializationRepo: ISpecializationRepository
+        private readonly _specializationRepo: ISpecializationRepository,
+        private readonly _departmentMapper: IMapper<IDepartment, DepartmentResponseDTO>,
+        private readonly _qualificationMapper: IMapper<IQualification, QualificationResponseDTO>,
+        private readonly _specializationMapper: IMapper<ISpecialization, SpecializationResponseDTO>
     ) {
     }
-    async registerDoctor(body: DoctorDTO, files: DoctorUploadFiles) {
+    async registerDoctor(body: DoctorDTO, files: DoctorUploadFiles): Promise<DoctorResponseDTO> {
         let profileImageUrl = "";
         let licenseUrl = "";
         const existingDoctor = await this._doctorRepo.findByEmail(body.email);
@@ -83,7 +94,8 @@ export class DoctorAuthService implements IDoctorAuthService {
             },
         };
 
-        return this._doctorRepo.create(doctorData);
+        const created = await this._doctorRepo.create(doctorData);
+        return this._doctorMapper.toDTO(created);
     }
 
     async loginDoctor(loginData: LoginDTO)
@@ -146,23 +158,22 @@ export class DoctorAuthService implements IDoctorAuthService {
         };
     }
 
-    async getHospitalDepartments(hospitalId: string) {
+    async getHospitalDepartments(hospitalId: string): Promise<DepartmentResponseDTO[]> {
         const result = await this._departmentRepo.findByHospitalId(hospitalId);
-        return result.data; // Return only the array of departments
+        return result.data.map(d => this._departmentMapper.toDTO(d));
     }
-    async getHospitalQualifications(hospitalId: string) {
+    async getHospitalQualifications(hospitalId: string): Promise<QualificationResponseDTO[]> {
         const qualifications = await this._qualificationRepo.findByHospitalId(hospitalId);
-        return qualifications.map(q => ({
-            _id: q._id,
-            name: q.name,
-            qualificationName: q.name // Keep for backward compatibility
-        }));
+        return qualifications.map(q => this._qualificationMapper.toDTO(q));
     }
 
-    async getHospitalSpecializations(hospitalId: string, departmentId?: string) {
+    async getHospitalSpecializations(hospitalId: string, departmentId?: string): Promise<SpecializationResponseDTO[]> {
+        let result: ISpecialization[];
         if (departmentId) {
-            return this._specializationRepo.findByDepartmentId(departmentId);
+            result = await this._specializationRepo.findByDepartmentId(departmentId);
+        } else {
+            result = await this._specializationRepo.findByHospitalId(hospitalId);
         }
-        return this._specializationRepo.findByHospitalId(hospitalId);
+        return result.map(s => this._specializationMapper.toDTO(s));
     }
 }

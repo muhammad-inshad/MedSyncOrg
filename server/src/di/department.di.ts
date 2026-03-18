@@ -12,6 +12,8 @@ import { DoctorModel } from "../models/doctor.model.ts";
 import { UserRepository } from "../repositories/patient/user.repository.ts";
 import { Patient } from "../models/Patient.model.ts";
 import { HospitalSubscriptionService } from "../services/hospital/subscription/implementation/subscription.service.ts";
+import { DepartmentMapper } from "../mappers/department.mapper.ts";
+import { SubscriptionMapper } from "../mappers/subscription.mapper.ts";
 
 export const departmentContiner = () => {
     const departmentRepo = new DepartmentRepository(DepartmentModel);
@@ -19,17 +21,20 @@ export const departmentContiner = () => {
     const subscriptionRepo = new SubscriptionRepository();
     const doctorRepo = new DoctorRepository(DoctorModel);
     const userRepo = new UserRepository(Patient);
+    const subscriptionMapper = new SubscriptionMapper();
 
     const subscriptionService = new HospitalSubscriptionService(
         subscriptionRepo,
         hospitalRepo,
         doctorRepo,
         departmentRepo,
-        userRepo
+        userRepo,
+        subscriptionMapper
     );
 
     const imageService = new CloudinaryImageService();
-    const departmentService = new DepartmentService(departmentRepo, imageService, subscriptionService);
+    const departmentMapper = new DepartmentMapper();
+    const departmentService = new DepartmentService(departmentRepo, imageService, subscriptionService, departmentMapper);
     const departmentManagement = new DepartmentManagementController(departmentService);
 
     return {

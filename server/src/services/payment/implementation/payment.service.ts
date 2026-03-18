@@ -11,15 +11,18 @@ import { ISubscription } from "../../../models/subscription.ts";
 import { IPatientService } from "../../patient/interfaces/patient.service.interfaces.ts";
 import { IAppointmentCheckoutData } from "../../../dto/appointment/appointment.dto.ts";
 import { IAppointment, AppointmentMode } from "../../../models/appointment.ts";
+import { CheckoutResponseDTO } from "../../../dto/payment/checkout-response.dto.ts";
+import { PaymentMapper } from "../../../mappers/payment.mapper.ts";
 
 export class PaymentService implements IPaymentService {
     constructor(
         private readonly subscriptionRepository: ISubscriptionRepository,
         private readonly hospitalRepository: IHospitalRepository,
-        private readonly patientService: IPatientService
+        private readonly patientService: IPatientService,
+        private readonly paymentMapper: PaymentMapper
     ) {}
 
-    async createCheckoutSession(planId: string, hospitalId: string): Promise<{ url: string | null }> {
+    async createCheckoutSession(planId: string, hospitalId: string): Promise<CheckoutResponseDTO> {
         const plan = await this.subscriptionRepository.findById(planId);
         if (!plan) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Subscription plan not found");
@@ -78,10 +81,10 @@ export class PaymentService implements IPaymentService {
         });
 
 
-    return { url: session.url };
+    return this.paymentMapper.toCheckoutDTO(session.url);
 }
 
-    async createAppointmentCheckoutSession(appointmentData: IAppointmentCheckoutData, patientId: string): Promise<{ url: string | null }> {
+    async createAppointmentCheckoutSession(appointmentData: IAppointmentCheckoutData, patientId: string): Promise<CheckoutResponseDTO> {
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
         
 const metadata = {
@@ -126,7 +129,7 @@ const metadata = {
             cancel_url: `${frontendUrl}/patient/appointment/${appointmentData.doctorId}`,
         });
 
-        return { url: session.url };
+        return this.paymentMapper.toCheckoutDTO(session.url);
     }
 
 

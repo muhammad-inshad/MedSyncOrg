@@ -21,19 +21,21 @@ export class DoctorAuthMiddleware {
       }
 
       const payload = this._tokenService.verifyAccessToken(token);
-
+      
       if (payload.role !== "doctor") {
         logger.warn(`Attempted doctor access by user with role: ${payload.role}`);
         return res.status(HttpStatusCode.FORBIDDEN).json({ message: "Insufficient permissions" });
       }
 
-      // Check if doctor is blocked in real-time
       const doctor = await this._doctorRepo.findById(payload.userId);
       if (!doctor || doctor.isActive === false) {
         return res.status(HttpStatusCode.FORBIDDEN).json({ message: "Account is blocked" });
       }
 
-      req.user = payload;
+      req.user = { 
+        ...payload, 
+        doctorID: doctor.id
+      };
       next();
     } catch (error) {
       logger.error("Doctor auth middleware error:", error);

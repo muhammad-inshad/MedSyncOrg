@@ -17,7 +17,11 @@ import { SpecializationRepository } from "../repositories/hospital/implementatio
 import SpecializationModel from "../models/specialization.model.ts";
 import { PatientService } from "../services/patient/implementations/patient.service.ts";
 import { LiveTokenService } from "../services/patient/implementations/livetoken.service.ts";
-
+import { LiveTokenMapper } from "../mappers/livetoken.mapper.ts";
+import { PatientMapper } from "../mappers/patient.mapper.ts";
+import { HospitalMapper } from "../mappers/hospital.mapper.ts";
+import { DoctorMapper } from "../mappers/doctor.mapper.ts";
+import { AppointmentMapper } from "../mappers/appointment.mapper.ts";
 
 import { SubscriptionRepository } from "../repositories/superAdmin/subscription/implements/subscription.repository.ts";
 
@@ -33,6 +37,11 @@ export const patientContainer = () => {
   const qualificationRepository = new QualificationRepository(QualificationModel);
   const specializationRepository = new SpecializationRepository();
   const subscriptionRepository = new SubscriptionRepository();
+  const liveTokenMapper = new LiveTokenMapper();
+  const patientMapper = new PatientMapper();
+  const hospitalMapper = new HospitalMapper();
+  const doctorMapper = new DoctorMapper();
+  const appointmentMapper = new AppointmentMapper();
 
   const patientService = new PatientService(
     userRepository,
@@ -42,12 +51,16 @@ export const patientContainer = () => {
     appointmentRepository,
     qualificationRepository,
     specializationRepository,
-    subscriptionRepository
+    subscriptionRepository,
+    patientMapper,
+    hospitalMapper,
+    doctorMapper,
+    appointmentMapper
   );
   const patientController = new PatientController(patientService);
   const patientAuthMiddleware = new PatientAuthMiddleware(tokenService, userRepository);
   
-  const liveTokenService = new LiveTokenService(appointmentRepository);
+  const liveTokenService = new LiveTokenService(appointmentRepository, liveTokenMapper);
   const liveToken = new LiveTokenController(liveTokenService);
 
   return {

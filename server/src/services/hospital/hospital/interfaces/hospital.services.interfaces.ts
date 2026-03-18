@@ -1,7 +1,5 @@
 import { HospitalResponseDTO, IHospitalUpdateDTO, selectedHospitalDto } from "../../../../dto/hospital/hospital-response.dto.ts";
 
-
-
 export interface IHospitalService {
     getHospitalProfile(hospitalId: string): Promise<HospitalResponseDTO>;
     getSelectedHospital(hospitalId: string, page?: number, limit?: number, search?: string): Promise<selectedHospitalDto>;

@@ -1,10 +1,9 @@
-
 import { transporter } from "../../../../utils/otp/mail.util.ts";
 import { IEmailService } from "../interfaces/email.otp.interface.ts";
-
+import { SuccessResponseDTO, SuccessResponseSchema } from "../../../../dto/auth/success-response.dto.ts";
 
 export class EmailService implements IEmailService {
-  async sendOtpEmail(to: string, otp: string): Promise<void> {
+  async sendOtpEmail(to: string, otp: string): Promise<SuccessResponseDTO> {
     const mailOptions = {
       from: `"MedSync" <${process.env.MAIL_USER}>`,
       to,
@@ -22,5 +21,10 @@ export class EmailService implements IEmailService {
     };
 
     await transporter.sendMail(mailOptions);
+
+    return SuccessResponseSchema.parse({
+      success: true,
+      message: `OTP sent successfully to ${to}`,
+    });
   }
 }

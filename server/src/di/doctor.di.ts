@@ -15,13 +15,17 @@ import DepartmentModel from "../models/department.model.ts";
 import { QualificationRepository } from "../repositories/hospital/implementation/qualification.repository.ts";
 import QualificationModel from "../models/qualification.model.ts";
 import { SpecializationRepository } from "../repositories/hospital/implementation/specialization.repository.ts";
-import SpecializationModel from "../models/specialization.model.ts";
 import { AppointmentRepository } from "../repositories/appointment/appointment.repository.ts";
 import { AppointmentController } from "../controllers/doctor/appointment.controller.ts";
 import { AppointmentService } from "../services/doctor/implementations/appointment.service.ts";
 import { LeaveRepository } from "../repositories/leave/leave.repository.ts";
-import DoctorLeaveModel from "../models/doctorLeave.model.ts";
+import { AppointmentMapper } from "../mappers/appointment.mapper.ts";
 import { Consultation } from "../controllers/doctor/consultation.controller.ts";
+import { DoctorLeaveMapper } from "../mappers/doctor-leave.mapper.ts";
+
+import { DepartmentMapper } from "../mappers/department.mapper.ts";
+import { QualificationMapper } from "../mappers/qualification.mapper.ts";
+import { SpecializationMapper } from "../mappers/specialization.mapper.ts";
 
 export const doctorContainer = () => {
   const doctorRepository = new DoctorRepository(DoctorModel);
@@ -33,19 +37,27 @@ export const doctorContainer = () => {
   const specializationRepo = new SpecializationRepository();
   const leaveRepo = new LeaveRepository();
   const appointmentRepo = new AppointmentRepository();
+  const appointmentMapper = new AppointmentMapper();
 
-  const appointmentService = new AppointmentService(appointmentRepo);
+  const appointmentService = new AppointmentService(appointmentRepo, appointmentMapper);
   const consultation = new Consultation(appointmentService);
 
+  const departmentMapper = new DepartmentMapper();
+  const qualificationMapper = new QualificationMapper();
+  const specializationMapper = new SpecializationMapper();
+
+  const doctorMapper = new DoctorMapper();
+  const doctorLeaveMapper = new DoctorLeaveMapper();
 
   const doctorService = new DoctorService(
     doctorRepository,
     tokenService,
     appointmentRepo,
-    leaveRepo
+    leaveRepo,
+    doctorMapper,
+    doctorLeaveMapper
   );
 
-  const doctorMapper = new DoctorMapper();
   const doctorAuthService = new DoctorAuthService(
     doctorRepository,
     tokenService,
@@ -54,7 +66,10 @@ export const doctorContainer = () => {
     hospitalMapper,
     departmentRepo,
     qualificationRepo,
-    specializationRepo
+    specializationRepo,
+    departmentMapper,
+    qualificationMapper,
+    specializationMapper
   );
 
   const doctorcontroller = new DoctorController(doctorService);

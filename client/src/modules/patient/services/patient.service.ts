@@ -2,8 +2,8 @@ import api from '@/lib/api';
 import type { IPatient } from '@/interfaces/IPatient';
 
 export const PatientService = {
-    updateProfile: async (id: string, data: Partial<IPatient> & { willRemoveImage?: boolean }) => {
-        const response = await api.patch(`/api/patient/patients/${id}`, data);
+    updateProfile: async ( data: Partial<IPatient> & { willRemoveImage?: boolean }) => {
+        const response = await api.patch(`/api/patient/patients`, data);
         return response.data;
     },
 
@@ -22,8 +22,8 @@ export const PatientService = {
 
     return response.data;
 },
-    changePassword: async (id: string, data: { currentPassword?: string; newPassword?: string }) => {
-        const response = await api.patch(`/api/patient/changePassword/${id}`, data);
+    changePassword: async ( data: { currentPassword?: string; newPassword?: string }) => {
+        const response = await api.patch(`/api/patient/patients/password`, data);
         return response.data;
     }
 };

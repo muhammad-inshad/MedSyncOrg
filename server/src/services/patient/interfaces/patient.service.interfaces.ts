@@ -1,23 +1,24 @@
-import { IPatient } from "../../../models/Patient.model.ts";
-import { IHospital } from "../../../models/hospital.model.ts";
-import { IDoctor } from "../../../models/doctor.model.ts";
-import { selectedHospitalDto } from "../../../dto/hospital/hospital-response.dto.ts";
+import { PatientResponseDTO } from "../../../dto/patient/patient-response.dto.ts";
+import { HospitalResponseDTO, selectedHospitalDto } from "../../../dto/hospital/hospital-response.dto.ts";
+import { DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.ts";
+import { AppointmentResponseDTO } from "../../../dto/appointment/appointment-response.dto.ts";
 import { IAppointment } from "../../../models/appointment.ts";
+import { IPatient } from "../../../models/Patient.model.ts";
 import { IPaginationResult } from "../../../types/hospital.types.ts";
 
 export interface IPatientService {
-  getProfile(userId: string): Promise<IPatient | null>;
-  updateProfile(id: string, data: Partial<IPatient>): Promise<IPatient | null>;
-  getAllPatient(query: { page: number; limit: number; search: string }): Promise<{ data: IPatient[]; total: number }>;
-  gethospitals(page: number, limit: number, search: string): Promise<IPaginationResult<IHospital>>;
+  getProfile(userId: string): Promise<PatientResponseDTO | null>;
+  updateProfile(id: string, data: Partial<IPatient>): Promise<PatientResponseDTO | null>;
+  getAllPatient(query: { page: number; limit: number; search: string }): Promise<{ data: PatientResponseDTO[]; total: number }>;
+  gethospitals(page: number, limit: number, search: string): Promise<IPaginationResult<HospitalResponseDTO>>;
   changePassword(id: string, current: string, newP: string): Promise<void>;
   selectedHospital(id: string, page: number, limit: number, search: string): Promise<selectedHospitalDto>;
-  getDoctorDepartment(id: string, page: number, limit: number, search: string): Promise<IPaginationResult<IDoctor>>;
-  getDoctorById(id: string): Promise<IDoctor>;
+  getDoctorDepartment(id: string, page: number, limit: number, search: string): Promise<IPaginationResult<DoctorResponseDTO>>;
+  getDoctorById(id: string): Promise<DoctorResponseDTO>;
   getAvailableSlots(doctorId: string, date: string): Promise<{ tokenInfo: { availableSlots: number; totalSlots: number; bookedTokens: number; maxTokens: number; status: "Available" | "Filling Fast" | "Fully Booked" } }>;
   bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<void>;
-  checkDuplicateAppointment(doctorId: string, date: string, patient: { name: string; age: number; email?: string }): Promise<IAppointment | null>;
-  getAppoimentHistory(patientId: string, query: { page: number; limit: number; search: string }): Promise<{ data: IAppointment[]; total: number }>;
-  getTodayAppointments(patientId: string): Promise<IAppointment[]>;
+  checkDuplicateAppointment(doctorId: string, date: string, patient: { name: string; age: number; email?: string }): Promise<AppointmentResponseDTO | null>;
+  getAppoimentHistory(patientId: string, query: { page: number; limit: number; search: string }): Promise<{ data: AppointmentResponseDTO[]; total: number }>;
+  getTodayAppointments(patientId: string): Promise<AppointmentResponseDTO[]>;
   cancelAppointment(data: { id: string; reason: string }): Promise<void>;
 }

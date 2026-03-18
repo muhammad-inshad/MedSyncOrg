@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { z } from 'zod';
 import { Upload, X, Loader2, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -118,38 +119,57 @@ const EditPatientProfile = () => {
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof typeof formData, string>> = {};
+    const patientProfileSchema = z.object({
+      name: z.string().min(1, 'Name is required'),
+      email: z.string().email('Invalid email format'),
+      phone: z.union([z.string(), z.number()])
+        .transform((val) => val.toString())
+        .refine((val) => /^\d{10}$/.test(val), 'Phone must be 10 digits'),
+      currentPassword: z.string().optional(),
+      newPassword: z.string().optional(),
+      confirmNewPassword: z.string().optional(),
+    }).refine((data) => {
+  
+      if (data.currentPassword || data.newPassword || data.confirmNewPassword) {
+        if (!data.currentPassword) return false;
+        if (data.newPassword && data.newPassword.length < 6) return false;
+        if (data.newPassword !== data.confirmNewPassword) return false;
+      }
+      return true;
+    }, {
+      message: "Password validation failed",
+      path: ["currentPassword"] 
+    });
 
-    // Required fields
-    if (!formData.name?.trim()) newErrors.name = 'Name is required';
-    if (!formData.email?.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
+    const validation = patientProfileSchema.safeParse(formData);
+
+    if (!validation.success) {
+      const newErrors: Partial<Record<keyof typeof formData, string>> = {};
+      
+      validation.error.issues.forEach((issue) => {
+        const path = issue.path[0] as keyof typeof formData;
+        
+        if (issue.code === z.ZodIssueCode.custom && issue.path.length === 0) {
+           if (!formData.currentPassword) newErrors.currentPassword = 'Current password is required to change password';
+           if (formData.newPassword && formData.newPassword.length < 6) newErrors.newPassword = 'New password must be at least 6 characters';
+           if (formData.newPassword !== formData.confirmNewPassword) newErrors.confirmNewPassword = 'Passwords do not match';
+        } else {
+          newErrors[path] = issue.message;
+        }
+      });
+
+      if (formData.newPassword || formData.confirmNewPassword || formData.currentPassword) {
+        if (!formData.currentPassword) newErrors.currentPassword = 'Current password is required to change password';
+        if (formData.newPassword && formData.newPassword.length < 6) newErrors.newPassword = 'New password must be at least 6 characters';
+        if (formData.newPassword !== formData.confirmNewPassword) newErrors.confirmNewPassword = 'Passwords do not match';
+      }
+
+      setErrors(newErrors);
+      return false;
     }
 
-    const phoneVal = formData.phone?.toString() || '';
-    if (!phoneVal.trim()) {
-      newErrors.phone = 'Phone number is required';
-    } else if (!/^\d{10}$/.test(phoneVal)) {
-      newErrors.phone = 'Phone must be 10 digits';
-    }
-
-    // Password validation (only if attempting to change)
-    if (formData.newPassword || formData.confirmNewPassword || formData.currentPassword) {
-      if (!formData.currentPassword) {
-        newErrors.currentPassword = 'Current password is required to change password';
-      }
-      if (formData.newPassword && formData.newPassword.length < 6) {
-        newErrors.newPassword = 'New password must be at least 6 characters';
-      }
-      if (formData.newPassword !== formData.confirmNewPassword) {
-        newErrors.confirmNewPassword = 'Passwords do not match';
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors({});
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -176,13 +196,13 @@ const EditPatientProfile = () => {
 
       if (patient?._id) {
         // 1. Update Profile Basic Info
-        await PatientService.updateProfile(patient._id, profilePayload);
+        await PatientService.updateProfile(profilePayload);
         profileUpdated = true;
 
         // 2. Update Password if requested
         if (formData.newPassword && formData.currentPassword) {
           try {
-            await PatientService.changePassword(patient._id, {
+            await PatientService.changePassword({
               currentPassword: formData.currentPassword,
               newPassword: formData.newPassword,
             });

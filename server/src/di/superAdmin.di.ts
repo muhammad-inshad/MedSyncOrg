@@ -17,6 +17,8 @@ import { SuperAdminAuthService } from "../services/auth/superAdmin/superAdmin.se
 import { SuperAdminAuthController } from "../controllers/auth/superAdmin/superAdmin.auth.controller.ts";
 import { SuperAdminMapper } from "../mappers/superAdmin.mapper.ts";
 import { HospitalMapper } from "../mappers/hospital.mapper.ts";
+import { KycHospitalMapper } from "../mappers/kyc-hospital.mapper.ts";
+import { SubscriptionMapper } from "../mappers/subscription.mapper.ts";
 import { HospitalModel } from "../models/hospital.model.ts";
 import { HospitalRepository } from "../repositories/hospital/hospital.repository.ts";
 import { DoctorRepository } from "../repositories/doctor/doctor.repository.ts";
@@ -36,6 +38,8 @@ export const superAdminContainer = () => {
   const doctorRepo = new DoctorRepository(DoctorModel);
   const patientRepo = new UserRepository(Patient);
   const hospitalMapper = new HospitalMapper();
+  const kycHospitalMapper = new KycHospitalMapper();
+  const subscriptionMapper = new SubscriptionMapper();
 
   // Dashboard Module
   const dashboardService = new SuperAdminDashboardService(superAdminRepo, kycRepo, doctorRepo, patientRepo);
@@ -46,7 +50,7 @@ export const superAdminContainer = () => {
   const hospitalController = new SuperAdminHospitalController(hospitalService);
 
   // KYC Management Module
-  const kycService = new SuperAdminKycService(kycRepo, hospitalMapper);
+  const kycService = new SuperAdminKycService(kycRepo, kycHospitalMapper);
 
   const kycController = new SuperAdminKycController(kycService);
 
@@ -61,7 +65,7 @@ export const superAdminContainer = () => {
   const patientManagementController = new SuperAdminPatientManagementController(patientManagementService);
 
   // Subscription Module
-  const subscriptionService = new SubscriptionService(subscriptionRepo);
+  const subscriptionService = new SubscriptionService(subscriptionRepo, subscriptionMapper);
   const subscriptionController = new SubscriptionController(subscriptionService);
 
   return {

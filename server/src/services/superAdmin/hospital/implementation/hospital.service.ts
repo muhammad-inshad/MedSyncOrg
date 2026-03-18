@@ -3,7 +3,7 @@ import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { IHospital } from "../../../../models/hospital.model.ts";
 import { uploadBufferToCloudinary } from "../../../../utils/cloudinaryUpload.ts";
-import { HospitalResponseDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
+import { HospitalResponseDTO, HospitalStatusUpdateResponseDTO, HospitalStatusUpdateResponseSchema, CreateHospitalDTO, UpdateHospitalDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
 import { HospitalMapper } from "../../../../mappers/hospital.mapper.ts";
 import bcrypt from "bcryptjs";
 import { ISuperAdminKYCRepository } from "../../../../repositories/superAdmin/interfaces/superAdminkyc.repository.interface.ts";
@@ -35,17 +35,17 @@ export class SuperAdminHospitalService implements ISuperAdminHospitalService {
         };
     }
 
-    async setActive(id: string, isActive: boolean): Promise<HospitalResponseDTO & { message: string }> {
+    async setActive(id: string, isActive: boolean): Promise<HospitalStatusUpdateResponseDTO> {
         const updatedHospital = await this.kycRepo.update(id, { isActive } as Partial<IHospital>);
 
         if (!updatedHospital) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Hospital not found");
         }
 
-        return {
+        return HospitalStatusUpdateResponseSchema.parse({
             ...this.hospitalMapper.toDTO(updatedHospital),
             message: `Hospital successfully ${isActive ? 'activated' : 'deactivated'}`
-        };
+        });
     }
 
     async updateHospitalStatus(id: string, status: string, reason?: string): Promise<HospitalResponseDTO | null> {
@@ -63,7 +63,7 @@ export class SuperAdminHospitalService implements ISuperAdminHospitalService {
     }
 
     async addHospital(
-        data: Partial<IHospital>,
+        data: CreateHospitalDTO,
         files?: { logo?: Express.Multer.File; licence?: Express.Multer.File }
     ): Promise<HospitalResponseDTO> {
         const { email, password, hospitalName, address, phone, since } = data;
@@ -98,25 +98,27 @@ export class SuperAdminHospitalService implements ISuperAdminHospitalService {
                 const durationUnit = planDetails.durationUnit || 'months';
                 
                 data.subscription.startDate = startDate;
-                data.subscription.endDate = this.calculateSubscriptionEndDate(startDate, duration, durationUnit);
+                (data.subscription as any).endDate = this.calculateSubscriptionEndDate(startDate, duration, durationUnit);
             }
         }
 
-        const created = await this.hospitalRepo.create({
+        const createdData: Partial<IHospital> = {
             ...data,
             since: Number(since),
             password: hashedPassword,
             logo: logoUrl || data.logo,
             licence: licenceUrl || data.licence,
             isActive: true,
-        } as Partial<IHospital>);
+        } as Partial<IHospital>;
+
+        const created = await this.hospitalRepo.create(createdData);
 
         return this.hospitalMapper.toDTO(created);
     }
 
     async editHospital(
         id: string,
-        updateData: Partial<IHospital> = {},
+        updateData: UpdateHospitalDTO = {},
         files?: { logo?: Express.Multer.File; licence?: Express.Multer.File }
     ): Promise<HospitalResponseDTO | null> {
         const hospital = await this.hospitalRepo.findById(id);
@@ -144,11 +146,11 @@ export class SuperAdminHospitalService implements ISuperAdminHospitalService {
                 const durationUnit = planDetails.durationUnit || 'months';
                 
                 updateData.subscription.startDate = startDate;
-                updateData.subscription.endDate = this.calculateSubscriptionEndDate(startDate, duration, durationUnit);
+                (updateData.subscription as any).endDate = this.calculateSubscriptionEndDate(startDate, duration, durationUnit);
             }
         }
 
-        const updated = await this.hospitalRepo.update(id, updateData);
+        const updated = await this.hospitalRepo.update(id, updateData as Partial<IHospital>);
         return updated ? this.hospitalMapper.toDTO(updated) : null;
     }
 

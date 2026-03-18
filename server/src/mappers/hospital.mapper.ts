@@ -1,6 +1,6 @@
 import { IMapper } from "../interfaces/mapper.interface.ts";
 import { IHospital } from "../models/hospital.model.ts";
-import { HospitalResponseDTO } from "../dto/hospital/hospital-response.dto.ts";
+import { HospitalResponseDTO, HospitalResponseSchema } from "../dto/hospital/hospital-response.dto.ts";
 
 export class HospitalMapper implements IMapper<IHospital, HospitalResponseDTO> {
     toDTO(
@@ -8,9 +8,8 @@ export class HospitalMapper implements IMapper<IHospital, HospitalResponseDTO> {
         limits?: HospitalResponseDTO['subscription']['limits'],
         currentCounts?: HospitalResponseDTO['currentCounts']
     ): HospitalResponseDTO {
-        return {
+        const dto = {
             id: hospital._id.toString(),
-            _id: hospital._id.toString(),
             hospitalName: hospital.hospitalName,
             logo: hospital.logo,
             address: hospital.address,
@@ -44,5 +43,8 @@ export class HospitalMapper implements IMapper<IHospital, HospitalResponseDTO> {
             createdAt: hospital.createdAt,
             updatedAt: hospital.updatedAt,
         };
+
+        // Output Validation using Zod
+        return HospitalResponseSchema.parse(dto);
     }
 }
