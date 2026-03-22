@@ -48,6 +48,7 @@ const PatientProfile: React.FC = () => {
   }
 
   const livetoken=()=>{
+    console.log("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
     navigate(PATIENT_ROUTES.LIVETOKEN)
   }
 
@@ -147,7 +148,7 @@ const PatientProfile: React.FC = () => {
                     />
                   </svg>
                 </div>
-                <h3 className="text-base font-semibold text-gray-800">Live Token</h3>
+                <h3 className="text-base font-semibold text-gray-800" onClick={()=>livetoken()}>Live Token</h3>
               </div>
               <button className="w-full bg-teal-500 hover:bg-teal-600 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
                 Get Token

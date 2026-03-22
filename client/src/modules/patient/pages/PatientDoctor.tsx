@@ -89,7 +89,6 @@ export default function PatientDoctor() {
   const { departmentId } = useParams();
   const searchQuery = useSelector((state: RootState) => state.search.query);
 
-  // ── Sync Page with Search ──
   const [prevSearchQuery, setPrevSearchQuery] = useState(searchQuery);
   if (searchQuery !== prevSearchQuery) {
     setPrevSearchQuery(searchQuery);
@@ -182,10 +181,10 @@ export default function PatientDoctor() {
                 {/* Button */}
                 <div className="bg-white px-4 py-4 mt-auto">
                   <button
-                    onClick={() => navigate(`/patient/doctor-profile/${doc._id}`)}
+                    onClick={() => navigate(`/patient/doctor-profile/${doc.id}`)}
                     className="w-full bg-[#0d2b4e] text-white text-sm font-bold py-2.5 rounded-lg hover:bg-[#163a68] transition-all transform hover:scale-[1.02] active:scale-95 cursor-pointer shadow-md"
                   >
-                    View Profile
+                    View Profile 
                   </button>
                 </div>
               </div>

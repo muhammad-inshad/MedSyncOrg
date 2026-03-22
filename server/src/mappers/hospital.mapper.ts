@@ -1,6 +1,7 @@
 import { IMapper } from "../interfaces/mapper.interface.ts";
 import { IHospital } from "../models/hospital.model.ts";
 import { HospitalResponseDTO, HospitalResponseSchema } from "../dto/hospital/hospital-response.dto.ts";
+import z from "zod";
 
 export class HospitalMapper implements IMapper<IHospital, HospitalResponseDTO> {
     toDTO(
@@ -11,7 +12,7 @@ export class HospitalMapper implements IMapper<IHospital, HospitalResponseDTO> {
         const dto = {
             id: hospital._id.toString(),
             hospitalName: hospital.hospitalName,
-            logo: hospital.logo,
+            logo: hospital.logo ?? undefined, // Convert null to undefined
             address: hospital.address,
             isActive: hospital.isActive,
             autoDisabled: hospital.autoDisabled,
@@ -19,32 +20,41 @@ export class HospitalMapper implements IMapper<IHospital, HospitalResponseDTO> {
             phone: hospital.phone,
             since: hospital.since,
             pincode: hospital.pincode,
-            about: hospital.about,
-            licence: hospital.licence,
-            images: hospital.images || {
-                landscape: [],
-                medicalTeam: [],
-                patientCare: [],
-                services: [],
+            about: hospital.about ?? undefined,
+            licence: hospital.licence ?? undefined,
+            images: {
+                landscape: hospital.images?.landscape || [],
+                medicalTeam: hospital.images?.medicalTeam || [],
+                patientCare: hospital.images?.patientCare || [],
+                services: hospital.images?.services || [],
             },
             income: hospital.income || 0,
             reviewStatus: hospital.reviewStatus,
-            reapplyDate: hospital.reapplyDate,
-            rejectionReason: hospital.rejectionReason,
+            // FIX: reapplyDate was null in your log. This converts it for Zod:
+            reapplyDate: hospital.reapplyDate ?? undefined, 
+            rejectionReason: hospital.rejectionReason ?? undefined,
             subscription: {
-                plan: (hospital.subscription?.plan as "free" | "basic" | "premium") || "free",
+                plan: hospital.subscription?.plan ,
                 amount: hospital.subscription?.amount || 0,
                 status: hospital.subscription?.status || "active",
-                startDate: hospital.subscription?.startDate,
-                endDate: hospital.subscription?.endDate,
-                limits: limits,
+                startDate: hospital.subscription?.startDate ?? undefined,
+                endDate: hospital.subscription?.endDate ?? undefined,
+                limits: limits, // Ensure your Schema has .optional() for this
             },
             currentCounts: currentCounts,
             createdAt: hospital.createdAt,
             updatedAt: hospital.updatedAt,
         };
 
-        // Output Validation using Zod
-        return HospitalResponseSchema.parse(dto);
+        try {
+            return HospitalResponseSchema.parse(dto);
+        } catch (error) {
+            console.error("Hospital Mapping Failed for:", hospital.hospitalName);
+            // This will tell you exactly which field is breaking the flow
+            if (error instanceof z.ZodError) {
+                console.error(error.format());
+            }
+            throw error; 
+        }
     }
 }

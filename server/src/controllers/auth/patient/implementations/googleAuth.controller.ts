@@ -55,9 +55,6 @@ export class GoogleAuthController {
 
     } catch (error) {
       console.error("Google Auth Controller Error:", error);
-      // For Google Auth, we might still want a redirect, but decentralized error handling
-      // usually means next(error). If we want to maintain the redirect, we can do it in the error middleware
-      // or keep it here. Given the user's request to "centralize", I'll use next(error).
       next(error);
     }
   }

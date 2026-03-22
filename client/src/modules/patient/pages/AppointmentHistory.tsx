@@ -13,7 +13,7 @@ type AppointmentStatus = 'pending' | 'completed' | 'cancelled';
 type AppointmentMode = 'online' | 'offline';
 
 interface IAppointment {
-    _id: string;
+    id: string;
     doctorId: { name: string; specialization: string; department: string; profileImage: string; };
     appointmentDate: string;
     tokenNumber: number;
@@ -55,29 +55,46 @@ const AppointmentHistory = () => {
     const [isCancelling, setIsCancelling] = useState(false);
 
    
-    useEffect(() => {
-     
-        const fetch = async () => {
-            setIsLoading(true);
-            try {
-                const result = await patientApi.getAppoimentHistory( currentPage, limit, searchQuery);
-                const responseData = result.data;
-                if (responseData.success) {
-                    setAppointments(Array.isArray(responseData.data) ? responseData.data : []);
-                    setTotalPages(responseData.pagination?.totalPages || 1);
-                } else {
-                    setAppointments([]);
-                }
-            } catch (err) {
-                console.error('Failed to fetch appointments', err);
-                setAppointments([]);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-        fetch();
-    }, [ currentPage, searchQuery]);
+useEffect(() => {
+    const fetch = async () => {
+        setIsLoading(true);
+        try {
+            const result = await patientApi.getAppoimentHistory(currentPage, limit, searchQuery);
+            const responseData = result.data;
 
+            if (responseData.success) {
+                const mappedData = responseData.data.map((item: any) => ({
+                    ...item,
+                    id: item.id,
+                    patientDetails: {
+                        name: item.patientName,
+                        age: item.patientAge,
+                        phone: item.patientPhone,
+                    },
+                    // Update this part to map flat fields to the nested object
+                    doctorId: { 
+                        id: item.doctorId,
+                        name: item.doctorName || 'Unknown Doctor', 
+                        specialization: item.doctorSpecialization || 'General',
+                        department: item.doctorDepartment || 'General Medicine', 
+                        profileImage: item.doctorProfileImage || 'https://via.placeholder.com/150' 
+                    }
+                }));
+
+                setAppointments(mappedData);
+                setTotalPages(responseData.pagination?.totalPages || 1);
+            } else {
+                setAppointments([]);
+            }
+        } catch (err) {
+            console.error('Failed to fetch appointments', err);
+            setAppointments([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    fetch();
+}, [currentPage, searchQuery]);
     useEffect(() => {
         setCurrentPage(1);
     }, [searchQuery, filter]);
@@ -86,15 +103,15 @@ const AppointmentHistory = () => {
         if (!cancelTarget || !cancelReason.trim()) return;
         setIsCancelling(true);
         try {
-            await patientApi.cancelAppointment(cancelTarget._id, { reason: cancelReason });
+            await patientApi.cancelAppointment(cancelTarget.id, { reason: cancelReason });
             setAppointments(prev =>
-                prev.map(a => a._id === cancelTarget._id
+                prev.map(a => a.id === cancelTarget.id
                     ? { ...a, status: 'cancelled', rejectionReason: cancelReason }
                     : a
                 )
             );
 
-            if (selected?._id === cancelTarget._id) {
+            if (selected?.id === cancelTarget.id) {
                 setSelected(prev => prev ? { ...prev, status: 'cancelled', rejectionReason: cancelReason } : null);
             }
             toast.success("Appointment cancelled successfully");
@@ -168,7 +185,7 @@ const AppointmentHistory = () => {
                         {list.map((appt) => {
                             const s = statusCfg[appt.status];
                             return (
-                                <div key={appt._id}
+                                <div key={appt.id}
                                     className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all group">
                                     <div className="flex items-center gap-4 px-6 py-4">
                                         <img src={appt.doctorId.profileImage} alt={appt.doctorId.name}
@@ -181,7 +198,7 @@ const AppointmentHistory = () => {
                                                 <span className="font-bold text-gray-900">Dr. {appt.doctorId.name}</span>
                                                 <span className={`text-xs font-bold px-3 py-0.5 rounded-full ${s.cls}`}>{s.label}</span>
                                             </div>
-                                            <p className="text-sm text-gray-500 mb-2">{appt.doctorId.department} — {appt.doctorId.specialization}</p>
+                                          
                                             <div className="flex items-center gap-4 flex-wrap text-xs text-gray-500">
                                                 <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-blue-400" />{fmt(appt.appointmentDate)}</span>
                                                 <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-blue-400" />{appt.visitTime}</span>

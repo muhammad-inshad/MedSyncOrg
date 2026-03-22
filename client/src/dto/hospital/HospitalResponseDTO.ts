@@ -23,6 +23,7 @@ export interface SpecializationResponseDTO {
 }
 
 export interface HospitalResponseDTO {
+  id:string;
   _id: string;
   hospitalName: string;
   logo?: string;

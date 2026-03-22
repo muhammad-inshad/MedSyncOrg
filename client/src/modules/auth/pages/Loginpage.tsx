@@ -112,11 +112,9 @@ const LogIn = () => {
     }
   };
 
-  const handleGoogleLogIn = () => {
-    authApi.googleLogin();
-  };
-
-
+  const handleGoogleLogIn = (role: string) => {
+  authApi.googleLogin(role);
+  }
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
 
@@ -200,7 +198,7 @@ const LogIn = () => {
             </div>
 
             <button
-              onClick={handleGoogleLogIn}
+              onClick={()=>handleGoogleLogIn(role)}
               className="w-full bg-white border border-gray-300 py-3 rounded-lg font-medium flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">

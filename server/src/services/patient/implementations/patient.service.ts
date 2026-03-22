@@ -80,6 +80,8 @@ export class PatientService implements IPatientService {
       searchFields: ["hospitalName", "address", "email"],
       filter: { isActive: true, reviewStatus: "approved" }
     });
+
+    console.log(result)
     
     return {
       ...result,
@@ -104,6 +106,7 @@ export class PatientService implements IPatientService {
   }
 
   async selectedHospital(id: string, page: number = 1, limit: number = 6, search: string = ""): Promise<selectedHospitalDto> {
+    
     const hospital = await this._hospitalRepo.findById(id);
     if (!hospital) {
       ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.ADMIN.NOT_FOUND);
@@ -116,30 +119,54 @@ export class PatientService implements IPatientService {
     ]);
 
     const departmentsWithCounts = await Promise.all(
-      departmentsResult.data.map(async (dept: IDepartment) => {
-        const deptObj = dept.toObject ? dept.toObject() : dept;
-        const doctorCount = await this._doctorRepo.countByDepartment(id, deptObj._id.toString());
+      departmentsResult.data.map(async (dept) => {
+        const d = dept.toObject ? dept.toObject() : dept;
+        const doctorCount = await this._doctorRepo.countByDepartment(id, d._id.toString());
         return {  
-          ...deptObj,
-          _id: deptObj._id.toString(),
+          ...d,
+          _id: d._id.toString(),
           doctorCount
-        } as DepartmentResponseDTO;
+        };
       })
     );
 
-    const selectedHospitalData: selectedHospitalDto = {
-      ...hospital!.toObject(),
-      _id: hospital!._id.toString(),
+    const formattedQualifications = qualifications.map((q) => {
+      const obj = q.toObject ? q.toObject() : q;
+      return {
+        _id: obj._id.toString(),
+        name: String(obj.name || ""),
+        qualificationName: String(obj.qualificationName || obj.abbreviation || ""),
+        description: obj.description || "",
+        image: obj.image || ""
+      };
+    });
+
+    const formattedSpecializations = specializations.map((s) => {
+      const obj = s.toObject ? s.toObject() : s;
+      return {
+        _id: obj._id.toString(),
+        name: String(obj.name || ""),
+        description: obj.description || "",
+        image: obj.image || "",
+        department_id: obj.department_id.toString()
+      };
+    });
+
+    const hospitalData = hospital!.toObject();
+
+    const selectedHospitalData = {
+      ...hospitalData,
+      _id: hospitalData._id.toString(),
       departments: departmentsWithCounts,
-      qualifications: qualifications as unknown as QualificationResponseDTO[],
-      specializations: specializations as unknown as SpecializationResponseDTO[],
+      qualifications: formattedQualifications,
+      specializations: formattedSpecializations,
       totalDepartments: departmentsResult.total,
       currentPage: page,
       totalPages: Math.ceil(departmentsResult.total / limit)
     };
-    
+
     return SelectedHospitalSchema.parse(selectedHospitalData);
-  }
+}
 
   async getDoctorDepartment(id: string, page: number, limit: number, search: string): Promise<IPaginationResult<DoctorResponseDTO>> {
     const result = await this._doctorRepo.findWithPagination({
@@ -157,7 +184,6 @@ export class PatientService implements IPatientService {
 
   async getDoctorById(id: string): Promise<DoctorResponseDTO> {
     const doctor = await this._doctorRepo.findById(id);
-
     if (!doctor) {
       ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
     }

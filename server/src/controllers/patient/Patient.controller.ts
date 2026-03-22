@@ -172,11 +172,10 @@ class PatientController {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 5;
       const search = (req.query.search as string) || "";
-
       if (!patientId) {
         return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
       }
-      const result = await this.patientService.getAppoimentHistory(patientId, { page, limit, search });
+      const result = await this.patientService.getAppoimentHistory(patientId, { page, limit, search })
       return ApiResponse.success(res, "Appointment history fetched successfully", result.data, HttpStatusCode.OK, {
         page,
         limit,

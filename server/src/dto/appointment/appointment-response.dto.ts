@@ -6,10 +6,18 @@ export const AppointmentResponseSchema = z.object({
     patientName: z.string(),
     patientAge: z.number(),
     patientPhone: z.string(),
-    appointmentDate: z.string(), // ISO string
-    visitTime: z.string().optional(),
+    appointmentDate: z.string(), 
+    visitTime: z.string().optional().nullable(),
     status: z.nativeEnum(AppointmentStatus),
     mode: z.nativeEnum(AppointmentMode),
+    
+    // Doctor Details - Added these fields
+    doctorId: z.string(),
+    doctorName: z.string().optional(),
+    doctorProfileImage: z.string().optional().nullable(),
+    doctorSpecialization: z.string().optional(),
+    doctorDepartment: z.string().optional(),
+
     tokenNumber: z.number(),
     prescription: z.object({
         medicines: z.array(z.object({

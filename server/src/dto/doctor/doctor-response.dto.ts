@@ -11,7 +11,6 @@ export const DoctorResponseSchema = z.object({
     qualification: z.string(),
     experience: z.string(),
     department: z.string(),
-    hospital_id: z.string().optional(),
     about: z.string(),
     licence: z.string(),
     profileImage: z.string(),
@@ -21,16 +20,17 @@ export const DoctorResponseSchema = z.object({
     isAccountVerified: z.boolean(),
     walletBalance: z.number(),
     reviewStatus: z.enum(["pending", "approved", "revision", "rejected"]),
-    reapplyDate: z.union([z.date(), z.string()]).optional(),
+    reapplyDate: z.union([z.date(), z.string()]).nullable().optional(), // Add .nullable()
+    hospital_id: z.string().nullable().optional(),
     rejectionReason: z.string().optional(),
     availableSlots: z.array(z.string()),
     consultationTime: z.object({
         start: z.string(),
         end: z.string(),
     }),
-    payment: z.object({
+   payment: z.object({
         type: z.enum(["commission", "fixed"]),
-        commissionPercentage: z.number().optional(),
+        commissionPercentage: z.number().nullable().optional(), // Add .nullable()
         fixedSalary: z.number().optional(),
         payoutCycle: z.enum(["weekly", "monthly"]),
         patientsPerDayLimit: z.number(),

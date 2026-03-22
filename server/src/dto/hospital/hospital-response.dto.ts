@@ -4,7 +4,6 @@ import { IHospital } from "../../models/hospital.model.ts";
 export const HospitalResponseSchema = z.object({
     id: z.string(),
     hospitalName: z.string(),
-    logo: z.string().optional(),
     address: z.string(),
     isActive: z.boolean(),
     autoDisabled: z.boolean(),
@@ -12,8 +11,10 @@ export const HospitalResponseSchema = z.object({
     phone: z.string(),
     since: z.number(),
     pincode: z.string(),
-    about: z.string().optional(),
-    licence: z.string().optional(),
+    reapplyDate: z.union([z.date(), z.string()]).nullable().optional(),
+logo: z.string().nullable().optional(),
+licence: z.string().nullable().optional(),
+about: z.string().nullable().optional(),
     income: z.number(),
     images: z.object({
         landscape: z.array(z.string()),
@@ -22,10 +23,9 @@ export const HospitalResponseSchema = z.object({
         services: z.array(z.string()),
     }),
     reviewStatus: z.enum(["pending", "approved", "revision", "rejected"]),
-    reapplyDate: z.union([z.date(), z.string()]).optional(),
     rejectionReason: z.string().optional(),
     subscription: z.object({
-        plan: z.enum(["free", "basic", "premium"]),
+        plan: z.string(),
         amount: z.number(),
         status: z.enum(["active", "expired", "cancelled"]),
         startDate: z.union([z.date(), z.string()]).optional(),
@@ -107,7 +107,7 @@ export const SelectedHospitalSchema = z.object({
   licence: z.string().optional(),
 
   subscription: z.object({
-    plan: z.enum(["free", "basic", "premium"]),
+    plan: z.string(),
     amount: z.number(),
     status: z.enum(["active", "expired", "cancelled"]),
     startDate: z.union([z.date(), z.string()]).optional(),
@@ -151,7 +151,7 @@ export const CreateHospitalSchema = z.object({
   logo: z.string().optional(),
   licence: z.string().optional(),
   subscription: z.object({
-    plan: z.enum(["free", "basic", "premium"]),
+    plan: z.string(),
     amount: z.number().optional(),
     status: z.enum(["active", "expired", "cancelled"]).optional(),
     startDate: z.union([z.date(), z.string()]).optional(),

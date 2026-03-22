@@ -30,7 +30,7 @@ export class AppointmentRepository extends BaseRepository<IAppointment> implemen
 
             const [appointments, total] = await Promise.all([
                 this.model.find(query)
-                    .sort({ tokenNumber: 1 })
+                    .sort({ tokenNumber: 1, createdAt: 1 }) // Added createdAt: 1 for stable sorting
                     .skip(skip)
                     .limit(limit)
                     .exec(),
@@ -59,7 +59,7 @@ export class AppointmentRepository extends BaseRepository<IAppointment> implemen
                 $gte: startOfDay,
                 $lte: endOfDay
             },
-            status: { $nin: [AppointmentStatus.COMPLETED, AppointmentStatus.CANCELLED] }
+            status: { $nin: [AppointmentStatus.CANCELLED] } // Included COMPLETED to ensure consecutive token numbers
         }).exec();
     }
 

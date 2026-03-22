@@ -28,12 +28,10 @@ export class PatientAuthMiddleware {
         return res.status(HttpStatusCode.FORBIDDEN).json({ message: "Insufficient permissions" });
       }
 
-      // Check if user is blocked in real-time
       const user = await this._userRepo.findById(payload.userId);
       if (!user || user.isActive === false) {
         return res.status(HttpStatusCode.FORBIDDEN).json({ message: "Account is blocked" });
       }
-
       req.user = payload;
       next();
     } catch (error) {

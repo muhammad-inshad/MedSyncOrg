@@ -1,9 +1,9 @@
 import { IMapper } from "../interfaces/mapper.interface.ts";
 import { IPatient } from "../models/Patient.model.ts";
 import { PatientResponseDTO, PatientResponseSchema } from "../dto/patient/patient-response.dto.ts";
-
 export class PatientMapper implements IMapper<IPatient, PatientResponseDTO> {
     toDTO(patient: IPatient): PatientResponseDTO {
+        // 1. Define the object FIRST
         const dto = {
             id: patient._id.toString(),
             name: patient.name || patient.email,
@@ -26,8 +26,16 @@ export class PatientMapper implements IMapper<IPatient, PatientResponseDTO> {
             isProfileComplete: patient.isProfileComplete || false,
             createdAt: patient.createdAt,
             updatedAt: patient.updatedAt,
+            age: patient.age
         };
 
-        return PatientResponseSchema.parse(dto);
+        try {
+            return PatientResponseSchema.parse(dto);
+        } catch (error) {
+            
+            console.log("Validation failed for:", dto.email);
+            console.error(JSON.stringify(error, null, 2)); 
+            throw error;
+        }
     }
 }

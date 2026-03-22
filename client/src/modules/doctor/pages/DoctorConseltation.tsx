@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import DoctorSidebar from '../components/DoctorSidebar';
 import { z } from 'zod';
 import { 
@@ -6,13 +6,14 @@ import {
   Phone, 
   Mail, 
   MapPin, 
-  MessageSquare, 
   ChevronLeft, 
   ChevronRight, 
   CheckCircle,
-  FileText
+  FileText,
+  Video
 } from 'lucide-react';
 import { doctorApi } from '@/constants/backend/doctor/doctor.api';
+import { socket } from "../../../services/socket.services";
 import toast from 'react-hot-toast';
 import type { IAppointment, IPrescriptionData } from '@/interfaces/IAppointment';
 import PrescriptionModal from '../components/PrescriptionModal';
@@ -23,6 +24,13 @@ const DoctorConsultation = () => {
   const [totalTokens, setTotalTokens] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCallActive, setIsCallActive] = useState(false);
+  const [remoteStreamState, setRemoteStreamState] = useState<MediaStream | null>(null);
+
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  const peerConnection = useRef<RTCPeerConnection | null>(null);
+  const localStream = useRef<MediaStream | null>(null);
 
   const fetchConsultation = async (page: number) => {
     try {
@@ -30,7 +38,18 @@ const DoctorConsultation = () => {
       const result = await doctorApi.getConsultation({ page, limit: 1 });
       if (result.data && result.data.data) {
         const { appointments, total } = result.data.data;
-        setCurrentAppointment(appointments.length > 0 ? appointments[0] : null);
+        const mappedAppointments = appointments.map((app: any) => ({
+          ...app,
+          _id: app.id || app._id,
+          patientDetails: {
+            name: app.patientName || "Unknown",
+            age: app.patientAge || 0,
+            phone: app.patientPhone || "N/A",
+            email: app.patientEmail || "",
+            address: app.patientAddress || "No Address"
+          }
+        }));
+        setCurrentAppointment(mappedAppointments.length > 0 ? mappedAppointments[0] : null);
         setTotalTokens(total);
       }
     } catch (error) {
@@ -43,6 +62,116 @@ const DoctorConsultation = () => {
   useEffect(() => {
     fetchConsultation(currentIndex);
   }, [currentIndex]);
+
+  useEffect(() => {
+    if (!currentAppointment) return;
+
+    const roomId = currentAppointment._id;
+
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    socket.emit("join-room", roomId);
+    console.log("Joined room:", roomId);
+
+    return () => {
+      setIsCallActive(false);
+      setRemoteStreamState(null);
+      if (localStream.current) {
+        localStream.current.getTracks().forEach(track => track.stop());
+      }
+      if (peerConnection.current) {
+        peerConnection.current.close();
+      }
+    };
+  }, [currentAppointment]);
+
+  const handleStartCall = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
+
+      localStream.current = stream;
+
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+      }
+
+      const pc = new RTCPeerConnection({
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      });
+      peerConnection.current = pc;
+
+      stream.getTracks().forEach((track) => {
+        pc.addTrack(track, stream);
+      });
+
+      pc.ontrack = (event) => {
+        console.log("Remote track received:", event.streams[0]);
+        setRemoteStreamState(event.streams[0]);
+      };
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate && currentAppointment && currentAppointment._id) {
+          socket.emit("ice-candidate", {
+            roomId: currentAppointment._id,
+            candidate: event.candidate,
+          });
+        }
+      };
+
+      setIsCallActive(true);
+      console.log("Peer connection ready");
+
+      // Create and send offer
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      
+      if (currentAppointment && currentAppointment._id) {
+        socket.emit("offer", {
+          roomId: currentAppointment._id,
+          offer,
+        });
+        console.log("Offer sent");
+      }
+
+    } catch (error) {
+      console.error("Error accessing media devices:", error);
+      toast.error("Could not access camera/microphone");
+    }
+  };
+
+  useEffect(() => {
+    if (!currentAppointment) return;
+
+    const handleAnswer = async (answer: any) => {
+      if (peerConnection.current) {
+        await peerConnection.current.setRemoteDescription(answer);
+        console.log("Call connected 🎉");
+      }
+    };
+
+    const handleIceCandidate = async (candidate: any) => {
+      if (peerConnection.current) {
+        try {
+          await peerConnection.current.addIceCandidate(candidate);
+        } catch (err) {
+          console.error("ICE error:", err);
+        }
+      }
+    };
+
+    socket.on("answer", handleAnswer);
+    socket.on("ice-candidate", handleIceCandidate);
+
+    return () => {
+      socket.off("answer", handleAnswer);
+      socket.off("ice-candidate", handleIceCandidate);
+    };
+  }, [currentAppointment]);
 
   const handleNext = () => currentIndex < totalTokens && setCurrentIndex(prev => prev + 1);
   const handlePrev = () => currentIndex > 1 && setCurrentIndex(prev => prev - 1);
@@ -117,7 +246,7 @@ const DoctorConsultation = () => {
           <div className="text-right">
             <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Queue Status</span>
             <div className="text-2xl font-black text-indigo-600">
-              {currentAppointment?.tokenNumber} <span className="text-slate-300">/ {totalTokens}</span>
+              {currentIndex} <span className="text-slate-300">/ {totalTokens}</span>
             </div>
           </div>
         </header>
@@ -148,12 +277,76 @@ const DoctorConsultation = () => {
                     </div>
                   </div>
                 </div>
-                {currentAppointment?.mode === 'online' && (
-                  <button className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-bold shadow-lg">
-                    <MessageSquare size={20} /> Open Chat
+                {currentAppointment?.mode === 'online' && !isCallActive && (
+                  <button 
+                    onClick={handleStartCall}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-bold shadow-lg transition-transform active:scale-95"
+                  >
+                    <Video size={20} /> Start Video Call
+                  </button>
+                )}
+                {isCallActive && (
+                  <button 
+                    onClick={() => {
+                      setIsCallActive(false);
+                      setRemoteStreamState(null);
+                      if (localStream.current) {
+                        localStream.current.getTracks().forEach(track => track.stop());
+                      }
+                      if (peerConnection.current) {
+                        peerConnection.current.close();
+                        peerConnection.current = null;
+                      }
+                    }}
+                    className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-bold shadow-lg transition-transform active:scale-95"
+                  >
+                    <Video size={20} /> End Call
                   </button>
                 )}
               </div>
+
+              {isCallActive && (
+                <div className="px-8 pb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="relative bg-slate-800 rounded-3xl overflow-hidden aspect-video shadow-2xl group">
+                    <video
+                      ref={(el) => {
+                        localVideoRef.current = el;
+                        if (el && localStream.current) {
+                          el.srcObject = localStream.current;
+                        }
+                      }}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-4 left-4 bg-indigo-600/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                      You (Doctor)
+                    </div>
+                  </div>
+                  <div className="relative bg-slate-800 rounded-3xl overflow-hidden aspect-video shadow-2xl group">
+                    <video
+                      ref={(el) => {
+                        remoteVideoRef.current = el;
+                        if (el && remoteStreamState) {
+                          el.srcObject = remoteStreamState;
+                        }
+                      }}
+                      autoPlay
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-4 left-4 bg-emerald-600/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                      Patient
+                    </div>
+                    {!remoteStreamState && (
+                      <div className="absolute inset-0 flex items-center justify-center text-slate-400 font-medium">
+                        Waiting for patient to join...
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div className="space-y-6">
@@ -217,4 +410,4 @@ const DoctorConsultation = () => {
   );
 };
 
-export default DoctorConsultation;
+export default DoctorConsultation

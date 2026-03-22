@@ -1,15 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState,useRef } from 'react';
 import { ChevronLeft, ChevronRight, Users, Clock } from 'lucide-react';
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
 import { patientApi } from '@/constants/backend/patient/patient.api';
+import { socket } from "../../../services/socket.services";
+
 
 const Livetoken = () => {
     const [myAppointments, setMyAppointments] = useState<any[]>([]);
     const [activeIdx, setActiveIdx] = useState(0);
     const [currentToken, setCurrentToken] = useState<number>(0);
     const [loading, setLoading] = useState(true);
+    const [isCallActive, setIsCallActive] = useState(false);
+    const [remoteStreamState, setRemoteStreamState] = useState<MediaStream | null>(null);
     const AVG_TIME_PER_PATIENT = 15;
+    const localVideoRef = useRef<HTMLVideoElement | null>(null);
+    const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+    const peerConnection = useRef<RTCPeerConnection | null>(null);
+    const localStream = useRef<MediaStream | null>(null);
+    const pendingOffer = useRef<any>(null);
 
     const selectedAppointment = myAppointments.length > 0 ? myAppointments[activeIdx] : null;
     const tokensAhead = selectedAppointment ? Math.max(0, selectedAppointment.tokenNumber - currentToken) : 0;
@@ -19,14 +28,22 @@ const Livetoken = () => {
             try {
                 setLoading(true);
                 const response = await patientApi.getTodayAppointments();
-                const appointments = response.data.data || [];
+                const appointments = (response.data.data || []).map((app: any) => ({
+                    ...app,
+                    _id: app.id || app._id,
+                    patientDetails: {
+                        name: app.patientName || "Patient",
+                        age: app.patientAge || 0,
+                        phone: app.patientPhone || "N/A"
+                    }
+                }));
                 setMyAppointments(appointments);
 
                 if (appointments.length > 0) {
                     const firstDoctorId = appointments[0].doctorId?._id || appointments[0].doctorId;
                     const tokenRes = await patientApi.getliveToken(firstDoctorId);
                     if (tokenRes.data.success && tokenRes.data.data) {
-                        setCurrentToken(tokenRes.data.data.tokenNumber);
+                        setCurrentToken(tokenRes.data.data.currentLiveToken);
                     }
                 }
             } catch (error) {
@@ -46,7 +63,7 @@ const Livetoken = () => {
                     const doctorId = selectedAppointment.doctorId?._id || selectedAppointment.doctorId;
                     const result = await patientApi.getliveToken(doctorId);
                     if (result.data.success && result.data.data) {
-                        setCurrentToken(result.data.data.tokenNumber);
+                        setCurrentToken(result.data.data.currentLiveToken);
                     } else {
                         setCurrentToken(0);
                     }
@@ -61,6 +78,143 @@ const Livetoken = () => {
         }
     }, [selectedAppointment]);
 
+    useEffect(() => {
+    if (!selectedAppointment) return;
+
+    const roomId = selectedAppointment._id; 
+
+
+    if (!socket.connected) {
+        socket.connect();
+    }
+
+ 
+    socket.emit("join-room", roomId);
+    console.log("Joined room:", roomId);
+
+    return () => {
+        setIsCallActive(false);
+        setRemoteStreamState(null);
+        if (localStream.current) {
+            localStream.current.getTracks().forEach(track => track.stop());
+        }
+        if (peerConnection.current) {
+            peerConnection.current.close();
+        }
+    };
+}, [selectedAppointment]);
+
+const handleStartCall = async () => {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true,
+        });
+
+        localStream.current = stream;
+
+        if (localVideoRef.current) {
+            localVideoRef.current.srcObject = stream;
+        }
+
+        const pc = new RTCPeerConnection({
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" }
+            ],
+        });
+        peerConnection.current = pc;
+
+        stream.getTracks().forEach(track => {
+            pc.addTrack(track, stream);
+        });
+
+        pc.ontrack = (event) => {
+            console.log("Remote track received:", event.streams[0]);
+            setRemoteStreamState(event.streams[0]);
+        };
+
+        pc.onicecandidate = (event) => {
+        if (event.candidate && selectedAppointment && selectedAppointment._id) {
+          socket.emit("ice-candidate", {
+            roomId: selectedAppointment._id,
+            candidate: event.candidate,
+          });
+        }
+      };
+        setIsCallActive(true);
+        console.log("Peer connection ready");
+
+        if (pendingOffer.current) {
+            console.log("Processing pending offer...");
+            await pc.setRemoteDescription(pendingOffer.current);
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+
+            socket.emit("answer", {
+                roomId: selectedAppointment._id,
+                answer,
+            });
+            pendingOffer.current = null;
+            console.log("Answer sent for pending offer");
+        }
+
+    } catch (error) {
+        console.error("Error accessing media devices:", error);
+    }
+};
+
+useEffect(() => {
+    if (!selectedAppointment) return;
+
+    const handleOffer = async (offer: any) => {
+        if (!peerConnection.current) {
+            console.log("Offer received but no peer connection yet. Storing as pending.");
+            pendingOffer.current = offer;
+            return;
+        }
+
+        await peerConnection.current.setRemoteDescription(offer);
+        const answer = await peerConnection.current.createAnswer();
+        await peerConnection.current.setLocalDescription(answer);
+
+        socket.emit("answer", {
+            roomId: selectedAppointment._id,
+            answer,
+        });
+        console.log("Answer sent");
+    };
+
+    const handleIceCandidate = async (candidate: any) => {
+        if (peerConnection.current) {
+            try {
+                await peerConnection.current.addIceCandidate(candidate);
+            } catch (err) {
+                console.error("ICE error:", err);
+            }
+        }
+    };
+
+    socket.on("offer", handleOffer);
+    socket.on("ice-candidate", handleIceCandidate);
+
+    return () => {
+        socket.off("offer", handleOffer);
+        socket.off("ice-candidate", handleIceCandidate);
+    };
+}, [selectedAppointment]);
+
+useEffect(() => {
+    socket.on("answer", async (answer) => {
+        if (peerConnection.current) {
+            await peerConnection.current.setRemoteDescription(answer);
+            console.log("Call connected 🎉");
+        }
+    });
+
+    return () => {
+        socket.off("answer");
+    };
+}, []);
     if (loading) {
         return (
             <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -106,6 +260,74 @@ const Livetoken = () => {
                                 'repeating-linear-gradient(45deg,rgba(255,255,255,0.015) 0px,rgba(255,255,255,0.015) 1px,transparent 1px,transparent 14px)',
                         }}
                     >
+                        {isCallActive && (
+                            <div className="space-y-4 mb-4">
+                                <div className="bg-black rounded-xl overflow-hidden mt-4 relative">
+                                    <video
+                                        ref={(el) => {
+                                            localVideoRef.current = el;
+                                            if (el && localStream.current) {
+                                                el.srcObject = localStream.current;
+                                            }
+                                        }}
+                                        autoPlay
+                                        playsInline
+                                        muted
+                                        className="w-full h-48 object-cover shadow-inner bg-slate-900"
+                                    />
+                                    <div className="absolute bottom-2 left-2 bg-indigo-600 text-[10px] text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                                        You
+                                    </div>
+                                </div>
+                                <div className="bg-black rounded-xl overflow-hidden mt-4 relative">
+                                    <video
+                                        ref={(el) => {
+                                            remoteVideoRef.current = el;
+                                            if (el && remoteStreamState) {
+                                                el.srcObject = remoteStreamState;
+                                            }
+                                        }}
+                                        autoPlay
+                                        playsInline
+                                        className="w-full h-64 object-cover shadow-inner bg-slate-900"
+                                    />
+                                    <div className="absolute bottom-2 left-2 bg-emerald-600 text-[10px] text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                                        Doctor
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setIsCallActive(false);
+                                        setRemoteStreamState(null);
+                                        if (localStream.current) {
+                                            localStream.current.getTracks().forEach(track => track.stop());
+                                        }
+                                        if (peerConnection.current) {
+                                            peerConnection.current.close();
+                                        }
+                                    }}
+                                    className="w-full py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-sm transition-colors  shadow-rose-200"
+                                >
+                                    End Call
+                                </button>
+                            </div>
+                        )}
+
+                        {!isCallActive && selectedAppointment?.mode === 'online' && (
+                            <div className="mb-6 px-4">
+                                <p className="text-indigo-200 text-xs mb-4 opacity-80">
+                                    Your consultation is scheduled via video call.
+                                </p>
+                                <button
+                                    onClick={handleStartCall}
+                                    className="w-full py-4 bg-white text-indigo-900 rounded-2xl font-bold text-base transition-transform active:scale-[0.98] shadow-xl hover:bg-indigo-50 flex items-center justify-center gap-2"
+                                >
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                    Join Video Consultation
+                                </button>
+                            </div>
+                        )}
+
                         <div className="flex items-center justify-center gap-2 mb-1">
                             <span
                                 className="inline-block w-2 h-2 rounded-full"
@@ -136,8 +358,8 @@ const Livetoken = () => {
                     </div>
                 </div>
 
-                {/* ── BOOKING SELECTOR ─────────────────────────────────────── */}
                 {myAppointments.length > 1 && (
+                    
                     <div className="flex items-center justify-between bg-white border border-slate-100 rounded-2xl px-3 py-2.5 mb-4 gap-2">
                         <button
                             onClick={() => setActiveIdx(prev => Math.max(0, prev - 1))}
@@ -152,7 +374,10 @@ const Livetoken = () => {
                                 Booking for
                             </p>
                             <p className="text-base font-bold text-slate-900 mt-0.5">
-                                {selectedAppointment?.patientDetails?.name || "Patient"}
+                                {selectedAppointment?.patientDetails?.name || "Patient"}{' '}
+                                <span className="text-indigo-600 text-sm opacity-70">
+                                    (#{selectedAppointment?.tokenNumber})
+                                </span>
                             </p>
                             <div className="flex gap-1.5 justify-center mt-1.5">
                                 {myAppointments.map((_, i) => (
@@ -212,6 +437,8 @@ const Livetoken = () => {
                     </div>
                 </div>
 
+        
+
                 {/* ── STATS ────────────────────────────────────────────────── */}
                 <div className="grid grid-cols-2 gap-2.5">
                     <div className="bg-slate-50 rounded-xl p-4 text-center">
@@ -236,6 +463,7 @@ const Livetoken = () => {
                 </div>
 
             </main>
+            
 
             <style>{`
                 @keyframes livePulse {
@@ -243,6 +471,7 @@ const Livetoken = () => {
                     50% { opacity: 0.4; transform: scale(0.7); }
                 }
             `}</style>
+            
 
             <Footer />
         </div>

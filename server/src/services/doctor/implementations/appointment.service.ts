@@ -38,6 +38,7 @@ export class AppointmentService implements IAppointments {
 
     async getTodayConsultations(doctorId: string, options?: { page: number; limit: number }): Promise<{ appointments: AppointmentResponseDTO[]; total: number }> {
         const today = new Date();
+        console.log(options)
         const res = await this._appointmentRepo.findByDoctorAndDate(doctorId, today, options);
         return {
             appointments: res.appointments.map(app => this._appointmentMapper.toDTO(app)),

@@ -9,6 +9,7 @@ import { loadHospitalData } from "@/store/selectedHospital/authThunk";
 import { useNavigate } from "react-router-dom";
 import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
 import type { HospitalResponseDTO } from "@/dto/hospital/HospitalResponseDTO";
+import { setHospitalSession } from "@/utils/session";
 
 
 
@@ -57,8 +58,8 @@ const SelectHospital: React.FC = () => {
     setSelecting(true);
 
     try {
-   
-      sessionStorage.setItem("hospitalId", hospitalId);
+   console.log(hospitalId)
+      setHospitalSession(hospitalId);
       await dispatch(loadHospitalData({ hospitalId }));
       navigate(PATIENT_ROUTES.HOSPITAL_HOMEPAGE);
     } catch (error) {
@@ -85,7 +86,7 @@ const SelectHospital: React.FC = () => {
                 <div
                   key={hospital._id}
                   onClick={() =>
-                    !selecting && handleSelectHospital(hospital._id)
+                    !selecting && handleSelectHospital(hospital.id)
                   }
                   className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer flex flex-col h-full"
                 >

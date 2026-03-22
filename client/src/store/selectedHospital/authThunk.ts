@@ -11,7 +11,6 @@ export const loadHospitalData = createAsyncThunk(
             const { hospitalId, page, limit, search } = params;
             const state = getState() as RootState;
             const role = state.auth.user?.role;
-
             let response;
             if (role === 'hospital') {
                 response = await hospitalApi.getSelectedHospital(hospitalId, { page, limit, search });

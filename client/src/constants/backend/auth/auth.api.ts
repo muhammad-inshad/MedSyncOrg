@@ -32,8 +32,8 @@ export const authApi = {
     logout: () =>
         api.post(AUTH_MANAGEMENT.LOGOUT),
 
-    googleLogin: () =>
-        window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`,
+googleLogin: (role: string) => 
+  window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google?role=${role}`,
 
     getHospitals: (page: number, limit: number, search: string) =>
         api.get(AUTH_MANAGEMENT.SELECTHOSPITLADOCTOR, {
