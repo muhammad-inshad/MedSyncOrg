@@ -7,11 +7,8 @@ import { authApi } from '@/constants/backend/auth/auth.api';
 
 import {
   LayoutDashboard,
-  DollarSign,
   Wallet,
-  RefreshCw,
   Building2,
-  BadgeDollarSign,
   UserCheck,
   Umbrella,
   User,
@@ -33,7 +30,6 @@ interface MenuItem {
   path?: string;
 }
 
-// Add props for mobile responsiveness
 interface HospitalSidebarProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
@@ -53,15 +49,12 @@ const HospitalSidbar = ({ isOpen, setIsOpen }: HospitalSidebarProps) => {
     {icon:HeartPulse,label:"Specilaization",path:HOSPITAL_ROUTES.HOSPITAL_SPECIALIZATION_MANGEMENT},
     {icon:GraduationCap ,label:"Qualification",path:HOSPITAL_ROUTES.HOSPITAL_QULIFICATION_MANGEMENT},
      { icon: Umbrella, label: 'DoctorLeaveManagement',path:HOSPITAL_ROUTES.DOCTOR_LEAVE_MANAGEMENT},
-    { icon: User, label: 'Profile' },
-    { icon: SquareStack, label: 'Chat' },
     { icon: Bell, label: 'Subscription',path:HOSPITAL_ROUTES.HOSPITAL_SUBSCRIPTION},
   ];
  
   const handleClick = (item: MenuItem) => {
     setActiveMenu(item.label);
     if (item.path) navigate(item.path);
-    // Close sidebar automatically on mobile after clicking a link
     setIsOpen(false);
   };
 

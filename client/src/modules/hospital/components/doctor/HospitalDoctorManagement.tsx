@@ -60,7 +60,7 @@ const HospitalDoctorManagement = () => {
   };
 
   const handleEdit = (doctor: IDoctor) => {
-    navigate(HOSPITAL_ROUTES.HOSPITALDOCTOREDIT, { state: { doctor } });
+    navigate(HOSPITAL_ROUTES.HOSPITALDOCTOREDIT,{state:doctor.id});
   };
 
   const handleToggleStatusClick = (id: string, name: string, status: boolean) => {
@@ -76,7 +76,7 @@ const HospitalDoctorManagement = () => {
       const response = await hospitalApi.toggleDoctor(id, { status: (!status).toString() });
       if (response.status === 200) {
         setDoctors((prev) =>
-          prev.map((d) => d._id === id ? { ...d, isActive: !d.isActive } : d)
+          prev.map((d) => d.id === id ? { ...d, isActive: !d.isActive } : d)
         );
         showToast.success(`Doctor ${status ? 'suspended' : 'unsuspended'} successfully`);
       }
@@ -217,7 +217,7 @@ const HospitalDoctorManagement = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {doctors.map((doctor: IDoctor) => (
-                    <tr key={doctor._id} className="hover:bg-slate-50/50 transition-all group">
+                    <tr key={doctor.id} className="hover:bg-slate-50/50 transition-all group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-xl overflow-hidden ring-2 ring-slate-100 group-hover:ring-blue-100 transition-all">
@@ -267,7 +267,7 @@ const HospitalDoctorManagement = () => {
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleToggleStatusClick(doctor._id, doctor.name, doctor.isActive)}
+                            onClick={() => handleToggleStatusClick(doctor.id, doctor.name, doctor.isActive)}
                             className={`p-2 rounded-lg shadow-sm transition-all ${doctor.isActive
                               ? 'bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white'
                               : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white'

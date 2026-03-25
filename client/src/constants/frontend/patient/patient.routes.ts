@@ -12,5 +12,6 @@ export const PATIENT_ROUTES = {
     PATIENT_APPOIMENT: `/patient/appoiment/:doctorId`,
     VIEW_APPOIMENTS_HISTORY:`/patient/view-appoiments-history`,
     LIVETOKEN:"/patient/livetoken",
-    PAYMENT_SUCCESS:"/patient/payment-success"
+    PAYMENT_SUCCESS:"/patient/payment-success",
+    PAYMENT_FAILED:"/patient/payment-failed"
 };

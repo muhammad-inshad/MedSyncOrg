@@ -12,7 +12,9 @@ import HospitalDepartments from "../pages/HospitalDeprtements";
 import DoctorProfile from "../pages/DoctorProfile";
 import AppointmentHistory from "../pages/AppointmentHistory";
 import Livetoken from "../pages/Livetoken";
-import PaymentSuccess from "../pages/PaymentSuccess";
+import PaymentSuccess from "../../shared/pages/PaymentSuccess";
+import PaymentFailed from "../../shared/pages/PaymentFailed";
+import { patientApi } from "@/constants/backend/patient/patient.api";
 
 
 const PatientRouts = () => {
@@ -24,7 +26,22 @@ const PatientRouts = () => {
         <Route path={PATIENT_ROUTES.VIEW_APPOIMENTS_HISTORY} element={<AppointmentHistory />} />
         <Route path={PATIENT_ROUTES.PATIENTEDIT} element={<EditPatientProfile />} />
         <Route path={PATIENT_ROUTES.LIVETOKEN} element={<Livetoken/>}/>
-        <Route path={PATIENT_ROUTES.PAYMENT_SUCCESS} element={<PaymentSuccess/>}/>
+        <Route path={PATIENT_ROUTES.PAYMENT_SUCCESS} element={
+          <PaymentSuccess 
+            redirectPath={PATIENT_ROUTES.PATIENTPROFILE}
+            redirectLabel="Go to Profile"
+            pollingFunc={patientApi.checkAppointmentStatus}
+            successMessage="Appointment confirmed!"
+            message="Your appointment has been successfully recorded."
+            failureRedirectPath={PATIENT_ROUTES.PAYMENT_FAILED}
+          />
+        }/>
+        <Route path={PATIENT_ROUTES.PAYMENT_FAILED} element={
+          <PaymentFailed 
+            redirectPath={PATIENT_ROUTES.PATIENTPROFILE}
+            redirectLabel="Back to Profile"
+          />
+        }/>
         <Route element={<HospitalProtectedRoute />}>
           <Route path={PATIENT_ROUTES.HOSPITAL_HOMEPAGE} element={<PatientHospitalHome />} />
           <Route path={PATIENT_ROUTES.HOSPITAL_DOCTOR} element={<PatientDoctor />} />

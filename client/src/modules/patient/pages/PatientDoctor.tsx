@@ -8,7 +8,7 @@ import { patientApi } from "@/constants/backend/patient/patient.api";
 import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
 
 interface Doctor {
-  _id: string;
+  id: string;
   name: string;
   specialization: string;
   profileImage: string;
@@ -111,10 +111,15 @@ export default function PatientDoctor() {
   useEffect(() => {
     if (!departmentId) {
       navigate(PATIENT_ROUTES.HOSPITAL_DEPaRTMENTS);
-      return;
     }
-    getDoctors(departmentId, currentPage, searchQuery);
-  }, [departmentId, currentPage, searchQuery, navigate, getDoctors]);
+  }, [departmentId, navigate]);
+
+
+  useEffect(() => {
+    if (departmentId) {
+      getDoctors(departmentId, currentPage, searchQuery);
+    }
+  }, [departmentId, currentPage, searchQuery, getDoctors]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

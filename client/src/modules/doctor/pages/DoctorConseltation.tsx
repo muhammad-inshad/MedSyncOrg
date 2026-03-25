@@ -73,8 +73,6 @@ const DoctorConsultation = () => {
     }
 
     socket.emit("join-room", roomId);
-    console.log("Joined room:", roomId);
-
     return () => {
       setIsCallActive(false);
       setRemoteStreamState(null);
@@ -126,7 +124,6 @@ const DoctorConsultation = () => {
       setIsCallActive(true);
       console.log("Peer connection ready");
 
-      // Create and send offer
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
       

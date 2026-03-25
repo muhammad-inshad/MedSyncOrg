@@ -40,4 +40,6 @@ export const patientApi = {
       
       createAppointmentPaymentSession: (data: any) =>
     api.post("/api/payment/appointment-checkout", data),
+    checkAppointmentStatus: (sessionId: string) =>
+        api.get(PATIENT_MANAGEMENT.CHECK_APPOINTMENT_STATUS(sessionId)),
 };

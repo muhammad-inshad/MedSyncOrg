@@ -35,5 +35,7 @@ export const HOSPITAL_MANAGEMENT = {
     SELECTED_HOSPITAL: (id: string) => `/api/hospital/hospitals/${id}`,
     GET_LEAVE_DOCTORS: (id: string) => `/api/hospital/doctors/${id}/leaves`,
     UPDATE_LEAVE_STATUS: (id: string) => `/api/hospital/leaves/${id}/status`,
-    GETSUBSCRIPTION:()=>`/api/hospital/subscription`
+    GETSUBSCRIPTION:()=>`/api/hospital/subscription`,
+    GETDEPSEPQULY:"/api/hospital/getdepsepquly",
+    GETSUBCRITPIONPROTECTION:"/api/hospital/subscription/protection"
 };

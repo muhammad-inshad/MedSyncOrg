@@ -1,6 +1,7 @@
 import api from "@/lib/api";
 import type { PaginationParams, UpdateDoctorKycStatusPayload, ToggleStatusData } from "@/interfaces/api.interfaces";
 import { HOSPITAL_MANAGEMENT } from "./hospital.routes";
+import type { CreateSubscriptionPayload } from "@/interfaces/ISubscription";
 
 export const hospitalApi = {
     getMe: () =>
@@ -26,6 +27,8 @@ export const hospitalApi = {
 
     getKycDoctors: (params: PaginationParams) =>
         api.get(HOSPITAL_MANAGEMENT.GET_KYC_DOCTORS, { params }),
+
+    getDepSepQuly:()=>api.get(HOSPITAL_MANAGEMENT.GETDEPSEPQULY),
 
     updateDoctorKycStatus: (id: string, status: 'approved' | 'rejected' | 'revision', payload?: UpdateDoctorKycStatusPayload) => {
         let endpoint = '';
@@ -135,5 +138,9 @@ export const hospitalApi = {
 
     createPaymentSession: (data?: any) =>
     api.post("/api/payment/checkout", data),
-
+    
+    getSubscriptonForProtection:()=>{
+       return api.get(HOSPITAL_MANAGEMENT.GETSUBCRITPIONPROTECTION)
+    }
 };
+                                   

@@ -16,7 +16,7 @@ interface SpecializationForm {
 }
 
 interface IDepartment {
-  _id: string;
+  id: string;          // ← your API returns "id", not "_id"
   departmentName: string;
 }
 
@@ -126,18 +126,21 @@ const ModalForm = ({
   submitLabel: string;
 }) => (
   <div
-    className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-      }`}
+    className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200 ${
+      isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+    }`}
   >
     <div
-      className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'opacity-0'
-        }`}
+      className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-200 ${
+        isOpen ? 'opacity-100' : 'opacity-0'
+      }`}
       onClick={isOpen ? onClose : undefined}
     />
 
     <div
-      className={`relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden transition-all duration-200 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
-        }`}
+      className={`relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden transition-all duration-200 ${
+        isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
+      }`}
     >
       <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100 bg-slate-50/50">
         <div className="flex items-center gap-3">
@@ -168,14 +171,16 @@ const ModalForm = ({
           <select
             value={form.department_id}
             onChange={(e) => onTextChange('department_id', e.target.value)}
-            className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:bg-white transition-all appearance-none ${errors.department_id
-              ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500 text-rose-500'
-              : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 text-slate-900'
-              }`}
+            className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:bg-white transition-all appearance-none ${
+              errors.department_id
+                ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500 text-rose-500'
+                : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500 text-slate-900'
+            }`}
           >
             <option value="">Select a department</option>
             {departments.map((dept) => (
-              <option key={dept._id} value={dept._id}>
+              // ✅ FIXED: use dept.id (not dept._id) — matches your API response
+              <option key={dept.id} value={dept.id}>
                 {dept.departmentName}
               </option>
             ))}
@@ -195,10 +200,11 @@ const ModalForm = ({
             placeholder="e.g. Interventional Cardiology"
             value={form.name}
             onChange={(e) => onTextChange('name', e.target.value)}
-            className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm font-medium placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:bg-white transition-all ${errors.name
-              ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500'
-              : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
-              }`}
+            className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm font-medium placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:bg-white transition-all ${
+              errors.name
+                ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500'
+                : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
+            }`}
           />
           {errors.name && (
             <p className="text-xs font-bold text-rose-500">{errors.name}</p>
@@ -282,7 +288,7 @@ const SpecializationManagement = () => {
       const res = await hospitalApi.getSpecializations({
         page: currentPage,
         limit,
-        search: debouncedSearch
+        search: debouncedSearch,
       });
       const { data, total, limit: resLimit } = res.data.data;
       setSpecializations(data || []);
@@ -295,32 +301,29 @@ const SpecializationManagement = () => {
 
   const fetchDepartments = useCallback(async () => {
     try {
-      const res = await hospitalApi.getDeparment({ page: 1, limit: 100 });
+      const res = await hospitalApi.getDeparment();
+      // ✅ FIXED: your API returns { data: { data: { data: [...] } } }
       setDepartments(res.data.data.data || []);
     } catch (error) {
       console.error('Failed to fetch departments:', error);
     }
   }, []);
 
-  useEffect(() => {
-    fetchSpecializations();
-  }, [fetchSpecializations]);
-
-  useEffect(() => {
-    fetchDepartments();
-  }, [fetchDepartments]);
+  useEffect(() => { fetchSpecializations(); }, [fetchSpecializations]);
+  useEffect(() => { fetchDepartments(); }, [fetchDepartments]);
 
   const handleToggleStatus = async (id: string) => {
     try {
       await hospitalApi.toggleSpecializationStatus(id);
       setSpecializations((prev) =>
-        prev.map((s) => (s._id === id ? { ...s, isActive: !s.isActive } : s))
+        prev.map((s) => (s.id === id ? { ...s, isActive: !s.isActive } : s))
       );
     } catch (error) {
       console.error('Failed to toggle status:', error);
     }
   };
 
+  // ── ADD ──────────────────────────────────────────────────────────────────
   const openAdd = () => { setAddForm(EMPTY_FORM); setAddErrors({}); setIsAddOpen(true); };
 
   const handleAddChange = (field: keyof SpecializationForm, value: string) => {
@@ -341,16 +344,14 @@ const SpecializationManagement = () => {
     try {
       setIsAddSubmitting(true);
       const formData = new FormData();
-      formData.append('department_id', addForm.department_id);
+      formData.append('department_id', addForm.department_id);   // sends dept.id (ObjectId string)
       formData.append('name', addForm.name);
       formData.append('description', addForm.description || '');
-
       if (addForm.file) {
         formData.append('image', addForm.file);
       } else if (addForm.image && !addForm.image.startsWith('data:')) {
         formData.append('image', addForm.image);
       }
-
       await hospitalApi.createSpecialization(formData);
       fetchSpecializations();
       setIsAddOpen(false);
@@ -362,14 +363,15 @@ const SpecializationManagement = () => {
     }
   };
 
+  // ── EDIT ─────────────────────────────────────────────────────────────────
   const openEdit = (spec: ISpecialization) => {
     setEditTarget(spec);
     setEditForm({
       name: spec.name,
-      department_id: spec.department_id,
+      department_id: String(spec.department_id),   // cast ObjectId → string for the select value
       description: spec.description || '',
       image: spec.image || '',
-      file: null
+      file: null,
     });
     setEditErrors({});
   };
@@ -393,7 +395,7 @@ const SpecializationManagement = () => {
     setIsEditSubmitting(true);
     try {
       const formData = new FormData();
-      formData.append('department_id', editForm.department_id);
+      formData.append('department_id', editForm.department_id);  // ObjectId string
       formData.append('name', editForm.name);
       formData.append('description', editForm.description || '');
 
@@ -405,7 +407,7 @@ const SpecializationManagement = () => {
         formData.append('image', editForm.image);
       }
 
-      await hospitalApi.updateSpecialization(editTarget._id, formData);
+      await hospitalApi.updateSpecialization(editTarget.id, formData);
       fetchSpecializations();
       setEditTarget(null);
     } catch (err) {
@@ -415,9 +417,10 @@ const SpecializationManagement = () => {
     }
   };
 
-  const getDepartmentName = (id: string) => {
-    return departments.find(d => d._id === id)?.departmentName || 'Unknown Department';
-  };
+  // ── HELPERS ───────────────────────────────────────────────────────────────
+  // ✅ FIXED: use dept.id to match
+  const getDepartmentName = (departmentId: string) =>
+    departments.find((d) => d.id === String(departmentId))?.departmentName || 'Unknown Department';
 
   const getStatusBadge = (isActive: boolean) =>
     isActive ? (
@@ -462,9 +465,9 @@ const SpecializationManagement = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-10">
           {[
             { label: 'Total Specializations', value: totalItems, icon: Layers, color: 'text-slate-600', bg: 'bg-slate-100' },
-            { label: 'Active', value: specializations.filter(q => q.isActive).length, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-100/50' },
-            { label: 'Inactive', value: specializations.filter(q => !q.isActive).length, icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-100/50' },
-            { label: 'Departments', value: Array.from(new Set(specializations.map(s => s.department_id))).length, icon: Building2, color: 'text-blue-600', bg: 'bg-blue-100/50' },
+            { label: 'Active', value: specializations.filter((q) => q.isActive).length, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-100/50' },
+            { label: 'Inactive', value: specializations.filter((q) => !q.isActive).length, icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-100/50' },
+            { label: 'Departments', value: Array.from(new Set(specializations.map((s) => String(s.department_id)))).length, icon: Building2, color: 'text-blue-600', bg: 'bg-blue-100/50' },
           ].map((stat, i) => (
             <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 transition-all hover:shadow-md">
               <div className={`p-3 rounded-xl ${stat.bg}`}>
@@ -502,7 +505,7 @@ const SpecializationManagement = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {specializations.map((spec) => (
-                      <tr key={spec._id} className="hover:bg-slate-50/50 transition-all group">
+                      <tr key={spec.id} className="hover:bg-slate-50/50 transition-all group">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-xl overflow-hidden ring-2 ring-slate-100 group-hover:ring-blue-100 transition-all flex-shrink-0">
@@ -527,7 +530,7 @@ const SpecializationManagement = () => {
                         <td className="px-6 py-4">
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
                             <Building2 className="w-3 h-3" />
-                            {getDepartmentName(spec.department_id)}
+                            {getDepartmentName(String(spec.department_id))}
                           </span>
                         </td>
                         <td className="px-6 py-4 max-w-xs">
@@ -549,11 +552,12 @@ const SpecializationManagement = () => {
                               <Edit2 className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleToggleStatus(spec._id)}
-                              className={`p-2 rounded-lg shadow-sm transition-all ${spec.isActive
-                                ? 'bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white'
-                                : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white'
-                                }`}
+                              onClick={() => handleToggleStatus(spec.id)}
+                              className={`p-2 rounded-lg shadow-sm transition-all ${
+                                spec.isActive
+                                  ? 'bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white'
+                                  : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white'
+                              }`}
                               title={spec.isActive ? 'Deactivate' : 'Activate'}
                             >
                               <Ban className="w-4 h-4" />

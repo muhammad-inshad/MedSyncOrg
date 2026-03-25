@@ -11,13 +11,13 @@ import PatientMangement from '../components/patient/PatientMangement'
 import HospitalAddPatientPage from '../components/patient/HospitalAddPatientpage'
 import HospitalPatientEdit from '../components/patient/HospitalPatientEdit'
 import HospitalEdit from '../pages/HospitalEdit'
-import HospitalLayout from "../components/HospitalLayout"
 import DepartmentManagement from '../components/master/department/DepartmentManagement'
 import QualificationManagement from '../components/master/qualification/QualificationManagement'
 import SpecializationManagement from '../components/master/specialization/SpecializationManagement'
 import DoctorLeaveManagement from '../pages/DoctorLeaveMenagement'
 import Subscription from '../pages/HospitalSubscription'
-import PaymentSuccess from '../pages/PaymentSuccess'
+import PaymentSuccess from '../../shared/pages/PaymentSuccess'
+import SubscriptionProtectedRoutes from './SubscriptionProtectedRoutes';
 
 
 const HospitalRoutes = () => {
@@ -25,7 +25,7 @@ const HospitalRoutes = () => {
         <Routes>
             <Route path={HOSPITAL_ROUTES.HOSPITALSIGNUP} element={<HospitalSignup />} />
             <Route element={<HospitalProtectedRoute />}>
-                <Route element={<HospitalLayout />}>
+                <Route element={<SubscriptionProtectedRoutes />}>
                     <Route path={HOSPITAL_ROUTES.HOSPITALDASHBOARD} element={<HospitalDashboard />} />
                     <Route path={HOSPITAL_ROUTES.HOSPITALDOCTORMANGEMENT} element={<HospitalDoctorManagement />} />
                     <Route path={HOSPITAL_ROUTES.HOSPITALDOCTORKYC} element={<HospitalDoctorKycManagement />} />
@@ -39,8 +39,16 @@ const HospitalRoutes = () => {
                      <Route path={HOSPITAL_ROUTES.HOSPITAL_QULIFICATION_MANGEMENT} element={<QualificationManagement/>}/>
                       <Route path={HOSPITAL_ROUTES.HOSPITAL_SPECIALIZATION_MANGEMENT} element={<SpecializationManagement/>}/>
                       <Route path={HOSPITAL_ROUTES.DOCTOR_LEAVE_MANAGEMENT}element={<DoctorLeaveManagement/>}/>
+
                       <Route path={HOSPITAL_ROUTES.HOSPITAL_SUBSCRIPTION} element={<Subscription/>}/>
-                      <Route path={HOSPITAL_ROUTES.HOSPITAL_PAYMENT_SUCCESS} element={<PaymentSuccess />} />
+                      <Route path={HOSPITAL_ROUTES.HOSPITAL_PAYMENT_SUCCESS} element={
+                        <PaymentSuccess 
+                          redirectPath={HOSPITAL_ROUTES.HOSPITALDASHBOARD}
+                          redirectLabel="Go to Dashboard"
+                          title="Payment Successful!"
+                          message="Your subscription is now active and all limits have been updated. Welcome aboard!"
+                        />
+                      } />
                 </Route>
             </Route>
         </Routes>

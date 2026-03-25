@@ -42,7 +42,6 @@ export default function PatientAppointment() {
   const { doctorId } = useParams();
   const navigate = useNavigate();
   const { profileData } = useAppSelector((state) => state.auth);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [hospitalName, setHospitalName] = useState("");
   const [loading, setLoading] = useState(true);
@@ -187,7 +186,6 @@ export default function PatientAppointment() {
         return;
       }
 
-      // Proceed to booking directly
       const bookingData = {
         doctorId,
         hospitalId: doctor?.hospital_id,

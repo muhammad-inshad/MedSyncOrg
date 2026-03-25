@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Search, Bell, Settings, User, MessageSquare, FileText, Phone, LogOut } from 'lucide-react';
 import DoctorDashbord from '../../../assets/images/DoctorDashbord.png';
-import { authApi } from '@/constants/backend/auth/auth.api';
-import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 import { DOCTOR_ROUTES } from '@/constants/frontend/doctor/doctor.routes';
 import DoctorSidebar from '../components/DoctorSidebar';

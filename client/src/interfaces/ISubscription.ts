@@ -1,6 +1,6 @@
 export interface SubscriptionForm {
-  _id?: string;
-  plan: string;
+  id?: string;
+  planName: string;
   amount: number;
   status: "active" | "expired" | "cancelled";
   duration: number;
@@ -18,12 +18,13 @@ export interface SubscriptionForm {
 
 
 export interface ISubscription {
-  _id: string;
+  id: string;
   plan: string;
   amount: number;
   duration?: number;
   durationUnit?: "days" | "months" | "years";
   startDate?: string;
+  description?:string;
   endDate?: string;
   features?: string[];
   isActive?: boolean;
@@ -35,4 +36,12 @@ export interface ISubscription {
   };
   createdAt?: string;
   updatedAt?: string;
-}
+}
+
+export type CreateSubscriptionPayload = {
+  planName: string;
+  description: string;
+  duration: number;
+  durationUnit: "months" | "years";
+  amount: number;
+};

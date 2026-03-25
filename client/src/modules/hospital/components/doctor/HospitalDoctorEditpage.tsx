@@ -5,18 +5,8 @@ import { useAppSelector, useAppDispatch } from '@/hooks/redux';
 import { loadHospitalData } from '@/store/selectedHospital/authThunk';
 import * as z from 'zod';
 import {
-  Upload,
-  Save,
-  User,
-  FileText,
-  MapPin,
-  Briefcase,
-  Phone,
-  Mail,
-  Award,
-  Info,
-  CreditCard,
-  ChevronLeft
+  Upload, Save, User, FileText, MapPin, Briefcase, Phone, Mail,
+  Award, Info, CreditCard, ChevronLeft
 } from 'lucide-react';
 import { hospitalApi } from '@/constants/backend/hospital/hospital.api';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -40,16 +30,11 @@ const doctorEditSchema = z.object({
     start: z.string().min(1, 'Start time is required'),
     end: z.string().min(1, 'End time is required'),
   }),
-  payment: z.object({
-    type: z.enum(['commission', 'fixed']),
-    commissionPercentage: z.string().optional(),
-    fixedSalary: z.string().optional(),
-    payoutCycle: z.enum(['weekly', 'monthly']),
-    patientsPerDayLimit: z.string().refine((val) => {
-      const num = parseInt(val);
-      return !isNaN(num) && num >= 1 && num <= 20;
-    }, 'Limit must be between 1 and 20'),
-  }),
+  monthlyAmount: z.string().min(1, 'Monthly salary is required'),
+  patientsPerDayLimit: z.string().refine((val) => {
+    const num = parseInt(val);
+    return !isNaN(num) && num >= 1 && num <= 20;
+  }, 'Limit must be between 1 and 20'),
   isActive: z.boolean(),
   isAccountVerified: z.boolean(),
 });
@@ -58,82 +43,154 @@ type HospitalDoctorEditFormData = z.infer<typeof doctorEditSchema>;
 
 const HospitalDoctorEditpage: React.FC = () => {
   const location = useLocation();
-  const doctor = location.state?.doctor as IDoctor;
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
+  const hospital = useAppSelector((state) => state.hospital.hospital);
 
+  const getDoctorIdFromState = () => {
+    if (!location.state) return null;
+    if (typeof location.state === 'string') return location.state;
+    return location.state.id || location.state.doctorId || location.state.doctor?.id || location.state.doctor?._id;
+  };
 
+  const doctorId = getDoctorIdFromState();
+
+  const [doctorData, setDoctorData] = useState<IDoctor | null>(null);
+  const [isLoadingDoctor, setIsLoadingDoctor] = useState(false);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [licenseImageFile, setLicenseImageFile] = useState<File | null>(null);
-  const [profilePreview, setProfilePreview] = useState<string>(doctor?.profileImage || '');
-  const [licensePreview, setLicensePreview] = useState<string>(doctor?.licence || '');
+  const [profilePreview, setProfilePreview] = useState<string>('');
+  const [licensePreview, setLicensePreview] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [pendingData, setPendingData] = useState<HospitalDoctorEditFormData | null>(null);
 
-  const hospital = useAppSelector((state) => state.hospital.hospital);
+  const [deptData, setDeptData] = useState<any[]>([]);
+  const [specData, setSpecData] = useState<any[]>([]);
+  const [qualData, setQualData] = useState<any[]>([]);
 
-  // Extract master data from Redux
-  const hospitalDepartments = hospital?.departments || [];
-  const hospitalQualifications = hospital?.qualifications || [];
-  const hospitalSpecializations = hospital?.specializations || [];
+  const [timePeriods, setTimePeriods] = useState({ start: 'AM', end: 'AM' });
 
-
-  const [timePeriods, setTimePeriods] = useState({
-    start: doctor?.consultationTime?.start?.includes('PM') ? 'PM' : 'AM',
-    end: doctor?.consultationTime?.end?.includes('PM') ? 'PM' : 'AM'
-  });
+  // ─── NEW: track the ObjectId for department & specialization ───
+  const [selectedDeptId, setSelectedDeptId] = useState<string>('');
+  const [selectedSpecId, setSelectedSpecId] = useState<string>('');
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
     watch,
+    setValue,   // ← added
   } = useForm<HospitalDoctorEditFormData>({
     resolver: zodResolver(doctorEditSchema),
     defaultValues: {
-      name: doctor?.name || '',
-      email: doctor?.email || '',
-      phone: doctor?.phone || '',
-      address: doctor?.address || '',
-      qualification: doctor?.qualification || '',
-      experience: String(doctor?.experience || ''),
-      department: doctor?.department || '',
-      specialization: doctor?.specialization || '',
-      about: doctor?.about || '',
-      consultationTime: {
-        start: doctor?.consultationTime?.start?.replace(/\s?(AM|PM)/g, '') || '',
-        end: doctor?.consultationTime?.end?.replace(/\s?(AM|PM)/g, '') || '',
-      },
-      payment: {
-        type: doctor?.payment?.type || 'commission',
-        commissionPercentage: String(doctor?.payment?.commissionPercentage || ''),
-        fixedSalary: String(doctor?.payment?.fixedSalary || ''),
-        payoutCycle: doctor?.payment?.payoutCycle || 'monthly',
-        patientsPerDayLimit: String(doctor?.payment?.patientsPerDayLimit || '20'),
-      },
-      isActive: !!doctor?.isActive,
-      isAccountVerified: !!doctor?.isAccountVerified,
+      name: '', email: '', phone: '', address: '', qualification: '',
+      experience: '', department: '', specialization: '', about: '',
+      consultationTime: { start: '', end: '' },
+      monthlyAmount: '', patientsPerDayLimit: '20',
+      isActive: true, isAccountVerified: false,
     }
   });
 
-  const paymentType = watch('payment.type');
+  const selectedDepartmentName = watch('department');
 
+  // Filter specializations based on selected department
+  const filteredSpecializations = selectedDepartmentName
+    ? specData.filter(spec => spec.department_id ===
+        deptData.find(d => d.departmentName === selectedDepartmentName)?._id
+      )
+    : specData;
+
+  // Fetch departments, specializations, qualifications
   useEffect(() => {
-    if (!doctor) {
-      showToast.error("No doctor data found");
+    const fetchAllDepSepQli = async () => {
+      try {
+        const result = await hospitalApi.getDepSepQuly();
+        const data = result.data.data;
+
+        setDeptData(data.departments || []);
+        setSpecData(data.specializations || []);
+        setQualData(data.qualifications || []);
+      } catch (error) {
+        console.error("Error fetching departments/specializations/qualifications:", error);
+      }
+    };
+
+    fetchAllDepSepQli();
+  }, []);
+
+  // Fetch doctor data
+  useEffect(() => {
+    if (!doctorId) {
+      showToast.error("No doctor ID found.");
       navigate(HOSPITAL_ROUTES.HOSPITALDOCTORMANGEMENT);
       return;
     }
 
-    if ((!hospital || !hospital.departments || !hospital.qualifications) && user?._id) {
+    const fetchDoctor = async () => {
+      try {
+        setIsLoadingDoctor(true);
+        console.log(doctorId);
+        const response = await hospitalApi.getDoctorById(doctorId);
+        if (response.status === 200) {
+          const doctorInfo = response.data.data;
+          setDoctorData(doctorInfo);
+          setProfilePreview(doctorInfo.profileImage || '');
+          setLicensePreview(doctorInfo.licence || '');
+        }
+      } catch (error) {
+        console.error("Error fetching doctor:", error);
+        showToast.error("Failed to load doctor data");
+        navigate(HOSPITAL_ROUTES.HOSPITALDOCTORMANGEMENT);
+      } finally {
+        setIsLoadingDoctor(false);
+      }
+    };
+
+    fetchDoctor();
+
+    if (user?._id && (!hospital?.departments || !hospital?.qualifications)) {
       dispatch(loadHospitalData({ hospitalId: user._id }));
     }
-  }, [doctor, navigate, hospital, user, dispatch]);
+  }, [doctorId, navigate, hospital, user, dispatch]);
+
+  // Reset form when doctor data is loaded
+  useEffect(() => {
+    if (doctorData) {
+      reset({
+        name: doctorData.name || '',
+        email: doctorData.email || '',
+        phone: doctorData.phone || '',
+        address: doctorData.address || '',
+        qualification: doctorData.qualification || '',
+        experience: String(doctorData.experience || ''),
+        department: doctorData.department || '',
+        specialization: doctorData.specialization || '',
+        about: doctorData.about || '',
+        consultationTime: {
+          start: doctorData.consultationTime?.start?.replace(/\s?(AM|PM)/g, '') || '',
+          end: doctorData.consultationTime?.end?.replace(/\s?(AM|PM)/g, '') || '',
+        },
+        monthlyAmount: String(doctorData.monthlyAmount || ''),
+        patientsPerDayLimit: String(doctorData.patientsPerDayLimit || '20'),
+        isActive: !!doctorData.isActive,
+        isAccountVerified: !!doctorData.isAccountVerified,
+      });
+
+      setTimePeriods({
+        start: doctorData.consultationTime?.start?.includes('PM') ? 'PM' : 'AM',
+        end: doctorData.consultationTime?.end?.includes('PM') ? 'PM' : 'AM'
+      });
+
+      // ─── NEW: seed the IDs from the existing doctor record ───
+      if (doctorData.department_id) setSelectedDeptId(doctorData.department_id);
+      if (doctorData.specialization_id) setSelectedSpecId(doctorData.specialization_id);
+    }
+  }, [doctorData, reset]);
 
   const onFormSubmit = (data: HospitalDoctorEditFormData) => {
-    // Combine time with periods
     const processedData = {
       ...data,
       consultationTime: {
@@ -146,28 +203,32 @@ const HospitalDoctorEditpage: React.FC = () => {
   };
 
   const executeUpdate = async () => {
-    if (!pendingData) return;
+    if (!pendingData || !doctorId) return;
 
     try {
       setIsSubmitting(true);
       const formData = new FormData();
 
-      const flatFields = ['name', 'email', 'phone', 'address', 'qualification', 'experience', 'department', 'specialization', 'about', 'isActive', 'isAccountVerified'];
+      const flatFields = [
+        'name', 'email', 'phone', 'address', 'qualification', 'experience',
+        'department', 'specialization', 'about', 'isActive', 'isAccountVerified'
+      ];
       flatFields.forEach(key => {
         formData.append(key, String(pendingData[key as keyof HospitalDoctorEditFormData]));
       });
 
+      formData.append('monthlyAmount', String(pendingData.monthlyAmount));
+      formData.append('patientsPerDayLimit', String(pendingData.patientsPerDayLimit));
       formData.append('consultationTime', JSON.stringify(pendingData.consultationTime));
-      formData.append('payment', JSON.stringify(pendingData.payment));
 
-      if (profileImageFile) {
-        formData.append('profileImage', profileImageFile);
-      }
-      if (licenseImageFile) {
-        formData.append('license', licenseImageFile);
-      }
+      // ─── NEW: append the ObjectIds ───
+      formData.append('department_id', selectedDeptId);
+      formData.append('specialization_id', selectedSpecId);
 
-      const response = await hospitalApi.editHospitalDoctor(doctor._id, formData);
+      if (profileImageFile) formData.append('profileImage', profileImageFile);
+      if (licenseImageFile) formData.append('license', licenseImageFile);
+
+      const response = await hospitalApi.editHospitalDoctor(doctorId, formData);
 
       if (response.status === 200) {
         showToast.success("Doctor profile updated successfully!");
@@ -175,10 +236,9 @@ const HospitalDoctorEditpage: React.FC = () => {
       }
     } catch (error: unknown) {
       console.error('ERROR:', error);
-      let errorMessage = 'An unexpected error occurred';
-      if (axios.isAxiosError(error)) {
-        errorMessage = error.response?.data?.message || error.message;
-      }
+      const errorMessage = axios.isAxiosError(error)
+        ? error.response?.data?.message || error.message
+        : 'An unexpected error occurred';
       showToast.error(`Update failed: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
@@ -191,9 +251,7 @@ const HospitalDoctorEditpage: React.FC = () => {
     if (file) {
       setProfileImageFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePreview(reader.result as string);
-      };
+      reader.onloadend = () => setProfilePreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
@@ -203,19 +261,25 @@ const HospitalDoctorEditpage: React.FC = () => {
     if (file) {
       setLicenseImageFile(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setLicensePreview(reader.result as string);
-      };
+      reader.onloadend = () => setLicensePreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
 
-  if (!doctor) return null;
+  if (isLoadingDoctor) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!doctorData) return null;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
-        {/* Navigation Breadcrumb */}
+        {/* Back button and header */}
         <button
           onClick={() => navigate(HOSPITAL_ROUTES.HOSPITALDOCTORMANGEMENT)}
           className="flex items-center gap-2 text-slate-500 hover:text-slate-900 mb-6 transition-colors group"
@@ -224,13 +288,12 @@ const HospitalDoctorEditpage: React.FC = () => {
           <span className="text-sm font-medium">Back to Doctor Management</span>
         </button>
 
-        {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Edit Doctor Profile</h1>
             <p className="text-slate-500 mt-1 flex items-center gap-2">
               <Info className="w-4 h-4 text-blue-500" />
-              Modify information for <span className="font-semibold text-slate-700">Dr. {doctor.name}</span>
+              Modify information for <span className="font-semibold text-slate-700">Dr. {doctorData.name}</span>
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -261,10 +324,9 @@ const HospitalDoctorEditpage: React.FC = () => {
 
         <form id="doctor-edit-form" onSubmit={handleSubmit(onFormSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-            {/* Left Sidebar: Photos & Status */}
+            {/* Image Section */}
             <div className="lg:col-span-4 space-y-6">
-              {/* Profile Photo Card */}
+              {/* Profile Photo */}
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col items-center">
                 <h3 className="w-full text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 px-1">Profile Photo</h3>
                 <div className="relative group/photo">
@@ -287,7 +349,7 @@ const HospitalDoctorEditpage: React.FC = () => {
                 </p>
               </div>
 
-              {/* Medical License Card */}
+              {/* Medical License */}
               <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 px-1">Medical License</h3>
                 <div className="relative group/license aspect-[4/3] rounded-2xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center">
@@ -306,10 +368,9 @@ const HospitalDoctorEditpage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Column: Main Form Sections */}
+            {/* Main Form */}
             <div className="lg:col-span-8 space-y-8">
-
-              {/* Profile Information */}
+              {/* Personal Information */}
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
@@ -323,10 +384,7 @@ const HospitalDoctorEditpage: React.FC = () => {
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Full Name</label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <input
-                        {...register('name')}
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-slate-300 text-sm font-medium"
-                      />
+                      <input {...register('name')} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all placeholder:text-slate-300 text-sm font-medium" />
                     </div>
                     {errors.name && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.name.message}</p>}
                   </div>
@@ -335,10 +393,7 @@ const HospitalDoctorEditpage: React.FC = () => {
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Email Address</label>
                     <div className="relative">
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <input
-                        {...register('email')}
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium"
-                      />
+                      <input {...register('email')} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium" />
                     </div>
                     {errors.email && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.email.message}</p>}
                   </div>
@@ -347,34 +402,39 @@ const HospitalDoctorEditpage: React.FC = () => {
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Phone Number</label>
                     <div className="relative">
                       <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                      <input
-                        {...register('phone')}
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium"
-                      />
+                      <input {...register('phone')} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium" />
                     </div>
                     {errors.phone && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.phone.message}</p>}
                   </div>
 
-                  {/* Department - Dropdown */}
+                  {/* ─── UPDATED: Department Dropdown ─── */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Department</label>
                     <div className="relative">
                       <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       <select
                         {...register('department')}
+                        onChange={(e) => {
+                          // react-hook-form needs the value updated too
+                          setValue('department', e.target.value);
+                          // find the matching dept and grab its _id
+                          const selected = deptData.find(d => d.departmentName === e.target.value);
+                          setSelectedDeptId(selected?._id || '');
+                          // reset specialization when department changes
+                          setValue('specialization', '');
+                          setSelectedSpecId('');
+                        }}
                         className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium appearance-none"
                       >
                         <option value="">Select Department</option>
-                        {hospitalDepartments.map((dept) => (
-                          <option key={dept._id} value={dept._id}>
+                        {deptData.map((dept) => (
+                          <option key={dept._id} value={dept.departmentName}>
                             {dept.departmentName}
                           </option>
                         ))}
                       </select>
                     </div>
-                    {errors.department && (
-                      <p className="text-[10px] text-rose-500 font-bold px-1">{errors.department.message}</p>
-                    )}
+                    {errors.department && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.department.message}</p>}
                   </div>
                 </div>
 
@@ -391,7 +451,7 @@ const HospitalDoctorEditpage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Professional details */}
+              {/* Expertise & Schedule Section */}
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
@@ -401,15 +461,29 @@ const HospitalDoctorEditpage: React.FC = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Specialization - Dropdown */}
+                  {/* ─── UPDATED: Specialization Dropdown ─── */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Specialization</label>
                     <select
                       {...register('specialization')}
+                      onChange={(e) => {
+                        setValue('specialization', e.target.value);
+                        const selected = filteredSpecializations.find(s => s.name === e.target.value);
+                        setSelectedSpecId(selected?._id || '');
+                      }}
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium appearance-none"
                     >
                       <option value="">Select Specialization</option>
-                      {hospitalSpecializations.map((spec) => (
+
+                      {/* Show current value if not in filtered list (e.g. on initial load) */}
+                      {watch('specialization') &&
+                        !filteredSpecializations.some(s => s.name === watch('specialization')) && (
+                          <option key="current" value={watch('specialization')}>
+                            {watch('specialization')}
+                          </option>
+                        )}
+
+                      {filteredSpecializations.map((spec) => (
                         <option key={spec._id} value={spec.name}>
                           {spec.name}
                         </option>
@@ -420,7 +494,7 @@ const HospitalDoctorEditpage: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Qualification - Dropdown */}
+                  {/* Qualification Dropdown */}
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Qualification</label>
                     <select
@@ -428,15 +502,19 @@ const HospitalDoctorEditpage: React.FC = () => {
                       className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium appearance-none"
                     >
                       <option value="">Select Qualification</option>
-                      {hospitalQualifications.map((qual) => (
+                      {watch('qualification') &&
+                        !qualData.some(q => q.name === watch('qualification')) && (
+                          <option key="current" value={watch('qualification')}>
+                            {watch('qualification')}
+                          </option>
+                        )}
+                      {qualData.map((qual) => (
                         <option key={qual._id} value={qual.name}>
                           {qual.name}
                         </option>
                       ))}
                     </select>
-                    {errors.qualification && (
-                      <p className="text-[10px] text-rose-500 font-bold px-1">{errors.qualification.message}</p>
-                    )}
+                    {errors.qualification && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.qualification.message}</p>}
                   </div>
 
                   <div className="space-y-2">
@@ -452,124 +530,56 @@ const HospitalDoctorEditpage: React.FC = () => {
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center gap-2">
                         <div className="flex-1 flex gap-1">
-                          <input
-                            type="time"
-                            {...register('consultationTime.start')}
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-xs font-bold"
-                          />
-                          <select
-                            value={timePeriods.start}
-                            onChange={(e) => setTimePeriods(prev => ({ ...prev, start: e.target.value }))}
-                            className="px-2 bg-slate-100 rounded-xl text-[10px] font-bold outline-none"
-                          >
+                          <input type="time" {...register('consultationTime.start')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-xs font-bold" />
+                          <select value={timePeriods.start} onChange={(e) => setTimePeriods(prev => ({ ...prev, start: e.target.value }))} className="px-2 bg-slate-100 rounded-xl text-[10px] font-bold outline-none">
                             <option value="AM">AM</option>
                             <option value="PM">PM</option>
                           </select>
                         </div>
                         <span className="text-slate-400 font-bold text-xs uppercase">to</span>
                         <div className="flex-1 flex gap-1">
-                          <input
-                            type="time"
-                            {...register('consultationTime.end')}
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-xs font-bold"
-                          />
-                          <select
-                            value={timePeriods.end}
-                            onChange={(e) => setTimePeriods(prev => ({ ...prev, end: e.target.value }))}
-                            className="px-2 bg-slate-100 rounded-xl text-[10px] font-bold outline-none"
-                          >
+                          <input type="time" {...register('consultationTime.end')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-xs font-bold" />
+                          <select value={timePeriods.end} onChange={(e) => setTimePeriods(prev => ({ ...prev, end: e.target.value }))} className="px-2 bg-slate-100 rounded-xl text-[10px] font-bold outline-none">
                             <option value="AM">AM</option>
                             <option value="PM">PM</option>
                           </select>
                         </div>
                       </div>
                     </div>
-                    {errors.consultationTime?.start && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.consultationTime.start.message}</p>}
-                    {errors.consultationTime?.end && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.consultationTime.end.message}</p>}
                   </div>
                 </div>
 
                 <div className="mt-6 space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Bio / Professional Brief</label>
-                  <textarea
-                    {...register('about')}
-                    rows={4}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all resize-none text-sm font-medium"
-                  />
+                  <textarea {...register('about')} rows={4} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all resize-none text-sm font-medium" />
                 </div>
               </div>
 
-              {/* Payment Configuration */}
+              {/* Salary & Limits Section */}
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
                     <CreditCard className="w-5 h-5" />
                   </div>
-                  <h2 className="text-xl font-bold text-slate-900">Payment & limits</h2>
+                  <h2 className="text-xl font-bold text-slate-900">Salary & limits</h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Payment Model</label>
-                    <select
-                      {...register('payment.type')}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-bold"
-                    >
-                      <option value="commission">Commission Based</option>
-                      <option value="fixed">Fixed Salary</option>
-                    </select>
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Monthly Salary (₹)</label>
+                    <input type="number" {...register('monthlyAmount')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium" placeholder="e.g. 80000" />
                   </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Payout Cycle</label>
-                    <select
-                      {...register('payment.payoutCycle')}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-bold"
-                    >
-                      <option value="monthly">Monthly</option>
-                      <option value="weekly">Weekly</option>
-                    </select>
-                  </div>
-
-                  {paymentType === 'commission' ? (
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Commission %</label>
-                      <input
-                        type="number"
-                        {...register('payment.commissionPercentage')}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium"
-                        placeholder="e.g. 15"
-                      />
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Fixed Salary (₹)</label>
-                      <input
-                        type="number"
-                        {...register('payment.fixedSalary')}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-medium"
-                        placeholder="e.g. 80000"
-                      />
-                    </div>
-                  )}
 
                   <div className="space-y-2">
                     <label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Tokens / Day Limit (Max 20)</label>
-                    <select
-                      {...register('payment.patientsPerDayLimit')}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-bold appearance-none"
-                    >
+                    <select {...register('patientsPerDayLimit')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all text-sm font-bold appearance-none">
                       {Array.from({ length: 20 }, (_, i) => i + 1).map((val) => (
                         <option key={val} value={val}>{val}</option>
                       ))}
                     </select>
-                    {errors.payment?.patientsPerDayLimit && (
-                      <p className="text-[10px] text-rose-500 font-bold px-1">{errors.payment.patientsPerDayLimit.message}</p>
-                    )}
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </form>
@@ -585,7 +595,7 @@ const HospitalDoctorEditpage: React.FC = () => {
             <p>Are you sure you want to save these changes to the doctor's profile?</p>
             <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
               <p className="text-xs text-blue-700 font-medium leading-relaxed">
-                Changes will take effect immediately across the platform. If the doctor is currently active, their profile visibility will reflect these updates instantly.
+                Changes will take effect immediately across the platform.
               </p>
             </div>
           </div>

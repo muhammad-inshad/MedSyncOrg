@@ -19,7 +19,7 @@ export const SUPERADMIN_MANAGEMENT = {
   EDIT_PATIENT: (id: string) => `/api/superadmin/patients/${id}`,
 
   GET_SUBSCRIPTIONS: "/api/superadmin/subscription",
-  ADD_SUBSCRIPTION: "/api/superadmin/subscription",
+    CREATE_SUBSCRIPTION: "/api/superadmin/subscription",
   TOGGLE_SUBSCRIPTION: "/api/superadmin/subscription/toggle",
   EDIT_SUBSCRIPTION: (id: string) => `/api/superadmin/subscription/${id}`,
 };

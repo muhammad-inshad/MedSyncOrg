@@ -46,12 +46,6 @@ const sidebarItems: SidebarItem[] = [
     icon: <Ticket className="w-5 h-5" />,
     path: DOCTOR_ROUTES.CONSELTATION, // e.g. '/doctor/token'
   },
-  
-  {
-    label: 'Patient Chat',
-    icon: <MessageSquare className="w-5 h-5" />,
-    path: DOCTOR_ROUTES.PATIENT_CHAT, // e.g. '/doctor/chat'
-  },
   {
     label: 'Wallet',
     icon: <Wallet className="w-5 h-5" />,

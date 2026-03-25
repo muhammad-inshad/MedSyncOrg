@@ -2,6 +2,9 @@ import { hospitalApi } from '@/constants/backend/hospital/hospital.api';
 import React, { useEffect, useState } from 'react';
 import { showToast } from '@/utils/toastUtils';
 import type { ISubscription } from '@/interfaces/ISubscription';
+import { Plus } from 'lucide-react';
+
+
 
 const colorMap: Record<string, string> = {
   "Basic": "border-t-blue-500",
@@ -21,50 +24,41 @@ const getDurationDisplay = (plan: ISubscription) => {
     const end = new Date(plan.endDate);
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays >= 360) return 'year';
     if (diffDays >= 28 && diffDays <= 31) return 'month';
     return `${diffDays} days`;
   }
-  
+
   if (plan.durationUnit) {
     return plan.durationUnit.replace(/s$/, '');
   }
-  
+
   return 'year';
 };
 
-
-// --- Billing Modal Component ---
 const BillingModal = ({ plan, onClose }: { plan: ISubscription; onClose: () => void }) => {
-  const taxRate = 0.1; // 18% GST Example
+  const taxRate = 0.1;
   const taxAmount = plan.amount * taxRate;
   const totalAmount = plan.amount + taxAmount;
 
   const handlePayment = async () => {
-  try {
-
-    showToast.success("Redirecting to payment gateway...");
-
-    const res = await hospitalApi.createPaymentSession({
-      planId: plan._id
-    });
-
-    if (res.data?.url) {
-     
-      window.location.href = res.data.url;
+    try {
+      const res = await hospitalApi.createPaymentSession({ planId: plan.id });
+     if (res.data?.url) {
+  window.location.href = res.data.url;
+} else {
+  showToast.error("Payment session failed");
+}
+    } catch (error) {
+      console.error(error);
+      showToast.error("Payment failed. Please try again.");
     }
-
-  } catch (error) {
-    console.error(error);
-    showToast.error("Payment failed. Please try again.");
-  }
-};
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className=" rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all animate-in zoom-in-95 duration-200">
-        {/* Modal Header */}
+      <div className="rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all animate-in zoom-in-95 duration-200">
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
           <h2 className="text-xl font-bold text-slate-800">Order Summary</h2>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition">
@@ -74,7 +68,6 @@ const BillingModal = ({ plan, onClose }: { plan: ISubscription; onClose: () => v
           </button>
         </div>
 
-        {/* Modal Body */}
         <div className="p-8 bg-amber-50 space-y-4">
           <div className="flex justify-between items-center text-slate-600">
             <span>Selected Plan</span>
@@ -84,9 +77,7 @@ const BillingModal = ({ plan, onClose }: { plan: ISubscription; onClose: () => v
             <span>Duration</span>
             <span className="capitalize">{getDurationDisplay(plan)}</span>
           </div>
-          
           <div className="my-6 border-t border-dashed border-slate-200" />
-
           <div className="flex justify-between text-slate-600">
             <span>Base Amount</span>
             <span>₹{plan.amount.toLocaleString()}</span>
@@ -95,22 +86,20 @@ const BillingModal = ({ plan, onClose }: { plan: ISubscription; onClose: () => v
             <span>GST (18%)</span>
             <span>₹{taxAmount.toLocaleString()}</span>
           </div>
-
           <div className="mt-6 bg-slate-900 rounded-2xl p-5 flex justify-between items-center shadow-lg shadow-slate-200">
             <span className="text-white font-medium">Total Payable</span>
             <span className="text-white text-2xl font-black">₹{totalAmount.toLocaleString()}</span>
           </div>
         </div>
 
-        {/* Modal Footer */}
         <div className="p-8 pt-0 bg-white space-y-3">
-         <button 
-  onClick={handlePayment}
-  className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
->
-  Pay Securely
-</button>
-          <button 
+          <button
+            onClick={handlePayment}
+            className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+          >
+            Pay Securely
+          </button>
+          <button
             onClick={onClose}
             className="w-full text-slate-400 py-2 text-sm font-medium hover:text-slate-600 transition"
           >
@@ -128,22 +117,31 @@ const HospitalSubscription = () => {
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<ISubscription | null>(null);
 
-  useEffect(() => {
-    const fetchSubscriptions = async () => {
-      try {
-        setLoading(true);
-        const response = await hospitalApi.getsubscription();
-        if (response.data && response.data.success) {
-          setSubscriptionPlans(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching subscriptions:", error);
-        showToast.error("Failed to load subscription plans");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
+  const fetchSubscriptions = async () => {
+  try {
+    setLoading(true);
+    const response = await hospitalApi.getsubscription();
+   
+    if (response.data?.success && response.data?.data?.data) {
+      const plans = response.data.data.data.map((item: any) => ({
+        ...item,
+        plan: item.plan || item.planName 
+      }));
+      
+      setSubscriptionPlans(plans);
+      console.log(subscriptionPlans)
+    }
+  } catch (error) {
+    console.error("Error fetching subscriptions:", error);
+    showToast.error("Failed to load subscription plans");
+  } finally {
+    setLoading(false);
+  }
+};
+
+  useEffect(() => {
     fetchSubscriptions();
   }, []);
 
@@ -154,24 +152,31 @@ const HospitalSubscription = () => {
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-12">
       <div className="max-w-7xl mx-auto">
+
         {/* Header Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
             MedSync Service Plans
           </h1>
           <p className="text-slate-600 mb-8 max-w-2xl mx-auto">
-            Choose the perfect management scale for your hospital’s needs.
+            Choose the perfect management scale for your hospital's needs.
           </p>
-          <div className="relative max-w-lg mx-auto">
-            <input
-              type="text"
-              placeholder="Search by plan name..."
-              className="w-full px-5 py-3 pl-12 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <svg className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+
+          {/* Search + Add button row */}
+          <div className="flex items-center justify-center gap-4 max-w-2xl mx-auto">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Search by plan name..."
+                className="w-full px-5 py-3 pl-12 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <svg className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+
+  
           </div>
         </div>
 
@@ -184,8 +189,8 @@ const HospitalSubscription = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredPlans.length > 0 ? (
               filteredPlans.map((plan) => (
-                <div 
-                  key={plan._id} 
+                <div
+                  key={plan.id}
                   className={`relative bg-white border-t-4 ${colorMap[plan.plan] || 'border-t-indigo-500'} rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col p-8`}
                 >
                   {plan.plan === "Premium" && (
@@ -195,7 +200,7 @@ const HospitalSubscription = () => {
                   )}
 
                   <h3 className="text-2xl font-bold text-slate-800">{plan.plan}</h3>
-                  
+
                   <div className="mt-6 flex items-baseline">
                     <span className="text-5xl font-black text-slate-900">₹{plan.amount}</span>
                     <span className="ml-2 text-slate-500 font-medium">/{getDurationDisplay(plan)}</span>
@@ -203,16 +208,22 @@ const HospitalSubscription = () => {
 
                   <hr className="my-8 border-slate-100" />
 
-                  <div className="space-y-4 mb-8 flex-grow">
-                    <PlanFeature label={`Up to ${plan.limits?.maxPatients || 'Unlimited'} Patients`} />
-                    <PlanFeature label={`Up to ${plan.limits?.maxDoctors || 'Unlimited'} Doctors`} />
-                    <PlanFeature label={`Up to ${plan.limits?.maxDepartments || 'Unlimited'} Depts`} />
-                    {plan.features?.map((f, i) => (
-                      <PlanFeature key={i} label={f} />
-                    ))}
-                  </div>
+                 <div className="space-y-4 mb-8 flex-grow">
+  {/* Display the Description */}
+  <div className="text-slate-600 italic">
+    {plan.description || "No description provided."}
+  </div>
 
-                  <button 
+ 
+  <div className="flex items-center gap-2 text-sm font-semibold text-indigo-600 bg-indigo-50 px-3 py-2 rounded-lg w-fit">
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span>Plan Validity: {getDurationDisplay(plan)}</span>
+  </div>
+</div>
+
+                  <button
                     onClick={() => setSelectedPlan(plan)}
                     className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-indigo-600 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-slate-200"
                   >
@@ -228,14 +239,16 @@ const HospitalSubscription = () => {
           </div>
         )}
 
-        {/* --- Render Modal --- */}
+        {/* Billing Modal */}
         {selectedPlan && (
-          <BillingModal 
-            plan={selectedPlan} 
-            onClose={() => setSelectedPlan(null)} 
+          <BillingModal
+            plan={selectedPlan}
+            onClose={() => setSelectedPlan(null)}
           />
         )}
       </div>
+
+
     </div>
   );
 };

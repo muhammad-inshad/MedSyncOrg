@@ -262,8 +262,7 @@ export default function UpcomingAppointments() {
         <div className="flex-1 overflow-y-auto px-8 py-6 space-y-8">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-24 text-slate-400 animate-pulse">
-              <RefreshCw className="w-12 h-12 mb-3 animate-spin opacity-30" />
-              <p className="text-lg font-medium">Loading appointments...</p>
+              <p className="text-lg font-medium">no  appointments...</p>
             </div>
           ) : sortedDates.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-slate-400">

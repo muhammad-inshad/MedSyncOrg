@@ -432,19 +432,7 @@ const DoctorEditProfile: React.FC = () => {
                                 <div className="mt-6 space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Bio</label><textarea {...register('about')} rows={4} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl resize-none text-sm font-medium" /></div>
                             </div>
 
-                            {/* Payment Config */}
-                            <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
-                                <div className="flex items-center gap-3 mb-8"><div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><CreditCard className="w-5 h-5" /></div><h2 className="text-xl font-bold text-slate-900">Payment & Limits</h2></div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Payment Model</label><select {...register('payment.type')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold"><option value="commission">Commission Based</option><option value="fixed">Fixed Salary</option></select></div>
-                                    {paymentType === 'commission' ? (
-                                        <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Commission %</label><input type="number" {...register('payment.commissionPercentage')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" /></div>
-                                    ) : (
-                                        <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Fixed Salary (₹)</label><input type="number" {...register('payment.fixedSalary')} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" /></div>
-                                    )}
-                                    <div className="space-y-2"><label className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">Patients / Day</label><input type="number" {...register('payment.patientsPerDayLimit')} max={20} className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm" />{errors.payment?.patientsPerDayLimit && <p className="text-[10px] text-rose-500 font-bold px-1">{errors.payment.patientsPerDayLimit.message}</p>}</div>
-                                </div>
-                            </div>
+                       
 
                         </div>
                     </div>

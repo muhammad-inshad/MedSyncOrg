@@ -1,7 +1,7 @@
 export interface IDoctor {
 
-  _id: string; // MongoDB ID
-
+  id: string; // MongoDB ID
+  
   name: string;
   email: string;
   phone: string;
@@ -13,7 +13,8 @@ export interface IDoctor {
   department: string;
 
   hospital_id?: string; // ObjectId becomes string in frontend
-
+specialization_id?:string;
+department_id?:string;
   licence: string;
   profileImage: string;
   about: string;
@@ -35,15 +36,8 @@ export interface IDoctor {
     end?: string;
   };
 
-  payment: {
-    type?: "commission" | "fixed";
-
-    commissionPercentage?: number;
-    fixedSalary?: number;
-
-    payoutCycle?: "weekly" | "monthly";
-    patientsPerDayLimit?: number;
-  };
+  monthlyAmount: number;
+  patientsPerDayLimit: number;
 
   createdAt: string; // Date → string (ISO format)
   updatedAt: string;

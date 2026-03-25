@@ -276,7 +276,7 @@ const QualificationManagement = () => {
 
   useEffect(() => {
     fetchQualifications();
-  }, [fetchQualifications]);
+  }, []);
 
   const handleToggleStatus = async (id: string) => {
     try {

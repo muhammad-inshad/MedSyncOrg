@@ -13,6 +13,22 @@ import { AxiosError } from 'axios';
 import { SUPERADMIN_ROUTES } from '@/constants/frontend/superAdmin/superAdmin.routes';
 import type { SubscriptionForm } from '@/interfaces/ISubscription';
 
+// Fix the form type to match your actual SubscriptionForm interface
+interface EditSubscriptionForm {
+  planName: string;
+  amount: number;
+  status: 'active' | 'expired' | 'cancelled';
+  duration: number;
+  durationUnit: 'days' | 'months' | 'years';
+  paymentId: string;
+  paymentMethod: string;
+  limits: {
+    maxPatients: number;
+    maxDoctors: number;
+    maxDepartments: number;
+  };
+}
+
 interface FormErrors {
   [key: string]: string;
 }
@@ -26,18 +42,20 @@ const STATUS_CONFIG = {
 const EditSubscription = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const subscription = location.state?.subscription as SubscriptionForm;
+  // Properly type the incoming subscription data
+  const subscription = (location.state?.subscription as Partial<SubscriptionForm>) || {};
 
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [subscriptionId, setSubscriptionId] = useState<string>('');
 
-  const [form, setForm] = useState<SubscriptionForm>({
-    plan: '',
+  // Use the corrected form type
+  const [form, setForm] = useState<EditSubscriptionForm>({
+    planName: '',
     amount: 0,
     status: 'active',
     duration: 1,
-    durationUnit: 'months',
+    durationUnit: 'months' as const,
     paymentId: '',
     paymentMethod: '',
     limits: {
@@ -48,19 +66,22 @@ const EditSubscription = () => {
   });
 
   useEffect(() => {
-    if (!subscription) {
+    if (!subscription.id && !subscription.id) {
       toast.error('No subscription data found');
       navigate(-1);
       return;
     }
-    const id = (subscription as any).id || (subscription as any)._id || '';
+    
+    const id = subscription.id || subscription.id || '';
     setSubscriptionId(String(id));
+    
+    // Map incoming data to form structure
     setForm({
-      plan: subscription.plan || '',
+      planName: subscription.planName || '',
       amount: subscription.amount || 0,
-      status: subscription.status || 'active',
+      status: (subscription.status as any) || 'active',
       duration: subscription.duration || 1,
-      durationUnit: subscription.durationUnit || 'months',
+      durationUnit: (subscription.durationUnit as any) || 'months',
       paymentId: subscription.paymentId || '',
       paymentMethod: subscription.paymentMethod || '',
       limits: {
@@ -81,27 +102,29 @@ const EditSubscription = () => {
       setForm(prev => ({
         ...prev,
         [parent]: {
-          ...(prev[parent as keyof SubscriptionForm] as Record<string, unknown>),
+          ...(prev[parent as keyof EditSubscriptionForm] as Record<string, unknown>),
           [child]: Number(value),
         },
       }));
     } else {
       setForm(prev => ({
         ...prev,
-        [name]: (name === 'amount' || name === 'duration') ? Number(value) : value,
+        [name as keyof EditSubscriptionForm]: 
+          (name === 'amount' || name === 'duration') ? Number(value) : value,
       }));
     }
 
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
+  // Fixed Zod schema to match your actual interface
   const validate = (): boolean => {
     const subscriptionSchema = z.object({
-      plan: z.string().min(1, 'Plan name is required'),
+      planName: z.string().min(1, 'Plan name is required'),
       amount: z.number().nonnegative('Amount must be zero or positive'),
       status: z.enum(['active', 'expired', 'cancelled']),
       duration: z.number().positive('Duration must be positive'),
-      durationUnit: z.enum(['months', 'years']),
+      durationUnit: z.enum(['days', 'months', 'years']),
       paymentId: z.string().optional(),
       paymentMethod: z.string().optional(),
       limits: z.object({
@@ -119,7 +142,7 @@ const EditSubscription = () => {
         if (issue.path.length > 1) {
           newErrors[issue.path.join('.')] = issue.message;
         } else {
-          newErrors[issue.path[0] as keyof SubscriptionForm] = issue.message;
+          newErrors[issue.path[0] as string] = issue.message;
         }
       });
       setErrors(newErrors);
@@ -220,15 +243,15 @@ const EditSubscription = () => {
                   <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <input
                     type="text"
-                    name="plan"
-                    value={form.plan}
+                    name="planName"  // Changed from "plan" to "planName"
+                    value={form.planName}
                     onChange={handleChange}
                     className={`w-full pl-10 pr-4 py-3 rounded-xl border text-sm font-medium bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition ${
-                      errors.plan ? 'border-red-400' : 'border-slate-200'
+                      errors.planName ? 'border-red-400' : 'border-slate-200'
                     }`}
                   />
                 </div>
-                {errors.plan && <p className="text-red-500 text-xs mt-1">{errors.plan}</p>}
+                {errors.planName && <p className="text-red-500 text-xs mt-1">{errors.planName}</p>}
               </div>
 
               <div>
@@ -264,47 +287,6 @@ const EditSubscription = () => {
                   <option value="expired">Expired</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-            <div className="px-8 py-5 border-b border-slate-100 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
-                <Users className="w-4 h-4 text-orange-600" />
-              </div>
-              <h2 className="font-bold text-slate-800">Plan Limits</h2>
-            </div>
-            <div className="p-8 grid md:grid-cols-3 gap-6">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Max Patients</label>
-                <input
-                  type="number"
-                  name="limits.maxPatients"
-                  value={form.limits?.maxPatients ?? 0}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-medium bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Max Doctors</label>
-                <input
-                  type="number"
-                  name="limits.maxDoctors"
-                  value={form.limits?.maxDoctors ?? 0}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-medium bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Max Departments</label>
-                <input
-                  type="number"
-                  name="limits.maxDepartments"
-                  value={form.limits?.maxDepartments ?? 0}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm font-medium bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 transition"
-                />
               </div>
             </div>
           </div>
@@ -356,10 +338,10 @@ const EditSubscription = () => {
             </div>
           </div>
 
-          {form.plan && (
+          {form.planName && (
             <div className="rounded-2xl p-5 flex flex-wrap items-center gap-4 bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200">
               <CreditCard className="w-5 h-5 opacity-80" />
-              <span className="font-bold text-lg">{form.plan}</span>
+              <span className="font-bold text-lg">{form.planName}</span>
               <span className="px-3 py-1 rounded-full bg-white/20 text-sm font-semibold">
                 ₹{Number(form.amount).toLocaleString()}
               </span>
