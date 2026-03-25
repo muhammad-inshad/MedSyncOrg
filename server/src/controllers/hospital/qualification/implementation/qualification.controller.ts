@@ -22,7 +22,6 @@ export class QualificationManagementController {
                 Number(limit),
                 search as string
             );
-
             return ApiResponse.success(res, "Qualifications fetched successfully", paginatedQualifications, HttpStatusCode.OK);
         } catch (error) {
             next(error);

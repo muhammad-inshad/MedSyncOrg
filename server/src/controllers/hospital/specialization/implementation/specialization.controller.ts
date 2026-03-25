@@ -8,10 +8,13 @@ export class SpecializationManagementController {
 
     async getSpecializations(req: Request, res: Response, next: NextFunction) {
         try {
-            const hospitalId = (req.user as any).userId;
+             const hospitalId = req.user?.userId;
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 10;
             const search = req.query.search as string;
+            if (!hospitalId) {
+            return ApiResponse.unauthorized(res, "Hospital ID not found");
+        }
 
             const result = await this._specializationService.getSpecializations(hospitalId, { page, limit, search });
             return ApiResponse.success(res, "Specializations fetched successfully", result, HttpStatusCode.OK);
@@ -22,9 +25,12 @@ export class SpecializationManagementController {
 
     async createSpecialization(req: Request, res: Response, next: NextFunction) {
         try {
-            const hospitalId = (req.user as any).userId;
+            const hospitalId = req.user?.userId;
             const specializationData = req.body;
             const file = req.file;
+            if (!hospitalId) {
+            return ApiResponse.unauthorized(res, "Hospital ID not found");
+        }
 
             const specialization = await this._specializationService.createSpecialization(hospitalId, specializationData, file);
             return ApiResponse.success(res, "Specialization created successfully", specialization, HttpStatusCode.CREATED);
@@ -37,8 +43,8 @@ export class SpecializationManagementController {
         try {
             const { id } = req.params;
             const specializationData = req.body;
+            console.log(specializationData)
             const file = req.file;
-
             const specialization = await this._specializationService.updateSpecialization(id, specializationData, file);
             if (!specialization) {
                 return ApiResponse.error(res, "Specialization not found", HttpStatusCode.NOT_FOUND);

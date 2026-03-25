@@ -55,7 +55,7 @@ export const doctorContainer = () => {
     appointmentRepo,
     leaveRepo,
     doctorMapper,
-    doctorLeaveMapper
+    doctorLeaveMapper,
   );
 
   const doctorAuthService = new DoctorAuthService(
@@ -85,6 +85,7 @@ export const doctorContainer = () => {
     doctorRepository,
     doctorAuthMiddleware,
     appoimentController,
-    consultation
+    consultation,
+    qualificationRepo
   };
 };

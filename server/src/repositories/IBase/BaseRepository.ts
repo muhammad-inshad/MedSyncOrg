@@ -69,4 +69,7 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
 
         return { data, total, page, limit };
     }
+    async findByFilter(filter: FilterQuery<T>): Promise<T[]> {
+    return await this.model.find(filter).exec();
+}
 }

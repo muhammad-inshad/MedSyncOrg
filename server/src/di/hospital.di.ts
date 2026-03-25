@@ -72,8 +72,6 @@ export const hospitalContainer = () => {
         hospitalMapper
     );
     const hospitalAuthController = new HospitalAuthController(hospitalAuthService);
-
-    // Hospital profile (getme)
     const imageService = new CloudinaryImageService();
     const { patientService } = patientContainer();
     const hospitalService = new HospitalService(
@@ -95,7 +93,9 @@ export const hospitalContainer = () => {
         departmentRepo,
         leaveRepo,
         hospitalSubscriptionService,
-        doctorLeaveMapper
+        doctorLeaveMapper,
+        specializationRepo,
+       qualificationRepo
     );
     const doctorManagement = new DoctorManagementController(
         doctorManagementService

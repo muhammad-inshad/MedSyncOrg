@@ -1,5 +1,5 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 
 export interface IHospitalSubscriptionController {
-    getActiveSubscriptions(req: Request, res: Response): Promise<void>;
+    getActiveSubscriptions(req: Request, res: Response,next:NextFunction): Promise<void>;
 }

@@ -24,28 +24,27 @@ export class PaymentService implements IPaymentService {
 
     async createCheckoutSession(planId: string, hospitalId: string): Promise<CheckoutResponseDTO> {
         const plan = await this.subscriptionRepository.findById(planId);
+        
         if (!plan) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Subscription plan not found");
         }
 
-          const baseAmount = plan.price || plan.amount;
-  const taxRate = 0.1; 
-  const taxAmount = baseAmount * taxRate;
-  const totalAmount = baseAmount + taxAmount;
-
+          const baseAmount = plan.amount;
+          const taxRate = 0.1; 
+          const taxAmount = baseAmount * taxRate;
+          const totalAmount = baseAmount + taxAmount;
         if (baseAmount === 0 || totalAmount === 0) {
             const startDate = new Date();
             const endDate = new Date();
             const duration = plan.duration || 1;
             const unit = plan.durationUnit || "months";
-            
-            if (unit === "days") endDate.setDate(endDate.getDate() + duration);
-            else if (unit === "months") endDate.setMonth(endDate.getMonth() + duration);
+          
+         if (unit === "months") endDate.setMonth(endDate.getMonth() + duration);
             else if (unit === "years") endDate.setFullYear(endDate.getFullYear() + duration);
 
             await this.hospitalRepository.update(hospitalId, {
                 subscription: {
-                    plan: plan.plan,
+                    plan: plan.planName,
                     amount: 0,
                     status: "active",
                     startDate,
@@ -64,8 +63,8 @@ export class PaymentService implements IPaymentService {
                     price_data: {
                         currency: "inr",
                         product_data: {
-                            name: plan.planName || plan.plan,
-                            description: plan.description || `Subscription for ${plan.planName || plan.plan}`,
+                            name: plan.planName,
+                            description: plan.description || `Subscription for ${plan.planName}`,
                         },
                         unit_amount: Math.round(totalAmount * 100), 
                     },
@@ -126,7 +125,7 @@ const metadata = {
             ],
             metadata,
             success_url: `${frontendUrl}/patient/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${frontendUrl}/patient/appointment/${appointmentData.doctorId}`,
+            cancel_url: `${frontendUrl}/patient/payment-failed`,
         });
 
         return this.paymentMapper.toCheckoutDTO(session.url);
@@ -140,7 +139,7 @@ const metadata = {
             event = stripe.webhooks.constructEvent(
                 payload,
                 signature,
-                process.env.STRIPE_WEBHOOK_SECRET as string
+                (process.env.STRIPE_WEBHOOK_SECRET as string).trim()
             );
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : "Unknown error";
@@ -180,10 +179,13 @@ const metadata = {
                         bloodPressure: metadata.bloodPressure,
                         heartRate: metadata.heartRate,
                         weight: metadata.weight,
+                        paymentId: session.id,
                     };
 
                     console.log("Reconstructed Appointment Data from Metadata:", JSON.stringify(appointmentData, null, 2));
+                    console.log("Booking appointment for patient:", patientId);
                     await this.patientService.bookAppointment(patientId, appointmentData);
+                    console.log("Appointment booked successfully via webhook");
                 } catch (error) {
                     console.error("ERROR during webhook appointment processing:", error);
                     throw error; 
@@ -211,15 +213,15 @@ const metadata = {
                 
                 const startDate = new Date();
                 const endDate = new Date();
-                if (unit === "days") endDate.setDate(endDate.getDate() + duration);
-                else if (unit === "months") endDate.setMonth(endDate.getMonth() + duration);
+               
+                 if (unit === "months") endDate.setMonth(endDate.getMonth() + duration);
                 else if (unit === "years") endDate.setFullYear(endDate.getFullYear() + duration);
 
                 try {
                     await this.hospitalRepository.update(hospitalId, {
                         subscription: {
-                            plan: plan.plan,
-                            amount: plan.price || plan.amount,
+                            plan: plan.planName,
+                            amount: plan.amount,
                             status: "active",
                             startDate,
                             endDate,
@@ -228,16 +230,12 @@ const metadata = {
                     console.log("Hospital subscription updated successfully");
 
                     const subscriptionData: Partial<ISubscription> = {
-                        hospitalId: hospital._id as Types.ObjectId,
-                        plan: plan.plan,
+                     
                         planName: plan.planName,
-                        amount: plan.price || plan.amount,
+                        amount: plan.amount,
                         status: "active",
                         startDate,
                         endDate,
-                        paymentId: session.id,
-                        paymentMethod: "stripe",
-                        limits: plan.limits
                     };
                     await this.subscriptionRepository.create(subscriptionData);
                     console.log("Subscription record created successfully");

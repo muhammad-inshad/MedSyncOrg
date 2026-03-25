@@ -8,13 +8,14 @@ export interface IDoctor extends Document {
   phone: string;
   address: string;
   role: Role;   
-  specialization: string;
+  specialization?: string;
   qualification: string;
   experience: string;
   department: string;
   hospital_id: Types.ObjectId;
   about: string;
-
+  department_id?:string;
+  specialization_id?:string;
   licence: string;
   profileImage: string;
 
@@ -36,13 +37,9 @@ export interface IDoctor extends Document {
     end: string;
   };
 
-  payment: {
-    type: "commission" | "fixed";
-    commissionPercentage?: number;
-    fixedSalary?: number;
-    payoutCycle: "weekly" | "monthly";
+  
+    monthlyAmount: number;
     patientsPerDayLimit: number;
-  };
 
   createdAt: Date;
   updatedAt: Date;
@@ -82,7 +79,7 @@ const doctorSchema = new Schema<IDoctor>(
       required: [true, 'Address is required'],
     },
 
-    specialization: {
+    specialization_id: {
       type: String,
       required: [true, 'Specialization is required'],
     },
@@ -97,7 +94,7 @@ const doctorSchema = new Schema<IDoctor>(
       required: [true, 'Experience is required'],
     },
 
-    department: {
+    department_id: {
       type: String,
       required: [true, 'Department is required'],
     },
@@ -188,27 +185,10 @@ const doctorSchema = new Schema<IDoctor>(
       },
     },
 
-    payment: {
-      type: {
-        type: String,
-        enum: ["commission", "fixed"],
-        required: false,
-      },
-
-      commissionPercentage: {
+    monthlyAmount: {
         type: Number,
-        min: 0,
-        max: 100,
-      },
-
-      fixedSalary: {
-        type: Number,
-      },
-
-      payoutCycle: {
-        type: String,
-        enum: ["weekly", "monthly"],
-        required: false,
+        required: [true, 'Monthly salary is required'],
+        min: [0, 'Salary cannot be negative'],
       },
 
       patientsPerDayLimit: {
@@ -217,7 +197,6 @@ const doctorSchema = new Schema<IDoctor>(
         default: 20,
         max: [20, 'Maximum tokens per day cannot exceed 20'],
       },
-    },
   },
   {
     timestamps: true,

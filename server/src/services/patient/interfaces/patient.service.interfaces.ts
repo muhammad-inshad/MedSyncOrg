@@ -21,4 +21,5 @@ export interface IPatientService {
   getAppoimentHistory(patientId: string, query: { page: number; limit: number; search: string }): Promise<{ data: AppointmentResponseDTO[]; total: number }>;
   getTodayAppointments(patientId: string): Promise<AppointmentResponseDTO[]>;
   cancelAppointment(data: { id: string; reason: string }): Promise<void>;
+  checkAppointmentStatus(sessionId: string): Promise<boolean>;
 }

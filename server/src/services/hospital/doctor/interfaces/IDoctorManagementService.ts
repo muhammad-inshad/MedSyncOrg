@@ -1,7 +1,7 @@
 import { IPaginationResult, IDoctorListOptions } from "../../../../types/hospital.types.ts";
 import { DoctorDTO } from "../../../../dto/auth/signup.dto.ts";
 import { DoctorUploadFiles } from "../../../../types/doctor.types.ts";
-import { DoctorResponseDTO, UpdateDoctorDTO } from "../../../../dto/doctor/doctor-response.dto.ts";
+import { DeptSpecQualResponse, DoctorResponseDTO, UpdateDoctorDTO } from "../../../../dto/doctor/doctor-response.dto.ts";
 import { DoctorLeaveResponseDTO } from "../../../../dto/doctor/doctor-leave-response.dto.ts";
 
 export interface IDoctorManagementService {
@@ -20,4 +20,6 @@ export interface IDoctorManagementService {
         date?: Date;
     }): Promise<{ data: DoctorLeaveResponseDTO[]; total: number; page: number; limit: number }>;
     updateLeaveStatus(leaveId: string, status: 'approved' | 'rejected', reason?: string): Promise<DoctorLeaveResponseDTO | null>;
+    getDoctorDetails(id:string):Promise<DoctorResponseDTO | null>;
+    getDeptSpecs(hospitalId: string): Promise<DeptSpecQualResponse>;
 }

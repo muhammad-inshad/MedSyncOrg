@@ -7,9 +7,9 @@ export class QualificationMapper implements IMapper<IQualification, Qualificatio
         const dto = {
             id: qualification._id.toString(),
             name: qualification.name,
-            abbreviation: qualification.abbreviation,
-            description: qualification.description,
-            image: qualification.image,
+             abbreviation: qualification.abbreviation ?? "",
+        description: qualification.description ?? "",
+        image: qualification.image ?? "",
             isActive: qualification.isActive,
         };
         // Output Validation using Zod

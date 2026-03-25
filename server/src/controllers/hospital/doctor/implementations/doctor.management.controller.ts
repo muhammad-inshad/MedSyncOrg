@@ -9,7 +9,7 @@ import { DoctorDTO } from "../../../../dto/auth/signup.dto.ts";
 import { MESSAGES } from "../../../../constants/messages.ts";
 import { FilterQuery } from 'mongoose';
 import { IDoctor } from "../../../../models/doctor.model.ts";
-import { id } from "zod/locales";
+import { ITokenPayload } from "../../../../services/token/token.service.interface.ts";
 // import { AuthHOspitalPayload } from "../../../../dto/hospital/hospital-response.dto.ts";
 
 export class DoctorManagementController implements IDoctorManagementController {
@@ -31,7 +31,6 @@ export class DoctorManagementController implements IDoctorManagementController {
         filter.hospital_id = hospital_id.toString();
       }
       const result = await this._doctorManagementService.getAllDoctors({ page, limit, search, filter });
-      console.log(result)
       return ApiResponse.success(res, "Doctors fetched successfully", result.data, HttpStatusCode.OK, {
         page,
         limit,
@@ -147,7 +146,7 @@ export class DoctorManagementController implements IDoctorManagementController {
       const { id } = req.params;
       const files = req.files as unknown as DoctorUploadFiles;
       const doctorData = req.body;
-
+      console.log(doctorData)
       const result = await this._doctorManagementService.updateDoctor(id, doctorData, files);
       return ApiResponse.success(res, "Doctor profile updated successfully", result);
     } catch (error: unknown) {
@@ -197,6 +196,24 @@ export class DoctorManagementController implements IDoctorManagementController {
     } catch (error: unknown) {
       next(error);
     }
+  }
+
+  async getDoctorDetails(req:Request,res:Response):Promise<Response|void>{
+    const {id}=req.params
+    const result = await this._doctorManagementService.getDoctorDetails(id);
+    console.log(result)
+    return ApiResponse.success(res,"success",result);
+  }
+
+  async getDeptSpecs(req:Request,res:Response,next:NextFunction):Promise<Response|void>{
+     try {
+        const user = req.user as unknown as ITokenPayload;
+      const hospitalId = user.userId;
+      const result=await this._doctorManagementService.getDeptSpecs(hospitalId)
+      return ApiResponse.success(res,"success",result)
+     } catch (error) {
+      next(error)
+     }
   }
 
 }

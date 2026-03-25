@@ -3,14 +3,21 @@ import { IDoctorRepository } from "../../../../repositories/doctor/doctor.reposi
 import Logger from "../../../../utils/logger.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { IDoctor } from "../../../../models/doctor.model.ts";
-import { IPaginationResult, IDoctorListOptions } from "../../../../types/hospital.types.ts";
+import {
+  IPaginationResult,
+  IDoctorListOptions,
+} from "../../../../types/hospital.types.ts";
 import { IDoctorManagementService } from "../interfaces/IDoctorManagementService.ts";
 import bcrypt from "bcryptjs";
 import { MESSAGES } from "../../../../constants/messages.ts";
 import { uploadBufferToCloudinary } from "../../../../utils/cloudinaryUpload.ts";
 import { DoctorUploadFiles } from "../../../../types/doctor.types.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { DoctorResponseDTO, UpdateDoctorDTO } from "../../../../dto/doctor/doctor-response.dto.ts";
+import {
+  DeptSpecQualResponse,
+  DoctorResponseDTO,
+  UpdateDoctorDTO,
+} from "../../../../dto/doctor/doctor-response.dto.ts";
 import { DoctorMapper } from "../../../../mappers/doctor.mapper.ts";
 import { DoctorLeaveMapper } from "../../../../mappers/doctor-leave.mapper.ts";
 import { DoctorLeaveResponseDTO } from "../../../../dto/doctor/doctor-leave-response.dto.ts";
@@ -20,260 +27,337 @@ import { CloudinaryImageService } from "../../../image/implementation/cloudinary
 import { ILeaveRepository } from "../../../../repositories/leave/leave.repository.interface.ts";
 import { IDoctorLeave } from "../../../../models/doctorLeave.model.ts";
 import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.ts";
+import { ISpecializationRepository } from "../../../../repositories/hospital/specialization.repository.interface.ts";
+import { IQualificationRepository } from "../../../../repositories/hospital/qualification.repository.interface.ts";
 
 export class DoctorManagementService implements IDoctorManagementService {
-    private readonly _cloudinary: CloudinaryImageService;
-    constructor(
-        private readonly _doctorRepo: IDoctorRepository,
-        private readonly _doctorMapper: DoctorMapper,
-        private readonly _departmentRepo: IDepartmentRepository,
-        private readonly _leaveRepo: ILeaveRepository,
-        private readonly _subscriptionService: IHospitalSubscriptionService,
-        private readonly _leaveMapper: DoctorLeaveMapper
-    ) {
-        this._cloudinary = new CloudinaryImageService();
+  private readonly _cloudinary: CloudinaryImageService;
+  constructor(
+    private readonly _doctorRepo: IDoctorRepository,
+    private readonly _doctorMapper: DoctorMapper,
+    private readonly _departmentRepo: IDepartmentRepository,
+    private readonly _leaveRepo: ILeaveRepository,
+    private readonly _subscriptionService: IHospitalSubscriptionService,
+    private readonly _leaveMapper: DoctorLeaveMapper,
+    private readonly _specializationRepo: ISpecializationRepository,
+    private readonly _qualificationRepo: IQualificationRepository
+  ) {
+    this._cloudinary = new CloudinaryImageService();
+  }
+
+  async getAllDoctors(
+    options: IDoctorListOptions,
+  ): Promise<IPaginationResult<DoctorResponseDTO>> {
+    const { page, limit, search, filter } = options;
+    const result = await this._doctorRepo.findWithPagination({
+      page,
+      limit,
+      search,
+      searchFields: ["name", "email", "specialization"],
+      filter,
+    });
+
+    const hospitalId = filter?.hospital_id;
+    const departmentMap = new Map<string, string>();
+
+    if (hospitalId) {
+      const { data: departments } = await this._departmentRepo.findByHospitalId(
+        hospitalId,
+        1,
+        100,
+      );
+      departments.forEach((dept) => {
+        departmentMap.set(dept._id.toString(), dept.departmentName);
+      });
     }
 
-    async getAllDoctors(options: IDoctorListOptions): Promise<IPaginationResult<DoctorResponseDTO>> {
-        const { page, limit, search, filter } = options;
-        const result = await this._doctorRepo.findWithPagination({
-            page,
-            limit,
-            search,
-            searchFields: ["name", "email", "specialization"],
-            filter,
-        });
+    const doctors = result.data.map((doc) => {
+      const dto = this._doctorMapper.toDTO(doc);
+      if (departmentMap.has(dto.department)) {
+        dto.department = departmentMap.get(dto.department)!;
+      }
+      return dto;
+    });
 
-        const hospitalId = filter?.hospital_id;
-        const departmentMap = new Map<string, string>();
+    return {
+      data: doctors,
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+    };
+  }
 
-        if (hospitalId) {
-            const { data: departments } = await this._departmentRepo.findByHospitalId(hospitalId, 1, 100);
-            departments.forEach(dept => {
-                departmentMap.set(dept._id.toString(), dept.departmentName);
-            });
-        }
-
-        const doctors = result.data.map(doc => {
-            const dto = this._doctorMapper.toDTO(doc);
-            if (departmentMap.has(dto.department)) {
-                dto.department = departmentMap.get(dto.department)!;
-            }
-            return dto;
-        });
-
-        return {
-            data: doctors,
-            total: result.total,
-            page: result.page,
-            limit: result.limit
-        };
+  async doctorsToggle(id: string): Promise<DoctorResponseDTO | null> {
+    const doctor = await this._doctorRepo.findById(id);
+    if (!doctor) {
+      Logger.warn(
+        `Toggle Doctor status failed: Doctor not found with ID ${id}`,
+      );
+      ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Doctor not found");
     }
 
-    async doctorsToggle(id: string): Promise<DoctorResponseDTO | null> {
-        const doctor = await this._doctorRepo.findById(id);
-        if (!doctor) {
-            Logger.warn(`Toggle Doctor status failed: Doctor not found with ID ${id}`);
-            ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Doctor not found");
-        }
+    const newStatus = !doctor.isActive;
+    Logger.info(`Doctor status toggled: ${id} to ${newStatus}`);
+    const updated = await this._doctorRepo.update(id, {
+      isActive: newStatus,
+    } as Partial<IDoctor>);
+    return updated ? this._doctorMapper.toDTO(updated) : null;
+  }
 
-        const newStatus = !doctor.isActive;
-        Logger.info(`Doctor status toggled: ${id} to ${newStatus}`);
-        const updated = await this._doctorRepo.update(id, { isActive: newStatus } as Partial<IDoctor>);
-        return updated ? this._doctorMapper.toDTO(updated) : null;
+  async acceptDoctor(id: string): Promise<DoctorResponseDTO | null> {
+    const doctor = await this._doctorRepo.findById(id);
+    if (!doctor) {
+      Logger.warn(`Accept Doctor failed: Doctor not found with ID ${id}`);
+      ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Doctor not found");
     }
 
-    async acceptDoctor(id: string): Promise<DoctorResponseDTO | null> {
-        const doctor = await this._doctorRepo.findById(id);
-        if (!doctor) {
-            Logger.warn(`Accept Doctor failed: Doctor not found with ID ${id}`);
-            ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Doctor not found");
-        }
+    Logger.info(`Doctor accepted: ${id}`);
+    const updated = await this._doctorRepo.update(id, {
+      reviewStatus: "approved",
+      isActive: true,
+      isAccountVerified: true,
+      rejectionReason: undefined,
+    } as Partial<IDoctor>);
+    return updated ? this._doctorMapper.toDTO(updated) : null;
+  }
 
-        Logger.info(`Doctor accepted: ${id}`);
-        const updated = await this._doctorRepo.update(id, {
-            reviewStatus: "approved",
-            isActive: true,
-            isAccountVerified: true,
-            rejectionReason: undefined,
-        } as Partial<IDoctor>);
-        return updated ? this._doctorMapper.toDTO(updated) : null;
+  async rejectDoctor(
+    id: string,
+    reason: string,
+  ): Promise<DoctorResponseDTO | null> {
+    const doctor = await this._doctorRepo.findById(id);
+    if (!doctor) {
+      Logger.warn(`Reject Doctor failed: Doctor not found with ID ${id}`);
+      ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Doctor not found");
     }
 
-    async rejectDoctor(id: string, reason: string): Promise<DoctorResponseDTO | null> {
-        const doctor = await this._doctorRepo.findById(id);
-        if (!doctor) {
-            Logger.warn(`Reject Doctor failed: Doctor not found with ID ${id}`);
-            ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Doctor not found");
-        }
+    Logger.info(`Doctor rejected: ${id}`);
+    const updated = await this._doctorRepo.update(id, {
+      reviewStatus: "rejected",
+      isActive: true,
+      rejectionReason: reason,
+    } as Partial<IDoctor>);
+    return updated ? this._doctorMapper.toDTO(updated) : null;
+  }
 
-        Logger.info(`Doctor rejected: ${id}`);
-        const updated = await this._doctorRepo.update(id, {
-            reviewStatus: "rejected",
-            isActive: true,
-            rejectionReason: reason
-        } as Partial<IDoctor>);
-        return updated ? this._doctorMapper.toDTO(updated) : null;
+  async requestRevisionDoctor(
+    id: string,
+    reason: string,
+  ): Promise<DoctorResponseDTO | null> {
+    const doctor = await this._doctorRepo.findById(id);
+    if (!doctor) {
+      Logger.warn(`Request Revision failed: Doctor not found with ID ${id}`);
+      ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Doctor not found");
+    }
+    Logger.info(`Doctor revision requested: ${id}`);
+    const updated = await this._doctorRepo.update(id, {
+      reviewStatus: "revision",
+      isActive: true,
+      rejectionReason: reason,
+    } as Partial<IDoctor>);
+    return updated ? this._doctorMapper.toDTO(updated) : null;
+  }
+
+  async registerDoctor(
+    data: DoctorDTO,
+    files: DoctorUploadFiles,
+    hospital_id: string,
+  ): Promise<DoctorResponseDTO> {
+    await this._subscriptionService.checkSubscriptionLimit(
+      hospital_id,
+      "maxDoctors",
+    );
+
+    let profileImageUrl = "";
+    let licenseUrl = "";
+
+    const existingDoctor = await this._doctorRepo.findByEmail(data.email);
+    if (existingDoctor) {
+      ApiResponse.throwError(
+        HttpStatusCode.CONFLICT,
+        MESSAGES.AUTH.ALREADY_EXISTS,
+      );
     }
 
-    async requestRevisionDoctor(id: string, reason: string): Promise<DoctorResponseDTO | null> {
-        const doctor = await this._doctorRepo.findById(id);
-        if (!doctor) {
-            Logger.warn(`Request Revision failed: Doctor not found with ID ${id}`);
-            ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Doctor not found");
-        }
-        Logger.info(`Doctor revision requested: ${id}`);
-        const updated = await this._doctorRepo.update(id, {
-            reviewStatus: "revision",
-            isActive: true,
-            rejectionReason: reason
-        } as Partial<IDoctor>);
-        return updated ? this._doctorMapper.toDTO(updated) : null;
+    if (files?.profileImage?.[0]) {
+      profileImageUrl = await uploadBufferToCloudinary(
+        files.profileImage[0].buffer,
+        "doctors/profile",
+      );
     }
 
-    async registerDoctor(data: DoctorDTO, files: DoctorUploadFiles, hospital_id: string): Promise<DoctorResponseDTO> {
-        await this._subscriptionService.checkSubscriptionLimit(hospital_id, "maxDoctors");
-
-        let profileImageUrl = "";
-        let licenseUrl = "";
-
-
-        const existingDoctor = await this._doctorRepo.findByEmail(data.email);
-        if (existingDoctor) {
-            ApiResponse.throwError(HttpStatusCode.CONFLICT, MESSAGES.AUTH.ALREADY_EXISTS);
-        }
-
-
-        if (files?.profileImage?.[0]) {
-            profileImageUrl = await uploadBufferToCloudinary(
-                files.profileImage[0].buffer,
-                "doctors/profile"
-            );
-        }
-
-        if (files?.license?.[0]) {
-            licenseUrl = await uploadBufferToCloudinary(
-                files.license[0].buffer,
-                "doctors/license"
-            );
-        }
-
-        const hashedPassword = await bcrypt.hash(data.password, 10);
-
-        const doctorData: Partial<IDoctor> = {
-            name: data.name,
-            email: data.email,
-            password: hashedPassword,
-            hospital_id: new Types.ObjectId(hospital_id),
-            phone: data.phone,
-            address: data.address,
-            specialization: data.specialization,
-            qualification: data.qualification,
-            experience: data.experience,
-            department: data.department,
-            about: data.about,
-            licence: licenseUrl,
-            profileImage: profileImageUrl,
-            isActive: true,
-            isAccountVerified: true,
-            reviewStatus: "pending",
-            consultationTime: {
-                start: "09:00 AM",
-                end: "05:00 PM",
-            },
-            payment: {
-                type: "fixed",
-                payoutCycle: "monthly",
-                patientsPerDayLimit: 10,
-                fixedSalary: 0,
-            },
-        };
-
-        const created = await this._doctorRepo.create(doctorData);
-        return this._doctorMapper.toDTO(created);
+    if (files?.license?.[0]) {
+      licenseUrl = await uploadBufferToCloudinary(
+        files.license[0].buffer,
+        "doctors/license",
+      );
     }
 
-    async updateDoctor(id: string, data: UpdateDoctorDTO, files: DoctorUploadFiles): Promise<DoctorResponseDTO | null> {
-        const doctor = await this._doctorRepo.findById(id);
-        if (!doctor) {
-            ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Doctor not found");
+    const hashedPassword = await bcrypt.hash(data.password, 10);
 
-        }
+    const doctorData: Partial<IDoctor> = {
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
+      hospital_id: new Types.ObjectId(hospital_id),
+      phone: data.phone,
+      address: data.address,
+      specialization: data.specialization,
+      qualification: data.qualification,
+      experience: data.experience,
+      department: data.department,
+      about: data.about,
+      licence: licenseUrl,
+      profileImage: profileImageUrl,
+      isActive: true,
+      isAccountVerified: true,
+      reviewStatus: "pending",
+      consultationTime: {
+        start: "09:00 AM",
+        end: "05:00 PM",
+      },
+      monthlyAmount: 0,
+      patientsPerDayLimit: 10,
+    };
 
-        let profileImageUrl = doctor.profileImage;
-        let licenseUrl = doctor.licence;
+    const created = await this._doctorRepo.create(doctorData);
+    return this._doctorMapper.toDTO(created);
+  }
 
-        if (files?.profileImage?.[0]) {
-            profileImageUrl = await uploadBufferToCloudinary(
-                files.profileImage[0].buffer,
-                "doctors/profile"
-            );
-        }
-
-        if (files?.license?.[0]) {
-            licenseUrl = await uploadBufferToCloudinary(
-                files.license[0].buffer,
-                "doctors/license"
-            );
-        }
-        let consultationTime = data.consultationTime;
-        if (typeof consultationTime === 'string') {
-            try {
-                consultationTime = JSON.parse(consultationTime);
-            } catch (e) {
-                Logger.error("Failed to parse consultationTime", e);
-            }
-        }
-
-        let payment = data.payment;
-        if (typeof payment === 'string') {
-            try {
-                payment = JSON.parse(payment);
-            } catch (e) {
-                Logger.error("Failed to parse payment", e);
-            }
-        }
-
-        const updateData: Partial<IDoctor> = {
-            ...data,
-            hospital_id: data.hospital_id ? (typeof data.hospital_id === 'string' ? new Types.ObjectId(data.hospital_id) : data.hospital_id) : undefined,
-            profileImage: profileImageUrl,
-            licence: licenseUrl,
-            consultationTime: {
-                start: consultationTime?.start || doctor.consultationTime.start,
-                end: consultationTime?.end || doctor.consultationTime.end,
-            },
-            payment: {
-                type: (payment?.type || doctor.payment.type) as "commission" | "fixed",
-                commissionPercentage: payment?.commissionPercentage ?? doctor.payment.commissionPercentage,
-                fixedSalary: payment?.fixedSalary ?? doctor.payment.fixedSalary,
-                payoutCycle: (payment?.payoutCycle || doctor.payment.payoutCycle) as "weekly" | "monthly",
-                patientsPerDayLimit: payment?.patientsPerDayLimit ?? doctor.payment.patientsPerDayLimit,
-            },
-            isActive: data.isActive === 'true' || data.isActive === true,
-            isAccountVerified: data.isAccountVerified === 'true' || data.isAccountVerified === true,
-        };
-
-        const updated = await this._doctorRepo.update(id, updateData);
-        return updated ? this._doctorMapper.toDTO(updated) : null;
+  async updateDoctor(
+    id: string,
+    data: UpdateDoctorDTO,
+    files: DoctorUploadFiles,
+  ): Promise<DoctorResponseDTO | null> {
+    const doctor = await this._doctorRepo.findById(id);
+    if (!doctor) {
+      ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Doctor not found");
     }
 
-    async getLeaveDoctors(options: {
-        hospitalId: string;
-        page: number;
-        limit: number;
-        search?: string;
-        date?: Date;
-    }): Promise<{ data: DoctorLeaveResponseDTO[]; total: number; page: number; limit: number }> {
-        const res = await this._leaveRepo.findHospitalLeaves(options);
-        return {
-            ...res,
-            data: res.data.map(leave => this._leaveMapper.toDTO(leave))
-        };
+    let profileImageUrl = doctor.profileImage;
+    let licenseUrl = doctor.licence;
+
+    if (files?.profileImage?.[0]) {
+      profileImageUrl = await uploadBufferToCloudinary(
+        files.profileImage[0].buffer,
+        "doctors/profile",
+      );
     }
 
-    async updateLeaveStatus(leaveId: string, status: 'approved' | 'rejected', reason?: string): Promise<DoctorLeaveResponseDTO | null> {
-        const leave = await this._leaveRepo.updateStatus(leaveId, status, reason);
-        return leave ? this._leaveMapper.toDTO(leave as IDoctorLeave) : null;
+    if (files?.license?.[0]) {
+      licenseUrl = await uploadBufferToCloudinary(
+        files.license[0].buffer,
+        "doctors/license",
+      );
     }
+    let consultationTime = data.consultationTime;
+    if (typeof consultationTime === "string") {
+      try {
+        consultationTime = JSON.parse(consultationTime);
+      } catch (e) {
+        Logger.error("Failed to parse consultationTime", e);
+      }
+    }
+
+    const updateData: Partial<IDoctor> = {
+      ...data,
+      hospital_id: data.hospital_id
+        ? typeof data.hospital_id === "string"
+          ? new Types.ObjectId(data.hospital_id)
+          : data.hospital_id
+        : undefined,
+      profileImage: profileImageUrl,
+      licence: licenseUrl,
+      consultationTime: {
+        start: consultationTime?.start || doctor.consultationTime.start,
+        end: consultationTime?.end || doctor.consultationTime.end,
+      },
+      monthlyAmount: Number(data.monthlyAmount) || doctor.monthlyAmount,
+      patientsPerDayLimit:
+        Number(data.patientsPerDayLimit) || doctor.patientsPerDayLimit,
+      isActive: data.isActive === "true" || data.isActive === true,
+      isAccountVerified:
+        data.isAccountVerified === "true" || data.isAccountVerified === true,
+    };
+
+    const updated = await this._doctorRepo.update(id, updateData);
+    console.log(updated)
+    return updated ? this._doctorMapper.toDTO(updated) : null;
+  }
+
+  async getLeaveDoctors(options: {
+    hospitalId: string;
+    page: number;
+    limit: number;
+    search?: string;
+    date?: Date;
+  }): Promise<{
+    data: DoctorLeaveResponseDTO[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const res = await this._leaveRepo.findHospitalLeaves(options);
+    return {
+      ...res,
+      data: res.data.map((leave) => this._leaveMapper.toDTO(leave)),
+    };
+  }
+
+  async updateLeaveStatus(
+    leaveId: string,
+    status: "approved" | "rejected",
+    reason?: string,
+  ): Promise<DoctorLeaveResponseDTO | null> {
+    const leave = await this._leaveRepo.updateStatus(leaveId, status, reason);
+    return leave ? this._leaveMapper.toDTO(leave as IDoctorLeave) : null;
+  }
+
+  async getDoctorDetails(id: string): Promise<DoctorResponseDTO | null> {
+    const doctor = await this._doctorRepo.findById(id);
+
+    if (!doctor) {
+      Logger.warn(`Doctor not found with ID: ${id}`);
+      return null;
+    }
+    const doctorDTO = this._doctorMapper.toDTO(doctor);
+    type DoctorWithIds = IDoctor & {
+      department_id?: string | Types.ObjectId;
+      specialization_id?: string | Types.ObjectId;
+    };
+    const doctorData = doctor as DoctorWithIds;
+    if (doctorData.department_id) {
+      const department = await this._departmentRepo.findById(
+        doctorData.department_id.toString(),
+      );
+      if (department) {
+        doctorDTO.department = department.departmentName;
+      }
+    }
+    if (doctorData.specialization_id) {
+      const specialization = await this._specializationRepo.findById(
+        doctorData.specialization_id,
+      );
+
+      if (specialization) {
+        doctorDTO.specialization = specialization.name;
+      }
+    }
+    return doctorDTO;
+  }
+
+ async getDeptSpecs(hospitalId: string): Promise<DeptSpecQualResponse> {
+  const hospitalObjectId = new Types.ObjectId(hospitalId);
+
+  const [departments, specializations, qualifications] = await Promise.all([
+    this._departmentRepo.findByFilter({ hospital_id: hospitalObjectId }),
+    this._specializationRepo.findByFilter({ hospital_id: hospitalObjectId }),
+    this._qualificationRepo.findByFilter({ hospital_id: hospitalObjectId })
+  ]);
+  return {
+    departments,
+    specializations,
+    qualifications
+  };
+}
 }

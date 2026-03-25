@@ -27,12 +27,14 @@ router.patch("/doctors/:id", upload.fields([
     { name: "license", maxCount: 1 }
 ]), doctorManagement.updateDoctor.bind(doctorManagement));
 router.get("/doctors/kyc", doctorManagement.getAllKycDoctors.bind(doctorManagement));
+router.get("/doctors/:id",doctorManagement.getDoctorDetails.bind(doctorManagement))
 router.patch("/doctors/:id/toggle", doctorManagement.doctorsToggle.bind(doctorManagement));
 router.patch("/doctors/:id/accept", doctorManagement.acceptDoctor.bind(doctorManagement));
 router.patch("/doctors/:id/reject", doctorManagement.rejectDoctor.bind(doctorManagement));
 router.patch("/doctors/:id/revision", doctorManagement.requestRevisionDoctor.bind(doctorManagement));
 router.get("/doctors/:id/leaves", doctorManagement.getLeaveDoctors.bind(doctorManagement));
 router.patch("/leaves/:id/status", doctorManagement.updateLeaveStatus.bind(doctorManagement));
+router.get("/getdepsepquly",doctorManagement.getDeptSpecs.bind(doctorManagement));
 
 router.post("/doctors", upload.fields([
     { name: "profileImage", maxCount: 1 },
@@ -61,5 +63,5 @@ router.patch("/specializations/:id/toggle", specializationManagement.toggleStatu
 router.patch("/specializations/:id", upload.single("image"), specializationManagement.updateSpecialization.bind(specializationManagement));
 
 router.get("/subscription", hospitalSubscriptionController.getActiveSubscriptions.bind(hospitalSubscriptionController));
-
+router.get("/subscription/protection",hospitalSubscriptionController.protection.bind(hospitalSubscriptionController))
 export default router;

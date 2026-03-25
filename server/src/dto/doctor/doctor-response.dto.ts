@@ -1,5 +1,8 @@
 import { z } from 'zod';
 import { Types } from 'mongoose';
+import { IDepartment } from '../../models/department.model.ts';
+import { ISpecialization } from '../../models/specialization.model.ts';
+import { IQualification } from '../../models/qualification.model.ts';
 
 export const DoctorResponseSchema = z.object({
     id: z.string(),
@@ -28,13 +31,8 @@ export const DoctorResponseSchema = z.object({
         start: z.string(),
         end: z.string(),
     }),
-   payment: z.object({
-        type: z.enum(["commission", "fixed"]),
-        commissionPercentage: z.number().nullable().optional(), // Add .nullable()
-        fixedSalary: z.number().optional(),
-        payoutCycle: z.enum(["weekly", "monthly"]),
-        patientsPerDayLimit: z.number(),
-    }),
+    monthlyAmount: z.number(),
+    patientsPerDayLimit: z.number(),
     createdAt: z.union([z.date(), z.string()]),
     updatedAt: z.union([z.date(), z.string()]),
 });
@@ -60,13 +58,8 @@ export interface UpdateDoctorDTO {
 
   availableSlots?: string[];
 
-  payment?: {
-    type?: "commission" | "fixed";
-    commissionPercentage?: number;
-    fixedSalary?: number;
-    payoutCycle?: "weekly" | "monthly";
-    patientsPerDayLimit?: number;
-  };
+  monthlyAmount?: number;
+  patientsPerDayLimit?: number;
 
   profileImage?: string;
   isActive?: boolean | string;
@@ -78,3 +71,9 @@ export interface UpdateDoctorDTO {
   currentPassword?: string;
   newPassword?: string;
 }
+
+export type DeptSpecQualResponse = {
+  departments: IDepartment[];
+  specializations: ISpecialization[];
+  qualifications: IQualification[];
+};

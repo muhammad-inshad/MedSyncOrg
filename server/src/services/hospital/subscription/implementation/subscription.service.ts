@@ -5,10 +5,11 @@ import { IHospitalRepository } from "../../../../repositories/hospital/hospital.
 import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
 import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.ts";
 import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
-import { SubscriptionResponseDTO } from "../../../../dto/subscription/subscription-response.dto.ts";
+import { CreateSubscription, SubscriptionResponseDTO } from "../../../../dto/subscription/subscription-response.dto.ts";
 import { SubscriptionMapper } from "../../../../mappers/subscription.mapper.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
+import { Types } from "mongoose";
 
 export class HospitalSubscriptionService implements IHospitalSubscriptionService {
     constructor(
@@ -20,17 +21,20 @@ export class HospitalSubscriptionService implements IHospitalSubscriptionService
         private readonly subscriptionMapper: SubscriptionMapper
     ) {}
 
-    async getActiveSubscriptions(page: number, limit: number, search: string): Promise<{ data: SubscriptionResponseDTO[]; total: number }> {
-        const skip = (page - 1) * limit;
-        const [data, total] = await Promise.all([
-            this.subscriptionRepository.findAllWithPagination(skip, limit, search, "Active"),
-            this.subscriptionRepository.count(search, "Active")
-        ]);
-        return { 
-            data: data.map(s => this.subscriptionMapper.toDTO(s as ISubscription)), 
-            total 
-        };
-    }
+  async getActiveSubscriptions(page: number,limit: number,search: string): Promise<{ data: SubscriptionResponseDTO[]; total: number }> {
+  const skip = (page - 1) * limit;
+  const [data, total] = await Promise.all([
+    this.subscriptionRepository.findAllWithPagination(skip, limit, search, "active"),
+    this.subscriptionRepository.count(search, "active"),
+  ]);
+
+  return {
+    data: data.map(s =>
+      this.subscriptionMapper.toDTO(s as ISubscription)
+    ),
+    total,
+  };
+}
 
     async checkSubscriptionLimit(hospitalId: string, type: "maxDoctors" | "maxPatients" | "maxDepartments"): Promise<void> {
         const hospital = await this.hospitalRepository.findById(hospitalId);
@@ -54,42 +58,30 @@ export class HospitalSubscriptionService implements IHospitalSubscriptionService
 
         const planDetails = await this.subscriptionRepository.findByPlanName(planName);
      
-        if (!planDetails) {
-            const fallbackDetails = await this.subscriptionRepository.findByPlanName(subscription.plan);
-            if (!fallbackDetails || !fallbackDetails.limits) {
-                
-                return;
-            }
-            const limitValue = fallbackDetails.limits[type] || 0;
-            await this.verifyLimit(hospitalId, type, limitValue);
-            return;
-        }
-
-        if (!planDetails.limits) {
-            return; // No limits defined for this plan
-        }
-
-        const limitValue = planDetails.limits[type] || 0;
-        await this.verifyLimit(hospitalId, type, limitValue);
+        
     }
 
-    private async verifyLimit(hospitalId: string, type: string, limitValue: number): Promise<void> {
-        let currentCount = 0;
-        switch (type) {
-            case "maxDoctors":
-                currentCount = await this.doctorRepository.countDocuments({ hospital_id: hospitalId });
-                break;
-            case "maxPatients":
-                currentCount = await this.userRepository.countDocuments({ hospital_id: hospitalId });
-                break;
-            case "maxDepartments":
-                currentCount = await this.departmentRepository.countDocuments({ hospital_id: hospitalId });
-                break;
-        }
+ async protection(hospitalId: string): Promise<boolean> {
+  const hospital = await this.hospitalRepository.findById(hospitalId);
 
-        if (currentCount >= limitValue) {
-            const entityName = type.replace("max", "").toLowerCase();
-            ApiResponse.throwError(HttpStatusCode.PAYMENT_REQUIRED, `Subscription limit reached for ${entityName}. Maximum allowed: ${limitValue}`);
-        }
-    }
+  if (!hospital) {
+    ApiResponse.throwError(404, "Hospital not found");
+  }
+
+  const subscription = hospital.subscription;
+
+  if (!subscription) return false;
+
+  if (!subscription.endDate) return false;
+
+  const now = new Date();
+  const endDate = new Date(subscription.endDate);
+
+  if (subscription.status !== "active") return false;
+
+  if (now > endDate) return false;
+
+  return true;
+}
+
 }

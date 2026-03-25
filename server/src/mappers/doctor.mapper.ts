@@ -32,13 +32,8 @@ export class DoctorMapper implements IMapper<IDoctor, DoctorResponseDTO> {
                 start: doctor.consultationTime?.start || "",
                 end: doctor.consultationTime?.end || "",
             },
-            payment: {
-                type: (doctor.payment?.type as "commission" | "fixed") || "fixed",
-                commissionPercentage: doctor.payment?.commissionPercentage ?? null,
-                fixedSalary: doctor.payment?.fixedSalary || 0,
-                payoutCycle: (doctor.payment?.payoutCycle as "weekly" | "monthly") || "monthly",
-                patientsPerDayLimit: doctor.payment?.patientsPerDayLimit || 0,
-            },
+            monthlyAmount: Number(doctor.monthlyAmount) || 0,
+            patientsPerDayLimit: Number(doctor.patientsPerDayLimit) || 0,
             createdAt: doctor.createdAt,
             updatedAt: doctor.updatedAt,
         };

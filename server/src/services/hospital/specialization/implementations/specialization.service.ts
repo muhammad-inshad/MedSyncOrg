@@ -18,6 +18,7 @@ export class SpecializationService implements ISpecializationService {
         params: { page: number; limit: number; search?: string }
     ): Promise<{ data: SpecializationResponseDTO[]; total: number; limit: number; page: number }> {
         const { page, limit, search } = params;
+       
         const result = await this._specializationRepo.findWithPagination({
             page,
             limit,
@@ -83,4 +84,5 @@ export class SpecializationService implements ISpecializationService {
         const updated = await this._specializationRepo.update(id, { isActive: !specialization.isActive });
         return updated ? this._specializationMapper.toDTO(updated) : null;
     }
+  
 }

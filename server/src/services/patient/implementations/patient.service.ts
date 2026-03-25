@@ -283,4 +283,9 @@ export class PatientService implements IPatientService {
       ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Appointment not found");
     }
   }
+
+  async checkAppointmentStatus(sessionId: string): Promise<boolean> {
+    const appointment = await this._appointmentRepo.findByPaymentId(sessionId);
+    return !!appointment;
+  }
 }

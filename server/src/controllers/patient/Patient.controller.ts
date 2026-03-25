@@ -212,6 +212,16 @@ class PatientController {
     }
   }
 
+  checkAppointmentStatus = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { sessionId } = req.params;
+      const exists = await this.patientService.checkAppointmentStatus(sessionId);
+      return ApiResponse.success(res, "Appointment status checked", { exists });
+    } catch (error) {
+      next(error);
+    }
+  };
+
 }
 
 

@@ -29,4 +29,5 @@ export interface IAppointmentRepository extends IBaseRepository<IAppointment> {
         findLiveToken(doctorId: string): Promise<IAppointment | null>;
     findDoctorByPatientToday(patientId: string): Promise<string | null>;
     findPatientAppointmentsToday(patientId: string): Promise<IAppointment[]>;
+    findByPaymentId(paymentId: string): Promise<IAppointment | null>;
 }

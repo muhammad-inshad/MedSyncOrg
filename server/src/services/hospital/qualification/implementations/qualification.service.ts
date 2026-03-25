@@ -21,7 +21,6 @@ export class QualificationService implements IQualificationService {
             searchFields: ["name", "abbreviation", "description"],
             filter: { hospital_id: new Types.ObjectId(hospitalId) }
         });
-
         return {
             ...result,
             data: result.data.map(q => this._qualificationMapper.toDTO(q as IQualification))

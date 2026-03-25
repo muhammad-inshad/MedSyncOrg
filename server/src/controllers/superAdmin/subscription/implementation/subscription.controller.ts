@@ -1,24 +1,22 @@
 import { NextFunction, Request, Response } from "express";
 import { ISubscriptionController } from "../interfaces/subscription.controller.interface.ts";
 import { ISubscriptionService } from "../../../../services/superAdmin/subscription/interfaces/subscription.service.interface.ts";
-import { CreateSubscriptionDTO, UpdateSubscriptionDTO } from "../../../../dto/subscription/subscription-response.dto.ts";
+import {  UpdateSubscriptionDTO } from "../../../../dto/subscription/subscription-response.dto.ts";
+import { MESSAGES } from "../../../../constants/messages.ts";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 
 export class SubscriptionController implements ISubscriptionController {
     constructor(private readonly subscriptionService: ISubscriptionService) {}
 
-    async addSubscription(req: Request, res: Response, next: NextFunction): Promise<void> {
+       async addSubscription(req: Request, res: Response,next:NextFunction): Promise<void> {
         try {
-            const payload = req.body as CreateSubscriptionDTO;
-            
-            const subscription = await this.subscriptionService.addSubscription(payload);
-            
-            res.status(201).json({ 
-                success: true, 
-                message: "Subscription plan created successfully!", 
-                data: subscription 
-            });
+       
+      const subscription = await this.subscriptionService.createSubscription({
+        ...req.body, 
+      });
+       ApiResponse.success(res, MESSAGES.UPDATION.ADDED, subscription);
         } catch (error) {
-            next(error);
+            next(error)
         }
     }
 
@@ -82,4 +80,4 @@ export class SubscriptionController implements ISubscriptionController {
             next(error);
         }
     }
-}
+}

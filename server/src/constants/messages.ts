@@ -54,6 +54,7 @@ export const MESSAGES = {
         INTERNAL_ERROR: "Internal Server Error",
     },
     UPDATION:{
-        UPDATE:" successfully updated"
+        UPDATE:" successfully updated",
+        ADDED:"successfully created new subscription"
     }
 };

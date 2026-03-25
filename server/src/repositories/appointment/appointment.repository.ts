@@ -228,4 +228,8 @@ export class AppointmentRepository extends BaseRepository<IAppointment> implemen
         .sort({ tokenNumber: 1 })
         .exec();
     }
+
+    async findByPaymentId(paymentId: string): Promise<IAppointment | null> {
+        return await this.model.findOne({ paymentId }).exec();
+    }
 }

@@ -52,6 +52,7 @@ export interface IAppointment extends Document {
   weight?: string;
   createdAt: Date;
   updatedAt: Date;
+  paymentId?: string;
 }
 
 const appointmentSchema = new Schema<IAppointment>(
@@ -131,6 +132,9 @@ const appointmentSchema = new Schema<IAppointment>(
       type: String,
     },
     weight: {
+      type: String,
+    },
+    paymentId: {
       type: String,
     },
   },

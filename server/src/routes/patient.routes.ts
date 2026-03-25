@@ -20,5 +20,6 @@ router.post("/appointments", patientController.bookAppointment.bind(patientContr
 router.get("/patients/appointments",patientController.getAppoimentHistory.bind(patientController))
 router.get("/appointments/today", patientController.getTodayAppointments.bind(patientController));
 router.patch("/appointments/:id/cancel",patientController.appoinmentCancel.bind(patientController))
+router.get("/appointments/status/:sessionId", patientController.checkAppointmentStatus.bind(patientController));
 router.get("/livetoken", liveToken.getToken.bind(liveToken));
 export default router;

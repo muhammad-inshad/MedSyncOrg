@@ -12,18 +12,13 @@ export class PaymentController implements IPaymentController {
     async checkoutPayment(req: Request, res: Response): Promise<void> {
         try {
             const { planId } = req.body;
-        const { accessToken } = req.cookies;
-
-const decoded = this._token.verifyAccessToken(accessToken);
-
-const hospitalId = decoded.userId;
-
-
+            const { accessToken } = req.cookies;
+            const decoded = this._token.verifyAccessToken(accessToken);
+            const hospitalId = decoded.userId;
             if (!planId) {
                 ApiResponse.error(res, "Plan ID is required", null, HttpStatusCode.BAD_REQUEST);
                 return;
             }
-
             const result = await this.paymentService.createCheckoutSession(planId, hospitalId);
             res.status(HttpStatusCode.OK).json({
                 success: true,
@@ -43,8 +38,6 @@ const hospitalId = decoded.userId;
         try {
             const { bookingData } = req.body;
             const { accessToken } = req.cookies;
-
-
 
             const decoded = this._token.verifyAccessToken(accessToken);
             const patientId = decoded.userId;

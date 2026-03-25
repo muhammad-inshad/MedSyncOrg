@@ -31,8 +31,13 @@ app.use(cors({
 
 
 app.use("/api/payment/webhook", express.raw({ type: 'application/json' }));
-
-app.use(express.json({ limit: '10mb' }));
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/payment/webhook") {
+    next();
+  } else {
+    express.json({ limit: '10mb' })(req, res, next);
+  }
+});
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 app.use("/api/auth", authRoutes);

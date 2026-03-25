@@ -4,49 +4,86 @@ import { ISubscription } from "../../../../models/subscription.ts";
 import { ISubscriptionRepository } from "../interfaces/subscription.repository.interface.ts";
 import { SubscriptionModel } from "../../../../models/subscription.ts";
 
-export class SubscriptionRepository extends BaseRepository<ISubscription> implements ISubscriptionRepository {
-    constructor() {
-        super(SubscriptionModel);
+export class SubscriptionRepository
+  extends BaseRepository<ISubscription>
+  implements ISubscriptionRepository {
+
+  constructor() {
+    super(SubscriptionModel);
+  }
+
+  private buildQuery(
+    search: string,
+    status: string
+  ): FilterQuery<ISubscription> {
+
+    const query: FilterQuery<ISubscription> = {};
+
+    if (search && search.trim() !== "") {
+      query.$or = [
+        { planName: { $regex: search, $options: "i" } }
+      ];
     }
 
-    private buildQuery(search: string, status: string): FilterQuery<ISubscription> {
-        const query: FilterQuery<ISubscription> = {};
-        
-        if (search) {
-            query.$or = [
-                { planName: { $regex: search, $options: "i" } },
-                { plan: { $regex: search, $options: "i" } } // Fallback to old property
-            ];
-        }
+    if (status && status !== "All") {
+      const normalizedStatus = status.toLowerCase();
 
-        if (status && status !== "All") {
-            query.isActive = status === "Active";
-        }
-
-        return query;
+      if (normalizedStatus === "active") {
+        query.status = "active";
+      } 
+      else if (normalizedStatus === "inactive") {
+        query.status = { $in: ["expired", "cancelled"] };
+      } 
+      else if (
+        normalizedStatus === "expired" ||
+        normalizedStatus === "cancelled"
+      ) {
+        query.status = normalizedStatus as "expired" | "cancelled";
+      }
     }
 
-    async findAllWithPagination(skip: number, limit: number, search: string, status: string): Promise<ISubscription[]> {
-        const query = this.buildQuery(search, status);
-        return await SubscriptionModel.find(query).skip(skip).limit(limit).sort({ createdAt: -1 });
-    }
+    return query;
+  }
 
-    async count(search: string, status: string): Promise<number> {
-        const query = this.buildQuery(search, status);
-        return await SubscriptionModel.countDocuments(query);
-    }
+  async findAllWithPagination(
+    skip: number,
+    limit: number,
+    search: string,
+    status: string
+  ): Promise<ISubscription[]> {
 
-    async updateById(id: string, updateData: Partial<ISubscription>): Promise<ISubscription | null> {
-        return await SubscriptionModel.findByIdAndUpdate(id, updateData, { new: true });
-    }
+    const query = this.buildQuery(search, status);
 
-    async findByPlanName(planName: string): Promise<ISubscription | null> {
-        return await SubscriptionModel.findOne({
-            $or: [
-                { planName: { $regex: new RegExp(`^${planName}$`, "i") } },
-                { plan: { $regex: new RegExp(`^${planName}$`, "i") } }
-            ],
-            isActive: true
-        });
-    }
+    return await SubscriptionModel
+      .find(query)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  async count(search: string, status: string): Promise<number> {
+    const query = this.buildQuery(search, status);
+    return await SubscriptionModel.countDocuments(query).exec();
+  }
+
+  async updateById(
+    id: string,
+    updateData: Partial<ISubscription>
+  ): Promise<ISubscription | null> {
+
+    return await SubscriptionModel.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    ).exec();
+  }
+
+  async findByPlanName(planName: string): Promise<ISubscription | null> {
+
+    return await SubscriptionModel.findOne({
+      planName: { $regex: new RegExp(`^${planName}$`, "i") },
+      status: "active",
+    }).exec();
+  }
 }
