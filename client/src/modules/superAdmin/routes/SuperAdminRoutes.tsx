@@ -11,6 +11,7 @@ import SuperAddpatient from '../components/patient/SuperAddpatient'
 import SuperEditpatient from '../components/patient/SuperEditpatient'
 import SubscriptionManagement from '../pages/SubscriptionManagement'
 import EditSubscription from '../components/subscription/EditSubscription'
+import SubscriptionHospital from '../pages/SubscriptionHospital'
 
 const SuperAdminRoutes = () => {
   return (
@@ -26,6 +27,7 @@ const SuperAdminRoutes = () => {
         <Route path={SUPERADMIN_ROUTES.SUBSCRIPTIONS}element={<SubscriptionManagement/>}/>
         <Route path={SUPERADMIN_ROUTES.EDITPATIENT}element={<SuperEditpatient/>}/>
         <Route path={SUPERADMIN_ROUTES.EDITSUBSCRIPTION}element={<EditSubscription/>}/>
+        <Route path={SUPERADMIN_ROUTES.SHOWSUBSCRIPTION} element={<SubscriptionHospital/>}/>
       </Route>
     </Routes>
   )

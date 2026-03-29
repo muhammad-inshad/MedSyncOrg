@@ -5,6 +5,7 @@ import { AppointmentResponseDTO } from "../../../dto/appointment/appointment-res
 import { IAppointment } from "../../../models/appointment.ts";
 import { IPatient } from "../../../models/Patient.model.ts";
 import { IPaginationResult } from "../../../types/hospital.types.ts";
+import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-response.dto.ts";
 
 export interface IPatientService {
   getProfile(userId: string): Promise<PatientResponseDTO | null>;
@@ -22,4 +23,7 @@ export interface IPatientService {
   getTodayAppointments(patientId: string): Promise<AppointmentResponseDTO[]>;
   cancelAppointment(data: { id: string; reason: string }): Promise<void>;
   checkAppointmentStatus(sessionId: string): Promise<boolean>;
+  getPrescriptions(patientId: string, query: { page: number; limit: number; search: string }): Promise<{
+    data: PrescriptionResponseDTO[]; total: number; page: number; limit: number;
+  }>;
 }

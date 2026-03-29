@@ -65,7 +65,7 @@ export const superAdminContainer = () => {
   const patientManagementController = new SuperAdminPatientManagementController(patientManagementService);
 
   // Subscription Module
-  const subscriptionService = new SubscriptionService(subscriptionRepo, subscriptionMapper);
+  const subscriptionService = new SubscriptionService(subscriptionRepo, subscriptionMapper,hospitalMapper);
   const subscriptionController = new SubscriptionController(subscriptionService);
 
   return {

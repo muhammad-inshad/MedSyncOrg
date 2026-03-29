@@ -26,7 +26,6 @@ export class SubscriptionController implements ISubscriptionController {
             const limit = parseInt(req.query.limit as string) || 10;
             const search = (req.query.search as string) || "";
             const status = (req.query.status as string) || "All";
-
             const { data, total } = await this.subscriptionService.getAllSubscriptions(page, limit, search, status);
 
             res.status(200).json({
@@ -63,7 +62,7 @@ export class SubscriptionController implements ISubscriptionController {
         try {
             const { id } = req.params;
             const updateData = req.body as UpdateSubscriptionDTO;
-            
+        
             const updatedSubscription = await this.subscriptionService.updateSubscription(id, updateData);
             
             if (!updatedSubscription) {
@@ -78,6 +77,19 @@ export class SubscriptionController implements ISubscriptionController {
             });
         } catch (error) {
             next(error);
+        }
+    }
+
+    async subscribeHospital(req:Request,res:Response,next:NextFunction):Promise<void>{
+        try {
+            const page=Number(req.query.page)||1;
+            const limit=Number(req.query.limit)||5;
+            const search = (req.query.search as string) || "";
+            console.log(req.query)
+            const result=await this.subscriptionService.subscribeHospital(  page,limit, search);
+            ApiResponse.success(res,"sucess",result)
+        } catch (error) {
+            next(error)
         }
     }
 }

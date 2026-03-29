@@ -2,7 +2,7 @@ export const HOSPITAL_MANAGEMENT = {
     LOGIN: "/api/auth/hospital/login",
     SIGNUP: "/api/auth/hospital/signup",
     GET_ME: "/api/hospital/me",
-    EDIT_HOSPITAL: (id: string) => `/api/hospital/hospitals/${id}`,
+    EDIT_HOSPITAL: `/api/hospital/hospitals`,
     GET_ALL_DOCTORS: `/api/hospital/doctors`,
     DOCTORS_TOGGLE: (id: string) => `/api/hospital/doctors/${id}/toggle`,
     PATIENTS_TOGGLE: (id: string) => `/api/hospital/patients/${id}/toggle`,
@@ -37,5 +37,6 @@ export const HOSPITAL_MANAGEMENT = {
     UPDATE_LEAVE_STATUS: (id: string) => `/api/hospital/leaves/${id}/status`,
     GETSUBSCRIPTION:()=>`/api/hospital/subscription`,
     GETDEPSEPQULY:"/api/hospital/getdepsepquly",
-    GETSUBCRITPIONPROTECTION:"/api/hospital/subscription/protection"
+    GETSUBCRITPIONPROTECTION:"/api/hospital/subscription/protection",
+    GETDASHBOARDSTATS:"/api/hospital/dashboard-stats",
 };

@@ -12,4 +12,8 @@ export class DoctorRepository extends BaseRepository<IDoctor> implements IDoctor
             reviewStatus: "approved"
         }).exec();
     }
+
+    async countActiveDoctor():Promise<number>{
+        return await this.model.countDocuments({isActive:true})
+    }
 }

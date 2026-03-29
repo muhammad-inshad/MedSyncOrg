@@ -42,4 +42,8 @@ export const patientApi = {
     api.post("/api/payment/appointment-checkout", data),
     checkAppointmentStatus: (sessionId: string) =>
         api.get(PATIENT_MANAGEMENT.CHECK_APPOINTMENT_STATUS(sessionId)),
+
+    getPrescriptions: ( page: number = 1, limit: number = 5, search: string = "") => 
+         api.get(`${PATIENT_MANAGEMENT.PRESCRIPTIONS}?page=${page}&limit=${limit}&search=${search}`)
+    
 };

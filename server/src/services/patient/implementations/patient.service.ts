@@ -26,6 +26,9 @@ import { HospitalMapper } from "../../../mappers/hospital.mapper.ts";
 import { DoctorMapper } from "../../../mappers/doctor.mapper.ts";
 import { AppointmentMapper } from "../../../mappers/appointment.mapper.ts";
 import { Types } from "mongoose";
+import { IPrescriptionRepository } from "../../../repositories/Prescription/prescription.repository.interface.ts";
+import { PrescriptionMapper } from "../../../mappers/prescription.mapper.ts";
+import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-response.dto.ts";
 
 export class PatientService implements IPatientService {
   constructor(
@@ -40,7 +43,9 @@ export class PatientService implements IPatientService {
     private readonly _patientMapper: PatientMapper,
     private readonly _hospitalMapper: HospitalMapper,
     private readonly _doctorMapper: DoctorMapper,
-    private readonly _appointmentMapper: AppointmentMapper
+    private readonly _appointmentMapper: AppointmentMapper,
+    private readonly _priscriptionRepo: IPrescriptionRepository,
+    private readonly _prescriptionMapper: PrescriptionMapper,
   ) {}
 
   async getProfile(userId: string): Promise<PatientResponseDTO | null> {
@@ -288,4 +293,34 @@ export class PatientService implements IPatientService {
     const appointment = await this._appointmentRepo.findByPaymentId(sessionId);
     return !!appointment;
   }
+
+getPrescriptions = async (
+  patientId: string,
+  query: { page: number; limit: number; search: string }
+): Promise<{ data: PrescriptionResponseDTO[]; total: number; page: number; limit: number }> => {
+
+    const patient = await this._userRepo.findById(patientId);
+
+    if (!patient) {
+        ApiResponse.throwError(
+            HttpStatusCode.NOT_FOUND,
+            MESSAGES.PATIENT.NOT_FOUND
+        );
+    }
+
+    const result = await this._priscriptionRepo.findPrescriptionsPaginated({
+        email: patient.email,
+        page: query.page,
+        limit: query.limit,
+        search: query.search,
+    });
+
+    return {
+        data: result.data.map(rx => this._prescriptionMapper.toDTO(rx)),
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+    };
+};
+   
 }

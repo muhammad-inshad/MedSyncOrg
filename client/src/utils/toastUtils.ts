@@ -16,5 +16,7 @@ export const showToast = {
     },
     dismiss: (id?: string) => {
         toast.dismiss(id);
-    }
+    },
+     info: (message: string, id?: string) =>
+    toast(message, { id }),
 };

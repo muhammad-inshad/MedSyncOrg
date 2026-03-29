@@ -232,4 +232,9 @@ export class AppointmentRepository extends BaseRepository<IAppointment> implemen
     async findByPaymentId(paymentId: string): Promise<IAppointment | null> {
         return await this.model.findOne({ paymentId }).exec();
     }
+
+    getPatientEmail(appointmentId: string): Promise<string | null> {
+        return this.model.findById(appointmentId).select("patientDetails.email").exec()
+            .then(appointment => appointment ? appointment.patientDetails.email || null : null);
+    }
 }

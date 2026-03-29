@@ -69,4 +69,8 @@ export const superAdminApi = {
 
    toggleSubscription: (data: { id: string; isActive: boolean }) =>
         api.patch(SUPERADMIN_MANAGEMENT.TOGGLE_SUBSCRIPTION, data),
+
+   getHospitalSubscriptions:(params:PaginationParams)=>(
+     api.get(SUPERADMIN_MANAGEMENT.GET_HOSPITAL_SUBSCRIPTIONS,{params}))
+   
 };

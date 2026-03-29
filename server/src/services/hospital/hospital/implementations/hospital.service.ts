@@ -1,7 +1,7 @@
 import { MESSAGES } from "../../../../constants/messages.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.ts";
-import { HospitalResponseDTO, IHospitalUpdateDTO, selectedHospitalDto, SelectedHospitalSchema } from "../../../../dto/hospital/hospital-response.dto.ts";
+import { HospitalResponseDTO, UpdateHospitalDTO, selectedHospitalDto, SelectedHospitalSchema } from "../../../../dto/hospital/hospital-response.dto.ts";
 import { IHospitalService } from "../interfaces/hospital.services.interfaces.ts";
 import { IPatientService } from "../../../../services/patient/interfaces/patient.service.interfaces.ts"
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
@@ -35,7 +35,6 @@ export class HospitalService implements IHospitalService {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.ADMIN.NOT_FOUND);
         }
 
-        // Fetch counts
         const [doctors, patients, departments] = await Promise.all([
             this._doctorRepo.countDocuments({ hospital_id: hospitalId }),
             this._userRepo.countDocuments({ hospital_id: hospitalId }),
@@ -44,18 +43,10 @@ export class HospitalService implements IHospitalService {
 
         const currentCounts = { doctors, patients, departments };
 
-        // Fetch limits
         let limits: HospitalResponseDTO['subscription']['limits'] | undefined;
         if (hospital!.subscription?.plan) {
             const planName = hospital!.subscription.plan.charAt(0).toUpperCase() + hospital!.subscription.plan.slice(1);
             const planDetails = await this._subscriptionRepo.findByPlanName(planName);
-            if (planDetails?.limits) {
-                limits = {
-                    maxPatients: planDetails.limits.maxPatients,
-                    maxDoctors: planDetails.limits.maxDoctors,
-                    maxDepartments: planDetails.limits.maxDepartments
-                };
-            }
         }
 
         return this._hospitalMapper.toDTO(hospital!, limits, currentCounts);
@@ -75,115 +66,168 @@ export class HospitalService implements IHospitalService {
     }
 
     async updateHospital(
-        hospitalId: string,
-        hospitalData: IHospitalUpdateDTO,
-        files?: { [fieldname: string]: Express.Multer.File[] }
-    ): Promise<HospitalResponseDTO | null> {
-        const hospital = await this._hospitalRepo.findById(hospitalId);
-        if (!hospital) {
-            Logger.warn(`Update Hospital failed: Hospital not found with ID ${hospitalId}`);
-            return null;
-        }
+  hospitalId: string,
+  hospitalData: UpdateHospitalDTO,
+  files?: { [fieldname: string]: Express.Multer.File[] }
+): Promise<HospitalResponseDTO | null> {
 
-        const updatePayload: IHospitalUpdateDTO = { ...hospitalData };
+  const hospital = await this._hospitalRepo.findById(hospitalId);
 
-        if (updatePayload.password && updatePayload.password.trim() !== "") {
-            const salt = await bcrypt.genSalt(10);
-            updatePayload.password = await bcrypt.hash(updatePayload.password, salt);
-        } else {
-            delete updatePayload.password;
-        }
-        delete updatePayload.confirmPassword;
+  if (!hospital) {
+    Logger.warn(`Update Hospital failed: Hospital not found with ID ${hospitalId}`);
+    return null;
+  }
 
-        // 2. Data Parsing (as they come from FormData as strings)
-        try {
-            if (typeof updatePayload.subscription === 'string') {
-                updatePayload.subscription = JSON.parse(updatePayload.subscription);
-            }
-            if (typeof updatePayload.images === 'string') {
-                updatePayload.images = JSON.parse(updatePayload.images);
-            }
-            if (typeof updatePayload.since === 'string') {
-                updatePayload.since = parseInt(updatePayload.since, 10);
-            }
-        } catch (e) {
-            Logger.error("Failed to parse nested JSON fields in Hospital Update", e);
-        }
+  const updatePayload: UpdateHospitalDTO = { ...hospitalData };
+  if (updatePayload.password && updatePayload.password.trim() !== "") {
+    const salt = await bcrypt.genSalt(10);
+    updatePayload.password = await bcrypt.hash(updatePayload.password, salt);
+  } else {
+    delete updatePayload.password;
+  }
 
-        const currentImages = hospital.images || {
-            landscape: [],
-            medicalTeam: [],
-            patientCare: [],
-            services: []
-        };
-
-        const desiredImages = (updatePayload.images as IHospital['images']) || currentImages;
-
-        if (typeof updatePayload.logo === 'string' && updatePayload.logo.startsWith('data:image')) {
-            if (hospital.logo) await this._imageService.deleteImage(hospital.logo);
-            updatePayload.logo = await this._imageService.uploadImage(updatePayload.logo, "hospitals/logos");
-        } else if (updatePayload.logo === "" && hospital.logo) {
-            await this._imageService.deleteImage(hospital.logo);
-            updatePayload.logo = "";
-        } else if (files?.logo?.[0]) {
-            if (hospital.logo) await this._imageService.deleteImage(hospital.logo);
-            updatePayload.logo = await this._imageService.uploadImage(files.logo[0].buffer, "hospitals/logos");
-        }
-
-        if (typeof updatePayload.licence === 'string' && updatePayload.licence.startsWith('data:image')) {
-            if (hospital.licence) await this._imageService.deleteImage(hospital.licence);
-            updatePayload.licence = await this._imageService.uploadImage(updatePayload.licence, "hospitals/licenses");
-        } else if (updatePayload.licence === "" && hospital.licence) {
-            await this._imageService.deleteImage(hospital.licence);
-            updatePayload.licence = "";
-        } else if (files?.licence?.[0]) {
-            if (hospital.licence) await this._imageService.deleteImage(hospital.licence);
-            updatePayload.licence = await this._imageService.uploadImage(files.licence[0].buffer, "hospitals/licenses");
-        }
-
-        const categories = ['landscape', 'medicalTeam', 'patientCare', 'services'] as const;
-        updatePayload.images = { ...currentImages };
-
-        for (const category of categories) {
-            const currentUrls = currentImages[category] || [];
-            const desiredState = desiredImages[category] || [];
-            let finalState = [...desiredState];
-            if (files?.[category]) {
-                const uploadedUrls = await Promise.all(
-                    files[category].map(file => this._imageService.uploadImage(file.buffer, `hospitals/gallery/${category}`))
-                );
-                finalState = [...finalState, ...uploadedUrls];
-            }
-
-            updatePayload.images[category] = await this._imageService.processGalleryUpdate(
-                currentUrls,
-                finalState,
-                `hospitals/gallery/${category}`
-            );
-        }
-
-        if (updatePayload.isActive !== undefined) {
-            updatePayload.isActive = String(updatePayload.isActive) === 'true' || updatePayload.isActive === true;
-        }
-
-        if (updatePayload.subscription && typeof updatePayload.subscription !== 'string' && updatePayload.subscription.plan) {
-            const subscription = updatePayload.subscription;
-            const planDetails = await this._subscriptionRepo.findByPlanName(subscription.plan);
-            if (planDetails) {
-                const startDate = subscription.startDate ? new Date(subscription.startDate) : new Date();
-                const duration = planDetails.duration || 1;
-                const durationUnit = planDetails.durationUnit || 'months';
-                
-                subscription.startDate = startDate;
-                subscription.endDate = this.calculateSubscriptionEndDate(startDate, duration, durationUnit);
-            }
-        }
-
-        Logger.info(`Updating hospital profile for ID: ${hospitalId}`);
-        const updatedHospital = await this._hospitalRepo.update(hospitalId, updatePayload as Partial<IHospital>);
-
-        return updatedHospital ? this._hospitalMapper.toDTO(updatedHospital) : null;
+  try {
+    if (typeof updatePayload.subscription === "string") {
+      updatePayload.subscription = JSON.parse(updatePayload.subscription);
     }
+
+    if (typeof updatePayload.images === "string") {
+      updatePayload.images = JSON.parse(updatePayload.images);
+    }
+
+    if (typeof updatePayload.since === "string") {
+      updatePayload.since = parseInt(updatePayload.since, 10);
+    }
+
+  } catch (error) {
+    Logger.error("Error parsing JSON fields in hospital update", error);
+  }
+
+  const currentImages = hospital.images || {
+    landscape: [],
+    medicalTeam: [],
+    patientCare: [],
+    services: [],
+  };
+
+  const desiredImages =
+    (updatePayload.images as IHospital["images"]) || currentImages;
+
+  if (typeof updatePayload.logo === "string" && updatePayload.logo.startsWith("data:image")) {
+    if (hospital.logo) await this._imageService.deleteImage(hospital.logo);
+
+    updatePayload.logo = await this._imageService.uploadImage(
+      updatePayload.logo,
+      "hospitals/logos"
+    );
+
+  } else if (updatePayload.logo === "" && hospital.logo) {
+
+    await this._imageService.deleteImage(hospital.logo);
+    updatePayload.logo = "";
+
+  } else if (files?.logo?.[0]) {
+
+    if (hospital.logo) await this._imageService.deleteImage(hospital.logo);
+
+    updatePayload.logo = await this._imageService.uploadImage(
+      files.logo[0].buffer,
+      "hospitals/logos"
+    );
+  }
+
+  if (typeof updatePayload.licence === "string" && updatePayload.licence.startsWith("data:image")) {
+    if (hospital.licence) await this._imageService.deleteImage(hospital.licence);
+
+    updatePayload.licence = await this._imageService.uploadImage(
+      updatePayload.licence,
+      "hospitals/licenses"
+    );
+
+  } else if (updatePayload.licence === "" && hospital.licence) {
+
+    await this._imageService.deleteImage(hospital.licence);
+    updatePayload.licence = "";
+
+  } else if (files?.licence?.[0]) {
+
+    if (hospital.licence) await this._imageService.deleteImage(hospital.licence);
+
+    updatePayload.licence = await this._imageService.uploadImage(
+      files.licence[0].buffer,
+      "hospitals/licenses"
+    );
+  }
+  const categories = ["landscape", "medicalTeam", "patientCare", "services"] as const;
+
+  updatePayload.images = { ...currentImages };
+
+  for (const category of categories) {
+
+    const currentUrls = currentImages[category] || [];
+    const desiredState = desiredImages[category] || [];
+
+    let finalState = [...desiredState];
+
+    if (files?.[category]) {
+      const uploadedUrls = await Promise.all(
+        files[category].map(file =>
+          this._imageService.uploadImage(
+            file.buffer,
+            `hospitals/gallery/${category}`
+          )
+        )
+      );
+
+      finalState = [...finalState, ...uploadedUrls];
+    }
+
+    updatePayload.images[category] =
+      await this._imageService.processGalleryUpdate(
+        currentUrls,
+        finalState,
+        `hospitals/gallery/${category}`
+      );
+  }
+
+  if (
+    updatePayload.subscription &&
+    typeof updatePayload.subscription !== "string"
+  ) {
+    const subscription = updatePayload.subscription;
+
+    if (subscription.plan) {
+      const planDetails =
+        await this._subscriptionRepo.findByPlanName(subscription.plan);
+
+      if (planDetails) {
+        const startDate = subscription.startDate
+          ? new Date(subscription.startDate)
+          : new Date();
+
+        subscription.startDate = startDate;
+
+        subscription.endDate = this.calculateSubscriptionEndDate(
+          startDate,
+          planDetails.duration || 1,
+          planDetails.durationUnit || "months"
+        );
+      }
+    }
+  }
+
+
+  Logger.info(`Updating hospital profile for ID: ${hospitalId}`);
+
+  const updatedHospital = await this._hospitalRepo.update(
+    hospitalId,
+    updatePayload as Partial<IHospital>
+  );
+
+  return updatedHospital
+    ? this._hospitalMapper.toDTO(updatedHospital)
+    : null;
+}
 
     private calculateSubscriptionEndDate(startDate: Date, duration: number, unit: string): Date {
         const endDate = new Date(startDate);

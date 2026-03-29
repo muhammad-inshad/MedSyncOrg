@@ -194,7 +194,7 @@ const HospitalSubscription = () => {
               {subscriptionPlans.length > 0 ? (
                 subscriptionPlans.map((plan) => (
                   <div 
-                    key={plan._id} 
+                    key={plan.id} 
                     className={`relative bg-white border-t-4 ${colorMap[plan.plan] || 'border-t-indigo-500'} rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col p-8`}
                   >
                     {plan.plan === "Premium" && (

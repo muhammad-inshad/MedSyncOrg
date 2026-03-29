@@ -3,6 +3,7 @@ import { FilterQuery } from "mongoose";
 import { ISubscription } from "../../../../models/subscription.ts";
 import { ISubscriptionRepository } from "../interfaces/subscription.repository.interface.ts";
 import { SubscriptionModel } from "../../../../models/subscription.ts";
+import { HospitalModel, IHospital } from "../../../../models/hospital.model.ts";
 
 export class SubscriptionRepository
   extends BaseRepository<ISubscription>
@@ -85,5 +86,30 @@ export class SubscriptionRepository
       planName: { $regex: new RegExp(`^${planName}$`, "i") },
       status: "active",
     }).exec();
+  }
+
+  async updateExpiredSubscription():Promise<void>{
+    const now =new Date();
+    await HospitalModel.updateMany(
+      {
+        "subscription.endDate":{$lt:now},
+        "subscription.status":"active"
+      },{
+        $set:{"subscription.status":"expired"}
+      }
+    )
+  }
+
+  async findHospitalWithSubscrib(skip: number, limit: number, search: string):Promise<IHospital[]>{
+     await this.updateExpiredSubscription()
+     const query:FilterQuery<IHospital>={};
+      if (search && search.trim() !== "") {
+    query.hospitalName = { $regex: search, $options: "i" };
+  }
+  return await HospitalModel.find(query)
+  .skip(skip)
+  .limit(limit)
+  .sort({createdAt:-1})
+  .exec()
   }
 }

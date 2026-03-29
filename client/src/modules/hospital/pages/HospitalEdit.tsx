@@ -310,9 +310,9 @@ const HospitalEdit = () => {
       const requestFormData = new FormData();
 
       Object.entries(formData).forEach(([key, value]) => {
-        // Never send confirmPassword to backend
+
         if (key === 'confirmPassword') return;
-        // Skip password if empty (user didn't want to change it)
+
         if (key === 'password' && !value) return;
 
         if (key === 'subscription' || key === 'images') {
@@ -324,8 +324,8 @@ const HospitalEdit = () => {
         }
       });
       console.log(requestFormData)
-      const response = await hospitalApi.editHospital(hospitalId, requestFormData);
-console.log(response)
+      const response = await hospitalApi.editHospital( requestFormData);
+
       if (response.status === 200 || response.status === 204) {
 
         toast.success('Hospital information updated successfully!');

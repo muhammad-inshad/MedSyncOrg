@@ -29,6 +29,7 @@ export interface PatientProfile extends BaseUser {
   bloodGroup: string;
   fatherName: string;
   isProfileComplete: boolean;
+   
 }
 
 export interface DoctorProfile extends BaseUser {
@@ -57,6 +58,13 @@ export interface DoctorProfile extends BaseUser {
 export interface HospitalProfile extends BaseUser {
   role: 'hospital' | 'superadmin';
   permissions: string[];
+   subscription?: {
+    amount: number;
+    plan: string;
+    startDate: string;
+    endDate: string;
+    status: string;
+  };
 }
 
 export type ProfileData = PatientProfile | DoctorProfile | HospitalProfile;

@@ -10,5 +10,6 @@ export const SUPERADMIN_ROUTES = {
     ADDPATIENT:'/superadmin/addpatient',
     EDITPATIENT:'/superadmin/editpatient',
     ADDSUBSCRIPTION:"/superadmin/addsubscription",
-    EDITSUBSCRIPTION:"/superadmin/editsubscription"
+    EDITSUBSCRIPTION:"/superadmin/editsubscription",
+    SHOWSUBSCRIPTION:"/superadmin/showsubscription"
 };

@@ -5,7 +5,6 @@ import { useAppSelector } from '@/hooks/redux';
 import Pagination from '@/components/Pagination';
 import toast from 'react-hot-toast';
 
-// --- TYPES ---
 interface IDoctorLeave {
   _id: string;
   doctorId: {

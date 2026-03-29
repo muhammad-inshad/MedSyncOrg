@@ -1,5 +1,5 @@
 
-import { Phone, Bot } from 'lucide-react';
+import { Phone, Bot,Pill } from 'lucide-react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '../../../hooks/redux';
 import { logout } from '@/store/auth/authSlice';
@@ -48,8 +48,11 @@ const PatientProfile: React.FC = () => {
   }
 
   const livetoken=()=>{
-    console.log("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
     navigate(PATIENT_ROUTES.LIVETOKEN)
+  }
+
+  const priscriptons=()=>{
+    navigate(PATIENT_ROUTES.PRISCRIPTION)
   }
 
   return (
@@ -155,18 +158,17 @@ const PatientProfile: React.FC = () => {
               </button>
             </div>
 
-            {/* Chat */}
             <div className="bg-green-50 rounded-xl p-5 shadow-sm">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
+                  <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center shadow-md">
+          <Pill className="w-6 h-6 text-white" />
+        </div>
                 </div>
-                <h3 className="text-base font-semibold text-gray-800">Chat</h3>
+                <h3 className="text-base font-semibold text-gray-800">priscriptions</h3>
               </div>
-              <button className="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
-                Start Chat
+              <button onClick={()=>priscriptons()} className="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
+                view priscriptions
               </button>
             </div>
 

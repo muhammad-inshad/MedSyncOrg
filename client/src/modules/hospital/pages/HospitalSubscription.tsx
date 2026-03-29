@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { showToast } from '@/utils/toastUtils';
 import type { ISubscription } from '@/interfaces/ISubscription';
 import { Plus } from 'lucide-react';
+import { useAppSelector } from '@/hooks/redux';
+import type { HospitalProfile } from '@/store/auth/auth.type';
 
 
 
@@ -41,7 +43,7 @@ const BillingModal = ({ plan, onClose }: { plan: ISubscription; onClose: () => v
   const taxRate = 0.1;
   const taxAmount = plan.amount * taxRate;
   const totalAmount = plan.amount + taxAmount;
-
+ 
   const handlePayment = async () => {
     try {
       const res = await hospitalApi.createPaymentSession({ planId: plan.id });
@@ -116,7 +118,8 @@ const HospitalSubscription = () => {
   const [subscriptionPlans, setSubscriptionPlans] = useState<ISubscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<ISubscription | null>(null);
-
+  const hospital = useAppSelector((state) => state.auth.profileData);
+  const subscription = (hospital as HospitalProfile)?.subscription ?? null;
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   const fetchSubscriptions = async () => {
@@ -148,6 +151,36 @@ const HospitalSubscription = () => {
   const filteredPlans = subscriptionPlans.filter(plan =>
     plan.plan?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const isSubscriptionActive = () => {
+  if (!subscription) {
+    return false;
+  }
+
+  const { status, endDate } = subscription;
+
+  console.log("Status:", status);
+  console.log("EndDate:", endDate);
+
+  if (status !== "active") {
+    console.log("Status not active");
+    return false;
+  }
+
+  if (!endDate) {
+    return false;
+  }
+
+  const today = new Date();
+  const expiry = new Date(endDate);
+
+  if (isNaN(expiry.getTime())) {
+    console.log("Invalid date");
+    return false;
+  }
+
+  return today <= expiry;
+};
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-12">
@@ -223,12 +256,19 @@ const HospitalSubscription = () => {
   </div>
 </div>
 
-                  <button
-                    onClick={() => setSelectedPlan(plan)}
-                    className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-indigo-600 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-slate-200"
-                  >
-                    Get Started
-                  </button>
+               <button
+  onClick={() => {
+    if (isSubscriptionActive()) {
+      showToast.error("You can subscribe only after current plan expires");
+      return;
+    }
+
+    setSelectedPlan(plan);
+  }}
+  className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-indigo-600 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-slate-200"
+>
+  Get Started
+</button>
                 </div>
               ))
             ) : (

@@ -22,11 +22,13 @@ import { PatientMapper } from "../mappers/patient.mapper.ts";
 import { HospitalMapper } from "../mappers/hospital.mapper.ts";
 import { DoctorMapper } from "../mappers/doctor.mapper.ts";
 import { AppointmentMapper } from "../mappers/appointment.mapper.ts";
+import { PrescriptionMapper } from "../mappers/prescription.mapper.ts";
 
 import { SubscriptionRepository } from "../repositories/superAdmin/subscription/implements/subscription.repository.ts";
 
 import { LiveTokenController } from "../controllers/patient/LiveToken.controller.ts";
-
+import { PrescriptionRepository } from "../repositories/Prescription/prescription.repository.ts";
+import PrescriptionModel from "../models/prescription.model.ts";
 export const patientContainer = () => {
   const tokenService = new TokenService();
   const userRepository = new UserRepository(Patient);
@@ -42,7 +44,8 @@ export const patientContainer = () => {
   const hospitalMapper = new HospitalMapper();
   const doctorMapper = new DoctorMapper();
   const appointmentMapper = new AppointmentMapper();
-
+  const prescriptionMapper = new PrescriptionMapper();
+  const priscriptionRepo= new PrescriptionRepository(PrescriptionModel);
   const patientService = new PatientService(
     userRepository,
     hospitalRepository,
@@ -55,7 +58,9 @@ export const patientContainer = () => {
     patientMapper,
     hospitalMapper,
     doctorMapper,
-    appointmentMapper
+    appointmentMapper,
+    priscriptionRepo,
+    prescriptionMapper
   );
   const patientController = new PatientController(patientService);
   const patientAuthMiddleware = new PatientAuthMiddleware(tokenService, userRepository);

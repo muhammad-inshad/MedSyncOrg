@@ -72,7 +72,6 @@ const HospitalDoctorEditpage: React.FC = () => {
 
   const [timePeriods, setTimePeriods] = useState({ start: 'AM', end: 'AM' });
 
-  // ─── NEW: track the ObjectId for department & specialization ───
   const [selectedDeptId, setSelectedDeptId] = useState<string>('');
   const [selectedSpecId, setSelectedSpecId] = useState<string>('');
 
@@ -82,7 +81,7 @@ const HospitalDoctorEditpage: React.FC = () => {
     formState: { errors },
     reset,
     watch,
-    setValue,   // ← added
+    setValue,   
   } = useForm<HospitalDoctorEditFormData>({
     resolver: zodResolver(doctorEditSchema),
     defaultValues: {
@@ -96,14 +95,12 @@ const HospitalDoctorEditpage: React.FC = () => {
 
   const selectedDepartmentName = watch('department');
 
-  // Filter specializations based on selected department
   const filteredSpecializations = selectedDepartmentName
     ? specData.filter(spec => spec.department_id ===
         deptData.find(d => d.departmentName === selectedDepartmentName)?._id
       )
     : specData;
 
-  // Fetch departments, specializations, qualifications
   useEffect(() => {
     const fetchAllDepSepQli = async () => {
       try {

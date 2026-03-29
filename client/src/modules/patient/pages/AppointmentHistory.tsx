@@ -8,7 +8,6 @@ import Pagination from '@/components/Pagination';
 import toast from 'react-hot-toast';
 import axios from "axios";
 
-// ── Types ──────────────────────────────────────────────────────────────────────
 type AppointmentStatus = 'pending' | 'completed' | 'cancelled';
 type AppointmentMode = 'online' | 'offline';
 
@@ -167,7 +166,7 @@ useEffect(() => {
                     </div>
                 </div>
 
-                {/* List */}
+  
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-24 text-gray-400">
                         <Loader2 className="w-10 h-10 animate-spin mb-3 text-blue-400" />
@@ -245,7 +244,6 @@ useEffect(() => {
 
             <Footer />
 
-            {/* ── Detail Modal ── */}
             {selected && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
                     style={{ backgroundColor: 'rgba(13,27,75,0.65)', backdropFilter: 'blur(4px)' }}

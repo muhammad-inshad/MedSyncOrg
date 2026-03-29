@@ -13,5 +13,7 @@ export const PATIENT_ROUTES = {
     VIEW_APPOIMENTS_HISTORY:`/patient/view-appoiments-history`,
     LIVETOKEN:"/patient/livetoken",
     PAYMENT_SUCCESS:"/patient/payment-success",
-    PAYMENT_FAILED:"/patient/payment-failed"
+    PAYMENT_FAILED:"/patient/payment-failed",
+    PRISCRIPTION:"/patient/priscriptions"
+    
 };

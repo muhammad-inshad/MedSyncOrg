@@ -35,6 +35,8 @@ import { QualificationMapper } from "../mappers/qualification.mapper.ts";
 import { SpecializationService } from "../services/hospital/specialization/implementations/specialization.service.ts";
 import { SpecializationMapper } from "../mappers/specialization.mapper.ts";
 import { SpecializationRepository } from "../repositories/hospital/implementation/specialization.repository.ts";
+import { Dashbord } from '../controllers/hospital/hospital/implementation/dashbord.controller.ts';
+import { DashbordService } from "../services/hospital/hospital/implementations/dashbord.service.ts";
 
 export const hospitalContainer = () => {
     const hospitalRepo = new HospitalRepository(HospitalModel);
@@ -127,6 +129,8 @@ export const hospitalContainer = () => {
         tokenService,
         hospitalRepo
     );
+  const dashbordservice = new DashbordService(doctorRepo, userRepo);
+const dashbordController = new Dashbord(dashbordservice);
 
     return {
         tokenService,
@@ -140,6 +144,7 @@ export const hospitalContainer = () => {
         hospitalAuthMiddleware,
         hospitalSubscriptionController,
         qualificationService,
-        specializationService
+        specializationService,
+        dashbordController
     };
 }

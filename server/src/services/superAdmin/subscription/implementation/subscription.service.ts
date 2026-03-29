@@ -4,11 +4,16 @@ import { SubscriptionMapper } from "../../../../mappers/subscription.mapper.ts";
 import { CreateSubscriptionDTO, UpdateSubscriptionDTO, SubscriptionResponseDTO, CreateSubscription } from "../../../../dto/subscription/subscription-response.dto.ts";
 import { ISubscription } from "../../../../models/subscription.ts";
 import { Types } from "mongoose";
+import { promise } from "zod";
+import { IHospital } from "../../../../models/hospital.model.ts";
+import { HospitalResponseDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
+import { HospitalMapper } from "../../../../mappers/hospital.mapper.ts";
 
 export class SubscriptionService implements ISubscriptionService {
     constructor(
         private readonly subscriptionRepository: ISubscriptionRepository,
-        private readonly subscriptionMapper: SubscriptionMapper
+        private readonly subscriptionMapper: SubscriptionMapper,
+        private readonly _hospitalMapper:HospitalMapper,
     ) {}
 
   
@@ -75,4 +80,14 @@ export class SubscriptionService implements ISubscriptionService {
         const updated = await this.subscriptionRepository.updateById(id, updateData as Partial<ISubscription>);
         return updated ? this.subscriptionMapper.toDTO(updated) : null;
     }
+
+    async subscribeHospital(page:number,limit:number, search:string):Promise<HospitalResponseDTO[]>{
+      const skip = (page - 1) * limit;
+      const hospital=await this.subscriptionRepository.findHospitalWithSubscrib(skip,limit,search)
+      const mappedHospitals=hospital.map((h)=>
+      this._hospitalMapper.toDTO(h))
+      return mappedHospitals
+    }
+
+    
 }

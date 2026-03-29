@@ -445,7 +445,6 @@ const SubscriptionManagement = () => {
         </div>
       )}
 
-      {/* Add Subscription Modal - Fixed props */}
     <AddSubscriptionModal
   isOpen={showAddModal}
   onClose={handleCloseAddModal}

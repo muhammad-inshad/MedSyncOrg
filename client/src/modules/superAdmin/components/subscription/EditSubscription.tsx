@@ -125,13 +125,6 @@ const EditSubscription = () => {
       status: z.enum(['active', 'expired', 'cancelled']),
       duration: z.number().positive('Duration must be positive'),
       durationUnit: z.enum(['days', 'months', 'years']),
-      paymentId: z.string().optional(),
-      paymentMethod: z.string().optional(),
-      limits: z.object({
-        maxPatients: z.number().int().nonnegative('Max patients must be a non-negative integer'),
-        maxDoctors: z.number().int().nonnegative('Max doctors must be a non-negative integer'),
-        maxDepartments: z.number().int().nonnegative('Max departments must be a non-negative integer'),
-      }),
     });
 
     const validation = subscriptionSchema.safeParse(form);

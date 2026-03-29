@@ -15,6 +15,7 @@ import Livetoken from "../pages/Livetoken";
 import PaymentSuccess from "../../shared/pages/PaymentSuccess";
 import PaymentFailed from "../../shared/pages/PaymentFailed";
 import { patientApi } from "@/constants/backend/patient/patient.api";
+import Prescriptions from "../pages/Prescriptions";
 
 
 const PatientRouts = () => {
@@ -26,6 +27,7 @@ const PatientRouts = () => {
         <Route path={PATIENT_ROUTES.VIEW_APPOIMENTS_HISTORY} element={<AppointmentHistory />} />
         <Route path={PATIENT_ROUTES.PATIENTEDIT} element={<EditPatientProfile />} />
         <Route path={PATIENT_ROUTES.LIVETOKEN} element={<Livetoken/>}/>
+        <Route path={PATIENT_ROUTES.PRISCRIPTION} element={<Prescriptions/>}/>
         <Route path={PATIENT_ROUTES.PAYMENT_SUCCESS} element={
           <PaymentSuccess 
             redirectPath={PATIENT_ROUTES.PATIENTPROFILE}

@@ -203,7 +203,7 @@ const HospitalDoctorKycManagement = () => {
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
                                         {doctors.map((doc: IDoctor) => (
-                                            <tr key={doc._id} className="hover:bg-slate-50/50 transition-all group">
+                                            <tr key={doc.id} className="hover:bg-slate-50/50 transition-all group">
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-4">
                                                         <img src={doc.profileImage} alt={doc.name} className="w-12 h-12 rounded-xl object-cover ring-2 ring-slate-100 group-hover:ring-blue-100 transition-all" />
@@ -389,21 +389,21 @@ const HospitalDoctorKycManagement = () => {
 
                                     <div className="flex flex-col sm:flex-row gap-4">
                                         <button
-                                            onClick={() => handleStatusUpdate(selectedDoctor._id, "approved")}
+                                            onClick={() => handleStatusUpdate(selectedDoctor.id, "approved")}
                                             className="flex-1 bg-emerald-600 text-white px-8 py-4 rounded-2xl hover:bg-emerald-700 font-bold transition-all shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 active:scale-95 uppercase text-sm tracking-wider"
                                         >
                                             <CheckCircle className="w-5 h-5" />
                                             Approve & Verify
                                         </button>
                                         <button
-                                            onClick={() => handleStatusUpdate(selectedDoctor._id, 'revision')}
+                                            onClick={() => handleStatusUpdate(selectedDoctor.id, 'revision')}
                                             className="flex-1 bg-amber-500 text-white px-8 py-4 rounded-2xl hover:bg-amber-600 font-bold transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 active:scale-95 uppercase text-sm tracking-wider"
                                         >
                                             <Clock className="w-5 h-5" />
                                             Request Revision
                                         </button>
                                         <button
-                                            onClick={() => handleStatusUpdate(selectedDoctor._id, 'rejected')}
+                                            onClick={() => handleStatusUpdate(selectedDoctor.id, 'rejected')}
                                             className="flex-1 bg-rose-600 text-white px-8 py-4 rounded-2xl hover:bg-rose-700 font-bold transition-all shadow-lg shadow-rose-600/20 flex items-center justify-center gap-2 active:scale-95 uppercase text-sm tracking-wider"
                                         >
                                             <XCircle className="w-5 h-5" />

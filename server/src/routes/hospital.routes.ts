@@ -8,13 +8,13 @@ const router = express.Router();
 const { specializationManagement } = specializationContainer()
 const { qualificationManagement } = qualificationContainer()
 const { departmentManagement } = departmentContiner()
-const { doctorManagement, patientManagement, hospitalController, hospitalSubscriptionController } = hospitalContainer();
+const { doctorManagement, patientManagement, hospitalController, hospitalSubscriptionController,dashbordController } = hospitalContainer();
 
 
 router.get("/me", hospitalController.getHospitalProfile.bind(hospitalController));
 router.get("/hospitals/:id", hospitalController.getSelectedHospital.bind(hospitalController));
 router.patch("/reapply", hospitalController.reapply.bind(hospitalController));
-router.patch("/hospitals/:id", upload.fields([{ name: "logo", maxCount: 1 },
+router.patch("/hospitals", upload.fields([{ name: "logo", maxCount: 1 },
 { name: "licence", maxCount: 1 },
 { name: "landscape", maxCount: 3 },
 { name: "medicalTeam", maxCount: 3 },
@@ -64,4 +64,6 @@ router.patch("/specializations/:id", upload.single("image"), specializationManag
 
 router.get("/subscription", hospitalSubscriptionController.getActiveSubscriptions.bind(hospitalSubscriptionController));
 router.get("/subscription/protection",hospitalSubscriptionController.protection.bind(hospitalSubscriptionController))
+
+router.get("/dashboard-stats",dashbordController.getstatus.bind(dashbordController))
 export default router;

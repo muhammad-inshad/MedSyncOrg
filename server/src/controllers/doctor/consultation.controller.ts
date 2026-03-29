@@ -55,7 +55,6 @@ export class Consultation {
     prescription = async (req: Request, res: Response) => {
         try {
             const { appointmentId, medicines, notes } = req.body;
-
             if (!appointmentId) {
                 return ApiResponse.error(res, "Appointment ID is required");
             }

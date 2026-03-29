@@ -30,4 +30,5 @@ export interface IAppointmentRepository extends IBaseRepository<IAppointment> {
     findDoctorByPatientToday(patientId: string): Promise<string | null>;
     findPatientAppointmentsToday(patientId: string): Promise<IAppointment[]>;
     findByPaymentId(paymentId: string): Promise<IAppointment | null>;
+    getPatientEmail(appointmentId: string): Promise<string | null>;
 }

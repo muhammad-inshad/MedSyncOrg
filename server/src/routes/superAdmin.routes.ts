@@ -27,6 +27,7 @@ router.patch("/patients/:id", upload.single('image'), patientManagementControlle
 
 // Subscription Management
 router.get("/subscription", subscriptionController.getSubscriptions.bind(subscriptionController));
+router.get("/subscribeHospital",subscriptionController.subscribeHospital.bind(subscriptionController))
 router.post("/subscription",subscriptionController.addSubscription.bind(subscriptionController))
 router.patch("/subscription/toggle", subscriptionController.toggleSubscription.bind(subscriptionController));
 router.patch("/subscription/:id", subscriptionController.updateSubscription.bind(subscriptionController));

@@ -4,5 +4,6 @@ import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
 
 export interface IDoctorRepository extends IBaseRepository<IDoctor> {
     countByDepartment(hospitalId: string, departmentId: string): Promise<number>;
+    countActiveDoctor():Promise<number>
     
 }

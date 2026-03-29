@@ -48,7 +48,8 @@ export class HospitalController implements IHospitalController {
 
     async updateHospital(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
         try {
-            const { id } = req.params;
+            const user = req.user as unknown as ITokenPayload;
+            const id=user.userId
             const hospitalData = req.body;
             const files = req.files as { [fieldname: string]: Express.Multer.File[] };
             const result = await this._hospitalService.updateHospital(id, hospitalData, files);

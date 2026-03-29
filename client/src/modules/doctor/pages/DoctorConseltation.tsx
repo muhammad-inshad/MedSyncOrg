@@ -147,7 +147,7 @@ const DoctorConsultation = () => {
     const handleAnswer = async (answer: any) => {
       if (peerConnection.current) {
         await peerConnection.current.setRemoteDescription(answer);
-        console.log("Call connected 🎉");
+        console.log("Call connected ");
       }
     };
 
@@ -396,12 +396,16 @@ const DoctorConsultation = () => {
           </div>
         </div>
 
-        <PrescriptionModal 
-          isOpen={isModalOpen} 
-          onClose={() => setIsModalOpen(false)}
-          patientName={currentAppointment?.patientDetails.name || ''}
-          onSave={handleSavePrescription}
-        />
+      <PrescriptionModal 
+  isOpen={isModalOpen} 
+  onClose={() => setIsModalOpen(false)}
+  patientName={currentAppointment?.patientDetails.name || ''}
+  appointmentId={currentAppointment?._id || null}
+  onSuccess={() => {
+    handleMarkAsCompleted();     
+  
+  }}
+/>
       </main>
     </div>
   );

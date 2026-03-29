@@ -22,10 +22,11 @@ import { LeaveRepository } from "../repositories/leave/leave.repository.ts";
 import { AppointmentMapper } from "../mappers/appointment.mapper.ts";
 import { Consultation } from "../controllers/doctor/consultation.controller.ts";
 import { DoctorLeaveMapper } from "../mappers/doctor-leave.mapper.ts";
-
+import PrescriptionModel from "../models/prescription.model.ts";
 import { DepartmentMapper } from "../mappers/department.mapper.ts";
 import { QualificationMapper } from "../mappers/qualification.mapper.ts";
 import { SpecializationMapper } from "../mappers/specialization.mapper.ts";
+import { PrescriptionRepository } from "../repositories/Prescription/prescription.repository.ts";
 
 export const doctorContainer = () => {
   const doctorRepository = new DoctorRepository(DoctorModel);
@@ -38,8 +39,8 @@ export const doctorContainer = () => {
   const leaveRepo = new LeaveRepository();
   const appointmentRepo = new AppointmentRepository();
   const appointmentMapper = new AppointmentMapper();
-
-  const appointmentService = new AppointmentService(appointmentRepo, appointmentMapper);
+  const prescriptionRepo = new PrescriptionRepository(PrescriptionModel);
+  const appointmentService = new AppointmentService(appointmentRepo, appointmentMapper, prescriptionRepo);
   const consultation = new Consultation(appointmentService);
 
   const departmentMapper = new DepartmentMapper();

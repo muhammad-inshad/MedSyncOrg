@@ -50,7 +50,6 @@ export class HospitalMapper implements IMapper<IHospital, HospitalResponseDTO> {
             return HospitalResponseSchema.parse(dto);
         } catch (error) {
             console.error("Hospital Mapping Failed for:", hospital.hospitalName);
-            // This will tell you exactly which field is breaking the flow
             if (error instanceof z.ZodError) {
                 console.error(error.format());
             }

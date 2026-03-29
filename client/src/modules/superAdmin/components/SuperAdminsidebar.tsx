@@ -38,8 +38,8 @@ const SuperAdminSidebar = () => {
     { icon: Building2, label: 'Hospital Management', path: SUPERADMIN_ROUTES.HOSPITALS },
     { icon: CreditCard, label: 'Subscriptions', path: SUPERADMIN_ROUTES.SUBSCRIPTIONS },
     { icon: Shield, label: 'KYC Verification', path: SUPERADMIN_ROUTES.KYC },
-    { icon: MessageSquare, label: 'Chat', path: SUPERADMIN_ROUTES.CHAT },
     { icon: UserPlus, label: 'Patient Management', path: SUPERADMIN_ROUTES.PATIENT },
+    { icon: Building2, label: 'Subscribed Hospital', path: SUPERADMIN_ROUTES.SHOWSUBSCRIPTION }
   ]
 
   return (

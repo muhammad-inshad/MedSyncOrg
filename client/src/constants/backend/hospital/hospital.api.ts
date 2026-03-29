@@ -7,8 +7,8 @@ export const hospitalApi = {
     getMe: () =>
         api.get(HOSPITAL_MANAGEMENT.GET_ME),
 
-    editHospital: (id: string, data: FormData) =>
-        api.patch(HOSPITAL_MANAGEMENT.EDIT_HOSPITAL(id), data),
+    editHospital: (data: FormData) =>
+        api.patch(HOSPITAL_MANAGEMENT.EDIT_HOSPITAL, data),
 
     getAllDoctors: (params?: PaginationParams) =>
         api.get(HOSPITAL_MANAGEMENT.GET_ALL_DOCTORS, { params }),
@@ -141,6 +141,8 @@ export const hospitalApi = {
     
     getSubscriptonForProtection:()=>{
        return api.get(HOSPITAL_MANAGEMENT.GETSUBCRITPIONPROTECTION)
-    }
+    },
+
+    getDashboardStats:()=>api.get(HOSPITAL_MANAGEMENT.GETDASHBOARDSTATS)
 };
                                    
