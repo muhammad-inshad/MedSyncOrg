@@ -12,7 +12,6 @@ export class SpecializationMapper implements IMapper<ISpecialization, Specializa
             image: specialization.image,
             isActive: specialization.isActive,
         };
-        // Output Validation using Zod
         return SpecializationResponseSchema.parse(dto);
     }
 }

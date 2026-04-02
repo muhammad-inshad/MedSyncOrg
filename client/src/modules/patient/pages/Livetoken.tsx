@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
 import { patientApi } from '@/constants/backend/patient/patient.api';
 import { socket } from "../../../services/socket.services";
+import toast from 'react-hot-toast';
 
 
 const Livetoken = () => {
@@ -159,7 +160,7 @@ const handleStartCall = async () => {
         }
 
     } catch (error) {
-        console.error("Error accessing media devices:", error);
+        toast.error("Error accessing media devices:");
     }
 };
 
@@ -207,7 +208,7 @@ useEffect(() => {
     socket.on("answer", async (answer) => {
         if (peerConnection.current) {
             await peerConnection.current.setRemoteDescription(answer);
-            console.log("Call connected 🎉");
+            console.log("Call connected ");
         }
     });
 

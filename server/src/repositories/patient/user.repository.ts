@@ -7,7 +7,6 @@ export class UserRepository extends BaseRepository<IPatient> implements IUserRep
      constructor(model:Model<IPatient>){
         super(model)
      }
-
      async getCount(email:string){
          return await this.model.countDocuments({email})
      }

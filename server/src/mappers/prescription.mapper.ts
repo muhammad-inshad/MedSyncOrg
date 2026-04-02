@@ -15,7 +15,7 @@ export class PrescriptionMapper implements IMapper<IPrescription, PrescriptionRe
             doctor_id: {
                 id: doctor._id?.toString() || prescription.doctor_id.toString(),
                 name: doctor.name || "Unknown Doctor",
-                profileImage: doctor.profileImage || "",
+                profileImage: doctor.profileImage || "", 
                 specialization: doctor.specialization || "",
             },
             hospital_id: {

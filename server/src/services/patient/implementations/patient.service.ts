@@ -294,13 +294,8 @@ export class PatientService implements IPatientService {
     return !!appointment;
   }
 
-getPrescriptions = async (
-  patientId: string,
-  query: { page: number; limit: number; search: string }
-): Promise<{ data: PrescriptionResponseDTO[]; total: number; page: number; limit: number }> => {
-
+getPrescriptions = async (patientId: string,query: { page: number; limit: number; search: string }): Promise<{ data: PrescriptionResponseDTO[]; total: number; page: number; limit: number }> => {
     const patient = await this._userRepo.findById(patientId);
-
     if (!patient) {
         ApiResponse.throwError(
             HttpStatusCode.NOT_FOUND,

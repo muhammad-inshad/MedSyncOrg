@@ -30,7 +30,7 @@ export class AppointmentRepository extends BaseRepository<IAppointment> implemen
 
             const [appointments, total] = await Promise.all([
                 this.model.find(query)
-                    .sort({ tokenNumber: 1, createdAt: 1 }) // Added createdAt: 1 for stable sorting
+                    .sort({ tokenNumber: 1, createdAt: 1 }) 
                     .skip(skip)
                     .limit(limit)
                     .exec(),
@@ -59,7 +59,7 @@ export class AppointmentRepository extends BaseRepository<IAppointment> implemen
                 $gte: startOfDay,
                 $lte: endOfDay
             },
-            status: { $nin: [AppointmentStatus.CANCELLED] } // Included COMPLETED to ensure consecutive token numbers
+            status: { $nin: [AppointmentStatus.CANCELLED] } 
         }).exec();
     }
 
@@ -141,7 +141,6 @@ export class AppointmentRepository extends BaseRepository<IAppointment> implemen
         const query: FilterQuery<IAppointment> = { bookedBy: new Types.ObjectId(patientId) };
 
         if (search) {
-            // Find doctors matching search
             const doctors = await mongoose.model("Doctor").find({
                 $or: [
                     { name: { $regex: search, $options: "i" } },
@@ -237,4 +236,6 @@ export class AppointmentRepository extends BaseRepository<IAppointment> implemen
         return this.model.findById(appointmentId).select("patientDetails.email").exec()
             .then(appointment => appointment ? appointment.patientDetails.email || null : null);
     }
+
+ 
 }

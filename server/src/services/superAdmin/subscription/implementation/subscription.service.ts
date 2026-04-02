@@ -1,11 +1,8 @@
 import { ISubscriptionRepository } from "../../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.ts";
 import { ISubscriptionService, ISubscriptionResult } from "../interfaces/subscription.service.interface.ts";
 import { SubscriptionMapper } from "../../../../mappers/subscription.mapper.ts";
-import { CreateSubscriptionDTO, UpdateSubscriptionDTO, SubscriptionResponseDTO, CreateSubscription } from "../../../../dto/subscription/subscription-response.dto.ts";
+import { UpdateSubscriptionDTO, SubscriptionResponseDTO, CreateSubscription } from "../../../../dto/subscription/subscription-response.dto.ts";
 import { ISubscription } from "../../../../models/subscription.ts";
-import { Types } from "mongoose";
-import { promise } from "zod";
-import { IHospital } from "../../../../models/hospital.model.ts";
 import { HospitalResponseDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
 import { HospitalMapper } from "../../../../mappers/hospital.mapper.ts";
 
