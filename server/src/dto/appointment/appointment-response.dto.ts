@@ -6,6 +6,9 @@ export const AppointmentResponseSchema = z.object({
     patientName: z.string(),
     patientAge: z.number(),
     patientPhone: z.string(),
+    patientEmail: z.string().optional().nullable(),
+    patientAddress: z.string().optional().nullable(),
+    patientImage: z.string().optional().nullable(),
     appointmentDate: z.string(), 
     visitTime: z.string().optional().nullable(),
     status: z.nativeEnum(AppointmentStatus),
@@ -31,6 +34,7 @@ export const AppointmentResponseSchema = z.object({
     bloodPressure: z.string().optional(),
     heartRate: z.string().optional(),
     weight: z.string().optional(),
+    cancelReason: z.string().optional().nullable(),
     createdAt: z.string(),
     updatedAt: z.string(),
 });

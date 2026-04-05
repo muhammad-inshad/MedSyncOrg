@@ -6,6 +6,11 @@ import {
 import type { IQualification } from '@/interfaces/IQualification';
 import { hospitalApi } from '@/constants/backend/hospital/hospital.api';
 import Pagination from '@/components/Pagination';
+import { StatsCards } from "../../tables/StatsCards";
+import { FilterTabs } from "../../tables/FilterTabs";
+import { DataTable, type TableColumn } from "../../tables/DataTable";
+
+type FilterType = 'all' | 'active' | 'blocked';
 
 interface QualificationForm {
   name: string;
@@ -118,20 +123,10 @@ const ModalForm = ({
   onSubmit: () => void;
   submitLabel: string;
 }) => (
-  <div
-    className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-      }`}
-  >
-    <div
-      className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'opacity-0'
-        }`}
-      onClick={isOpen ? onClose : undefined}
-    />
+  <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-200 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+    <div className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-200 ${isOpen ? 'opacity-100' : 'opacity-0'}`} onClick={isOpen ? onClose : undefined} />
 
-    <div
-      className={`relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden transition-all duration-200 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
-        }`}
-    >
+    <div className={`relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden transition-all duration-200 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}>
       <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100 bg-slate-50/50">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-blue-50">
@@ -142,10 +137,7 @@ const ModalForm = ({
             <p className="text-xs text-slate-400">{subtitle}</p>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-all"
-        >
+        <button onClick={onClose} className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-all">
           <X className="w-5 h-5" />
         </button>
       </div>
@@ -163,14 +155,9 @@ const ModalForm = ({
             placeholder="e.g. Bachelor of Medicine"
             value={form.name}
             onChange={(e) => onTextChange('name', e.target.value)}
-            className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm font-medium placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:bg-white transition-all ${errors.name
-              ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500'
-              : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'
-              }`}
+            className={`w-full px-4 py-3 bg-slate-50 border rounded-xl text-sm font-medium placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:bg-white transition-all ${errors.name ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-500' : 'border-slate-200 focus:ring-blue-500/20 focus:border-blue-500'}`}
           />
-          {errors.name && (
-            <p className="text-xs font-bold text-rose-500">{errors.name}</p>
-          )}
+          {errors.name && <p className="text-xs font-bold text-rose-500">{errors.name}</p>}
         </div>
 
         <div className="space-y-2">
@@ -203,10 +190,7 @@ const ModalForm = ({
       </div>
 
       <div className="flex items-center justify-between px-8 py-5 border-t border-slate-100 bg-slate-50/50">
-        <button
-          onClick={onClose}
-          className="px-5 py-2.5 rounded-xl font-bold text-sm text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-all"
-        >
+        <button onClick={onClose} className="px-5 py-2.5 rounded-xl font-bold text-sm text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-all">
           Cancel
         </button>
         <button
@@ -234,10 +218,10 @@ const ModalForm = ({
 const QualificationManagement = () => {
   const [qualifications, setQualifications] = useState<IQualification[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [filter, setFilter] = useState<FilterType>('all');
   const [limit] = useState(5);
 
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -250,46 +234,89 @@ const QualificationManagement = () => {
   const [editErrors, setEditErrors] = useState<Partial<QualificationForm>>({});
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery);
-      setCurrentPage(1);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
+  // Fetch qualifications with filter support
   const fetchQualifications = useCallback(async () => {
     try {
-      const res = await hospitalApi.getQualifications({
+      const params: any = {
         page: currentPage,
         limit,
-        search: debouncedSearch
-      });
-      const { data, total, limit: resLimit } = res.data.data;
+        search: searchQuery,
+      };
+
+      if (filter !== 'all') {
+        params.filter = filter;
+      }
+
+      const res = await hospitalApi.getQualifications(params);
+
+      const { data, total, limit: resLimit } = res.data.data || {};
       setQualifications(data || []);
       setTotalItems(total || 0);
       setTotalPages(Math.ceil((total || 0) / (resLimit || limit)) || 1);
     } catch (error) {
       console.error('Failed to fetch qualifications:', error);
     }
-  }, [currentPage, limit, debouncedSearch]);
+  }, [currentPage, limit, searchQuery, filter]);
 
   useEffect(() => {
     fetchQualifications();
-  }, []);
+  }, [fetchQualifications]);
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleToggleStatus = async (id: string) => {
     try {
       await hospitalApi.toggleQualificationStatus(id);
       setQualifications((prev) =>
-        prev.map((q) => (q._id === id ? { ...q, isActive: !q.isActive } : q))
+        prev.map((q) => (q.id === id ? { ...q, isActive: !q.isActive } : q))
       );
     } catch (error) {
       console.error('Failed to toggle status:', error);
     }
   };
 
-  const openAdd = () => { setAddForm(EMPTY_FORM); setAddErrors({}); setIsAddOpen(true); };
+  const openAdd = () => {
+    setAddForm(EMPTY_FORM);
+    setAddErrors({});
+    setIsAddOpen(true);
+  };
+
+  const stats = [
+  {
+    label: "Total Qualifications",
+    value: totalItems,
+    icon: Layers,
+    color: "text-slate-600",
+    bg: "bg-slate-100",
+  },
+  {
+    label: "Active",
+    value: qualifications.filter((q) => q.isActive).length,
+    icon: CheckCircle2,
+    color: "text-emerald-600",
+    bg: "bg-emerald-100/50",
+  },
+  {
+    label: "Blocked",
+    value: qualifications.filter((q) => !q.isActive).length,
+    icon: XCircle,
+    color: "text-rose-600",
+    bg: "bg-rose-100/50",
+  },
+  {
+    label: "With Abbreviation",
+    value: qualifications.filter((q) => q.abbreviation).length,
+    icon: Tag,
+    color: "text-blue-600",
+    bg: "bg-blue-100/50",
+  },
+];
 
   const handleAddChange = (field: keyof QualificationForm, value: string) => {
     setAddForm((prev) => ({ ...prev, [field]: value }));
@@ -303,7 +330,10 @@ const QualificationManagement = () => {
   const handleAddSubmit = async () => {
     const errors: Partial<QualificationForm> = {};
     if (!addForm.name.trim()) errors.name = 'Qualification name is required.';
-    if (Object.keys(errors).length > 0) { setAddErrors(errors); return; }
+    if (Object.keys(errors).length > 0) {
+      setAddErrors(errors);
+      return;
+    }
 
     try {
       setIsAddSubmitting(true);
@@ -312,11 +342,7 @@ const QualificationManagement = () => {
       formData.append('abbreviation', addForm.abbreviation || '');
       formData.append('description', addForm.description || '');
 
-      if (addForm.file) {
-        formData.append('image', addForm.file);
-      } else if (addForm.image && !addForm.image.startsWith('data:')) {
-        formData.append('image', addForm.image);
-      }
+      if (addForm.file) formData.append('image', addForm.file);
 
       await hospitalApi.createQualification(formData);
       fetchQualifications();
@@ -354,7 +380,10 @@ const QualificationManagement = () => {
     if (!editTarget) return;
     const errors: Partial<QualificationForm> = {};
     if (!editForm.name.trim()) errors.name = 'Qualification name is required.';
-    if (Object.keys(errors).length > 0) { setEditErrors(errors); return; }
+    if (Object.keys(errors).length > 0) {
+      setEditErrors(errors);
+      return;
+    }
 
     setIsEditSubmitting(true);
     try {
@@ -367,11 +396,11 @@ const QualificationManagement = () => {
         formData.append('image', editForm.file);
       } else if (editForm.image === '') {
         formData.append('image', '');
-      } else if (editForm.image && !editForm.image.startsWith('data:')) {
+      } else if (editForm.image) {
         formData.append('image', editForm.image);
       }
 
-      await hospitalApi.updateQualification(editTarget._id, formData);
+      await hospitalApi.updateQualification(editTarget.id, formData);
       fetchQualifications();
       setEditTarget(null);
     } catch (err) {
@@ -381,16 +410,110 @@ const QualificationManagement = () => {
     }
   };
 
-  const getStatusBadge = (isActive: boolean) =>
+  const getStatusBadge = (isActive: boolean) => (
     isActive ? (
       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border bg-emerald-50 text-emerald-700 border-emerald-100">
         <ShieldCheck className="w-3 h-3" /> Active
       </span>
     ) : (
       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border bg-rose-50 text-rose-700 border-rose-100">
-        <ShieldAlert className="w-3 h-3" /> Inactive
+        <ShieldAlert className="w-3 h-3" /> Blocked
       </span>
-    );
+    )
+  );
+
+  const filterTabs = [
+    { key: 'all' as const, label: 'All Qualifications' },
+    { key: 'active' as const, label: 'Active' },
+    { key: 'blocked' as const, label: 'Blocked' },
+  ];
+
+  const getFilterCount = (key: string) => {
+  switch (key) {
+    case "active":
+      return qualifications.filter((q) => q.isActive).length;
+    case "blocked":
+      return qualifications.filter((q) => !q.isActive).length;
+    default:
+      return 0;
+  }
+};
+
+const tableColumns: TableColumn[] = [
+  { key: "qualification", label: "Qualification" },
+  { key: "abbreviation", label: "Abbreviation" },
+  { key: "description", label: "Description" },
+  { key: "status", label: "Status" },
+  { key: "actions", label: "Actions", className: "text-right" },
+];
+
+const renderQualificationRow = (qual: IQualification) => (
+  <>
+    <td className="px-6 py-4">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl overflow-hidden ring-2 ring-slate-100 group-hover:ring-blue-100 transition-all flex-shrink-0">
+          {qual.image ? (
+            <img src={qual.image} alt={qual.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full bg-blue-50 flex items-center justify-center">
+              <GraduationCap className="w-6 h-6 text-blue-400" />
+            </div>
+          )}
+        </div>
+        <div>
+          <div className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors uppercase">
+            {qual.name}
+          </div>
+        </div>
+      </div>
+    </td>
+
+    <td className="px-6 py-4">
+      {qual.abbreviation ? (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
+          <Tag className="w-3 h-3" />
+          {qual.abbreviation}
+        </span>
+      ) : (
+        <span className="text-xs text-slate-300 italic">—</span>
+      )}
+    </td>
+
+    <td className="px-6 py-4 max-w-xs">
+      <div className="flex items-start gap-2 text-xs font-medium text-slate-600">
+        <FileText className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
+        <span className="line-clamp-2">
+          {qual.description || <span className="text-slate-300 italic">No description</span>}
+        </span>
+      </div>
+    </td>
+
+    <td className="px-6 py-4">{getStatusBadge(qual.isActive)}</td>
+
+    <td className="px-6 py-4 text-right">
+      <div className="flex items-center justify-end gap-2">
+        <button
+          onClick={() => openEdit(qual)}
+          className="p-2 rounded-lg bg-slate-50 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+          title="Edit Qualification"
+        >
+          <Edit2 className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => handleToggleStatus(qual.id)}
+          className={`p-2 rounded-lg shadow-sm transition-all ${
+            qual.isActive
+              ? "bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white"
+              : "bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white"
+          }`}
+          title={qual.isActive ? "Block Qualification" : "Unblock Qualification"}
+        >
+          <Ban className="w-4 h-4" />
+        </button>
+      </div>
+    </td>
+  </>
+);
 
   return (
     <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10 font-inter">
@@ -421,126 +544,42 @@ const QualificationManagement = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-10">
-          {[
-            { label: 'Total Qualifications', value: totalItems, icon: Layers, color: 'text-slate-600', bg: 'bg-slate-100' },
-            { label: 'Active', value: qualifications.filter(q => q.isActive).length, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-100/50' },
-            { label: 'Inactive', value: qualifications.filter(q => !q.isActive).length, icon: XCircle, color: 'text-rose-600', bg: 'bg-rose-100/50' },
-            { label: 'With Abbreviation', value: qualifications.filter(q => q.abbreviation).length, icon: Tag, color: 'text-blue-600', bg: 'bg-blue-100/50' },
-          ].map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 transition-all hover:shadow-md">
-              <div className={`p-3 rounded-xl ${stat.bg}`}>
-                <stat.icon className={`w-6 h-6 ${stat.color}`} />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">{stat.label}</p>
-                <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* Stats */}
+<StatsCards stats={stats} />
 
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          {qualifications.length === 0 ? (
-            <div className="py-20 text-center">
-              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                <Search className="w-8 h-8 text-slate-300" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">No qualifications found</h3>
-              <p className="text-slate-500">Try adjusting your search criteria.</p>
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead className="bg-slate-50/50 border-b border-slate-200">
-                    <tr>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Qualification</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Abbreviation</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Description</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {qualifications.map((qual) => (
-                      <tr key={qual._id} className="hover:bg-slate-50/50 transition-all group">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-xl overflow-hidden ring-2 ring-slate-100 group-hover:ring-blue-100 transition-all flex-shrink-0">
-                              {qual.image ? (
-                                <img src={qual.image} alt={qual.name} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full bg-blue-50 flex items-center justify-center">
-                                  <GraduationCap className="w-6 h-6 text-blue-400" />
-                                </div>
-                              )}
-                            </div>
-                            <div>
-                              <div className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors uppercase">
-                                {qual.name}
-                              </div>
-                              <div className="text-[10px] font-bold text-slate-400 mt-0.5 tracking-tight uppercase">
-                                Qualification
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          {qual.abbreviation ? (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold tracking-wider bg-slate-100 text-slate-700 border border-slate-200">
-                              <Tag className="w-3 h-3" />
-                              {qual.abbreviation}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-slate-300 italic">—</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 max-w-xs">
-                          <div className="flex items-start gap-2 text-xs font-medium text-slate-600">
-                            <FileText className="w-3.5 h-3.5 text-slate-400 mt-0.5 shrink-0" />
-                            <span className="line-clamp-2">
-                              {qual.description || <span className="text-slate-300 italic">No description</span>}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">{getStatusBadge(qual.isActive)}</td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => openEdit(qual)}
-                              className="p-2 rounded-lg bg-slate-50 text-slate-600 hover:bg-blue-600 hover:text-white transition-all shadow-sm"
-                              title="Edit Qualification"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleToggleStatus(qual._id)}
-                              className={`p-2 rounded-lg shadow-sm transition-all ${qual.isActive
-                                ? 'bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white'
-                                : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white'
-                                }`}
-                              title={qual.isActive ? 'Deactivate' : 'Activate'}
-                            >
-                              <Ban className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
-            </>
-          )}
-        </div>
+     {/* Filter Tabs */}
+<FilterTabs
+  tabs={filterTabs}
+  activeFilter={filter}
+  onFilterChange={(filterKey: string) => {
+    setFilter(filterKey as FilterType);
+    setCurrentPage(1);
+  }}
+  getCount={getFilterCount}
+/>
+     {/* Table */}
+<div className="mb-8">
+  <DataTable
+    data={qualifications}
+    columns={tableColumns}
+    renderRow={renderQualificationRow}
+    isLoading={false} 
+    emptyState={{
+      title: "No qualifications found",
+      message: "Try adjusting your search or filter.",
+      icon: <Search className="w-8 h-8 text-slate-300" />,
+    }}
+  />
+
+  <Pagination
+    currentPage={currentPage}
+    totalPages={totalPages}
+    onPageChange={setCurrentPage}
+  />
+</div>
       </div>
 
+      {/* Add Modal */}
       <ModalForm
         isOpen={isAddOpen}
         onClose={() => setIsAddOpen(false)}
@@ -555,6 +594,7 @@ const QualificationManagement = () => {
         submitLabel="Add Qualification"
       />
 
+      {/* Edit Modal */}
       <ModalForm
         isOpen={!!editTarget}
         onClose={() => setEditTarget(null)}

@@ -130,10 +130,10 @@ export default function DoctorLeaveManagement() {
             });
 
             if (response.data.success) {
-               
-                setLeaves(response.data.data.data);
-                setTotalPages(Math.ceil(response.data.data.total / 5));
-                setTotalRequests(response.data.data.total);
+                setLeaves(response.data.data || []);
+               const pagination = response.data.pagination;
+                setTotalPages(pagination?.totalPages || 1);
+                setTotalRequests(pagination?.totalItems || 0);
             }
         } catch (error) {
             console.error("Failed to fetch leaves", error);

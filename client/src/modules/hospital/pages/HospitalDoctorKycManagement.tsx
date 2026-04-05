@@ -3,6 +3,9 @@ import { hospitalApi } from '../../../constants/backend/hospital/hospital.api';
 import toast from 'react-hot-toast';
 import { Search, CheckCircle, XCircle, AlertCircle, Eye, Download, Users, Clock, FileWarning, UserCheck } from 'lucide-react';
 import type { IDoctor } from '@/interfaces/IDoctor';
+import { StatsCards } from "../components/tables/StatsCards";
+import { FilterTabs } from "../components/tables/FilterTabs";
+import { DataTable, type TableColumn } from "../components/tables/DataTable";
 
 import Pagination from '@/components/Pagination';
 
@@ -99,6 +102,7 @@ const HospitalDoctorKycManagement = () => {
         };
 
         const currentStatus = status || 'pending';
+      
 
         return (
             <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${styles[currentStatus as keyof typeof styles] || 'bg-gray-100 text-gray-700 border-gray-200'}`}>
@@ -106,6 +110,111 @@ const HospitalDoctorKycManagement = () => {
             </span>
         );
     };
+
+      const stats = [
+  {
+    label: "Total Applications",
+    value: doctors.length,
+    icon: Users,
+    color: "text-slate-600",
+    bg: "bg-slate-100",
+  },
+  {
+    label: "Pending Review",
+    value: doctors.filter((d) => d.reviewStatus === "pending").length,
+    icon: Clock,
+    color: "text-blue-600",
+    bg: "bg-blue-100/50",
+  },
+  {
+    label: "Needs Revision",
+    value: doctors.filter((d) => d.reviewStatus === "revision").length,
+    icon: FileWarning,
+    color: "text-amber-600",
+    bg: "bg-amber-100/50",
+  },
+  {
+    label: "Verified Doctors",
+    value: doctors.filter((d) => d.reviewStatus === "approved").length,
+    icon: UserCheck,
+    color: "text-emerald-600",
+    bg: "bg-emerald-100/50",
+  },
+];
+
+const filterTabs: { key: "all" | "pending" | "revision" | "rejected"; label: string }[] = [
+  { key: "all", label: "All Applications" },
+  { key: "pending", label: "Pending Review" },
+  { key: "revision", label: "Needs Revision" },
+  { key: "rejected", label: "Rejected" },
+];
+
+const getFilterCount = (key: string) => {
+  switch (key) {
+    case "pending":
+      return doctors.filter((d) => d.reviewStatus === "pending").length;
+    case "revision":
+      return doctors.filter((d) => d.reviewStatus === "revision").length;
+    case "rejected":
+      return doctors.filter((d) => d.reviewStatus === "rejected").length;
+    default:
+      return 0;
+  }
+};
+
+const tableColumns: TableColumn[] = [
+  { key: "doctor", label: "Doctor Details" },
+  { key: "qualification", label: "Qualification" },
+  { key: "status", label: "Status" },
+  { key: "submitted", label: "Submitted" },
+  { key: "action", label: "Action" },
+];
+
+const renderRow = (doc: IDoctor) => (
+  <>
+    <td className="px-6 py-4">
+      <div className="flex items-center gap-4">
+        <img
+          src={doc.profileImage}
+          alt={doc.name}
+          className="w-12 h-12 rounded-xl object-cover ring-2 ring-slate-100 group-hover:ring-blue-100 transition-all"
+        />
+        <div>
+          <div className="text-sm font-bold text-slate-900 uppercase">Dr. {doc.name}</div>
+          <div className="text-xs text-slate-400 font-bold">{doc.email}</div>
+        </div>
+      </div>
+    </td>
+
+    <td className="px-6 py-4">
+      <div className="text-sm font-bold text-slate-700 uppercase">{doc.qualification}</div>
+      <div className="text-xs text-slate-400 font-bold uppercase tracking-tighter">{doc.specialization}</div>
+    </td>
+
+    <td className="px-6 py-4">{getStatusBadge(doc.reviewStatus)}</td>
+
+    <td className="px-6 py-4 text-xs font-bold text-slate-500">
+      {new Date(doc.createdAt).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })}
+    </td>
+
+    <td className="px-6 py-4">
+      <button
+        onClick={() => {
+          setSelectedDoctor(doc);
+          setShowModal(true);
+        }}
+        className="flex items-center gap-2 text-blue-600 hover:text-white text-xs font-bold bg-blue-50 hover:bg-blue-600 px-3 py-2 rounded-lg transition-all shadow-sm"
+      >
+        <Eye className="w-4 h-4" />
+        Review
+      </button>
+    </td>
+  </>
+);
 
     return (
         <div className="min-h-screen bg-slate-50/50 p-6 lg:p-10">
@@ -132,126 +241,35 @@ const HospitalDoctorKycManagement = () => {
                     </div>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-                    {[
-                        { label: 'Total Applications', value: doctors.length, icon: Users, color: 'text-slate-600', bg: 'bg-slate-100' },
-                        { label: 'Pending Review', value: doctors.filter(d => d.reviewStatus === 'pending').length, icon: Clock, color: 'text-blue-600', bg: 'bg-blue-100/50' },
-                        { label: 'Needs Revision', value: doctors.filter(d => d.reviewStatus === 'revision').length, icon: FileWarning, color: 'text-amber-600', bg: 'bg-amber-100/50' },
-                        { label: 'Verified Doctors', value: doctors.filter(d => d.reviewStatus === 'approved').length, icon: UserCheck, color: 'text-emerald-600', bg: 'bg-emerald-100/50' },
-                    ].map((stat, i) => (
-                        <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4 transition-all hover:shadow-md">
-                            <div className={`p-3 rounded-xl ${stat.bg}`}>
-                                <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-slate-500">{stat.label}</p>
-                                <p className="text-2xl font-bold text-slate-900">{stat.value}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <StatsCards stats={stats} />;
 
-                {/* Filter Tabs */}
-                <div className="bg-white p-1 rounded-xl shadow-sm border border-slate-200 mb-8 inline-flex flex-wrap gap-1">
-                    {(['all', 'pending', 'revision', 'rejected'] as const).map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => {
-                                setFilter(tab);
-                                setCurrentPage(1);
-                            }}
-                            className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${filter === tab
-                                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                                : 'text-slate-600 hover:bg-slate-50'
-                                }`}
-                        >
-                            <span className="capitalize">{tab === 'revision' ? 'Revision' : tab}</span>
-                            {tab !== 'all' && (
-                                <span className={`ml-2 px-1.5 py-0.5 rounded-md text-[10px] ${filter === tab ? 'bg-white/20' : 'bg-slate-100'}`}>
-                                    {doctors.filter((d) => d.reviewStatus === tab).length}
-                                </span>
-                            )}
-                        </button>
-                    ))}
-                </div>
+               <FilterTabs
+  tabs={filterTabs}
+  activeFilter={filter}
+  onFilterChange={(key: string) => {
+    setFilter(key as "all" | "pending" | "revision" | "rejected");
+    setCurrentPage(1);
+  }}
+  getCount={getFilterCount}
+/>
 
                 {/* Table */}
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                    {isLoading ? (
-                        <div className="py-20 text-center text-slate-400 font-medium">Loading applications...</div>
-                    ) : doctors.length === 0 ? (
-                        <div className="py-20 text-center">
-                            <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100">
-                                <Search className="w-8 h-8 text-slate-300" />
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-900">No applications found</h3>
-                            <p className="text-slate-500">Try adjusting your filters or search query.</p>
-                        </div>
-                    ) : (
-                        <>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-left border-collapse">
-                                    <thead className="bg-slate-50/50 border-b border-slate-200">
-                                        <tr>
-                                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Doctor Details</th>
-                                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Qualification</th>
-                                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Submitted</th>
-                                            <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {doctors.map((doc: IDoctor) => (
-                                            <tr key={doc.id} className="hover:bg-slate-50/50 transition-all group">
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-4">
-                                                        <img src={doc.profileImage} alt={doc.name} className="w-12 h-12 rounded-xl object-cover ring-2 ring-slate-100 group-hover:ring-blue-100 transition-all" />
-                                                        <div>
-                                                            <div className="text-sm font-bold text-slate-900 uppercase">Dr. {doc.name}</div>
-                                                            <div className="text-xs text-slate-400 font-bold">{doc.email}</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="text-sm font-bold text-slate-700 uppercase">{doc.qualification}</div>
-                                                    <div className="text-xs text-slate-400 font-bold uppercase tracking-tighter">{doc.specialization}</div>
-                                                </td>
-                                                <td className="px-6 py-4">{getStatusBadge(doc.reviewStatus)}</td>
-                                                <td className="px-6 py-4 text-xs font-bold text-slate-500">
-                                                    {new Date(doc.createdAt).toLocaleDateString(undefined, {
-                                                        year: 'numeric',
-                                                        month: 'short',
-                                                        day: 'numeric'
-                                                    })}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <button
-                                                        onClick={() => {
-                                                            setSelectedDoctor(doc);
-                                                            setShowModal(true);
-                                                        }}
-                                                        className="flex items-center gap-2 text-blue-600 hover:text-white text-xs font-bold bg-blue-50 hover:bg-blue-600 px-3 py-2 rounded-lg transition-all shadow-sm"
-                                                    >
-                                                        <Eye className="w-4 h-4" />
-                                                        Review
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Pagination */}
-                            <Pagination
-                                currentPage={currentPage}
-                                totalPages={totalPages}
-                                onPageChange={(page) => setCurrentPage(page)}
-                            />
-                        </>
-                    )}
-                </div>
+                <DataTable
+  data={doctors}
+  columns={tableColumns}
+  renderRow={renderRow}
+  isLoading={isLoading}
+  emptyState={{
+    title: "No applications found",
+    message: "Try adjusting your filters or search query.",
+    icon: <Search className="w-8 h-8 text-slate-300" />,
+  }}
+/>
+<Pagination
+  currentPage={currentPage}
+  totalPages={totalPages}
+  onPageChange={(page) => setCurrentPage(page)}
+/>
             </div>
 
             {/* Review Modal */}

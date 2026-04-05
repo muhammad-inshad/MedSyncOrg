@@ -4,7 +4,7 @@ export const DOCTOR_MANAGEMENT = {
     GET_ME: "/api/doctor/me",
     EDIT_PROFILE: () => `/api/doctor/profile`,
     REAPPLY: (id: string) => `/api/doctor/reapply/${id}`,
-    UPCOMING_APPOINTMENTS: (id: string) => `/api/doctor/appointments/upcoming/${id}`,
+    UPCOMING_APPOINTMENTS:`/api/doctor/appointments/upcoming`,
     DOCTOR_APPLAY_LEAVE: "/api/doctor/leaves",
     GET_LEAVES: "/api/doctor/leaves",
     GET_APPOIMENTS:"/api/doctor/consultation",

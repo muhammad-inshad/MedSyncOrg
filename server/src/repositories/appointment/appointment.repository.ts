@@ -63,53 +63,52 @@ export class AppointmentRepository extends BaseRepository<IAppointment> implemen
         }).exec();
     }
 
-    async findUpcomingAppointments(
-        doctorId: string,
-        options: {
-            page: number;
-            limit: number;
-            search?: string;
-            date?: Date
-        }
+    async findUpcomingAppointments(doctorId: string,options: {    page: number;limit: number;search?: string;date?: Date}
     ): Promise<{ appointments: IAppointment[]; total: number }> {
         const { page, limit, search, date } = options;
         const skip = (page - 1) * limit;
+        if(!mongoose.Types.ObjectId.isValid(doctorId)){
+            throw new Error("Invalid doctorId")
+        }
 
-        const query: FilterQuery<IAppointment> = {
-            doctorId: doctorId,
-            status: { $nin: [AppointmentStatus.COMPLETED] }
+        const ObjectDoctorId=new mongoose.Types.ObjectId(doctorId)
+
+        const query:FilterQuery<IAppointment>={
+            doctorId:ObjectDoctorId,
+            status:{$nin:[AppointmentStatus.COMPLETED]}
         };
-
-        if (date) {
-            const startOfDay = new Date(date);
-            startOfDay.setHours(0, 0, 0, 0);
-            const endOfDay = new Date(date);
-            endOfDay.setHours(23, 59, 59, 999);
-            query.appointmentDate = { $gte: startOfDay, $lte: endOfDay };
-        } else {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            query.appointmentDate = { $gte: today };
+        if(date){
+            const startOfDay=new Date(date)
+            startOfDay.setHours(0,0,0,0);
+            const endOfDay=new Date(date)
+            query.appointmentDate={
+                $gte:startOfDay,
+                $lte:endOfDay
+            }
         }
-
-        if (search) {
-            query.$or = [
-                { 'patientDetails.name': { $regex: search, $options: 'i' } },
-                { 'patientDetails.phone': { $regex: search, $options: 'i' } }
-            ];
+        else{
+            const today=new Date()
+            today.setHours(0,0,0,0);
+            query.appointmentDate={$gte:today}
         }
+       if (search && search.trim()) {
+    query.$or = [
+      { "patientDetails.name": { $regex: search, $options: "i" } },
+      { "patientDetails.phone": { $regex: search, $options: "i" } }
+    ];
+  }
+  const [appointments, total] = await Promise.all([
+    this.model
+      .find(query)
+      .populate("bookedBy", "name email image") 
+      .sort({ appointmentDate: 1, visitTime: 1 })
+      .skip(skip)
+      .limit(limit)
+      .exec(),
 
-        const [appointments, total] = await Promise.all([
-            this.model.find(query)
-                .populate('bookedBy')
-                .sort({ appointmentDate: 1, visitTime: 1 })
-                .skip(skip)
-                .limit(limit)
-                .exec(),
-            this.model.countDocuments(query).exec()
-        ]);
-
-        return { appointments, total };
+    this.model.countDocuments(query).exec()
+  ]);
+  return { appointments, total };
     }
 
     async findDuplicate(

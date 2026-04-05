@@ -156,13 +156,13 @@ export class DoctorManagementController implements IDoctorManagementController {
 
   async getLeaveDoctors(req: Request, res: Response, next: NextFunction): Promise<Response | void> {
     try {
-      const hospitalId = req.params.id;
+       const hospital = req.user;
+      const hospitalId = hospital?.userId?.toString() || "";
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 5;
       const search = req.query.search as string;
       const dateStr = req.query.date as string;
       const date = dateStr ? new Date(dateStr) : undefined;
-
       const result = await this._doctorManagementService.getLeaveDoctors({
         hospitalId,
         page,

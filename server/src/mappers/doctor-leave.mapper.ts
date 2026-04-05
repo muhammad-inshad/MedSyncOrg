@@ -6,7 +6,16 @@ export class DoctorLeaveMapper implements IMapper<IDoctorLeave, DoctorLeaveRespo
     toDTO(leave: IDoctorLeave): DoctorLeaveResponseDTO {
         const dto = {
             id: leave._id.toString(),
-            doctorId: leave.doctorId.toString(),
+            doctorId: leave.doctorId && typeof leave.doctorId === 'object' && (leave.doctorId as any).name
+                ? {
+                    _id: ((leave.doctorId as any)._id || leave.doctorId).toString(),
+                    name: (leave.doctorId as any).name,
+                    email: (leave.doctorId as any).email,
+                    profileImage: (leave.doctorId as any).profileImage,
+                    specialization: (leave.doctorId as any).specialization,
+                    department: (leave.doctorId as any).department,
+                }
+                : leave.doctorId.toString(),
             startDate: leave.startDate,
             endDate: leave.endDate,
             leaveSession: leave.leaveSession,

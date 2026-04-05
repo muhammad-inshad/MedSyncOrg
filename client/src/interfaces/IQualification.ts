@@ -1,5 +1,5 @@
 export interface IQualification {
-    _id: string;
+    id: string;
     name: string;
     abbreviation?: string;
     description?: string;

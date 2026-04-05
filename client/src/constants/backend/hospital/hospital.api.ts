@@ -127,8 +127,8 @@ export const hospitalApi = {
     getSelectedHospital: (id: string, params?: { page?: number; limit?: number; search?: string }) => {
         return api.get(HOSPITAL_MANAGEMENT.SELECTED_HOSPITAL(id), { params });
     },
-    getLeaveFromDoctor: (id: string, params?: { page?: number; limit?: number; search?: string; date?: string }) => {
-        return api.get(HOSPITAL_MANAGEMENT.GET_LEAVE_DOCTORS(id), { params });
+    getLeaveFromDoctor: (params?: { page?: number; limit?: number; search?: string; date?: string }) => {
+        return api.get(HOSPITAL_MANAGEMENT.GET_LEAVE_DOCTORS, { params });
     },
     updateLeaveStatus: (id: string, data: { status: 'approved' | 'rejected'; rejectedReason?: string }) => {
         return api.patch(HOSPITAL_MANAGEMENT.UPDATE_LEAVE_STATUS(id), data);

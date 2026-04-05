@@ -87,7 +87,6 @@ class DoctorController {
     try {
       const user = req.user as unknown as ITokenPayload;
       const doctorId = user?.doctorID || user?.userId;
-
       if (!doctorId) {
         return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Unauthorized");
       }
@@ -129,7 +128,12 @@ class DoctorController {
         endDate: endDate ? new Date(endDate as string) : undefined
       });
 
-      return ApiResponse.success(res, "Leaves fetched successfully", result, HttpStatusCode.OK);
+      return ApiResponse.success(res, "Leaves fetched successfully", result.data, HttpStatusCode.OK, {
+        page: result.page,
+        limit: result.limit,
+        totalItems: result.total,
+        totalPages: Math.ceil(result.total / result.limit),
+      });
     } catch (error: unknown) {
       next(error);
     }

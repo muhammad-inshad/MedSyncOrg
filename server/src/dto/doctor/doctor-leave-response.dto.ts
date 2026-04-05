@@ -2,7 +2,17 @@ import { z } from 'zod';
 
 export const DoctorLeaveResponseSchema = z.object({
     id: z.string(),
-    doctorId: z.string(),
+    doctorId: z.union([
+        z.string(),
+        z.object({
+            _id: z.string(),
+            name: z.string(),
+            email: z.string(),
+            profileImage: z.string(),
+            specialization: z.string().optional(),
+            department: z.string().optional(),
+        })
+    ]),
     startDate: z.union([z.date(), z.string()]),
     endDate: z.union([z.date(), z.string()]),
     leaveSession: z.enum(["morning", "afternoon", "evening", "night"]).optional(),

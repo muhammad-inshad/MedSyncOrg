@@ -9,6 +9,7 @@ import type { IPatient } from '@/interfaces/IPatient';
 import { PATIENT_ROUTES } from '@/constants/frontend/patient/patient.routes';
 import { initializeAuth } from '@/store/auth/authThunks';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { Patient } from '../../../../../../server/src/models/Patient.model';
 
 const EditPatientProfile = () => {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ const EditPatientProfile = () => {
   const { profileData, loading } = useAppSelector((state) => state.auth);
 
   const patient = profileData as IPatient | null;
-
+console.log('Patient data from store:', patient?.age, patient?.dateOfBirth);
   const [formData, setFormData] = useState<Partial<IPatient> & {
     currentPassword?: string;
     newPassword?: string;
@@ -70,6 +71,7 @@ const EditPatientProfile = () => {
         newPassword: '',
         confirmNewPassword: '',
       });
+    
 
       if (patient.image) {
         setImagePreview(patient.image);

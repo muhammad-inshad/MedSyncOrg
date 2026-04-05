@@ -24,14 +24,15 @@ export class AppointmentService implements IAppointments {
         }
     ): Promise<{ appointments: AppointmentResponseDTO[]; total: number }> {
         const { page, limit, search, date } = options;
-
+        console.log(date,"oooooooooooooooooooooooooo")
+  
         const res = await this._appointmentRepo.findUpcomingAppointments(doctorId, {
             page,
             limit,
             search,
             date: date ? new Date(date) : undefined
         });
-
+console.log(res)
         return {
             appointments: res.appointments.map(app => this._appointmentMapper.toDTO(app)),
             total: res.total

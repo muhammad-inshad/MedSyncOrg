@@ -20,12 +20,23 @@ export class LeaveRepository extends BaseRepository<IDoctorLeave> implements ILe
         const { doctorId, page, limit, startDate, endDate } = options;
         const skip = (page - 1) * limit;
 
-        const filter: FilterQuery<IDoctorLeave> = { doctorId };
+        const filter: FilterQuery<IDoctorLeave> = { 
+            doctorId: new Types.ObjectId(doctorId) 
+        };
 
-        if (startDate && endDate) {
-            filter.startDate = { $gte: startDate, $lte: endDate };
-        } else if (startDate) {
-            filter.startDate = { $gte: startDate };
+        if (startDate) {
+            const startOfDay = new Date(startDate);
+            startOfDay.setHours(0, 0, 0, 0);
+            
+            const endOfDay = endDate ? new Date(endDate) : new Date(startDate);
+            endOfDay.setHours(23, 59, 59, 999);
+
+            // Overlap logic: Leave overlaps with requested range if:
+            // (LeaveStartDate <= EndOfRange) AND (LeaveEndDate >= StartOfRange)
+            filter.$and = [
+                { startDate: { $lte: endOfDay } },
+                { endDate: { $gte: startOfDay } }
+            ];
         }
 
         const [data, total] = await Promise.all([

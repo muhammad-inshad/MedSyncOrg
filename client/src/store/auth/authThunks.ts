@@ -10,6 +10,7 @@ export const initializeAuth = createAsyncThunk(
             const apiRole = role;
             const response = await api.get(`/api/${apiRole}/me`);
             const userData = response.data.user || response.data.data;
+            console.log('User data received from API:', userData);
             return {
                 user: { ...userData, role: role },
                 profileData: userData,

@@ -1,9 +1,20 @@
-import { useState, useEffect } from 'react';
-import { Search, Building2 } from 'lucide-react';
-import Pagination from '@/components/Pagination';
-import SuperAdminSidebar from '../components/SuperAdminsidebar';
-import { superAdminApi } from '../../../constants/backend/superAdmin/superAdmin.api';
+import { useEffect, useState, useCallback } from 'react';
+import { Building2, Search, ArrowRight, ShieldCheck, Clock, FileWarning, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+
+import ManagementLayout from '../components/common/ManagementLayout';
+import AvatarCell from '../components/common/AvatarCell';
+import DataTable, { type Column } from '../components/common/DataTable';
+import StatusBadge from '../components/common/StatusBadge';  
+
+import { superAdminApi } from '../../../constants/backend/superAdmin/superAdmin.api';
+
+const getImageUrl = (path?: string) => {
+  if (!path) return '';
+  if (path.startsWith('http') || path.startsWith('data:')) return path;
+  const baseUrl = import.meta.env.VITE_BACKEND_URL || '';
+  return `${baseUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+};
 
 interface KYCApplication {
   _id?: string;
@@ -33,7 +44,7 @@ const KycManagement = () => {
   const [selectedApplication, setSelectedApplication] = useState<KYCApplication | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
-  const [filter, setFilter] = useState<'all' | 'pending' | 'rejected' | 'revision'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'revision'>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [showZoomModal, setShowZoomModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,44 +52,32 @@ const KycManagement = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [totalApplications, setTotalApplications] = useState(0);
 
-  const fetchApplications = async (page: number) => {
-    setIsLoading(true);
+  const fetchApplications = useCallback(async (page: number) => {
     try {
+      setIsLoading(true);
       const response = await superAdminApi.getKycManagement({
         page,
         limit: ITEMS_PER_PAGE,
         search: searchQuery,
-        filter: filter
+        filter: filter === 'all' ? undefined : filter
       });
 
       const responseData = response.data.data || [];
       const pagination = response.data.pagination || {};
-      const pages = pagination.totalPages || 0;
-      const total = pagination.totalItems || 0;
-
-      const rawArray = Array.isArray(responseData) ? responseData : [];
-
-      const normalizedData = rawArray.map((app: KYCApplication) => ({
-        ...app,
-        _id: app._id || app.id
-      }));
-
-      setApplications(normalizedData);
-      setTotalPages(pages);
-      setTotalApplications(total);
+      
+      setApplications(responseData);
+      setTotalPages(pagination.totalPages || 0);
+      setTotalApplications(pagination.totalItems || 0);
       setCurrentPage(page);
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Failed to fetch applications';
-      toast.error(message);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to fetch applications');
       setApplications([]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [searchQuery, filter]);
 
-  useEffect(() => {
-    fetchApplications(currentPage);
-  }, [currentPage]);
+  useEffect(() => { fetchApplications(currentPage); }, [currentPage, fetchApplications]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -89,405 +88,322 @@ const KycManagement = () => {
       }
     }, 600);
     return () => clearTimeout(timer);
-  }, [searchQuery, filter]);
+  }, [searchQuery, filter, fetchApplications]);
 
-  const handlestatus = async (id: string, status: string) => {
+  const handleStatusUpdate = async (id: string, status: string) => {
     try {
-      if (!id) {
-        toast.error("Application ID is missing");
-        return;
+      if (!id) return toast.error("Application ID is missing");
+      
+      const res = await superAdminApi.updateKycStatus({ 
+        id, 
+        status, 
+        reason: status === 'approved' ? undefined : rejectionReason 
+      });
+
+      if (res.status === 200) {
+        toast.success(status === 'approved' ? 'Hospital Approved' : `Status updated to ${status}`);
+        fetchApplications(currentPage);
+        setShowModal(false);
+        setSelectedApplication(null);
+        setRejectionReason('');
       }
-
-
-      if (status === 'approved') {
-        await superAdminApi.updateKycStatus({ id, status });
-      } else {
-        await superAdminApi.updateKycStatus({ id, status, reason: rejectionReason });
-      }
-
-      const successMsg = status === 'approved' ? 'Hospital Approved' : `Status updated to ${status}`;
-      toast.success(successMsg);
-
-      fetchApplications(currentPage);
-      setShowModal(false);
-      setSelectedApplication(null);
-      setRejectionReason('');
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Action failed';
-      toast.error(message);
+    } catch (error: any) { 
+      toast.error(error.message || 'Action failed'); 
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const styles = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      approved: 'bg-green-100 text-green-800',
-      rejected: 'bg-red-100 text-red-800',
-      revision: 'bg-orange-100 text-orange-800',
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      pending: 'Pending',
+      approved: 'Active',
+      rejected: 'Expired',
+      revision: 'Expiring Soon',
     };
-
-    const labels = {
-      pending: 'Pending Review',
-      approved: 'Approved',
-      rejected: 'Rejected',
-      revision: 'Needs Revision',
-    };
-
-    return (
-      <span
-        className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status as keyof typeof styles] || 'bg-gray-100 text-gray-800'
-          }`}
-      >
-        {labels[status as keyof typeof labels] || status}
-      </span>
-    );
+    return labels[status] || status;
   };
 
+  const columns: Column<KYCApplication>[] = [
+    {
+      key: 'hospital',
+      header: 'Hospital Details',
+      render: (app) => (
+        <AvatarCell
+          src={getImageUrl(app.logo)}
+          name={app.hospitalName}
+          id={String(app._id || app.id || '')}
+          subText={app.reviewStatus === 'revision' ? '⚠️ Needs Revision' : undefined}
+          fallbackIcon={<Building2 className="w-5 h-5 text-slate-400" />}
+        />
+      ),
+    },
+    {
+      key: 'contact',
+      header: 'Admin Contact',
+      render: (app) => (
+        <div className="min-w-[150px]">
+          <div className="text-sm font-bold text-slate-900">{app.adminName || 'Admin'}</div>
+          <div className="text-xs text-slate-500 truncate max-w-[180px]">{app.email}</div>
+        </div>
+      ),
+    },
+    {
+      key: 'status',
+      header: 'Review Status',
+      render: (app) => <StatusBadge status={getStatusLabel(app.reviewStatus)} />,
+    },
+    {
+      key: 'submitted',
+      header: 'Submitted On',
+      render: (app) => (
+        <span className="text-sm text-slate-600 font-medium">
+          {app.createdAt ? new Date(app.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      width: 'w-32',
+      render: (app) => (
+        <button
+          onClick={() => { setSelectedApplication(app); setShowModal(true); }}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider text-blue-600 bg-blue-50 hover:bg-blue-100 transition-all active:scale-95 border border-blue-100 shadow-sm"
+        >
+          Review
+          <ArrowRight className="w-3.5 h-3.5" />
+        </button>
+      ),
+    },
+  ];
+
+  const pendingCount = applications.filter(a => a.reviewStatus === 'pending').length;
+  const revisionCount = applications.filter(a => a.reviewStatus === 'revision').length;
+  const rejectedCount = applications.filter(a => a.reviewStatus === 'rejected').length;
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <SuperAdminSidebar />
-
-      <div className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">KYC Management</h1>
-              <p className="text-gray-600">Review and manage hospital registration applications</p>
+    <ManagementLayout
+      title="KYC Management"
+      subtitle="Review and verify hospital credentials, medical licenses, and registration details."
+    >
+      {/* Stats Dashboard */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 bg-slate-50 rounded-xl text-slate-400">
+              <ShieldCheck className="w-5 h-5" />
             </div>
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search hospitals..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all w-full sm:w-64"
-              />
-            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">Total</span>
           </div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <div className="text-sm text-gray-600 mb-1">Total Applications</div>
-              <div className="text-2xl font-bold text-gray-900">{totalApplications}</div>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <div className="text-sm text-gray-600 mb-1">Pending Review</div>
-              <div className="text-2xl font-bold text-yellow-600">
-                {applications.filter((app) => app.reviewStatus === 'pending').length}
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <div className="text-sm text-gray-600 mb-1">Needs Revision</div>
-              <div className="text-2xl font-bold text-orange-600">
-                {applications.filter((app) => app.reviewStatus === 'revision').length}
-              </div>
-            </div>
-          </div>
-
-          {/* Filter Tabs */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-            <div className="flex border-b border-gray-200">
-              {(['all', 'revision', 'pending', 'rejected'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setFilter(tab)}
-                  className={`px-6 py-3 text-sm font-medium capitalize transition-colors ${filter === tab
-                    ? 'border-b-2 border-blue-500 text-blue-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                >
-                  {tab === 'all' ? 'All Applications' : tab === 'revision' ? 'Needs Revision' : tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  {tab !== 'all' && (
-                    <span className="ml-2 px-2 py-0.5 bg-gray-100 rounded-full text-xs">
-                      {applications.filter((app) => app.reviewStatus === tab).length}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Applications Table */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            {isLoading ? (
-              <div className="py-12 text-center text-gray-500">Loading applications...</div>
-            ) : applications.length === 0 ? (
-              <div className="py-12 text-center text-gray-500">No applications found.</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-max">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Hospital Details
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Admin Contact
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Submitted
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {applications.map((app: KYCApplication) => (
-                      <tr
-                        key={app._id || app.id || Math.random().toString()}
-                        className={`hover:bg-gray-50 transition-colors ${app.reviewStatus === 'revision' ? 'bg-orange-50' : ''
-                          }`}
-                      >
-                        <td className="px-6 py-4">
-                          <div className="flex items-center">
-                            {app.reviewStatus === 'revision' && <span className="mr-2 text-orange-500">⚠️</span>}
-                            <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 mr-3 shrink-0 bg-gray-50 flex items-center justify-center">
-                              {app.logo ? (
-                                <img
-                                  src={app.logo}
-                                  alt={app.hospitalName}
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/40?text=H';
-                                  }}
-                                />
-                              ) : (
-                                <Building2 className="w-6 h-6 text-gray-400" />
-                              )}
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">{app.hospitalName}</div>
-                              <div className="text-sm text-gray-500">ID: {app._id ? String(app._id).slice(-6) : 'N/A'}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900">{app.adminName || 'Admin'}</div>
-                          <div className="text-sm text-gray-500">{app.email}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          {getStatusBadge(app.reviewStatus)}
-                          {app.reviewStatus === 'revision' && app.rejectionReason && (
-                            <div className="mt-1 text-xs text-orange-600 line-clamp-1">{app.rejectionReason}</div>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-500">
-                          {app.createdAt ? new Date(app.createdAt).toLocaleDateString() : 'N/A'}
-                        </td>
-                        <td className="px-6 py-4">
-                          <button
-                            onClick={() => {
-                              setSelectedApplication(app);
-                              setShowModal(true);
-                            }}
-                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                          >
-                            Review
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-          {/* Pagination Controls */}
-          {totalPages > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={(page) => setCurrentPage(page)}
-            />
-          )}
+          <div className="text-2xl font-black text-slate-900">{totalApplications}</div>
+          <div className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">All Applications</div>
         </div>
 
-        {/* Review Modal */}
-        {showModal && selectedApplication && (
-          <div className="fixed inset-0 backdrop-blur-md bg-opacity-60 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl">
-              <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center z-10">
-                <h2 className="text-2xl font-bold text-gray-900">Application Review</h2>
-                <button
-                  onClick={() => {
-                    setShowModal(false);
-                    setRejectionReason('');
-                    setShowZoomModal(false);
-                  }}
-                  className="text-gray-500 hover:text-gray-700 text-3xl leading-none"
-                >
-                  ×
-                </button>
-              </div>
-
-              <div className="p-6 space-y-8">
-                <div>
-                  <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-300 mb-6">
-                    {selectedApplication.logo ? (
-                      <img
-                        src={selectedApplication.logo}
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                        <Building2 className="w-10 h-10 text-gray-400" />
-                      </div>
-                    )}
-                  </div>
-
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Hospital Information</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 block mb-1">Hospital Name</label>
-                      <p className="text-gray-900 font-medium">{selectedApplication.hospitalName}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 block mb-1">Email</label>
-                      <p className="text-gray-900 font-medium">{selectedApplication.email}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 block mb-1">Phone</label>
-                      <p className="text-gray-900 font-medium">{selectedApplication.phone}</p>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="text-sm font-medium text-gray-600 block mb-1">Address</label>
-                      <p className="text-gray-900">{selectedApplication.address}</p>
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="text-sm font-medium text-gray-600 block mb-1">About</label>
-                      <p className="text-gray-900">{selectedApplication.about || 'No description provided'}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 block mb-1">Since (Year)</label>
-                      <p className="text-gray-900">{selectedApplication.since || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-gray-600 block mb-1">Pincode</label>
-                      <p className="text-gray-900">{selectedApplication.pincode}</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-4">Medical License / Documents</h3>
-                  {selectedApplication.licence ? (
-                    <div className="space-y-4">
-                      <div
-                        className="cursor-pointer border border-gray-300 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all max-w-xs mx-auto"
-                        onClick={() => setShowZoomModal(true)}
-                      >
-                        <img
-                          src={selectedApplication.licence}
-                          alt="Medical License Document Preview"
-                          className="w-full h-64 object-contain bg-gray-50"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300?text=Document+Load+Failed';
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center text-gray-500 italic">
-                      No license document uploaded
-                    </div>
-                  )}
-                </div>
-
-                {/* Rejection/Revision reason + buttons */}
-                {selectedApplication.reviewStatus !== 'approved' && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Reason for Revision or Rejection
-                      </label>
-                      <textarea
-                        value={rejectionReason}
-                        onChange={(e) => setRejectionReason(e.target.value)}
-                        placeholder={selectedApplication.rejectionReason || "Provide detailed feedback..."}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[140px] resize-y"
-                      />
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-100">
-                      <button
-                        onClick={() => handlestatus((selectedApplication._id || selectedApplication.id) as string, "approved")}
-                        className="flex-1 bg-green-600 text-white px-6 py-3.5 rounded-lg hover:bg-green-700 font-medium transition-colors shadow-sm"
-                      >
-                        Approve Application
-                      </button>
-                      <button
-                        onClick={() => handlestatus((selectedApplication._id || selectedApplication.id) as string, 'revision')}
-                        className="flex-1 bg-orange-600 text-white px-6 py-3.5 rounded-lg hover:bg-orange-700 font-medium transition-colors shadow-sm"
-                      >
-                        Request Revision
-                      </button>
-                      <button
-                        onClick={() => handlestatus((selectedApplication._id || selectedApplication.id) as string, 'rejected')}
-                        className="flex-1 bg-red-600 text-white px-6 py-3.5 rounded-lg hover:bg-red-700 font-medium transition-colors shadow-sm"
-                      >
-                        Reject Permanently
-                      </button>
-                    </div>
-                  </>
-                )}
-
-                {selectedApplication.reviewStatus === 'approved' && (
-                  <div className="text-center py-10 text-green-700 font-medium text-lg bg-green-50 rounded-lg border border-green-200">
-                    ✓ This application has already been approved.
-                  </div>
-                )}
-              </div>
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-amber-500">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 bg-amber-50 rounded-xl text-amber-500">
+              <Clock className="w-5 h-5" />
             </div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-amber-300">Pending</span>
           </div>
-        )}
+          <div className="text-2xl font-black text-slate-900">{pendingCount}</div>
+          <div className="text-[10px] font-bold text-amber-500 mt-1 uppercase tracking-wider">Awaiting Review</div>
+        </div>
 
-        {/* ── Zoom / Full-size Image Modal ── */}
-        {showZoomModal && selectedApplication?.licence && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-[60] p-4"
-            onClick={() => setShowZoomModal(false)}
-          >
-            <div className="relative max-w-5xl w-full max-h-[95vh] flex flex-col items-center">
-              <button
-                onClick={() => setShowZoomModal(false)}
-                className="absolute top-4 right-4 text-white bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full w-10 h-10 flex items-center justify-center text-2xl leading-none z-10"
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-orange-500">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 bg-orange-50 rounded-xl text-orange-500">
+              <FileWarning className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-orange-300">Revision</span>
+          </div>
+          <div className="text-2xl font-black text-slate-900">{revisionCount}</div>
+          <div className="text-[10px] font-bold text-orange-500 mt-1 uppercase tracking-wider">Feedback Sent</div>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all border-l-4 border-l-red-500">
+          <div className="flex items-center justify-between mb-2">
+            <div className="p-2 bg-red-50 rounded-xl text-red-500">
+              <XCircle className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-widest text-red-300">Rejected</span>
+          </div>
+          <div className="text-2xl font-black text-slate-900">{rejectedCount}</div>
+          <div className="text-[10px] font-bold text-red-500 mt-1 uppercase tracking-wider">Permanently Denied</div>
+        </div>
+      </div>
+
+      <DataTable
+        data={applications}
+        columns={columns}
+        rowKey={(app) => String(app._id || app.id || Math.random())}
+        isLoading={isLoading}
+        tabs={['all', 'revision', 'pending', 'rejected']}
+        activeTab={filter}
+        onTabChange={(tab) => setFilter(tab as any)}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search by hospital name or admin email..."
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        emptyMessage="No KYC applications found matching your criteria."
+      />
+
+      {/* Detailed Review Modal */}
+      {showModal && selectedApplication && (
+        <div className="fixed inset-0 backdrop-blur-md bg-slate-900/40 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 transform transition-all scale-100">
+            <div className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-slate-100 px-8 py-5 flex justify-between items-center z-10 font-bold">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-slate-900 uppercase tracking-tight line-height-1">Application File</h2>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-widest">Verification ID: {String(selectedApplication._id || selectedApplication.id).slice(-8)}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  setShowModal(false);
+                  setRejectionReason('');
+                  setShowZoomModal(false);
+                }} 
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-400 hover:text-slate-900 transition-colors text-2xl leading-none"
               >
                 ×
               </button>
+            </div>
 
-              <img
-                src={selectedApplication.licence}
-                alt="Medical License - Full View"
-                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-              />
+            <div className="p-8 space-y-10">
+              {/* Profile & Info Grid */}
+              <div className="flex flex-col md:flex-row gap-10">
+                <div className="w-32 h-32 rounded-[2rem] overflow-hidden border-4 border-slate-50 shadow-inner shrink-0 bg-slate-50 flex items-center justify-center">
+                  {selectedApplication.logo ? (
+                    <img src={getImageUrl(selectedApplication.logo)} alt="Hospital Logo" className="w-full h-full object-cover" />
+                  ) : (
+                    <Building2 className="w-12 h-12 text-slate-200" />
+                  )}
+                </div>
 
-              <a
-                href={selectedApplication.licence}
-                download={`hospital-licence-${selectedApplication.hospitalName || 'document'}.jpg`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Download Full Image
-              </a>
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-12">
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Hospital Entity</label>
+                    <p className="text-slate-900 font-black text-xl">{selectedApplication.hospitalName}</p>
+                    <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded mt-1 inline-block">ESTD {selectedApplication.since}</span>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Admin Presence</label>
+                    <p className="text-slate-900 font-bold">{selectedApplication.adminName || 'Admin'}</p>
+                    <p className="text-slate-500 text-sm font-medium">{selectedApplication.email}</p>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Registration #</label>
+                    <p className="text-slate-900 font-bold font-mono">{selectedApplication.registrationNumber || 'Pending'}</p>
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">Location Details</label>
+                    <p className="text-slate-900 text-sm font-medium leading-relaxed">{selectedApplication.address} - {selectedApplication.pincode}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Documentary Evidence */}
+              <div>
+                <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-[10px]">DOC</span>
+                  Medical License / Professional Credentials
+                </h3>
+                {selectedApplication.licence ? (
+                  <div 
+                    className="group relative cursor-zoom-in border-4 border-slate-50 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all max-w-2xl bg-slate-50 mx-auto md:mx-0"
+                    onClick={() => setShowZoomModal(true)}
+                  >
+                    <div className="absolute inset-0 bg-slate-900/0 group-hover:bg-slate-900/5 transition-colors z-10 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                       <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-bold text-slate-900 shadow-xl border border-white">Click to Inspect Document</div>
+                    </div>
+                    <img
+                      src={getImageUrl(selectedApplication.licence)}
+                      alt="Medical License Evidence"
+                      className="w-full h-[400px] object-contain"
+                      onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x400?text=Scan+Failed+to+Load'; }}
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-12 text-center text-slate-400 font-bold italic tracking-wider">No documentary evidence provided</div>
+                )}
+              </div>
+
+              {/* Status Action Deck */}
+              {selectedApplication.reviewStatus !== 'approved' && (
+                <div className="space-y-6 pt-10 border-t border-slate-100">
+                  <div>
+                    <label className="text-xs font-black text-slate-900 uppercase tracking-widest mb-3 block flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-[10px]">MOD</span>
+                      Review Findings & Corrective Feedback
+                    </label>
+                    <textarea
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      placeholder={selectedApplication.rejectionReason || "Enter specific feedback or reasons for document rejection... This will be visible to the hospital admin."}
+                      className="w-full p-6 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-400 font-medium text-slate-700 min-h-[140px] transition-all placeholder:text-slate-300"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <button
+                      onClick={() => handleStatusUpdate(String(selectedApplication._id || selectedApplication.id), "approved")}
+                      className="h-16 bg-emerald-600 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-200 active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      Approve Profile
+                    </button>
+                    <button
+                      onClick={() => handleStatusUpdate(String(selectedApplication._id || selectedApplication.id), 'revision')}
+                      className="h-16 bg-orange-500 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-orange-600 transition-all shadow-lg shadow-orange-200 active:scale-95"
+                    >
+                      Request Revision
+                    </button>
+                    <button
+                      onClick={() => handleStatusUpdate(String(selectedApplication._id || selectedApplication.id), 'rejected')}
+                      className="h-16 bg-red-600 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-red-700 transition-all shadow-lg shadow-red-200 active:scale-95"
+                    >
+                      Reject Entry
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedApplication.reviewStatus === 'approved' && (
+                <div className="flex items-center justify-center gap-4 py-8 bg-emerald-50 rounded-3xl border border-emerald-100">
+                  <div className="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-200">
+                    <ShieldCheck className="w-7 h-7" />
+                  </div>
+                  <div className="text-emerald-900 font-bold text-xl uppercase tracking-tight">Verified & Approved</div>
+                </div>
+              )}
             </div>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+
+      {/* Full Resolution Document Viewer */}
+      {showZoomModal && selectedApplication?.licence && (
+        <div className="fixed inset-0 bg-slate-950/95 backdrop-blur-2xl flex items-center justify-center z-[70] p-10 cursor-zoom-out animate-in zoom-in-105 duration-300" onClick={() => setShowZoomModal(false)}>
+          <div className="absolute top-8 right-8 flex gap-4">
+               <a 
+                href={selectedApplication.licence} 
+                download={`KYC_LICENSE_${selectedApplication.hospitalName}.jpg`}
+                className="w-12 h-12 rounded-2xl bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all shadow-2xl backdrop-blur-sm"
+                onClick={(e) => e.stopPropagation()}
+               >
+                   <svg className="w-6 h-6 outline-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+               </a>
+               <button className="w-12 h-12 rounded-2xl bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-all text-3xl font-light shadow-2xl backdrop-blur-sm">×</button>
+          </div>
+          <img src={getImageUrl(selectedApplication.licence)} alt="Evidence Inspection" className="max-w-full max-h-[90vh] object-contain rounded-xl shadow-[0_0_100px_rgba(0,0,0,0.5)] border border-white/10 shadow-2xl" />
+        </div>
+      )}
+    </ManagementLayout>
   );
 };
 

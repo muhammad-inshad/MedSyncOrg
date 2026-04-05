@@ -1,6 +1,6 @@
 
 export interface IDepartment {
-  _id: string;
+  id: string;
   departmentName: string;
   description?: string;
   doctors: string[];

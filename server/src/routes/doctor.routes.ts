@@ -14,7 +14,7 @@ router.patch("/profile", upload.fields([
 ]), doctorcontroller.updateDoctor.bind(doctorcontroller));
 router.post("/leaves", upload.single("photo"), doctorcontroller.applyLeave.bind(doctorcontroller))
 router.get("/leaves", doctorcontroller.getDoctorLeaves.bind(doctorcontroller))
-router.get("/appointments/upcoming/:id", appoimentController.getUpcomingAppointments.bind(appoimentController))
+router.get("/appointments/upcoming", appoimentController.getUpcomingAppointments.bind(appoimentController))
 
 router.get("/consultation", consultation.getConsultation.bind(consultation))
 router.patch("/consultation/:id/status", consultation.markAsCompleted.bind(consultation))

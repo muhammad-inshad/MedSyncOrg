@@ -33,7 +33,7 @@ export const HOSPITAL_MANAGEMENT = {
     SPECIALIZATION_TOGGLE: (id: string) => `/api/hospital/specializations/${id}/toggle`,
     UPDATE_SPECIALIZATION: (id: string) => `/api/hospital/specializations/${id}`,
     SELECTED_HOSPITAL: (id: string) => `/api/hospital/hospitals/${id}`,
-    GET_LEAVE_DOCTORS: (id: string) => `/api/hospital/doctors/${id}/leaves`,
+    GET_LEAVE_DOCTORS:`/api/hospital/doctors/leaves`,
     UPDATE_LEAVE_STATUS: (id: string) => `/api/hospital/leaves/${id}/status`,
     GETSUBSCRIPTION:()=>`/api/hospital/subscription`,
     GETDEPSEPQULY:"/api/hospital/getdepsepquly",
