@@ -206,13 +206,6 @@ export default function DoctorLeaveManagement() {
     color: "text-rose-600",
     bg: "bg-rose-100/50",
   },
-  {
-    label: "Expired",
-    value: expiredCount,
-    icon: AlertTriangle,
-    color: "text-amber-600",
-    bg: "bg-amber-100/50",
-  },
 ];
 const getFilterCount = (key: string): number => {
   switch (key) {

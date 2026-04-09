@@ -6,6 +6,8 @@ import { IDoctor } from "../../../../models/doctor.model.ts";
 import {
   IPaginationResult,
   IDoctorListOptions,
+  IPatientFilter,
+  IDoctorFilter,
 } from "../../../../types/hospital.types.ts";
 import { IDoctorManagementService } from "../interfaces/IDoctorManagementService.ts";
 import bcrypt from "bcryptjs";
@@ -48,13 +50,26 @@ export class DoctorManagementService implements IDoctorManagementService {
   async getAllDoctors(
     options: IDoctorListOptions,
   ): Promise<IPaginationResult<DoctorResponseDTO>> {
-    const { page, limit, search, filter } = options;
+    const { page, limit, search, filter, status } = options;
+    const queryFilter: IDoctorFilter = { ...filter };
+    if (status === "active") {
+      queryFilter.isActive = true;
+    } else if (status === "blocked") {
+      queryFilter.isActive = false;
+    } else if (
+      status === "pending" ||
+      status === "approved" ||
+      status === "revision" ||
+      status === "rejected"
+    ) {
+      queryFilter.reviewStatus = status;
+    }
     const result = await this._doctorRepo.findWithPagination({
       page,
       limit,
       search,
       searchFields: ["name", "email", "specialization"],
-      filter,
+      filter: queryFilter,
     });
 
     const hospitalId = filter?.hospital_id;

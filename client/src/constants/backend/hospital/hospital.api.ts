@@ -1,14 +1,19 @@
 import api from "@/lib/api";
 import type { PaginationParams, UpdateDoctorKycStatusPayload, ToggleStatusData } from "@/interfaces/api.interfaces";
 import { HOSPITAL_MANAGEMENT } from "./hospital.routes";
-import type { CreateSubscriptionPayload } from "@/interfaces/ISubscription";
 
 export const hospitalApi = {
     getMe: () =>
         api.get(HOSPITAL_MANAGEMENT.GET_ME),
+    getCommonStats: (type: string) =>
+  api.get(HOSPITAL_MANAGEMENT.COMMON_STATS, {
+    params: { type }
+  }),
 
     editHospital: (data: FormData) =>
         api.patch(HOSPITAL_MANAGEMENT.EDIT_HOSPITAL, data),
+    getKycStats: () =>
+        api.get(HOSPITAL_MANAGEMENT.KYC_STATS),
 
     getAllDoctors: (params?: PaginationParams) =>
         api.get(HOSPITAL_MANAGEMENT.GET_ALL_DOCTORS, { params }),
@@ -143,6 +148,8 @@ export const hospitalApi = {
        return api.get(HOSPITAL_MANAGEMENT.GETSUBCRITPIONPROTECTION)
     },
 
-    getDashboardStats:()=>api.get(HOSPITAL_MANAGEMENT.GETDASHBOARDSTATS)
+    getDashboardStats:()=>api.get(HOSPITAL_MANAGEMENT.GETDASHBOARDSTATS),
+
+    getDoctorStatus:() => api.get(HOSPITAL_MANAGEMENT.GET_DOCTOR_STATUS)
 };
                                    

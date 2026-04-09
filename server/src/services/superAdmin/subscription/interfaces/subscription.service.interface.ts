@@ -19,5 +19,5 @@ export interface ISubscriptionService {
     getAllSubscriptions(page: number, limit: number, search: string, status: string): Promise<ISubscriptionResult>;
     toggleSubscription(id: string, isActive: boolean): Promise<SubscriptionResponseDTO | null>;
     updateSubscription(id: string, updateData: UpdateSubscriptionDTO): Promise<SubscriptionResponseDTO | null>;
-    subscribeHospital(page:number,limit:number, search:string):Promise<HospitalResponseDTO[]>
+    subscribeHospital(page:number,limit:number, search:string,filter?:string):Promise<HospitalResponseDTO[]>
 }

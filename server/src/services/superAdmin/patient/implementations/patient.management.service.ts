@@ -1,7 +1,7 @@
 import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
 import bcrypt from "bcryptjs";
 import { PatientMapper } from "../../../../mappers/patient.mapper.ts";
-import { IPaginationResult } from "../../../../types/hospital.types.ts";
+import { IPaginationResult, IPatientFilter } from "../../../../types/hospital.types.ts";
 import { PatientResponseDTO, CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.ts";
 import { ISuperAdminPatientManagementService } from "../interfaces/patient.management.service.interface.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
@@ -18,14 +18,12 @@ export class SuperAdminPatientManagementService implements ISuperAdminPatientMan
 
     async getAllPatients(options: { page: number; limit: number; search?: string; status?: string }): Promise<IPaginationResult<PatientResponseDTO>> {
         const { page, limit, search, status } = options;
-
-        const filter: FilterQuery<IPatient> = {};
-        if (status === "Active") {
-            filter.isActive = true;
-        } else if (status === "Inactive") {
-            filter.isActive = false;
-        }
-
+        const filter:IPatientFilter = {};
+       if (status?.toLowerCase() === "active") {
+  filter.isActive = true;
+} else if (status?.toLowerCase() === "inactive") {
+  filter.isActive = false;
+}
         const result = await this._userRepo.findWithPagination({
             page,
             limit,

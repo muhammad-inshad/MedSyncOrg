@@ -20,6 +20,7 @@ export const PatientResponseSchema = z.object({
     isProfileComplete: z.boolean(),
     createdAt: z.union([z.date(), z.string()]),
     updatedAt: z.union([z.date(), z.string()]),
+    age: z.number().optional()
 });
 export type PatientResponseDTO = z.infer<typeof PatientResponseSchema>;
 export const CreatePatientSchema = z.object({
@@ -32,6 +33,7 @@ export const CreatePatientSchema = z.object({
   dateOfBirth: z.union([z.date(), z.string()]).optional(),
   address: z.string().optional(),
   bloodGroup: z.string().optional(),
+  age: z.number().optional(),
   image: z.string().optional(),
 });
 export type CreatePatientDTO = z.infer<typeof CreatePatientSchema>;

@@ -10,6 +10,8 @@ import Pagination from '@/components/Pagination';
 import { StatsCards } from "../tables/StatsCards";
 import { FilterTabs } from "../tables/FilterTabs";
 import { DataTable, type TableColumn } from "../tables/DataTable";
+import { COMMENT_TYPES } from '@/constants/comments/comments';
+import { set } from 'mongoose';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -25,10 +27,14 @@ const PatientManagement = () => {
   const [filter, setFilter] = useState<FilterType>('all');
   const [totalPages, setTotalPages] = useState(0);
   const navigate = useNavigate();
+  const [toatl,setTotal]=useState(0);
+  const [active,setActive]=useState(0);
+  const [blocked,setBlocked]=useState(0);
 
   // Fetch patients when page or filter changes
   useEffect(() => {
     fetchPatients(currentPage);
+    fetchStats();
   }, [currentPage, filter]);
 
   // Debounced search
@@ -59,6 +65,19 @@ const PatientManagement = () => {
       setIsLoading(false);
     }
   };
+
+const fetchStats = async () => {
+  try {
+    const response = await hospitalApi.getCommonStats(
+      COMMENT_TYPES.PATIENT_MANAGEMENT
+    );
+    setTotal(response.data.data.stats.total);
+    setActive(response.data.data.stats.active);
+    setBlocked(response.data.data.stats.blocked);
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+  }
+};
 
   const handleEdit = (patient: IPatient) => {
     navigate(HOSPITAL_ROUTES.HOSPITALPATIENTEDIT, { state: { patient } });
@@ -112,21 +131,21 @@ const PatientManagement = () => {
   const stats=[
     {
       label:"Total Patients",
-      value:patients.length,
+      value:toatl,
       icon:Users,
       color: "text-slate-600",
       bg: "bg-slate-100",
     },
     {
       label:"Active Patients",
-      value:patients.filter(p => p.isActive).length,
+      value:active,
       icon:UserCheck,
       color: "text-emerald-600",
       bg: "bg-emerald-100/50",
     },
     {
       label:"Blocked Patients",
-      value:patients.filter(p => !p.isActive).length,
+      value:blocked,
       icon:UserX,
       color: "text-rose-600",
       bg: "bg-rose-100/50",

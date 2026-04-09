@@ -14,7 +14,10 @@ export interface SubscriptionForm {
     maxDoctors: number;
     maxDepartments: number;
   };
+
 }
+
+
 
 
 export interface ISubscription {

@@ -1,6 +1,7 @@
 export const HOSPITAL_MANAGEMENT = {
     LOGIN: "/api/auth/hospital/login",
     SIGNUP: "/api/auth/hospital/signup",
+    COMMON_STATS: "/api/hospital/common-stats",
     GET_ME: "/api/hospital/me",
     EDIT_HOSPITAL: `/api/hospital/hospitals`,
     GET_ALL_DOCTORS: `/api/hospital/doctors`,
@@ -39,4 +40,6 @@ export const HOSPITAL_MANAGEMENT = {
     GETDEPSEPQULY:"/api/hospital/getdepsepquly",
     GETSUBCRITPIONPROTECTION:"/api/hospital/subscription/protection",
     GETDASHBOARDSTATS:"/api/hospital/dashboard-stats",
+    GET_DOCTOR_STATUS:"/api/hospital/getdoctorstatus",
+    KYC_STATS:"/api/hospital/kyc-stats",
 };

@@ -129,7 +129,7 @@ export const hospitalContainer = () => {
         tokenService,
         hospitalRepo
     );
-  const dashbordservice = new DashbordService(doctorRepo, userRepo);
+  const dashbordservice = new DashbordService(doctorRepo, userRepo, departmentRepo, specializationRepo, qualificationRepo);
 const dashbordController = new Dashbord(dashbordservice);
 
     return {

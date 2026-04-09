@@ -4,7 +4,7 @@ import { SpecializationResponseDTO } from "../../../../dto/hospital/specializati
 export interface ISpecializationService {
     getSpecializations(
         hospitalId: string,
-        params: { page: number; limit: number; search?: string }
+        params: { page: number; limit: number; search?: string; filter?: "active" | "blocked" | undefined }
     ): Promise<{ data: SpecializationResponseDTO[]; total: number; limit: number; page: number }>;
 
     createSpecialization(

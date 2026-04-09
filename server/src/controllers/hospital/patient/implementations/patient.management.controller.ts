@@ -58,9 +58,8 @@ export class PatientManagementController implements IPatientManagementController
       const search = (req.query.search as string) || "";
       const hospital = req.user as AuthHOspitalPayload;
       const hospital_id = hospital?.userId;
-      const filter: IPatientFilter = hospital_id ? { hospital_id: hospital_id.toString() } : {};
-
-      const result = await this._patientManagementService.getAllPatient({ page, limit, search });
+      const filter= req.query.filter as "all" | "active" | "blocked" | undefined;
+      const result = await this._patientManagementService.getAllPatient({ page, limit, search,filter, hospital_id });
 
       return ApiResponse.success(res, MESSAGES.PATIENT.FETCH_SUCCESS, result.data, HttpStatusCode.OK, {
         page,

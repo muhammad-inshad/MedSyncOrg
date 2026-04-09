@@ -18,22 +18,32 @@ export class SuperAdminHospitalService implements ISuperAdminHospitalService {
         private readonly subscriptionRepo: ISubscriptionRepository
     ) { }
 
-    async hospitalManagement(options: { page: number; limit: number; search?: string }): Promise<IHospitalManagementResult> {
-        const { page, limit, search } = options;
-        const result = await this.kycRepo.findWithPagination({
-            page,
-            limit,
-            search,
-            searchFields: ["hospitalName", "email"],
-            filter: { reviewStatus: 'approved' }
-        });
-        return {
-            data: result.data.map(h => this.hospitalMapper.toDTO(h as IHospital)),
-            total: result.total,
-            page: result.page,
-            limit: result.limit
-        };
+   async hospitalManagement(options: { page: number; limit: number; search?: string; isActive?: boolean }): Promise<IHospitalManagementResult> {
+    const { page, limit, search, isActive } = options;
+
+    const filter: Partial<IHospital> = {
+        reviewStatus: 'approved',
+    };
+
+    if (isActive !== undefined) {
+        filter.isActive = isActive;
     }
+
+    const result = await this.kycRepo.findWithPagination({
+        page,
+        limit,
+        search,
+        searchFields: ["hospitalName", "email"],
+        filter
+    });
+
+    return {
+        data: result.data.map(h => this.hospitalMapper.toDTO(h as IHospital)),
+        total: result.total,
+        page: result.page,
+        limit: result.limit
+    };
+}
 
     async setActive(id: string, isActive: boolean): Promise<HospitalStatusUpdateResponseDTO> {
         const updatedHospital = await this.kycRepo.update(id, { isActive } as Partial<IHospital>);
@@ -98,7 +108,7 @@ export class SuperAdminHospitalService implements ISuperAdminHospitalService {
                 const durationUnit = planDetails.durationUnit || 'months';
                 
                 data.subscription.startDate = startDate;
-                (data.subscription as any).endDate = this.calculateSubscriptionEndDate(startDate, duration, durationUnit);
+                (data.subscription).endDate = this.calculateSubscriptionEndDate(startDate, duration, durationUnit);
             }
         }
 
@@ -146,7 +156,7 @@ export class SuperAdminHospitalService implements ISuperAdminHospitalService {
                 const durationUnit = planDetails.durationUnit || 'months';
                 
                 updateData.subscription.startDate = startDate;
-                (updateData.subscription as any).endDate = this.calculateSubscriptionEndDate(startDate, duration, durationUnit);
+                (updateData.subscription).endDate = this.calculateSubscriptionEndDate(startDate, duration, durationUnit);
             }
         }
 

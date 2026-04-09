@@ -5,6 +5,7 @@ import { ICloudinaryImageService } from "../../../image/interfaces/cloudinary.se
 import { SpecializationResponseDTO } from "../../../../dto/hospital/specialization-response.dto.ts";
 import { SpecializationMapper } from "../../../../mappers/specialization.mapper.ts";
 import { Types } from "mongoose";
+import { IDepartmentFilter } from "../../../../types/hospital.types.ts";
 
 export class SpecializationService implements ISpecializationService {
     constructor(
@@ -15,16 +16,21 @@ export class SpecializationService implements ISpecializationService {
 
     async getSpecializations(
         hospitalId: string,
-        params: { page: number; limit: number; search?: string }
-    ): Promise<{ data: SpecializationResponseDTO[]; total: number; limit: number; page: number }> {
-        const { page, limit, search } = params;
-       
+        params: { page: number; limit: number; search?: string; filter?: "active" | "blocked" | undefined }
+    ): Promise<{ data: SpecializationResponseDTO[]; total: number; limit: number; page: number, }> {
+        const { page, limit, search, filter } = params;
+        const query: IDepartmentFilter = { hospital_id: new Types.ObjectId(hospitalId) };
+        if (filter === "active") {
+            query.isActive = true;
+        } else if (filter === "blocked") {
+            query.isActive = false;
+        }
         const result = await this._specializationRepo.findWithPagination({
             page,
             limit,
             search,
             searchFields: ["name", "description"],
-            filter: { hospital_id: new Types.ObjectId(hospitalId) },
+            filter: query,
         });
 
         return {

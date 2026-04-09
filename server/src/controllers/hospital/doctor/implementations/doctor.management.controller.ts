@@ -22,7 +22,7 @@ export class DoctorManagementController implements IDoctorManagementController {
       const search = req.query.search as string;
       const hospital = req.user;
       const hospital_id = hospital?.userId;
-
+      const filterStatus = req.query.filter as "active" | "blocked" | undefined;
       const filter: IDoctorFilter = {
         reviewStatus: "approved"
       };
@@ -30,6 +30,11 @@ export class DoctorManagementController implements IDoctorManagementController {
       if (hospital_id) {
         filter.hospital_id = hospital_id.toString();
       }
+          if (filterStatus === "active") {
+      filter.isActive = true;
+    } else if (filterStatus === "blocked") {
+      filter.isActive = false;
+    }
       const result = await this._doctorManagementService.getAllDoctors({ page, limit, search, filter });
       return ApiResponse.success(res, "Doctors fetched successfully", result.data, HttpStatusCode.OK, {
         page,
@@ -47,7 +52,7 @@ export class DoctorManagementController implements IDoctorManagementController {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 5;
       const search = req.query.search as string;
-      // const reviewStatus = req.query.filter as string; // 'all' | 'pending' | 'revision' | 'rejected'
+      const status = req.query.filter as string; // 'all' | 'pending' | 'revision' | 'rejected'
 
       const hospital = req.user;
       const hospital_id = hospital?.userId;
@@ -61,7 +66,7 @@ export class DoctorManagementController implements IDoctorManagementController {
         filter.hospital_id = hospital_id.toString();
       }
 
-      const result = await this._doctorManagementService.getAllDoctors({ page, limit, search, filter });
+      const result = await this._doctorManagementService.getAllDoctors({ page, limit, search, filter,status });
       return ApiResponse.success(res, "KYC Doctors fetched successfully", result.data, HttpStatusCode.OK, {
         page,
         limit,

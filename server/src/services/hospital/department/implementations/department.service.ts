@@ -6,6 +6,7 @@ import { Types } from "mongoose";
 import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.ts";
 import { DepartmentResponseDTO } from "../../../../dto/hospital/department-response.dto.ts";
 import { DepartmentMapper } from "../../../../mappers/department.mapper.ts";
+import { IDepartmentFilter } from "../../../../types/hospital.types.ts";
 
 export class DepartmentService implements IDepartmentService {
     constructor(
@@ -15,13 +16,23 @@ export class DepartmentService implements IDepartmentService {
         private readonly _departmentMapper: DepartmentMapper
     ) { }
 
-    async getDepartments(hospitalId: string, page: number, limit: number, search?: string): Promise<{ data: DepartmentResponseDTO[]; total: number; page: number; limit: number }> {
+    async getDepartments(hospitalId: string, page: number, limit: number, search?: string, filter?: "all" | "active" | "blocked" | undefined): Promise<{ data: DepartmentResponseDTO[]; total: number; page: number; limit: number }> {
+      
+        const query:IDepartmentFilter = {
+    hospital_id: new Types.ObjectId(hospitalId),
+  };
+        if (filter === "active") {
+    query.isActive = true;
+  } else if (filter === "blocked") {
+    query.isActive = false;
+  }
+
         const res = await this._departmentRepo.findWithPagination({
             page,
             limit,
             search,
             searchFields: ["departmentName", "description"],
-            filter: { hospital_id: new Types.ObjectId(hospitalId) }
+            filter: query
         });
 
         return {

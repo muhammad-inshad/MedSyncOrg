@@ -9,6 +9,7 @@ import { DataTable, type TableColumn } from "../components/tables/DataTable";
 
 import Pagination from '@/components/Pagination';
 
+
 const ITEMS_PER_PAGE = 5;
 
 const HospitalDoctorKycManagement = () => {
@@ -22,6 +23,10 @@ const HospitalDoctorKycManagement = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
+    const [pendingreview, setPendingReview] = useState(0);
+    const [totalapplications, setTotalApplications] = useState(0);
+    const [revision, setRevision] = useState(0);
+    const [rejected, setRejected] = useState(0);
 
     const fetchDoctors = async (page: number) => {
         setIsLoading(true);
@@ -47,7 +52,22 @@ const HospitalDoctorKycManagement = () => {
 
     useEffect(() => {
         fetchDoctors(currentPage);
+          fetchkycStats();
     }, [currentPage]);
+
+
+    async function fetchkycStats() {    
+        try {
+          const response = await hospitalApi.getKycStats();
+          setTotalApplications(response.data.data.total);
+            setPendingReview(response.data.data.pending);
+            setRevision(response.data.data.revision);
+            setRejected(response.data.data.rejected);
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : 'Failed to fetch KYC stats';
+          toast.error(message);
+        }
+    }
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -114,32 +134,32 @@ const HospitalDoctorKycManagement = () => {
       const stats = [
   {
     label: "Total Applications",
-    value: doctors.length,
+    value:totalapplications,
     icon: Users,
     color: "text-slate-600",
     bg: "bg-slate-100",
   },
   {
     label: "Pending Review",
-    value: doctors.filter((d) => d.reviewStatus === "pending").length,
+    value: pendingreview,
     icon: Clock,
     color: "text-blue-600",
     bg: "bg-blue-100/50",
   },
   {
     label: "Needs Revision",
-    value: doctors.filter((d) => d.reviewStatus === "revision").length,
+    value: revision,
     icon: FileWarning,
     color: "text-amber-600",
     bg: "bg-amber-100/50",
   },
-  {
-    label: "Verified Doctors",
-    value: doctors.filter((d) => d.reviewStatus === "approved").length,
-    icon: UserCheck,
-    color: "text-emerald-600",
-    bg: "bg-emerald-100/50",
-  },
+    {
+    label: "Rejected",
+    value: rejected, 
+    icon: XCircle,
+    color: "text-rose-600", 
+    bg: "bg-rose-100/50",   
+    }
 ];
 
 const filterTabs: { key: "all" | "pending" | "revision" | "rejected"; label: string }[] = [
@@ -489,3 +509,11 @@ const renderRow = (doc: IDoctor) => (
 };
 
 export default HospitalDoctorKycManagement;
+function setRivision(revision: any) {
+    throw new Error('Function not implemented.');
+}
+
+function setRejected(rejected: any) {
+    throw new Error('Function not implemented.');
+}
+

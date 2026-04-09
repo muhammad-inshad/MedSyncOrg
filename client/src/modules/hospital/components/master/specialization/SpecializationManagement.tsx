@@ -9,6 +9,7 @@ import Pagination from '@/components/Pagination';
 import { StatsCards } from "../../tables/StatsCards";
 import { FilterTabs } from "../../tables/FilterTabs";
 import { DataTable, type TableColumn } from "../../tables/DataTable";
+import { COMMENT_TYPES } from '@/constants/comments/comments';
 
 type FilterType = 'all' | 'active' | 'blocked';
 
@@ -246,7 +247,9 @@ const SpecializationManagement = () => {
   const [addForm, setAddForm] = useState<SpecializationForm>(EMPTY_FORM);
   const [addErrors, setAddErrors] = useState<Partial<SpecializationForm>>({});
   const [isAddSubmitting, setIsAddSubmitting] = useState(false);
-
+   const [toatl,setTotal]=useState(0);
+    const [active,setActive]=useState(0);
+    const [blocked,setBlocked]=useState(0);
   const [editTarget, setEditTarget] = useState<ISpecialization | null>(null);
   const [editForm, setEditForm] = useState<SpecializationForm>(EMPTY_FORM);
   const [editErrors, setEditErrors] = useState<Partial<SpecializationForm>>({});
@@ -286,7 +289,21 @@ const SpecializationManagement = () => {
 
   useEffect(() => {
     fetchSpecializations();
+      fetchStats();
   }, [fetchSpecializations]);
+
+  const fetchStats = async () => {
+    try {
+      const response = await hospitalApi.getCommonStats(
+        COMMENT_TYPES.SPECIALIZATION
+      );
+      setTotal(response.data.data.stats.total);
+      setActive(response.data.data.stats.active);
+      setBlocked(response.data.data.stats.blocked);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  };
 
   useEffect(() => {
     fetchDepartments();
@@ -430,31 +447,24 @@ const SpecializationManagement = () => {
 const stats = [
   {
     label: "Total Specializations",
-    value: totalItems,
+    value: toatl,
     icon: Layers,
     color: "text-slate-600",
     bg: "bg-slate-100",
   },
   {
     label: "Active",
-    value: specializations.filter((q) => q.isActive).length,
+    value: active,
     icon: CheckCircle2,
     color: "text-emerald-600",
     bg: "bg-emerald-100/50",
   },
   {
     label: "Blocked",
-    value: specializations.filter((q) => !q.isActive).length,
+    value: blocked,
     icon: XCircle,
     color: "text-rose-600",
     bg: "bg-rose-100/50",
-  },
-  {
-    label: "Departments",
-    value: Array.from(new Set(specializations.map((s) => String(s.department_id)))).length,
-    icon: Building2,
-    color: "text-blue-600",
-    bg: "bg-blue-100/50",
   },
 ];
 

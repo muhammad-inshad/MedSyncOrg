@@ -302,6 +302,7 @@ const SubscriptionHospital = () => {
         page,
         limit: ITEMS_PER_PAGE,
         search: searchQuery,
+        filter: activeTab === 'All' ? undefined : activeTab === 'Active' ? 'active' : 'expired',
       });
 
       const rawData = response.data.data || [];

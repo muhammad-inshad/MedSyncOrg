@@ -10,6 +10,7 @@ import Pagination from "@/components/Pagination";
 import { StatsCards } from "../tables/StatsCards";
 import { FilterTabs } from "../tables/FilterTabs";
 import { DataTable, type TableColumn } from "../tables/DataTable";
+import { set } from "mongoose";
 
 
 
@@ -25,6 +26,10 @@ const HospitalDoctorManagement = () => {
   const [modalConfig, setModalConfig] = useState<{ id: string; name: string; isActive: boolean } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>("all");
+  const [totaldoctors, setTotalDoctors] = useState(0);
+  const [activeDoctors, setActiveDoctors] = useState(0);
+  const [blockedDoctors, setBlockedDoctors] = useState(0);
+  const [pendingDoctors, setPendingDoctors] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const navigate = useNavigate();
 
@@ -43,6 +48,7 @@ const HospitalDoctorManagement = () => {
 
 useEffect(() => {
   fetchDoctors(currentPage);
+  fetchStaus()
 }, [currentPage, searchQuery, filter]);
   const fetchDoctors = async (page: number) => {
     try {
@@ -65,6 +71,20 @@ useEffect(() => {
       setIsLoading(false);
     }
   };
+
+       const fetchStaus = async () => {
+        try {
+          const res = await hospitalApi.getDoctorStatus();
+          console.log(res.data)
+         setTotalDoctors(res.data.data.total);
+    setActiveDoctors(res.data.data.active);
+    setBlockedDoctors(res.data.data.blocked);
+    setPendingDoctors(res.data.data.pending);
+    console.log(totaldoctors,activeDoctors,blockedDoctors)
+  } catch (error) {
+    console.error("Failed to fetch doctor status:", error);
+  }
+      };
 
   const handleEdit = (doctor: IDoctor) => {
     navigate(HOSPITAL_ROUTES.HOSPITALDOCTOREDIT, { state: doctor.id });
@@ -90,11 +110,11 @@ useEffect(() => {
 
         showToast.success(`Doctor ${newStatus ? "activated" : "blocked"} successfully`);
 
-        // Refresh list when on filtered view
         if (filter !== "all") {
           fetchDoctors(currentPage);
         }
       }
+
     } catch (error) {
       console.error("Failed to toggle status:", error);
       showToast.error("Operation failed");
@@ -143,21 +163,21 @@ useEffect(() => {
   const stats = [
     {
       label: "Total Doctors",
-      value: doctors.length,
+      value: totaldoctors,
       icon: Users,
       color: "text-slate-600",
       bg: "bg-slate-100",
     },
     {
       label: "Active Doctors",
-      value: doctors.filter((d) => d.isActive).length,
+      value: activeDoctors,
       icon: UserCheck,
       color: "text-emerald-600",
       bg: "bg-emerald-100/50",
     },
     {
       label: "Blocked Doctors",
-      value: doctors.filter((d) => !d.isActive).length,
+      value: blockedDoctors,
       icon: UserX,
       color: "text-rose-600",
       bg: "bg-rose-100/50",
@@ -179,9 +199,9 @@ useEffect(() => {
   const getFilterCount = (key: string) => {
     switch (key) {
       case "active":
-        return doctors.filter((d) => d.isActive).length;
+        return activeDoctors;
       case "blocked":
-        return doctors.filter((d) => !d.isActive).length;
+        return blockedDoctors;
       default:
         return 0;
     }

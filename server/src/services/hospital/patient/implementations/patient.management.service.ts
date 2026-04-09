@@ -8,6 +8,8 @@ import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.ts";
 import { Types } from "mongoose";
+import { query } from 'winston';
+import { IPatientFilter } from "../../../../types/hospital.types.ts";
 
 export class PatientManagementService implements IPatientManagementService {
     constructor(
@@ -48,12 +50,19 @@ export class PatientManagementService implements IPatientManagementService {
         return this._patientMapper.toDTO(updated!);
     }
 
-    async getAllPatient(query: { page: number; limit: number; search: string }): Promise<{ data: PatientResponseDTO[]; total: number }> {
+    async getAllPatient(query: { page: number; limit: number; search: string; filter?: "all" | "active" | "blocked"; hospital_id: string }): Promise<{ data: PatientResponseDTO[]; total: number }> {
+        const queryFilter: IPatientFilter = { hospital_id: query.hospital_id };
+        if (query.filter === "active") {
+            queryFilter.isActive = true;
+        } else if (query.filter === "blocked") {
+            queryFilter.isActive = false;
+        }
         const result = await this._userRepo.findWithPagination({
             page: query.page,
             limit: query.limit,
             search: query.search,
-            searchFields: ["name", "email", "phone"]
+            searchFields: ["name", "email", "phone"],
+            filter: queryFilter
         });
         return {
             data: result.data.map(p => this._patientMapper.toDTO(p)),

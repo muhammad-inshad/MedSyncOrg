@@ -16,8 +16,9 @@ export class SuperAdminPatientManagementController implements ISuperAdminPatient
             const limit = parseInt(req.query.limit as string) || 5;
             const search = (req.query.search as string) || "";
             const status = (req.query.status as string) || "All";
+          
             const result = await this._patientService.getAllPatients({ page, limit, search, status });
-
+         
             return ApiResponse.success(res, MESSAGES.PATIENT.FETCH_SUCCESS, result.data, HttpStatusCode.OK, {
                 page,
                 limit,

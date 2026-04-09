@@ -5,6 +5,7 @@ import { UpdateSubscriptionDTO, SubscriptionResponseDTO, CreateSubscription } fr
 import { ISubscription } from "../../../../models/subscription.ts";
 import { HospitalResponseDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
 import { HospitalMapper } from "../../../../mappers/hospital.mapper.ts";
+import { IsubscriptionFilter } from "../../../../types/hospital.types.ts";
 
 export class SubscriptionService implements ISubscriptionService {
     constructor(
@@ -78,9 +79,17 @@ export class SubscriptionService implements ISubscriptionService {
         return updated ? this.subscriptionMapper.toDTO(updated) : null;
     }
 
-    async subscribeHospital(page:number,limit:number, search:string):Promise<HospitalResponseDTO[]>{
+    async subscribeHospital(page:number,limit:number, search:string,filter?:string):Promise<HospitalResponseDTO[]>{
       const skip = (page - 1) * limit;
-      const hospital=await this.subscriptionRepository.findHospitalWithSubscrib(skip,limit,search)
+      const qury:IsubscriptionFilter={}
+      console.log(filter)
+      if(filter==="active"){
+        qury.isActive=true
+      }
+      else if(filter==="expired"){
+        qury.isActive=false
+      }
+      const hospital=await this.subscriptionRepository.findHospitalWithSubscrib(skip,limit,search,qury)
       const mappedHospitals=hospital.map((h)=>
       this._hospitalMapper.toDTO(h))
       return mappedHospitals

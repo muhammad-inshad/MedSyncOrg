@@ -5,6 +5,9 @@ export const patientApi = {
     getMe: () =>
         api.get(PATIENT_MANAGEMENT.GET_ME),
 
+    getPatientStatus: () =>
+        api.get(PATIENT_MANAGEMENT.STATUS),
+
     updateProfile: (data: FormData) =>
         api.put(PATIENT_MANAGEMENT.UPDATE_PROFILE, data),
     get_hospital: (id: string, page: number = 1, limit: number = 6, search: string = "") => {

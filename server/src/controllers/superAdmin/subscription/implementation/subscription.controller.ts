@@ -85,8 +85,9 @@ export class SubscriptionController implements ISubscriptionController {
             const page=Number(req.query.page)||1;
             const limit=Number(req.query.limit)||5;
             const search = (req.query.search as string) || "";
-            console.log(req.query)
-            const result=await this.subscriptionService.subscribeHospital(  page,limit, search);
+            const filter = (req.query.filter as string) || undefined;
+
+            const result=await this.subscriptionService.subscribeHospital(  page,limit, search,filter);
             ApiResponse.success(res,"sucess",result)
         } catch (error) {
             next(error)

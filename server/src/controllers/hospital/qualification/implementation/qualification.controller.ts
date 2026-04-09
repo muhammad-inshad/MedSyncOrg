@@ -14,13 +14,13 @@ export class QualificationManagementController {
                 return ApiResponse.unauthorized(res, "Hospital ID not found in token");
             }
 
-            const { page = 1, limit = 10, search = "" } = req.query;
-
+            const { page = 1, limit = 10, search = "",filter } = req.query;
             const paginatedQualifications = await this._qualificationService.getQualifications(
                 hospitalId,
                 Number(page),
                 Number(limit),
-                search as string
+                search as string,
+                filter as "active" | "blocked" | undefined
             );
             return ApiResponse.success(res, "Qualifications fetched successfully", paginatedQualifications, HttpStatusCode.OK);
         } catch (error) {

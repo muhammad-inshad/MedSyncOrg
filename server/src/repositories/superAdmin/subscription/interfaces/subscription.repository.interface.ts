@@ -7,5 +7,5 @@ export interface ISubscriptionRepository extends IBaseRepository<ISubscription> 
     count(search: string, status: string): Promise<number>;
     updateById(id: string, updateData: Partial<ISubscription>): Promise<ISubscription | null>;
     findByPlanName(planName: string): Promise<ISubscription | null>;
-    findHospitalWithSubscrib(skip: number, limit: number, search: string,):Promise<IHospital[]>
+    findHospitalWithSubscrib(skip: number, limit: number, search: string,filter:object):Promise<IHospital[]>
 }

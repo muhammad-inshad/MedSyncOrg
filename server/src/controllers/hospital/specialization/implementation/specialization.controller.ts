@@ -12,11 +12,12 @@ export class SpecializationManagementController {
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 10;
             const search = req.query.search as string;
+            const filterStatus = req.query.filter as "active" | "blocked" | undefined;
             if (!hospitalId) {
             return ApiResponse.unauthorized(res, "Hospital ID not found");
         }
 
-            const result = await this._specializationService.getSpecializations(hospitalId, { page, limit, search });
+            const result = await this._specializationService.getSpecializations(hospitalId, { page, limit, search, filter: filterStatus });
             return ApiResponse.success(res, "Specializations fetched successfully", result, HttpStatusCode.OK);
         } catch (error) {
             next(error);

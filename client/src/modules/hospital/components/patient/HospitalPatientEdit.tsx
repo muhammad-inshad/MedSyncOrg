@@ -46,7 +46,7 @@ const HospitalPatientEdit = () => {
   const bloodGroups = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
   useEffect(() => {
-    if (!patient || !patient._id) {
+    if (!patient || !patient.id) {
       toast.error('Patient data or ID not found');
       navigate(HOSPITAL_ROUTES.HOSPITALPATIENT, { replace: true });
       return;
@@ -145,7 +145,7 @@ const HospitalPatientEdit = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    if (!patient?._id) {
+    if (!patient?.id) {
       toast.error('Cannot update: Patient ID is missing');
       navigate(HOSPITAL_ROUTES.HOSPITALPATIENT, { replace: true });
       return;
@@ -173,7 +173,7 @@ const HospitalPatientEdit = () => {
         formPayload.append('image', selectedFile);
       }
 
-      const response = await hospitalApi.editPatient(patient._id, formPayload);
+      const response = await hospitalApi.editPatient(patient.id, formPayload);
 
       if (response.status === 200) {
         toast.success('Patient updated successfully!');
@@ -191,7 +191,7 @@ const HospitalPatientEdit = () => {
     }
   };
 
-  if (!patient || !patient._id) {
+  if (!patient || !patient.id) {
     return null;
   }
 

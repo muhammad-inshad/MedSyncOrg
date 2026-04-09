@@ -9,7 +9,6 @@ import type { IPatient } from '@/interfaces/IPatient';
 import { PATIENT_ROUTES } from '@/constants/frontend/patient/patient.routes';
 import { initializeAuth } from '@/store/auth/authThunks';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { Patient } from '../../../../../../server/src/models/Patient.model';
 
 const EditPatientProfile = () => {
   const navigate = useNavigate();
@@ -196,7 +195,7 @@ console.log('Patient data from store:', patient?.age, patient?.dateOfBirth);
       let profileUpdated = false;
       let passwordUpdated = false;
 
-      if (patient?._id) {
+      if (patient?.id) {
         // 1. Update Profile Basic Info
         await PatientService.updateProfile(profilePayload);
         profileUpdated = true;

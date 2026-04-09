@@ -19,13 +19,28 @@ export interface IHospitalLoginResponse {
 }
 
 export interface IDoctorFilter {
+    isActive?: boolean;
     hospital_id?: string;
     reviewStatus?: string;
     licence?: object;
 }
 
+export interface IDepartmentFilter {
+    isActive?: boolean;
+    hospital_id?: object;}
+
 export interface IPatientFilter {
     hospital_id?: string;
+      isActive?: boolean;
+}
+
+export interface IsubscriptionFilter {
+      isActive?: boolean;
+}
+
+export interface IQualificationFilter {
+    isActive?: boolean;
+    hospital_id?: object;
 }
 
 export interface IDoctorListOptions {
@@ -33,4 +48,5 @@ export interface IDoctorListOptions {
     limit: number;
     search?: string;
     filter?: IDoctorFilter;
+    status?: string; // 'all' | 'pending' | 'revision' | 'rejected'
 }

@@ -17,7 +17,7 @@ class PatientController {
         ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED || "Unauthorized");
       }
       const patient = await this.patientService.getProfile(userId);
-      console.log('Patient profile fetched:', patient);
+ 
       return ApiResponse.success(res, MESSAGES.PATIENT.FETCH_SUCCESS, patient);
     } catch (error: unknown) {
       next(error);

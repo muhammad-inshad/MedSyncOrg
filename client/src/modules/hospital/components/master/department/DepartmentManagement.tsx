@@ -9,6 +9,7 @@ import Pagination from '@/components/Pagination';
 import { StatsCards } from '../../tables/StatsCards';
 import { FilterTabs } from '../../tables/FilterTabs';
 import { DataTable, type TableColumn } from '../../tables/DataTable';
+import { COMMENT_TYPES } from '@/constants/comments/comments';
 
 type FilterType = 'all' | 'active' | 'blocked';
 
@@ -212,6 +213,10 @@ const DepartmentManagement = () => {
   const [filter, setFilter] = useState<FilterType>('all');
   const [limit] = useState(5);
 
+    const [toatl,setTotal]=useState(0);
+    const [active,setActive]=useState(0);
+    const [blocked,setBlocked]=useState(0);
+
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [addForm, setAddForm] = useState<DepartmentForm>(EMPTY_FORM);
   const [addErrors, setAddErrors] = useState<Partial<DepartmentForm>>({});
@@ -249,8 +254,21 @@ const DepartmentManagement = () => {
 
   useEffect(() => {
     fetchDepartments();
+    fetchStats()
   }, [fetchDepartments]);
 
+   const fetchStats = async () => {
+    try {
+      const response = await hospitalApi.getCommonStats(
+        COMMENT_TYPES.SPECIALIZATION
+      );
+      setTotal(response.data.data.stats.total);
+      setActive(response.data.data.stats.active);
+      setBlocked(response.data.data.stats.blocked);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  };
   // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -273,21 +291,21 @@ const DepartmentManagement = () => {
   const stats = [
   {
     label: "Total Departments",
-    value: totalItems,
+    value: toatl,
     icon: LayoutGrid,
     color: "text-slate-600",
     bg: "bg-slate-100",
   },
   {
     label: "Active",
-    value: departments.filter((d) => d.isActive).length,
+    value: active,
     icon: CheckCircle2,
     color: "text-emerald-600",
     bg: "bg-emerald-100/50",
   },
   {
     label: "Blocked",
-    value: departments.filter((d) => !d.isActive).length,
+    value: blocked,
     icon: XCircle,
     color: "text-rose-600",
     bg: "bg-rose-100/50",

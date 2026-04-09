@@ -73,7 +73,7 @@ const HospitalManagement = () => {
     finally { setIsToggling(false); }
   };
 
-  // ✅ Column definitions — all the custom UI lives here
+  //  Column definitions — all the custom UI lives here
   const columns: Column<IHospital>[] = [
     {
       key: 'hospital',

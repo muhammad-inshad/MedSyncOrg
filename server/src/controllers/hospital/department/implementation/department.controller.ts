@@ -14,13 +14,15 @@ export class DepartmentManagementController {
                 return ApiResponse.unauthorized(res, "Hospital ID not found in token");
             }
 
-            const { page = 1, limit = 10, search = "" } = req.query;
+            const { page = 1, limit = 10, search = "" ,filter} = req.query;
+            console.log(filter)
 
             const paginatedDepartments = await this._departmentService.getDepartments(
                 hospitalId,
                 Number(page),
                 Number(limit),
-                search as string
+                search as string,
+                filter as "all" | "active" | "blocked" | undefined
             );
 
             return ApiResponse.success(res, "Departments fetched successfully", paginatedDepartments, HttpStatusCode.OK);

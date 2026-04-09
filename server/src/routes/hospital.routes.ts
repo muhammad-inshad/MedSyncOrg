@@ -66,4 +66,8 @@ router.get("/subscription", hospitalSubscriptionController.getActiveSubscription
 router.get("/subscription/protection",hospitalSubscriptionController.protection.bind(hospitalSubscriptionController))
 
 router.get("/dashboard-stats",dashbordController.getstatus.bind(dashbordController))
+
+router.get("/getdoctorstatus",dashbordController.getDoctorStatus.bind(dashbordController))
+router.get("/kyc-stats",dashbordController.getKycStats.bind(dashbordController))
+router.get("/common-stats", dashbordController.getCommonStats.bind(dashbordController));
 export default router;

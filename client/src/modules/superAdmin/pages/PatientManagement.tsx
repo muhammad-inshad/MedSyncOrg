@@ -96,7 +96,7 @@ const PatientManagement = () => {
       setIsToggling(true);
       const res = await superAdminApi.togglePatient({ id: confirmTarget.id, isActive: !confirmTarget.status });
       if (res.status === 200) {
-        setPatients((prev) => prev.map((p) => p._id === confirmTarget.id ? { ...p, isActive: !confirmTarget.status } : p));
+        setPatients((prev) => prev.map((p) => p.id === confirmTarget.id ? { ...p, isActive: !confirmTarget.status } : p));
         toast.success(`Patient ${!confirmTarget.status ? 'activated' : 'blocked'} successfully`);
         setConfirmTarget(null);
       }
@@ -115,7 +115,7 @@ const PatientManagement = () => {
         <AvatarCell
           src={getImageUrl(p.image)}
           name={p.name}
-          id={p._id}
+          id={p.id}
           subText={p.email}
           fallbackIcon={<span className="text-xl">👤</span>}
         />
@@ -133,7 +133,7 @@ const PatientManagement = () => {
         <div className="flex flex-col">
           <span className="text-sm font-bold text-slate-700 uppercase">{p.gender || '—'}</span>
           <span className="text-[10px] font-black text-slate-400 tracking-tighter uppercase tabular-nums">
-             {p.bloodGroup || 'Blood Type —'} • {p.age ? `${p.age} Yrs` : 'Age —'}
+             {p.bloodGroup || 'Blood Type —'} 
           </span>
         </div>
       ),
@@ -148,7 +148,7 @@ const PatientManagement = () => {
       header: 'Actions',
       width: 'w-32',
       render: (p) => {
-        const patientId = p._id;
+        const patientId = p.id;
         return (
           <RowActions
             isActive={p.isActive}
@@ -223,7 +223,7 @@ const PatientManagement = () => {
       <DataTable
         data={patients}
         columns={columns}
-        rowKey={(p) => p._id || Math.random().toString()}
+        rowKey={(p) => p.id || Math.random().toString()}
         isLoading={isLoading}
         tabs={['All', 'Active', 'Inactive']}
         activeTab={activeTab}

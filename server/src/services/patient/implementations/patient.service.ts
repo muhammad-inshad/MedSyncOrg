@@ -50,6 +50,7 @@ export class PatientService implements IPatientService {
 
   async getProfile(userId: string): Promise<PatientResponseDTO | null> {
     const patient = await this._userRepo.findById(userId);
+
     if (!patient) {
       ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.PATIENT.NOT_FOUND);
     }

@@ -4,6 +4,7 @@ import { ISubscription } from "../../../../models/subscription.ts";
 import { ISubscriptionRepository } from "../interfaces/subscription.repository.interface.ts";
 import { SubscriptionModel } from "../../../../models/subscription.ts";
 import { HospitalModel, IHospital } from "../../../../models/hospital.model.ts";
+import { IsubscriptionFilter } from "../../../../types/hospital.types.ts";
 
 export class SubscriptionRepository
   extends BaseRepository<ISubscription>
@@ -55,6 +56,7 @@ export class SubscriptionRepository
 
     const query = this.buildQuery(search, status);
 
+
     return await SubscriptionModel
       .find(query)
       .skip(skip)
@@ -100,16 +102,25 @@ export class SubscriptionRepository
     )
   }
 
-  async findHospitalWithSubscrib(skip: number, limit: number, search: string):Promise<IHospital[]>{
-     await this.updateExpiredSubscription()
-     const query:FilterQuery<IHospital>={};
-      if (search && search.trim() !== "") {
+async findHospitalWithSubscrib(
+  skip: number,
+  limit: number,
+  search: string,
+  filter: IsubscriptionFilter
+): Promise<IHospital[]> {
+
+  await this.updateExpiredSubscription();
+
+  const query: FilterQuery<IHospital> = { ...filter }; 
+
+  if (search && search.trim() !== "") {
     query.hospitalName = { $regex: search, $options: "i" };
   }
-  return await HospitalModel.find(query)
-  .skip(skip)
-  .limit(limit)
-  .sort({createdAt:-1})
-  .exec()
-  }
+
+  return HospitalModel.find(query)
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 })
+    .exec();
+}
 }
