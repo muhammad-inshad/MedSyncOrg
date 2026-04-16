@@ -10,7 +10,7 @@ import { MESSAGES } from "../../../../constants/messages.ts";
 import { FilterQuery } from 'mongoose';
 import { IDoctor } from "../../../../models/doctor.model.ts";
 import { ITokenPayload } from "../../../../services/token/token.service.interface.ts";
-// import { AuthHOspitalPayload } from "../../../../dto/hospital/hospital-response.dto.ts";
+import logger from "../../../../utils/logger.ts";
 
 export class DoctorManagementController implements IDoctorManagementController {
   constructor(private readonly _doctorManagementService: IDoctorManagementService) { }
@@ -151,7 +151,7 @@ export class DoctorManagementController implements IDoctorManagementController {
       const { id } = req.params;
       const files = req.files as unknown as DoctorUploadFiles;
       const doctorData = req.body;
-      console.log(doctorData)
+      logger.debug(`Updating doctor ${id} with data: ${JSON.stringify(doctorData)}`);
       const result = await this._doctorManagementService.updateDoctor(id, doctorData, files);
       return ApiResponse.success(res, "Doctor profile updated successfully", result);
     } catch (error: unknown) {
@@ -206,9 +206,10 @@ export class DoctorManagementController implements IDoctorManagementController {
   async getDoctorDetails(req:Request,res:Response):Promise<Response|void>{
     const {id}=req.params
     const result = await this._doctorManagementService.getDoctorDetails(id);
-    console.log(result)
+    logger.debug(`Fetched doctor details for ${id}`);
     return ApiResponse.success(res,"success",result);
   }
+
 
   async getDeptSpecs(req:Request,res:Response,next:NextFunction):Promise<Response|void>{
      try {

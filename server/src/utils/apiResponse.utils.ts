@@ -57,4 +57,7 @@ export class ApiResponse {
     static throwError(statusCode: HttpStatusCode, message: string): never {
         throw new AppError(message, statusCode);
     }
+    static internalServerError(res: Response, message: string = MESSAGES.SERVER.ERROR) {
+        return this.error(res, message, null, HttpStatusCode.INTERNAL_SERVER_ERROR);
+    }
 }

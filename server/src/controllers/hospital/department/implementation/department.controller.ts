@@ -3,6 +3,8 @@ import { IDepartmentService } from "../../../../services/hospital/department/int
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { IDepartment } from "../../../../models/department.model.ts";
+import logger from "../../../../utils/logger.ts";
+
 
 export class DepartmentManagementController {
     constructor(private readonly _departmentService: IDepartmentService) { }
@@ -15,7 +17,8 @@ export class DepartmentManagementController {
             }
 
             const { page = 1, limit = 10, search = "" ,filter} = req.query;
-            console.log(filter)
+            logger.debug(`Fetching departments with filter: ${filter}`);
+
 
             const paginatedDepartments = await this._departmentService.getDepartments(
                 hospitalId,

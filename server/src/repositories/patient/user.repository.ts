@@ -10,4 +10,12 @@ export class UserRepository extends BaseRepository<IPatient> implements IUserRep
      async getCount(email:string){
          return await this.model.countDocuments({email})
      }
+
+     async addHospital(patientId: string, hospitalId: string): Promise<IPatient | null> {
+         return await this.model.findByIdAndUpdate(
+             patientId,
+             { $addToSet: { hospital_id: hospitalId } },
+             { new: true }
+         );
+     }
 }

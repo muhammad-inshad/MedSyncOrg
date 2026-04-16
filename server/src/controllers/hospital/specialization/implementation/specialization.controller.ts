@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from "express";
 import { ISpecializationService } from "../../../../services/hospital/specialization/interfaces/specialization.service.interface.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
+import logger from "../../../../utils/logger.ts";
+
 
 export class SpecializationManagementController {
     constructor(private readonly _specializationService: ISpecializationService) { }
@@ -44,7 +46,7 @@ export class SpecializationManagementController {
         try {
             const { id } = req.params;
             const specializationData = req.body;
-            console.log(specializationData)
+            logger.debug(`Updating specialization ${id} with data: ${JSON.stringify(specializationData)}`);
             const file = req.file;
             const specialization = await this._specializationService.updateSpecialization(id, specializationData, file);
             if (!specialization) {
@@ -56,6 +58,7 @@ export class SpecializationManagementController {
             next(error);
         }
     }
+
 
     async toggleStatus(req: Request, res: Response, next: NextFunction) {
         try {

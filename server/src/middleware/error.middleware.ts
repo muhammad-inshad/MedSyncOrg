@@ -16,6 +16,7 @@ export function errorHandler(
     err: IError | AppError | ZodError,
     req: Request,
     res: Response,
+    _next: NextFunction
 ) {
     if (err instanceof ZodError) {
         return ApiResponse.validationError(res, MESSAGES.VALIDATION.INVALID_INPUT, err.issues);

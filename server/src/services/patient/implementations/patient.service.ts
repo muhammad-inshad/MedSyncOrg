@@ -1,5 +1,4 @@
 import { IPatient } from "../../../models/Patient.model.ts";
-import { IDepartment } from "../../../models/department.model.ts";
 import { IPatientService } from "../interfaces/patient.service.interfaces.ts";
 import { IUserRepository } from "../../../repositories/patient/user.repository.interface.ts";
 import { IHospitalRepository } from "../../../repositories/hospital/hospital.repository.interface.ts";
@@ -12,12 +11,10 @@ import { ISubscriptionRepository } from "../../../repositories/superAdmin/subscr
 import { HttpStatusCode } from "../../../constants/enums.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
 import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
-import { IHospital } from "../../../models/hospital.model.ts";
-import { IDoctor } from "../../../models/doctor.model.ts";
 import { IAppointment, AppointmentStatus } from "../../../models/appointment.ts";
 import { IPaginationResult } from "../../../types/hospital.types.ts";
 import bcrypt from "bcryptjs";
-import { selectedHospitalDto, DepartmentResponseDTO, QualificationResponseDTO, SpecializationResponseDTO, HospitalResponseDTO, SelectedHospitalSchema } from "../../../dto/hospital/hospital-response.dto.ts";
+import { selectedHospitalDto,HospitalResponseDTO, SelectedHospitalSchema } from "../../../dto/hospital/hospital-response.dto.ts";
 import { PatientResponseDTO } from "../../../dto/patient/patient-response.dto.ts";
 import { DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.ts";
 import { AppointmentResponseDTO } from "../../../dto/appointment/appointment-response.dto.ts";
@@ -229,9 +226,10 @@ export class PatientService implements IPatientService {
   }
 
   async bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<void> {
-    const { doctorId, appointmentDate, patientDetails } = data;
-   
-    if (!doctorId || !appointmentDate || !patientDetails) {
+    const { doctorId, appointmentDate, patientDetails,hospitalId} = data;
+  
+
+    if (!doctorId || !appointmentDate || !patientDetails||!hospitalId) {
         console.error("[PatientService.bookAppointment] Error: Missing critical details:", { doctorId, appointmentDate, patientDetails });
         ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Missing appointment details");
     }
@@ -258,6 +256,8 @@ export class PatientService implements IPatientService {
       status: AppointmentStatus.PENDING
     });
     console.log(`[PatientService.bookAppointment] SUCCESS! Appointment created with ID: ${result._id}`);
+    await this._userRepo.addHospital(patientId, hospitalId.toString());
+    
   }
 
   async checkDuplicateAppointment(doctorId: string, date: string, patient: { name: string; age: number; email?: string }): Promise<AppointmentResponseDTO | null> {

@@ -6,6 +6,8 @@ import { initSocket } from "./socket/socket.ts";
 
 import http from "http";
 
+import logger from "./utils/logger.ts";
+
 connectDB();
 
 const PORT = process.env.PORT || 5000;
@@ -15,5 +17,5 @@ const server = http.createServer(app);
 initSocket(server);
 
 server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+  logger.info(`Server running on http://localhost:${PORT}`);
+});

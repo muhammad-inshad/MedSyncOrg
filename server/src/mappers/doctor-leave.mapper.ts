@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { IMapper } from "../interfaces/mapper.interface.ts";
 import { IDoctorLeave } from "../models/doctorLeave.model.ts";
 import { DoctorLeaveResponseDTO, DoctorLeaveResponseSchema } from "../dto/doctor/doctor-leave-response.dto.ts";
@@ -6,16 +7,16 @@ export class DoctorLeaveMapper implements IMapper<IDoctorLeave, DoctorLeaveRespo
     toDTO(leave: IDoctorLeave): DoctorLeaveResponseDTO {
         const dto = {
             id: leave._id.toString(),
-            doctorId: leave.doctorId && typeof leave.doctorId === 'object' && (leave.doctorId as any).name
-                ? {
-                    _id: ((leave.doctorId as any)._id || leave.doctorId).toString(),
-                    name: (leave.doctorId as any).name,
-                    email: (leave.doctorId as any).email,
-                    profileImage: (leave.doctorId as any).profileImage,
-                    specialization: (leave.doctorId as any).specialization,
-                    department: (leave.doctorId as any).department,
-                }
-                : leave.doctorId.toString(),
+            doctorId: leave.doctorId instanceof Types.ObjectId
+                ? leave.doctorId.toString()
+                : {
+                    _id: leave.doctorId._id.toString(),
+                    name: leave.doctorId.name,
+                    email: leave.doctorId.email,
+                    profileImage: leave.doctorId.profileImage,
+                    specialization: leave.doctorId.specialization,
+                    department: leave.doctorId.department,
+                },
             startDate: leave.startDate,
             endDate: leave.endDate,
             leaveSession: leave.leaveSession,
@@ -23,8 +24,8 @@ export class DoctorLeaveMapper implements IMapper<IDoctorLeave, DoctorLeaveRespo
             photo: leave.photo,
             rejectedReson: leave.rejectedReson,
             status: leave.status,
-            createdAt: (leave as any).createdAt,
-            updatedAt: (leave as any).updatedAt,
+            createdAt: leave.createdAt,
+            updatedAt: leave.updatedAt,
         };
 
         return DoctorLeaveResponseSchema.parse(dto);

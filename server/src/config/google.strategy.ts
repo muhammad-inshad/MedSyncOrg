@@ -1,9 +1,10 @@
 import passport from 'passport';
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
 import bcrypt from 'bcryptjs';
-import { Patient } from '../models/Patient.model.ts';
-import { HospitalModel } from '../models/hospital.model.ts';
-import { DoctorModel } from '../models/doctor.model.ts';
+import { Patient, IPatient } from '../models/Patient.model.ts';
+import { HospitalModel, IHospital } from '../models/hospital.model.ts';
+import { DoctorModel, IDoctor } from '../models/doctor.model.ts';
+import { Role } from '../constants/enums.ts';
 
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID!,
@@ -11,37 +12,39 @@ passport.use(new GoogleStrategy({
   callbackURL: "http://localhost:5000/api/auth/google/callback",
   passReqToCallback: true
 },
-  async (req, accessToken, refreshToken, profile, done) => {
+  async (req, _accessToken, _refreshToken, profile: Profile, done) => {
     try {
-      const role = (req.query.state as string) || 'patient';
+      const role = (req.query.state as Role) || Role.PATIENT;
       const email = profile.emails?.[0].value;
 
-      let user = null;
-      let model: any = Patient;
-
-      if (role === 'hospital') {
-        model = HospitalModel;
-      } else if (role === 'doctor') {
-        model = DoctorModel;
+      if (!email) {
+        return done(new Error('No email found in Google profile'), undefined);
       }
 
-      user = await model.findOne({ email });
+      let user: IPatient | IHospital | IDoctor | null = null;
+
+      if (role === Role.HOSPITAL) {
+        user = await HospitalModel.findOne({ email });
+      } else if (role === Role.DOCTOR) {
+        user = await DoctorModel.findOne({ email });
+      } else {
+        user = await Patient.findOne({ email });
+      }
 
       if (!user) {
-        // Prepare creation data
-        const createData: any = {
-          email,
-          name: profile.displayName,
-          isGoogleAuth: true,
-          role: role
-        };
-
-        // Note: Hospital and Doctor models might need adjustments to their schemas 
-        // to support these fields if they don't already. 
-        // For now, we attempt to create according to the role.
-        if (role === 'patient') {
-          user = await Patient.create(createData);
-        } else if (role === 'hospital') {
+      
+        if (role === Role.PATIENT) {
+          const hashedPlaceholder = await bcrypt.hash('google-auth-placeholder', 10);
+          user = await Patient.create({
+            email,
+            name: profile.displayName,
+            isGoogleAuth: true,
+            role: Role.PATIENT,
+            password: hashedPlaceholder,
+            phone: 0,
+            isActive: true,
+          } as unknown as IPatient);
+        } else if (role === Role.HOSPITAL) {
           const hashedPlaceholder = await bcrypt.hash('google-auth-placeholder', 10);
           user = await HospitalModel.create({
             hospitalName: profile.displayName,
@@ -52,8 +55,8 @@ passport.use(new GoogleStrategy({
             pincode: '000000',
             password: hashedPlaceholder,
             reviewStatus: 'pending'
-          });
-        } else if (role === 'doctor') {
+          } as unknown as IHospital);
+        } else if (role === Role.DOCTOR) {
           const hashedPlaceholder = await bcrypt.hash('google-auth-placeholder', 10);
           user = await DoctorModel.create({
             name: profile.displayName,
@@ -69,11 +72,15 @@ passport.use(new GoogleStrategy({
             profileImage: profile.photos?.[0].value || '',
             about: 'Bio pending Google Auth',
             reviewStatus: 'pending'
-          });
+          } as unknown as IDoctor);
         }
       }
 
-      return done(null, user);
+      if (!user) {
+        return done(new Error('User creation failed'), undefined);
+      }
+
+      return done(null, user as Express.User);
     } catch (error) {
       return done(error as Error, undefined);
     }

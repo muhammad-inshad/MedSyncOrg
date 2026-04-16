@@ -1,7 +1,5 @@
 import { HospitalResponseDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
 import { CreateSubscription, SubscriptionResponseDTO, UpdateSubscriptionDTO } from "../../../../dto/subscription/subscription-response.dto.ts";
-import { IHospital } from "../../../../models/hospital.model.ts";
-import { ISubscription } from "../../../../models/subscription.ts";
 
 export interface ISubscriptionResult {
     data: SubscriptionResponseDTO[];

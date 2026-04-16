@@ -1,4 +1,6 @@
 import { NextFunction, Request, Response } from "express";
+import logger from "../../utils/logger.ts";
+
 import { HttpStatusCode } from "../../constants/enums.ts";
 import { DoctorUploadFiles } from "../../types/doctor.types.ts";
 import { ITokenPayload } from "../../services/token/token.service.interface.ts";
@@ -39,16 +41,18 @@ class DoctorController {
         try {
           updateData.consultationTime = JSON.parse(updateData.consultationTime);
         } catch (error) {
-          console.error('Error parsing consultationTime:', error);
+          logger.error('Error parsing consultationTime:', error);
         }
+
       }
 
       if (typeof updateData.payment === 'string') {
         try {
           updateData.payment = JSON.parse(updateData.payment);
         } catch (error) {
-          console.error('Error parsing payment:', error);
+          logger.error('Error parsing payment:', error);
         }
+
       }
 
       if (files?.profileImage?.[0]) {

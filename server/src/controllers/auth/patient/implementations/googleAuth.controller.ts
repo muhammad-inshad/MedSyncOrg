@@ -1,6 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { ITokenService } from '../../../../services/token/token.service.interface.ts';
 import { IPatient } from '../../../../models/Patient.model.ts';
+import logger from '../../../../utils/logger.ts';
+
+
 export class GoogleAuthController {
   private tokenService: ITokenService;
 
@@ -10,7 +13,7 @@ export class GoogleAuthController {
 
   public async handleCallback(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = (req as any).user as IPatient;
+      const user = req.user as IPatient;
       if (!user) {
         return res.redirect(`${process.env.FRONTEND_URL}/login?error=no_user`);
       }
@@ -54,8 +57,8 @@ export class GoogleAuthController {
       return res.redirect(`${frontendUrl}/api/auth/google-success?user=${userData}&role=${role}`);
 
     } catch (error) {
-      console.error("Google Auth Controller Error:", error);
+      logger.error("Google Auth Controller Error:", error);
       next(error);
     }
   }
-}
+}

@@ -4,6 +4,8 @@ import { ApiResponse } from "../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../constants/enums.ts";
 import { ITokenPayload } from "../../dto/auth/token-payload.dto.ts";
 
+import logger from "../../utils/logger.ts";
+
 export class AppointmentController {
   constructor(private readonly _appointmentService: IAppointments) { }
 
@@ -16,6 +18,7 @@ export class AppointmentController {
             }
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 5;
+      
       const search = req.query.search as string || "";
       const date = req.query.date as string;
 
@@ -25,7 +28,8 @@ export class AppointmentController {
         search,
         date
       });
-console.log(date,"hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii")
+      logger.debug(`Fetching upcoming appointments for date: ${date}`);
+      console.log(total)
       return ApiResponse.success(res, "Upcoming appointments fetched successfully", appointments, HttpStatusCode.OK, {
         page,
         limit,

@@ -59,7 +59,6 @@ export class AppointmentMapper implements IMapper<IAppointment, AppointmentRespo
                 : new Date(appointment.updatedAt).toISOString(),
         };
 
-        // Output Validation using Zod
         return AppointmentResponseSchema.parse(dto);
     }
 }

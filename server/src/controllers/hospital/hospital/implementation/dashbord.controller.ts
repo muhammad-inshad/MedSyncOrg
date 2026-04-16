@@ -15,7 +15,7 @@ export class Dashbord {
       }
 
       const stats = await this._dashbord.getDashboardStats(hospitalId);
-      ApiResponse.success(res, "success", stats);
+      ApiResponse.success(res, MESSAGES.DASHBOARD_STATS_FETCHED, stats);
     } catch (error) {
       next(error);
     }

@@ -6,7 +6,6 @@ import { IDoctor } from "../../../../models/doctor.model.ts";
 import {
   IPaginationResult,
   IDoctorListOptions,
-  IPatientFilter,
   IDoctorFilter,
 } from "../../../../types/hospital.types.ts";
 import { IDoctorManagementService } from "../interfaces/IDoctorManagementService.ts";

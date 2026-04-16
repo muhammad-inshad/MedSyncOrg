@@ -6,12 +6,15 @@ import { ISuperAdminAuthController } from "./superAdmin.auth.controller.interfac
 import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 
 
+import logger from "../../../utils/logger.ts";
+
 export class SuperAdminAuthController implements ISuperAdminAuthController {
     constructor(private readonly _SuperadminAuthService: ISuperAdminAuthService) { }
     login = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const { email, password } = req.body;
-            console.log(email, password)
+            logger.debug(`Login attempt for email: ${email}`);
+
             if (!email || !password) {
                 ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, MESSAGES.VALIDATION.REQUIRED_FIELD);
             }

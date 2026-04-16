@@ -1,8 +1,15 @@
 import { Schema, model, Document, Types } from "mongoose";
 import { Role } from "../constants/enums.ts";
 
+export interface IDoctorPayment {
+  type: string;
+  payoutCycle: string;
+  patientsPerDayLimit: number;
+  fixedSalary: number;
+}
+
 export interface IDoctor extends Document {
-  payment: any;
+  payment: IDoctorPayment;
   name: string;
   email: string;
   password: string;

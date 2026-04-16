@@ -26,6 +26,7 @@ import { QualificationResponseDTO } from "../../../dto/hospital/qualification-re
 import { ISpecialization } from "../../../models/specialization.model.ts";
 import { SpecializationResponseDTO } from "../../../dto/hospital/specialization-response.dto.ts";
 import { DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.ts";
+import logger from "../../../utils/logger.ts";
 
 
 export class DoctorAuthService implements IDoctorAuthService {
@@ -49,6 +50,7 @@ export class DoctorAuthService implements IDoctorAuthService {
         const existingDoctor = await this._doctorRepo.findByEmail(body.email);
         if (existingDoctor) {
             ApiResponse.throwError(HttpStatusCode.CONFLICT, MESSAGES.AUTH.ALREADY_EXISTS);
+            logger.warn(`Registration attempt with existing email: ${body.email}`);
         }
         if (files?.profileImage?.[0]) {
             profileImageUrl = await uploadBufferToCloudinary(

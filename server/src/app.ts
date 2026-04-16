@@ -15,6 +15,8 @@ import { hospitalContainer } from "./di/hospital.di.ts";
 import { patientContainer } from "./di/patient.di.ts";
 import { doctorContainer } from "./di/doctor.di.ts";
 import paymentRoutes from "./routes/payment.routes.ts";
+import logger from "./utils/logger.ts";
+
 
 const { patientAuthMiddleware } = patientContainer();
 const { hospitalAuthMiddleware } = hospitalContainer();
@@ -22,7 +24,14 @@ const { doctorAuthMiddleware } = doctorContainer();
 
 
 const app = express();
+
+app.use((req, _res, next) => {
+  logger.http(`${req.method} ${req.originalUrl}`);
+  next();
+});
+
 app.use(passport.initialize());
+
 app.use(cookieParser());
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',

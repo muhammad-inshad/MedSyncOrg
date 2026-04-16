@@ -1,4 +1,6 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
+import { IDoctor } from "./doctor.model.ts";
+import { IPatient } from "./Patient.model.ts";
 
 export enum AppointmentStatus {
   PENDING = "pending",
@@ -18,8 +20,8 @@ export interface IMedicine {
 }
 
 export interface IAppointment extends Document {
-  bookedBy: Types.ObjectId;
-  doctorId: Types.ObjectId;
+  bookedBy: Types.ObjectId | IPatient;
+  doctorId: Types.ObjectId | IDoctor;
   hospitalId: Types.ObjectId;
 
   appointmentDate: Date;

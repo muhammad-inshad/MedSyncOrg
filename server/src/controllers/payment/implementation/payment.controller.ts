@@ -5,6 +5,8 @@ import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../../constants/enums.ts";
 import { AppError } from "../../../errors/app.error.ts";
 import { ITokenService } from "../../../services/token/token.service.interface.ts";
+import logger from "../../../utils/logger.ts";
+
 
 export class PaymentController implements IPaymentController {
     constructor(private readonly paymentService: IPaymentService,private readonly _token:ITokenService) {}
@@ -66,7 +68,7 @@ export class PaymentController implements IPaymentController {
     async handleWebhook(req: Request, res: Response): Promise<void> {
         try {
             const sig = req.headers["stripe-signature"] as string;
-            console.log("[PaymentController.handleWebhook] Received webhook with signature:", sig);
+            logger.info(`[PaymentController.handleWebhook] Received webhook with signature: ${sig}`);
             await this.paymentService.handleWebhook(sig, req.body);
             res.status(HttpStatusCode.OK).json({ received: true });
         } catch (error: unknown) {
@@ -76,3 +78,4 @@ export class PaymentController implements IPaymentController {
         }
     }
 }
+

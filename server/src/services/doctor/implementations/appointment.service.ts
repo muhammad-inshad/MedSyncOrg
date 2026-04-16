@@ -24,15 +24,14 @@ export class AppointmentService implements IAppointments {
         }
     ): Promise<{ appointments: AppointmentResponseDTO[]; total: number }> {
         const { page, limit, search, date } = options;
-        console.log(date,"oooooooooooooooooooooooooo")
-  
+      
         const res = await this._appointmentRepo.findUpcomingAppointments(doctorId, {
             page,
             limit,
             search,
             date: date ? new Date(date) : undefined
         });
-console.log(res)
+    
         return {
             appointments: res.appointments.map(app => this._appointmentMapper.toDTO(app)),
             total: res.total
@@ -65,10 +64,13 @@ async savePrescription(
     throw new Error("Patient email is required");
   }
 
+  const doctorId =typeof appointment.doctorId === "object"
+    ? appointment.doctorId._id
+    : appointment.doctorId;
   const prescriptionPayload = {
     hospital_id: appointment.hospitalId,
     patient_email: appointment.patientDetails.email, 
-    doctor_id: appointment.doctorId,
+    doctor_id: doctorId,
     appointment_id: appointment._id,
     medicines: prescriptionData.medicines,
     notes: prescriptionData.notes,

@@ -20,7 +20,7 @@ export interface IPatient extends Document {
   walletBalance: number;
   medicalReports: string[];
 
-  hospital_id?: mongoose.Types.ObjectId;
+ hospital_id?: mongoose.Types.ObjectId[];
   appointmentHistory: mongoose.Types.ObjectId[];
 
   isProfileComplete: boolean;
@@ -53,10 +53,12 @@ const patientSchema = new Schema<IPatient>(
 
     medicalReports: { type: [String], default: [] },
 
-    hospital_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Hospital",
-    },
+   hospital_id: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Hospital",
+  },
+],
 
     appointmentHistory: [
       {

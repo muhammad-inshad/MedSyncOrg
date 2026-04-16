@@ -27,9 +27,9 @@ export class LiveTokenService implements Igettoken {
         // Also get the patient's own appointment for today to show their token number
         const patientAppointments = await this._appointmentRepo.findPatientAppointmentsToday(patientId);
         const patientAppointment = patientAppointments.find((app) => {
-            const docId = (app.doctorId as any)?._id
-                ? (app.doctorId as any)._id.toString()
-                : app.doctorId.toString();
+            const docId = app.doctorId instanceof Types.ObjectId
+                ? app.doctorId.toString()
+                : app.doctorId._id.toString();
             return docId === targetDoctorId;
         });
 
@@ -37,7 +37,7 @@ export class LiveTokenService implements Igettoken {
             return null;
         }
 
-        const doctor = patientAppointment.doctorId as unknown as IDoctor;
+        const doctor = patientAppointment.doctorId as IDoctor;
 
         const data = {
             currentLiveToken: liveAppointment ? liveAppointment.tokenNumber : 0,

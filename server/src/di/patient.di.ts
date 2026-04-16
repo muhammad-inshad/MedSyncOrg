@@ -2,7 +2,6 @@ import { UserRepository } from "../repositories/patient/user.repository.ts";
 import PatientController from "../controllers/patient/Patient.controller.ts";
 import { Patient } from "../models/Patient.model.ts";
 import { TokenService } from "../services/token/token.service.ts";
-import { AppointmentService } from "../services/doctor/implementations/appointment.service.ts";
 import { HospitalRepository } from "../repositories/hospital/hospital.repository.ts";
 import { HospitalModel } from "../models/hospital.model.ts";
 import { PatientAuthMiddleware } from "../middleware/patient.auth.middleware.ts";
@@ -14,7 +13,6 @@ import { AppointmentRepository } from "../repositories/appointment/appointment.r
 import { QualificationRepository } from "../repositories/hospital/implementation/qualification.repository.ts";
 import QualificationModel from "../models/qualification.model.ts";
 import { SpecializationRepository } from "../repositories/hospital/implementation/specialization.repository.ts";
-import SpecializationModel from "../models/specialization.model.ts";
 import { PatientService } from "../services/patient/implementations/patient.service.ts";
 import { LiveTokenService } from "../services/patient/implementations/livetoken.service.ts";
 import { LiveTokenMapper } from "../mappers/livetoken.mapper.ts";

@@ -5,11 +5,11 @@ import { IHospitalRepository } from "../../../../repositories/hospital/hospital.
 import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
 import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.ts";
 import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
-import { CreateSubscription, SubscriptionResponseDTO } from "../../../../dto/subscription/subscription-response.dto.ts";
+import { SubscriptionResponseDTO } from "../../../../dto/subscription/subscription-response.dto.ts";
 import { SubscriptionMapper } from "../../../../mappers/subscription.mapper.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
-import { Types } from "mongoose";
+
 
 export class HospitalSubscriptionService implements IHospitalSubscriptionService {
     constructor(
@@ -42,7 +42,7 @@ export class HospitalSubscriptionService implements IHospitalSubscriptionService
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Hospital not found");
         }
         const subscription = hospital.subscription;
-
+        console.log(type)
         if (!subscription || !subscription.plan) {
             ApiResponse.throwError(HttpStatusCode.PAYMENT_REQUIRED, "No active subscription plan found. Please subscribe to continue.");
         }
@@ -58,7 +58,7 @@ export class HospitalSubscriptionService implements IHospitalSubscriptionService
 
         const planDetails = await this.subscriptionRepository.findByPlanName(planName);
      
-        
+        console.log(planDetails)
     }
 
  async protection(hospitalId: string): Promise<boolean> {

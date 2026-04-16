@@ -56,5 +56,6 @@ export const MESSAGES = {
     UPDATION:{
         UPDATE:" successfully updated",
         ADDED:"successfully created new subscription"
-    }
+    },
+    DASHBOARD_STATS_FETCHED: "Dashboard stats fetched successfully",
 };

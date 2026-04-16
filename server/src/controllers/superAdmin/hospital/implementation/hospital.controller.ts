@@ -4,6 +4,8 @@ import { ISuperAdminHospitalService } from "../../../../services/superAdmin/hosp
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { CreateHospitalDTO, UpdateHospitalDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
+import logger from "../../../../utils/logger.ts";
+
 
 export class SuperAdminHospitalController implements ISuperAdminHospitalController {
     constructor(private readonly service: ISuperAdminHospitalService) { }
@@ -89,7 +91,7 @@ export class SuperAdminHospitalController implements ISuperAdminHospitalControll
                 try {
                     updateData.subscription = JSON.parse(updateData.subscription);
                 } catch (e) {
-                    console.error("Failed to parse subscription", e);
+                    logger.error("Failed to parse subscription", e);
                 }
             }
 
@@ -105,3 +107,4 @@ export class SuperAdminHospitalController implements ISuperAdminHospitalControll
 
 
 }
+

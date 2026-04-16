@@ -1,8 +1,9 @@
 import { Schema, model, Document, Types } from "mongoose";
-import { string } from "zod";
+import { IDoctor } from "./doctor.model.ts";
 
 export interface IDoctorLeave extends Document {
-  doctorId: Types.ObjectId;
+  _id: Types.ObjectId;
+  doctorId: Types.ObjectId | IDoctor;
   startDate: Date;
   endDate: Date;
 
@@ -10,9 +11,11 @@ export interface IDoctorLeave extends Document {
 
   reason?: string;
   photo?: string;
-  rejectedReson?:string
+  rejectedReson?: string;
 
   status: "approved" | "pending" | "rejected";
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const doctorLeaveSchema = new Schema<IDoctorLeave>(

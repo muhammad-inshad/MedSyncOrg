@@ -8,7 +8,6 @@ import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.ts";
 import { Types } from "mongoose";
-import { query } from 'winston';
 import { IPatientFilter } from "../../../../types/hospital.types.ts";
 
 export class PatientManagementService implements IPatientManagementService {
@@ -22,7 +21,7 @@ export class PatientManagementService implements IPatientManagementService {
     async addPatient(patientData: CreatePatientDTO, hospital_id: string, patientFile?: Express.Multer.File): Promise<PatientResponseDTO> {
         const patient = await this._userRepo.create({
             ...patientData,
-            hospital_id: new Types.ObjectId(hospital_id),
+            hospital_id: [new Types.ObjectId(hospital_id)],
             image: patientFile?.path || undefined,
             isActive: true
         } as Partial<IPatient>);

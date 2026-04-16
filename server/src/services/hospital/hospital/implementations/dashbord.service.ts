@@ -2,7 +2,6 @@ import { Types } from "mongoose";
 import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
 import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
 import { IDashbord } from "../interfaces/dashbord.services.interfaces.ts";
-import { IDepartment } from "../../../../models/department.model.ts";
 import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.ts";
 import { ISpecializationRepository } from "../../../../repositories/hospital/specialization.repository.interface.ts";
 import { IQualificationRepository } from "../../../../repositories/hospital/qualification.repository.interface.ts";

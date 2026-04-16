@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { IHospital } from "../../models/hospital.model.ts";
 
 export const HospitalResponseSchema = z.object({
     id: z.string(),

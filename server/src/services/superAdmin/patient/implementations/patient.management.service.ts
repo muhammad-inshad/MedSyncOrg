@@ -8,7 +8,7 @@ import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../../../constants/enums.ts";
 import { uploadBufferToCloudinary, deleteFromCloudinary } from "../../../../utils/cloudinaryUpload.ts";
 import { IPatient } from "../../../../models/Patient.model.ts";
-import { Types, FilterQuery } from "mongoose";
+import { Types } from "mongoose";
 
 export class SuperAdminPatientManagementService implements ISuperAdminPatientManagementService {
     constructor(
@@ -65,13 +65,13 @@ export class SuperAdminPatientManagementService implements ISuperAdminPatientMan
         const patientData = {
             ...data,
             password: hashedPassword,
-            hospital_id: new Types.ObjectId(hospital_id),
+            hospital_id: [new Types.ObjectId(hospital_id)],
             image: imageUrl,
             isActive: true,
             isProfileComplete: true,
         };
 
-        const created = await this._userRepo.create(patientData as IPatient);
+        const created = await this._userRepo.create(patientData as Partial<IPatient>);
         return this._patientMapper.toDTO(created);
     }
 

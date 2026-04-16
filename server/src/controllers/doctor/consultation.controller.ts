@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { IAppointments } from "../../services/doctor/interfaces/appointment.service.interfaces.ts";
 import { ApiResponse } from "../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../constants/enums.ts";
+import logger from "../../utils/logger.ts";
+
 import { AppointmentStatus } from "../../models/appointment.ts";
 
 export class Consultation {
@@ -26,9 +28,10 @@ export class Consultation {
                 HttpStatusCode.OK
             );
         } catch (error) {
-            console.error("Error in getConsultation:", error);
+            logger.error("Error in getConsultation:", error);
             return ApiResponse.error(res, "Failed to fetch consultations");
         }
+
     }
 
     markAsCompleted = async (req: Request, res: Response) => {
@@ -47,9 +50,10 @@ export class Consultation {
                 HttpStatusCode.OK
             );
         } catch (error) {
-            console.error("Error in markAsCompleted:", error);
+            logger.error("Error in markAsCompleted:", error);
             return ApiResponse.error(res, "Failed to mark appointment as completed");
         }
+
     }
 
     prescription = async (req: Request, res: Response) => {
@@ -75,8 +79,9 @@ export class Consultation {
                 HttpStatusCode.OK
             );
         } catch (error) {
-            console.error("Error in savePrescription:", error);
+            logger.error("Error in savePrescription:", error);
             return ApiResponse.error(res, "Failed to save prescription");
         }
+
     }
 }

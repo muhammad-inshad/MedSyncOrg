@@ -5,6 +5,8 @@ import { MESSAGES } from "../../constants/messages.ts";
 
 import { IPatientService } from "../../services/patient/interfaces/patient.service.interfaces.ts";
 import { ITokenPayload } from "../../services/token/token.service.interface.ts";
+import logger from "../../utils/logger.ts";
+
 
 class PatientController {
   constructor(private readonly patientService: IPatientService) { }
@@ -99,7 +101,7 @@ class PatientController {
 
   getdepartments = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj")
+      logger.debug("Fetching departments in PatientController");
     } catch (error) {
       next(error)
     }
@@ -146,7 +148,7 @@ class PatientController {
       if (!patientId) {
         return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED || "Unauthorized");
       }
-      await this.patientService.bookAppointment(patientId, req.body);
+     await this.patientService.bookAppointment(patientId, req.body);
       return ApiResponse.success(res, "Appointment booked successfully", null, HttpStatusCode.CREATED);
     } catch (error) {
       next(error);
