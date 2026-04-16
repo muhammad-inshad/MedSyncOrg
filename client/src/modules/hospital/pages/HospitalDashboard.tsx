@@ -28,7 +28,6 @@ import {
     Legend,
 } from 'recharts';
 import { HOSPITAL_ROUTES } from '@/constants/frontend/hospital/hospital.routes';
-import toast from 'react-hot-toast';
 import { showToast } from '@/utils/toastUtils';
 
 const HospitalDashboard = () => {
@@ -176,7 +175,7 @@ const HospitalDashboard = () => {
                         <div className="bg-white rounded-xl shadow p-4 sm:p-6 flex flex-col justify-between">
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-purple-100 rounded-full flex items-center justify-center shrink-0">
                                         <CreditCard className="w-6 h-6 sm:w-7 sm:h-7 text-purple-600" />
                                     </div>
                                     <div>
@@ -299,7 +298,7 @@ function StatCard({
     return (
         <div className="bg-white rounded-xl shadow p-4 sm:p-6">
             <div className="flex items-center space-x-3 sm:space-x-4">
-                <div className={`w-12 h-12 sm:w-14 sm:h-14 ${bg} rounded-full flex items-center justify-center flex-shrink-0`}>
+                <div className={`w-12 h-12 sm:w-14 sm:h-14 ${bg} rounded-full flex items-center justify-center shrink-0`}>
                     <Icon className={`w-6 h-6 sm:w-7 sm:h-7 ${text}`} />
                 </div>
                 <div className="min-w-0">

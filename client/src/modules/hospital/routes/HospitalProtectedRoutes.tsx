@@ -22,15 +22,13 @@ const HospitalProtectedRoute = () => {
   );
 
   useEffect(() => {
-    const savedRole = localStorage.getItem("role");
-    if (!savedRole) {
-      if (loading) dispatch(stopLoading());
-      return;
-    }
-
-    dispatch(initializeAuth(savedRole));
-
-  }, [dispatch, location.pathname]);
+  const savedRole = localStorage.getItem("role");
+  if (!savedRole || isAuthenticated) {  
+    if (loading) dispatch(stopLoading());
+    return;
+  }
+  dispatch(initializeAuth(savedRole));
+}, [dispatch, isAuthenticated, loading]); 
 
   if (loading) return <FullScreenLoader />;
 

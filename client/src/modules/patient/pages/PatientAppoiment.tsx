@@ -8,6 +8,7 @@ import { PATIENT_ROUTES } from '@/constants/frontend/patient/patient.routes';
 import { toast } from 'react-hot-toast';
 import { format, addDays, startOfToday, isSameDay, parseISO } from 'date-fns';
 import { Calendar } from 'lucide-react';
+import { getHospitalSession } from '@/utils/session';
 
 interface DaySlot {
   day: string;
@@ -19,7 +20,7 @@ interface DaySlot {
 }
 
 interface Doctor {
-  _id: string;
+  id: string;
   name: string;
   specialization: string;
   consultationTime?: {
@@ -81,7 +82,6 @@ export default function PatientAppointment() {
     }
   }, [profileData]);
 
-  // Fetch Doctor Details
   useEffect(() => {
     const fetchDoctor = async () => {
       if (!doctorId) {
@@ -154,7 +154,34 @@ export default function PatientAppointment() {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  // Check if booking is allowed (at least 1 hour before consultation start)
+  const isBookingAllowed = () => {
+    if (!doctor?.consultationTime?.start) return true;
+
+    const now = new Date();
+    const today = startOfToday();
+
+    // Only apply restriction if today is selected
+    if (!isSameDay(selectedDate, today)) return true;
+
+    const [hours, minutes] = doctor.consultationTime.start.split(":").map(Number);
+
+    const consultationStart = new Date(today);
+    consultationStart.setHours(hours, minutes || 0, 0, 0);
+
+    const oneHourBefore = new Date(consultationStart.getTime() - 60 * 60 * 1000);
+
+    return now < oneHourBefore;
+  };
+
+  const isTodayBookingClosed = !isBookingAllowed() && isSameDay(selectedDate, startOfToday());
+
   const handleBooking = async () => {
+    if (isTodayBookingClosed) {
+      toast.error("Today's booking is closed. Please select another date.");
+      return;
+    }
+
     const currentAvailability = weekDaysAvailability.find(d =>
       isSameDay(d.fullDate, selectedDate)
     );
@@ -177,17 +204,23 @@ export default function PatientAppointment() {
           name: form.fullName,
           age: Number(form.age),
           email: form.email
-        }
+        },
+        hospitalId: getHospitalSession()
       };
 
       const dupRes = await patientApi.checkDuplicateAppointment(checkData);
       if (dupRes.data.success && dupRes.data.data) {
-        toast.error("patient already book the sloate");
+        toast.error("Patient already booked this slot");
         return;
       }
-
+console.log(doctor)
+      if (!doctor?.id || !doctor?.hospital_id) {
+        toast.error("Doctor or hospital not found");
+        return;
+      }
+    
       const bookingData = {
-        doctorId,
+        doctorId: doctor?.id,
         hospitalId: doctor?.hospital_id,
         appointmentDate: selectedDate.toISOString(),
         mode: serviceType,
@@ -202,6 +235,8 @@ export default function PatientAppointment() {
         heartRate: form.heartRate,
         weight: form.weight
       };
+
+    
 
       if (paymentMethod === "cash") {
         const res = await patientApi.bookAppointment(bookingData);
@@ -227,11 +262,12 @@ export default function PatientAppointment() {
         }
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
       toast.error("Something went wrong");
     }
   };
+
   const selectedAvailability = weekDaysAvailability.find(d => isSameDay(d.fullDate, selectedDate));
 
   const inputCls =
@@ -263,8 +299,9 @@ export default function PatientAppointment() {
       <section className="px-[5%] py-12 bg-[#f4f8fc]">
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-6 items-start">
 
-          {/* ── LEFT: Patient Information ── */}
+          {/* LEFT: Patient Information */}
           <div className="w-full lg:w-105 shrink-0 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            {/* ... Your existing patient form remains unchanged ... */}
             <div className="flex items-center gap-2 mb-1">
               <svg className="w-4 h-4 text-[#1a8fd1]" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
@@ -322,7 +359,6 @@ export default function PatientAppointment() {
                 ))}
               </div>
 
-              {/* Doctor and Hospital */}
               <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
                 <p className="text-[10px] uppercase font-bold text-blue-400 mb-2">Doctor & Hospital</p>
                 <div className="flex flex-col gap-0.5">
@@ -334,10 +370,10 @@ export default function PatientAppointment() {
             </div>
           </div>
 
-          {/* ── RIGHT: Calendar + Appointment Details ── */}
+          {/* RIGHT: Calendar + Appointment Details */}
           <div className="flex-1 flex flex-col gap-5 w-full">
 
-            {/* Week Calendar */}
+            {/* Week Calendar - Updated with red "Booking Closed" */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 overflow-x-auto">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-[#0d2b4e] text-sm flex items-center gap-2">
@@ -367,6 +403,7 @@ export default function PatientAppointment() {
                   />
                 </div>
               </div>
+
               {availabilityLoading ? (
                 <div className="flex justify-center p-4">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#1a8fd1]"></div>
@@ -375,6 +412,8 @@ export default function PatientAppointment() {
                 <div className="flex gap-2 justify-between min-w-125">
                   {weekDaysAvailability.map((d) => {
                     const isSelected = isSameDay(selectedDate, d.fullDate);
+                    const showClosed = isTodayBookingClosed && isSameDay(selectedDate, d.fullDate);
+
                     return (
                       <button
                         key={d.fullDate.toISOString()}
@@ -390,11 +429,14 @@ export default function PatientAppointment() {
                         <span className={`text-xl font-extrabold leading-none ${isSelected ? "text-white" : "text-[#0d2b4e]"}`}>
                           {d.date}
                         </span>
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase ${isSelected
-                          ? "bg-white/20 border-white/30 text-white"
-                          : statusStyle[d.status]
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase 
+                          ${showClosed 
+                            ? "bg-red-100 text-red-600 border-red-300" 
+                            : isSelected
+                              ? "bg-white/20 border-white/30 text-white"
+                              : statusStyle[d.status]
                           }`}>
-                          {d.status}
+                          {showClosed ? "Booking Closed" : d.status}
                         </span>
                       </button>
                     );
@@ -418,7 +460,21 @@ export default function PatientAppointment() {
                   </p>
                 )}
               </div>
-              <p className="text-xs text-gray-400 mb-5">Token-based booking for {format(selectedDate, 'MMMM d, yyyy')}</p>
+
+              <p className="text-xs text-gray-400 mb-5">
+                Token-based booking for {format(selectedDate, 'MMMM d, yyyy')}
+              </p>
+
+              {/* Red Warning Box when today booking is closed */}
+              {isTodayBookingClosed && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+                  <p className="font-semibold text-base">Today's Booking is Closed</p>
+                  <p className="text-sm mt-1">
+                    Booking closes 1 hour before consultation time ({doctor?.consultationTime?.start}). 
+                    Please select another available date.
+                  </p>
+                </div>
+              )}
 
               {/* Token Info */}
               <div className="grid grid-cols-2 gap-4 mb-8">
@@ -436,8 +492,9 @@ export default function PatientAppointment() {
                 </div>
               </div>
 
-              {/* Service Type */}
+              {/* Service Type & Payment Method - unchanged */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* ... your existing service type and payment method code ... */}
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-3 uppercase">Service Type</label>
                   <div className="flex flex-col gap-2">
@@ -445,8 +502,7 @@ export default function PatientAppointment() {
                       <label key={type} className="flex items-center gap-2 cursor-pointer group">
                         <div
                           onClick={() => setServiceType(type)}
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors ${serviceType === type ? "border-[#1a8fd1]" : "border-gray-300 group-hover:border-gray-400"
-                            }`}
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors ${serviceType === type ? "border-[#1a8fd1]" : "border-gray-300 group-hover:border-gray-400"}`}
                         >
                           {serviceType === type && <div className="w-2.5 h-2.5 rounded-full bg-[#1a8fd1]" />}
                         </div>
@@ -463,8 +519,7 @@ export default function PatientAppointment() {
                       <label key={method} className="flex items-center gap-2 cursor-pointer group">
                         <div
                           onClick={() => setPaymentMethod(method)}
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors ${paymentMethod === method ? "border-[#1a8fd1]" : "border-gray-300 group-hover:border-gray-400"
-                            }`}
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center cursor-pointer transition-colors ${paymentMethod === method ? "border-[#1a8fd1]" : "border-gray-300 group-hover:border-gray-400"}`}
                         >
                           {paymentMethod === method && <div className="w-2.5 h-2.5 rounded-full bg-[#1a8fd1]" />}
                         </div>
@@ -485,13 +540,17 @@ export default function PatientAppointment() {
                 </button>
                 <button
                   onClick={handleBooking}
-                  className="flex items-center gap-2 px-8 py-2.5 bg-[#1a8fd1] text-white rounded text-sm font-bold hover:bg-[#1478b0] transition-all cursor-pointer shadow-md disabled:opacity-50"
-                  disabled={availabilityLoading || selectedAvailability?.status === "Fully Booked"}
+                  className="flex items-center gap-2 px-8 py-2.5 bg-[#1a8fd1] text-white rounded text-sm font-bold hover:bg-[#1478b0] transition-all cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={availabilityLoading || selectedAvailability?.status === "Fully Booked" || isTodayBookingClosed}
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  {selectedAvailability?.status === "Fully Booked" ? 'Fully Booked' : 'Confirm Appointment'}
+                  {isTodayBookingClosed 
+                    ? "Booking Closed Today" 
+                    : selectedAvailability?.status === "Fully Booked" 
+                      ? 'Fully Booked' 
+                      : 'Confirm Appointment'}
                 </button>
               </div>
             </div>

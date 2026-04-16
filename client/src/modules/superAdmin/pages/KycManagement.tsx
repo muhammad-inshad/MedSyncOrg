@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Building2, Search, ArrowRight, ShieldCheck, Clock, FileWarning, XCircle } from 'lucide-react';
+import { Building2,ArrowRight, ShieldCheck, Clock, FileWarning, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import ManagementLayout from '../components/common/ManagementLayout';
@@ -69,8 +69,9 @@ const KycManagement = () => {
       setTotalPages(pagination.totalPages || 0);
       setTotalApplications(pagination.totalItems || 0);
       setCurrentPage(page);
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to fetch applications');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch applications';
+      toast.error(errorMessage);
       setApplications([]);
     } finally {
       setIsLoading(false);
@@ -88,7 +89,7 @@ const KycManagement = () => {
       }
     }, 600);
     return () => clearTimeout(timer);
-  }, [searchQuery, filter, fetchApplications]);
+  }, [searchQuery, filter, fetchApplications, currentPage]);
 
   const handleStatusUpdate = async (id: string, status: string) => {
     try {
@@ -107,8 +108,9 @@ const KycManagement = () => {
         setSelectedApplication(null);
         setRejectionReason('');
       }
-    } catch (error: any) { 
-      toast.error(error.message || 'Action failed'); 
+    } catch (error: unknown) { 
+      const errorMessage = error instanceof Error ? error.message : 'Action failed';
+      toast.error(errorMessage); 
     }
   };
 
@@ -239,7 +241,7 @@ const KycManagement = () => {
         isLoading={isLoading}
         tabs={['all', 'revision', 'pending', 'rejected']}
         activeTab={filter}
-        onTabChange={(tab) => setFilter(tab as any)}
+        onTabChange={(tab) => setFilter(tab as typeof filter)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         searchPlaceholder="Search by hospital name or admin email..."

@@ -7,8 +7,26 @@ import { socket } from "../../../services/socket.services";
 import toast from 'react-hot-toast';
 
 
+interface IAppointmentLite {
+    id: string;
+    _id: string;
+    tokenNumber: number;
+    patientName: string;
+    patientAge: number;
+    patientPhone: string;
+    doctorId: {
+        _id: string;
+    } | string;
+    mode: 'online' | 'offline';
+    patientDetails: {
+        name: string;
+        age: number;
+        phone: string;
+    };
+}
+
 const Livetoken = () => {
-    const [myAppointments, setMyAppointments] = useState<any[]>([]);
+    const [myAppointments, setMyAppointments] = useState<IAppointmentLite[]>([]);
     const [activeIdx, setActiveIdx] = useState(0);
     const [currentToken, setCurrentToken] = useState<number>(0);
     const [loading, setLoading] = useState(true);
@@ -19,7 +37,7 @@ const Livetoken = () => {
     const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
     const peerConnection = useRef<RTCPeerConnection | null>(null);
     const localStream = useRef<MediaStream | null>(null);
-    const pendingOffer = useRef<any>(null);
+    const pendingOffer = useRef<RTCSessionDescriptionInit | null>(null);
 
     const selectedAppointment = myAppointments.length > 0 ? myAppointments[activeIdx] : null;
     const tokensAhead = selectedAppointment ? Math.max(0, selectedAppointment.tokenNumber - currentToken) : 0;
@@ -29,7 +47,16 @@ const Livetoken = () => {
             try {
                 setLoading(true);
                 const response = await patientApi.getTodayAppointments();
-                const appointments = (response.data.data || []).map((app: any) => ({
+                const appointments = (response.data.data || []).map((app: {
+                    id: string;
+                    _id?: string;
+                    tokenNumber: number;
+                    patientName: string;
+                    patientAge: number;
+                    patientPhone: string;
+                    doctorId: { _id: string } | string;
+                    mode: 'online' | 'offline';
+                }) => ({
                     ...app,
                     _id: app.id || app._id,
                     patientDetails: {
@@ -41,7 +68,8 @@ const Livetoken = () => {
                 setMyAppointments(appointments);
 
                 if (appointments.length > 0) {
-                    const firstDoctorId = appointments[0].doctorId?._id || appointments[0].doctorId;
+                    const firstDoctor = appointments[0].doctorId;
+                    const firstDoctorId = typeof firstDoctor === 'object' ? firstDoctor._id : firstDoctor;
                     const tokenRes = await patientApi.getliveToken(firstDoctorId);
                     if (tokenRes.data.success && tokenRes.data.data) {
                         setCurrentToken(tokenRes.data.data.currentLiveToken);
@@ -61,7 +89,8 @@ const Livetoken = () => {
         if (selectedAppointment) {
             const fetchCurrentToken = async () => {
                 try {
-                    const doctorId = selectedAppointment.doctorId?._id || selectedAppointment.doctorId;
+                    const doctor = selectedAppointment.doctorId;
+                    const doctorId = typeof doctor === 'object' ? doctor._id : doctor;
                     const result = await patientApi.getliveToken(doctorId);
                     if (result.data.success && result.data.data) {
                         setCurrentToken(result.data.data.currentLiveToken);
@@ -159,7 +188,7 @@ const handleStartCall = async () => {
             console.log("Answer sent for pending offer");
         }
 
-    } catch (error) {
+    } catch {
         toast.error("Error accessing media devices:");
     }
 };
@@ -167,7 +196,7 @@ const handleStartCall = async () => {
 useEffect(() => {
     if (!selectedAppointment) return;
 
-    const handleOffer = async (offer: any) => {
+    const handleOffer = async (offer: RTCSessionDescriptionInit) => {
         if (!peerConnection.current) {
             console.log("Offer received but no peer connection yet. Storing as pending.");
             pendingOffer.current = offer;
@@ -185,7 +214,7 @@ useEffect(() => {
         console.log("Answer sent");
     };
 
-    const handleIceCandidate = async (candidate: any) => {
+    const handleIceCandidate = async (candidate: RTCIceCandidateInit) => {
         if (peerConnection.current) {
             try {
                 await peerConnection.current.addIceCandidate(candidate);

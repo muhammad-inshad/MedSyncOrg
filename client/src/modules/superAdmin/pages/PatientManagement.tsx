@@ -58,10 +58,10 @@ const PatientManagement = () => {
           : [];
 
       // Robust mapping for ID consistency
-      const mappedList: IPatient[] = rawList.map((p: any) => ({
+      const mappedList: IPatient[] = rawList.map((p: Record<string, unknown>) => ({
         ...p,
-        _id: p._id || p.id
-      }));
+        _id: String(p._id || p.id || '')
+      })) as IPatient[];
 
       const pagination = responseBody?.pagination || {};
       
@@ -88,7 +88,7 @@ const PatientManagement = () => {
       }
     }, 500);
     return () => clearTimeout(t);
-  }, [searchQuery, activeTab, fetchPatients]);
+  }, [searchQuery, activeTab, fetchPatients, currentPage]);
 
   const handleConfirmToggle = async () => {
     if (!confirmTarget) return;
@@ -100,8 +100,9 @@ const PatientManagement = () => {
         toast.success(`Patient ${!confirmTarget.status ? 'activated' : 'blocked'} successfully`);
         setConfirmTarget(null);
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to update patient status');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update patient status';
+      toast.error(errorMessage);
     } finally {
       setIsToggling(false);
     }

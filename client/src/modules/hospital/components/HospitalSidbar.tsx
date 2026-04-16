@@ -7,12 +7,10 @@ import { authApi } from '@/constants/backend/auth/auth.api';
 
 import {
   LayoutDashboard,
-  Wallet,
   Building2,
   UserCheck,
   Umbrella,
   User,
-  SquareStack,
   Bell,
   LogOut,
   Stethoscope,

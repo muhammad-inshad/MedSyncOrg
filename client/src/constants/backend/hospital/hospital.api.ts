@@ -1,6 +1,7 @@
-import api from "@/lib/api";
 import type { PaginationParams, UpdateDoctorKycStatusPayload, ToggleStatusData } from "@/interfaces/api.interfaces";
+import type { PaymentPayload } from "@/interfaces/ISubscription";
 import { HOSPITAL_MANAGEMENT } from "./hospital.routes";
+import api from "@/lib/api";
 
 export const hospitalApi = {
     getMe: () =>
@@ -141,7 +142,7 @@ export const hospitalApi = {
     getsubscription: (params?: { page?: number; limit?: number; search?: string }) =>
         api.get(HOSPITAL_MANAGEMENT.GETSUBSCRIPTION(), { params }),
 
-    createPaymentSession: (data?: any) =>
+    createPaymentSession: (data: PaymentPayload) =>
     api.post("/api/payment/checkout", data),
     
     getSubscriptonForProtection:()=>{

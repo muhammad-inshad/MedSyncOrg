@@ -9,7 +9,6 @@ import {
     FileText,
     Award,
     Info,
-    CreditCard,
     ChevronLeft,
     Lock,
     MapPin,
@@ -103,11 +102,11 @@ const DoctorEditProfile: React.FC = () => {
         end: 'AM'
     });
 
-    const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<DoctorUpdateFormData>({
+    const { register, handleSubmit, formState: { errors }, reset } = useForm<DoctorUpdateFormData>({
         resolver: zodResolver(doctorUpdateSchema),
     });
 
-    const paymentType = watch('payment.type');
+    // const paymentType = watch('payment.type');
 
     useEffect(() => {
         const fetchHospitalData = async () => {
@@ -147,7 +146,7 @@ const DoctorEditProfile: React.FC = () => {
             }
         };
         fetchHospitalData();
-    }, [userData?.hospital_id]);
+    }, [userData]);
 
     useEffect(() => {
         if (userData) {
@@ -310,7 +309,7 @@ const DoctorEditProfile: React.FC = () => {
 
                             <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
                                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 px-1">Medical License</h3>
-                                <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center">
+                                <div className="relative aspect-4/3 rounded-2xl overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center">
                                     {licensePreview ? <img src={licensePreview} alt="License" className="w-full h-full object-cover" /> : <FileText className="w-10 h-10 text-slate-300" />}
                                     <label className="absolute inset-0 bg-slate-900/60 opacity-0 hover:opacity-100 transition-all flex items-center justify-center cursor-pointer backdrop-blur-[2px]">
                                         <div className="bg-white text-slate-900 px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-2"><Upload className="w-3.5 h-3.5" /> Update Document</div>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Calendar,
   Clock,
@@ -11,6 +11,7 @@ import {
   XCircle,
   User,
   RefreshCw,
+  Phone,
 } from 'lucide-react';
 import DoctorSidebar from '../components/DoctorSidebar';
 import { doctorApi } from '@/constants/backend/doctor/doctor.api';
@@ -108,12 +109,12 @@ export default function UpcomingAppointments() {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchAppointmentsData = async (page: number = 1) => {
+  const fetchAppointmentsData = useCallback(async (page: number = 1) => {
     setIsLoading(true);
     try {
       const result = await doctorApi.UpcomingAppointments({
         page,
-        limit: 10,
+        limit: 5,
         search: debouncedSearch,
         date: selectedDate || undefined,
       });
@@ -177,7 +178,7 @@ export default function UpcomingAppointments() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [debouncedSearch, selectedDate]);
 
   // Debounce search
   useEffect(() => {
@@ -188,12 +189,12 @@ export default function UpcomingAppointments() {
   // Fetch when filters change
   useEffect(() => {
     fetchAppointmentsData(1);
-  }, [selectedDate, debouncedSearch]);
+  }, [fetchAppointmentsData]);
 
   // Fetch when page changes
   useEffect(() => {
     fetchAppointmentsData(currentPage);
-  }, [currentPage]);
+  }, [currentPage, fetchAppointmentsData]);
 
   const filteredAppointments = appointments.filter((appt) => {
     const matchType = typeFilter === 'All' || appt.type === typeFilter;
@@ -203,12 +204,6 @@ export default function UpcomingAppointments() {
   const grouped = groupByDate(filteredAppointments);
   const sortedDates = Object.keys(grouped).sort();
 
-  const stats = {
-    total: appointments.length,
-    confirmed: appointments.filter(a => a.status === 'Confirmed').length,
-    pending: appointments.filter(a => a.status === 'Pending').length,
-    canceled: appointments.filter(a => a.status === 'Canceled').length,
-  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -222,14 +217,7 @@ export default function UpcomingAppointments() {
               <h1 className="text-3xl font-bold text-slate-800">Upcoming Appointments</h1>
               <p className="text-slate-500 mt-1">Manage your scheduled consultations</p>
             </div>
-            <button
-              onClick={() => fetchAppointmentsData(currentPage)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition text-sm font-medium"
-              disabled={isLoading}
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
+         
           </div>
 
         </div>
@@ -309,7 +297,7 @@ export default function UpcomingAppointments() {
                       >
                         <div className="flex items-center gap-5">
                           {/* Avatar */}
-                          <div className={`w-14 h-14 rounded-2xl ${avatarColor} flex items-center justify-center text-white font-bold text-lg flex-shrink-0 overflow-hidden`}>
+                          <div className={`w-14 h-14 rounded-2xl ${avatarColor} flex items-center justify-center text-white font-bold text-lg shrink-0 overflow-hidden`}>
                             {appt.image ? (
                               <img src={appt.image} alt={appt.patientName} className="w-full h-full object-cover" />
                             ) : (
@@ -337,7 +325,7 @@ export default function UpcomingAppointments() {
                             </div>
 
                             {appt.phone && (
-                              <p className="text-sm text-slate-500 mt-1">📞 {appt.phone}</p>
+                              <p className="text-sm text-slate-500 mt-1">   <Phone className="w-4 h-4" /> {appt.phone}</p>
                             )}
                           </div>
 
@@ -378,7 +366,7 @@ export default function UpcomingAppointments() {
             ))
           )}
 
-          {/* Pagination */}
+  
           {!isLoading && totalPages > 1 && (
             <div className="mt-10 flex justify-center">
               <Pagination

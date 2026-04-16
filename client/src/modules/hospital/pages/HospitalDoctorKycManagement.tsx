@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { hospitalApi } from '../../../constants/backend/hospital/hospital.api';
 import toast from 'react-hot-toast';
 import { Search, CheckCircle, XCircle, AlertCircle, Eye, Download, Users, Clock, FileWarning, UserCheck } from 'lucide-react';
@@ -28,7 +28,7 @@ const HospitalDoctorKycManagement = () => {
     const [revision, setRevision] = useState(0);
     const [rejected, setRejected] = useState(0);
 
-    const fetchDoctors = async (page: number) => {
+    const fetchDoctors = useCallback(async (page: number) => {
         setIsLoading(true);
         try {
             const response = await hospitalApi.getKycDoctors({
@@ -48,15 +48,9 @@ const HospitalDoctorKycManagement = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [searchQuery, filter]);
 
-    useEffect(() => {
-        fetchDoctors(currentPage);
-          fetchkycStats();
-    }, [currentPage]);
-
-
-    async function fetchkycStats() {    
+    const fetchkycStats = useCallback(async () => {
         try {
           const response = await hospitalApi.getKycStats();
           setTotalApplications(response.data.data.total);
@@ -67,7 +61,13 @@ const HospitalDoctorKycManagement = () => {
           const message = error instanceof Error ? error.message : 'Failed to fetch KYC stats';
           toast.error(message);
         }
-    }
+    }, []);
+
+    useEffect(() => {
+        fetchDoctors(currentPage);
+          fetchkycStats();
+    }, [currentPage, fetchDoctors, fetchkycStats]);
+
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -78,7 +78,7 @@ const HospitalDoctorKycManagement = () => {
             }
         }, 500);
         return () => clearTimeout(timer);
-    }, [searchQuery, filter]);
+    }, [searchQuery, filter, fetchDoctors, currentPage]);
 
     const handleStatusUpdate = async (id: string, status: string) => {
         try {
@@ -509,11 +509,4 @@ const renderRow = (doc: IDoctor) => (
 };
 
 export default HospitalDoctorKycManagement;
-function setRivision(revision: any) {
-    throw new Error('Function not implemented.');
-}
-
-function setRejected(rejected: any) {
-    throw new Error('Function not implemented.');
-}
 

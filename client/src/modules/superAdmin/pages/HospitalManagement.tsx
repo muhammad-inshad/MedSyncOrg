@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Circle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -37,7 +37,7 @@ const HospitalManagement = () => {
   const [isToggling, setIsToggling] = useState(false);
   const navigate = useNavigate();
 
-  const fetchHospitals = async (page: number) => {
+  const fetchHospitals = useCallback(async (page: number) => {
     try {
       setIsLoading(true);
       const res = await superAdminApi.getHospitalManagement({ page, limit: ITEMS_PER_PAGE, search: searchQuery, status: activeTab });
@@ -45,9 +45,9 @@ const HospitalManagement = () => {
       setTotalPages(res.data.pagination?.totalPages || 0);
       setCurrentPage(page);
     } catch { setHospitals([]); } finally { setIsLoading(false); }
-  };
+  }, [searchQuery, activeTab]);
 
-  useEffect(() => { fetchHospitals(currentPage); }, [currentPage]);
+  useEffect(() => { fetchHospitals(currentPage); }, [currentPage, fetchHospitals]);
   useEffect(() => {
     const t = setTimeout(() => {
       if (currentPage !== 1) {
@@ -57,7 +57,7 @@ const HospitalManagement = () => {
       }
     }, 500);
     return () => clearTimeout(t);
-  }, [searchQuery, activeTab]);
+  }, [searchQuery, activeTab, fetchHospitals, currentPage]);
 
   const handleConfirmToggle = async () => {
     if (!confirmTarget) return;

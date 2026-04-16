@@ -221,7 +221,6 @@ const QualificationManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
   const [filter, setFilter] = useState<FilterType>('all');
   const [limit] = useState(5);
 
@@ -242,7 +241,7 @@ const QualificationManagement = () => {
   // Fetch qualifications with filter support
   const fetchQualifications = useCallback(async () => {
     try {
-      const params: any = {
+      const params: { page: number; limit: number; search: string; filter?: FilterType } = {
         page: currentPage,
         limit,
         search: searchQuery,
@@ -256,7 +255,7 @@ const QualificationManagement = () => {
 
       const { data, total, limit: resLimit } = res.data.data || {};
       setQualifications(data || []);
-      setTotalItems(total || 0);
+      // setTotalItems(total || 0);
       setTotalPages(Math.ceil((total || 0) / (resLimit || limit)) || 1);
     } catch (error) {
       console.error('Failed to fetch qualifications:', error);
@@ -330,7 +329,7 @@ const QualificationManagement = () => {
    const fetchStats = async () => {
       try {
         const response = await hospitalApi.getCommonStats(
-          COMMENT_TYPES.SPECIALIZATION
+          COMMENT_TYPES.QUALIFICATION
         );
         setTotal(response.data.data.stats.total);
         setActive(response.data.data.stats.active);

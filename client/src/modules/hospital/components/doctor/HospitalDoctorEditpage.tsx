@@ -66,9 +66,25 @@ const HospitalDoctorEditpage: React.FC = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [pendingData, setPendingData] = useState<HospitalDoctorEditFormData | null>(null);
 
-  const [deptData, setDeptData] = useState<any[]>([]);
-  const [specData, setSpecData] = useState<any[]>([]);
-  const [qualData, setQualData] = useState<any[]>([]);
+  interface IDeptItem {
+    _id: string;
+    departmentName: string;
+  }
+
+  interface ISpecItem {
+    _id: string;
+    name: string;
+    department_id: string;
+  }
+
+  interface IQualItem {
+    _id: string;
+    name: string;
+  }
+
+  const [deptData, setDeptData] = useState<IDeptItem[]>([]);
+  const [specData, setSpecData] = useState<ISpecItem[]>([]);
+  const [qualData, setQualData] = useState<IQualItem[]>([]);
 
   const [timePeriods, setTimePeriods] = useState({ start: 'AM', end: 'AM' });
 

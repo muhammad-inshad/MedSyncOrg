@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { z } from 'zod';
 import {
   CreditCard, Calendar, DollarSign, Tag,
-  ArrowLeft, Save, X, PencilLine, Users
+  ArrowLeft, Save, X, PencilLine, 
 } from 'lucide-react';
 
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -43,7 +43,7 @@ const EditSubscription = () => {
   const navigate = useNavigate();
   const location = useLocation();
   // Properly type the incoming subscription data
-  const subscription = (location.state?.subscription as Partial<SubscriptionForm>) || {};
+  const subscription = useMemo(() => (location.state?.subscription as Partial<SubscriptionForm>) || {}, [location.state]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -79,9 +79,9 @@ const EditSubscription = () => {
     setForm({
       planName: subscription.planName || '',
       amount: subscription.amount || 0,
-      status: (subscription.status as any) || 'active',
+      status: (subscription.status as EditSubscriptionForm['status']) || 'active',
       duration: subscription.duration || 1,
-      durationUnit: (subscription.durationUnit as any) || 'months',
+      durationUnit: (subscription.durationUnit as EditSubscriptionForm['durationUnit']) || 'months',
       paymentId: subscription.paymentId || '',
       paymentMethod: subscription.paymentMethod || '',
       limits: {

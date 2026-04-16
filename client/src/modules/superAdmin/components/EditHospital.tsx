@@ -76,15 +76,15 @@ const EditHospital = () => {
   const [hospitalId, setHospitalId] = useState<string>('');
 
   useEffect(() => {
-    console.log("jiiiiiiiiiiiiiiiii", hospital._id)
     if (hospital) {
       loadHospitalData(hospital);
     } else {
       navigate(-1)
     }
-  }, []);
+  }, [hospital, navigate, loadHospitalData]);
 
-  const loadHospitalData = (data: IHospital) => {
+
+  const loadHospitalData = useCallback((data: IHospital) => {
     setHospitalId(data.id || data._id);
 
     setFormData({
@@ -112,7 +112,8 @@ const EditHospital = () => {
     if (data.licence) {
       setLicensePreview(data.licence);
     }
-  };
+  }, [setHospitalId, setFormData, setLogoPreview, setLicensePreview]);
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;

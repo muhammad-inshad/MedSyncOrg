@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Bell, Settings, User, MessageSquare, FileText, Phone, LogOut } from 'lucide-react';
+import { Search, Bell, Settings, User, MessageSquare, FileText, Phone } from 'lucide-react';
 import DoctorDashbord from '../../../assets/images/DoctorDashbord.png';
 import { Link, useNavigate } from 'react-router-dom';
 import { DOCTOR_ROUTES } from '@/constants/frontend/doctor/doctor.routes';

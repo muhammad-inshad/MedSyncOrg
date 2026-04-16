@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useAppSelector } from "@/hooks/redux";
@@ -24,34 +23,7 @@ const specialties: string[] = [
   "Gastroenterology", "Urology", "Dermatology", "Gynaecology",
 ];
 
-interface Doctor {
-  name: string;
-  specialty: string;
-}
-
-const doctors: Doctor[] = [
-  { name: "Doctor's Name", specialty: "NEUROLOGY" },
-  { name: "Doctor's Name", specialty: "NEUROLOGY" },
-  { name: "Doctor's Name", specialty: "NEUROLOGY" },
-];
-
-interface ContactCard {
-  icon: string;
-  label: string;
-  lines: string[];
-}
-
-const contactCards: ContactCard[] = [
-  { icon: "📞", label: "EMERGENCY", lines: ["(337) 666-810-200", "(337) 666-321-894"] },
-  { icon: "📍", label: "LOCATION", lines: ["1703 Some place", "8878 Some place, Some County"] },
-  { icon: "✉️", label: "EMAIL", lines: ["hideweease@gmail.com", "medefolius@gmail.com"] },
-  { icon: "🕐", label: "WORKING HOURS", lines: ["Mon–Sat 09:00–20:00", "Sunday Emergency only"] },
-];
-
-
-
 export default function PatientHospitalHome() {
-  const [activeDoctor, setActiveDoctor] = useState<number>(1);
   const hospital = useAppSelector((state) => state.hospital.hospital);
 
   return (

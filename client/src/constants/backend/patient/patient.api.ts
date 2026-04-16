@@ -1,6 +1,24 @@
 import api from "@/lib/api";
 import { PATIENT_MANAGEMENT } from "./patient.routes";
 
+interface IBookingData {
+    doctorId: string;
+    hospitalId: string;
+    appointmentDate: string;
+    mode: "offline" | "online" | string;
+    patientDetails: {
+        name: string;
+        age: number;
+        phone: string;
+        email: string;
+        address: string;
+    };
+    bloodPressure: string;
+    heartRate: string;
+    weight: string;
+    doctorName?: string;
+}
+
 export const patientApi = {
     getMe: () =>
         api.get(PATIENT_MANAGEMENT.GET_ME),
@@ -22,7 +40,7 @@ export const patientApi = {
     getAvailableSlots: (doctorId: string, date: string) => {
         return api.get(`${PATIENT_MANAGEMENT.GET_AVAILABLE_SLOTS(doctorId)}?date=${date}`)
     },
-    bookAppointment: (data: any) => {
+    bookAppointment: (data: IBookingData) => {
         return api.post(PATIENT_MANAGEMENT.BOOK_APPOINTMENT, data)
     },
     checkDuplicateAppointment: (data: { doctorId: string, date: string, patient: { name: string, age: number, email?: string } }) => {
@@ -41,8 +59,8 @@ export const patientApi = {
         return api.get(PATIENT_MANAGEMENT.TODAY_APPOINTMENTS);
     },
       
-      createAppointmentPaymentSession: (data: any) =>
-    api.post("/api/payment/appointment-checkout", data),
+    createAppointmentPaymentSession: (data: { bookingData: IBookingData }) =>
+        api.post("/api/payment/appointment-checkout", data),
     checkAppointmentStatus: (sessionId: string) =>
         api.get(PATIENT_MANAGEMENT.CHECK_APPOINTMENT_STATUS(sessionId)),
 

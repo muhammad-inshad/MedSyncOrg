@@ -50,7 +50,7 @@ const DoctorRegistrationForm: React.FC = () => {
     if (!selectedHospitalId) {
       navigate(COMMON_ROUTES.DOCTORSELECTHOSPITAL)
     }
-  }, [])
+  }, [navigate])
 
   const {
     register,
@@ -86,7 +86,7 @@ const DoctorRegistrationForm: React.FC = () => {
       }
     };
     fetchMasterData();
-  }, []);
+  }, [selectedDepartment]);
 
   useEffect(() => {
     const fetchSpecializations = async () => {
@@ -223,8 +223,8 @@ const DoctorRegistrationForm: React.FC = () => {
                 <select {...register('qualification')} className={inputClass(!!errors.qualification)}>
                   <option value="">{AUTH_MESSAGES.SIGNUP.SELECT}</option>
                   {qualifications.map(q => (
-                    <option key={q._id} value={q.name || (q as any).qualificationName}>
-                      {q.name || (q as any).qualificationName}
+                    <option key={q.id} value={q.name}>
+                      {q.name}
                     </option>
                   ))}
                 </select>
@@ -240,7 +240,7 @@ const DoctorRegistrationForm: React.FC = () => {
                 <select {...register('department')} className={inputClass(!!errors.department)}>
                   <option value="">{AUTH_MESSAGES.SIGNUP.SELECT}</option>
                   {departments.map(d => (
-                    <option key={d._id} value={d._id}>{d.departmentName}</option>
+                    <option key={d.id} value={d.id}>{d.departmentName}</option>
                   ))}
                 </select>
                 {errors.department && <p className={errorClass}>{errors.department.message}</p>}
@@ -250,7 +250,7 @@ const DoctorRegistrationForm: React.FC = () => {
                 <select {...register('specialization')} className={inputClass(!!errors.specialization)}>
                   <option value="">{AUTH_MESSAGES.SIGNUP.SELECT}</option>
                   {specializations.map(s => (
-                    <option key={s._id} value={s.name}>{s.name}</option>
+                    <option key={s.id} value={s.name}>{s.name}</option>
                   ))}
                 </select>
                 {errors.specialization && <p className={errorClass}>{errors.specialization.message}</p>}

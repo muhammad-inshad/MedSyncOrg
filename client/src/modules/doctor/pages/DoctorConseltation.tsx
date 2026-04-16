@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import DoctorSidebar from '../components/DoctorSidebar';
-import { z } from 'zod';
+
 import { 
   User, 
   Phone, 
@@ -15,8 +15,9 @@ import {
 import { doctorApi } from '@/constants/backend/doctor/doctor.api';
 import { socket } from "../../../services/socket.services";
 import toast from 'react-hot-toast';
-import type { IAppointment, IPrescriptionData } from '@/interfaces/IAppointment';
+import type { IAppointment } from '@/interfaces/IAppointment';
 import PrescriptionModal from '../components/PrescriptionModal';
+import axios from 'axios';
 
 const DoctorConsultation = () => {
   const [currentAppointment, setCurrentAppointment] = useState<IAppointment | null>(null);
@@ -38,7 +39,21 @@ const DoctorConsultation = () => {
       const result = await doctorApi.getConsultation({ page, limit: 1 });
       if (result.data && result.data.data) {
         const { appointments, total } = result.data.data;
-        const mappedAppointments = appointments.map((app: any) => ({
+        const mappedAppointments: IAppointment[] = appointments.map((app: {
+          id?: string;
+          _id: string;
+          patientName?: string;
+          patientAge?: number;
+          patientPhone?: string;
+          patientEmail?: string;
+          patientAddress?: string;
+          tokenNumber: number;
+          mode: string;
+          bloodPressure?: string;
+          heartRate?: string;
+          weight?: string;
+          status?: string;
+        }) => ({
           ...app,
           _id: app.id || app._id,
           patientDetails: {
@@ -53,7 +68,11 @@ const DoctorConsultation = () => {
         setTotalTokens(total);
       }
     } catch (error) {
-      toast.error("Something went wrong while fetching consultations");
+        if (axios.isAxiosError(error)) {
+    toast.error(error.response?.data?.message || "Failed to fetch consultation data");
+  } else {
+    toast.error("Something went wrong");
+  }
     } finally {
       setLoading(false);
     }
@@ -144,14 +163,14 @@ const DoctorConsultation = () => {
   useEffect(() => {
     if (!currentAppointment) return;
 
-    const handleAnswer = async (answer: any) => {
+    const handleAnswer = async (answer: RTCSessionDescriptionInit) => {
       if (peerConnection.current) {
         await peerConnection.current.setRemoteDescription(answer);
         console.log("Call connected ");
       }
     };
 
-    const handleIceCandidate = async (candidate: any) => {
+    const handleIceCandidate = async (candidate: RTCIceCandidateInit) => {
       if (peerConnection.current) {
         try {
           await peerConnection.current.addIceCandidate(candidate);
@@ -181,44 +200,52 @@ const DoctorConsultation = () => {
       toast.success("Appointment marked as completed");
       setCurrentAppointment((prev) => prev ? { ...prev, status: 'completed' } : null);
     } catch (error) {
-      toast.error("Failed to mark as completed");
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || "Failed to mark as completed");
+      } else {
+        toast.error("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSavePrescription = async (prescriptionData: IPrescriptionData) => {
-    if (!currentAppointment?._id) return;
+  // const handleSavePrescription = async (prescriptionData: IPrescriptionData) => {
+  //   if (!currentAppointment?._id) return;
     
-    const prescriptionSchema = z.object({
-      symptoms: z.string().min(1, "Symptoms are required"),
-      diagnosis: z.string().min(1, "Diagnosis is required"),
-      medicines: z.array(z.object({
-        name: z.string().min(1, "Medicine name is required"),
-        dosage: z.string().min(1, "Dosage is required"),
-        duration: z.string().min(1, "Duration is required"),
-        instruction: z.string().optional()
-      })).min(1, "At least one medicine is required")
-    });
+  //   const prescriptionSchema = z.object({
+  //     symptoms: z.string().min(1, "Symptoms are required"),
+  //     diagnosis: z.string().min(1, "Diagnosis is required"),
+  //     medicines: z.array(z.object({
+  //       name: z.string().min(1, "Medicine name is required"),
+  //       dosage: z.string().min(1, "Dosage is required"),
+  //       duration: z.string().min(1, "Duration is required"),
+  //       instruction: z.string().optional()
+  //     })).min(1, "At least one medicine is required")
+  //   });
 
-    const validation = prescriptionSchema.safeParse(prescriptionData);
-    if (!validation.success) {
-      toast.error(validation.error.issues[0].message);
-      return;
-    }
+  //   const validation = prescriptionSchema.safeParse(prescriptionData);
+  //   if (!validation.success) {
+  //     toast.error(validation.error.issues[0].message);
+  //     return;
+  //   }
 
-    try {
-      setLoading(true);
-      await doctorApi.savePrescription(currentAppointment._id, prescriptionData);
-      toast.success("Prescription saved successfully");
-      setIsModalOpen(false);
-      handleMarkAsCompleted(); 
-    } catch (error) {
-      toast.error("Failed to save prescription");
-    } finally {
-      setLoading(false);
-    }
-  };
+  //   try {
+  //     setLoading(true);
+  //     await doctorApi.savePrescription(currentAppointment._id, prescriptionData);
+  //     toast.success("Prescription saved successfully");
+  //     setIsModalOpen(false);
+  //     handleMarkAsCompleted(); 
+  //   } catch (error) {
+  //     if (axios.isAxiosError(error)) {
+  //       toast.error(error.response?.data?.message || "Failed to save prescription");
+  //     } else {
+  //       toast.error("Something went wrong");
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   if (loading && !currentAppointment) {
     return (
@@ -396,14 +423,14 @@ const DoctorConsultation = () => {
           </div>
         </div>
 
-      <PrescriptionModal 
+    <PrescriptionModal 
   isOpen={isModalOpen} 
   onClose={() => setIsModalOpen(false)}
   patientName={currentAppointment?.patientDetails.name || ''}
   appointmentId={currentAppointment?._id || null}
+  
   onSuccess={() => {
     handleMarkAsCompleted();     
-  
   }}
 />
       </main>

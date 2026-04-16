@@ -7,7 +7,6 @@ import {
   Building2,
   CreditCard,
   Shield,
-  MessageSquare,
   LogOut,
   Hospital,
   UserPlus

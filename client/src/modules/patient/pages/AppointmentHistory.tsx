@@ -62,7 +62,18 @@ useEffect(() => {
             const responseData = result.data;
 
             if (responseData.success) {
-                const mappedData = responseData.data.map((item: any) => ({
+                const mappedData = responseData.data.map((item: {
+                    id: string;
+                    patientName: string;
+                    patientAge: number;
+                    patientPhone: string;
+                    doctorId: string;
+                    doctorName?: string;
+                    doctorSpecialization?: string;
+                    doctorDepartment?: string;
+                    doctorProfileImage?: string;
+                    [key: string]: unknown; // Allow for other fields
+                }) => ({
                     ...item,
                     id: item.id,
                     patientDetails: {

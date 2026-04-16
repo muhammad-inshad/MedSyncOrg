@@ -32,7 +32,7 @@ const CommonProtector = () => {
     } else {
       dispatch(initializeAuth(savedRole));
     }
-  }, [dispatch, location.pathname]);
+  }, [dispatch, location.pathname, navigate]);
 
   if (loading) return <FullScreenLoader />;
 

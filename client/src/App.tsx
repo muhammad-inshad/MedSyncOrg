@@ -9,7 +9,6 @@ import DoctorRoutes from "./modules/doctor/routes/DoctorRoutes.tsx";
 
 const App = () => {
   useEffect(() => {
-    // Check for "pending" toasts that should survive a page reload
     const pendingToastData = localStorage.getItem("pending_toast");
     if (pendingToastData) {
       try {

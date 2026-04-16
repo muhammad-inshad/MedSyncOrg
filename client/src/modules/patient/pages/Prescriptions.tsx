@@ -3,32 +3,18 @@ import Navbar from '@/modules/patient/components/Navbar';
 import Footer from '../components/Footer';
 import {
     Calendar, ChevronRight, X, Pill, FileText,
-    Building2, Loader2, ClipboardList, Clock, Search
+    Building2, Loader2, ClipboardList, Search
 } from 'lucide-react';
 import { patientApi } from '@/constants/backend/patient/patient.api';
 import Pagination from '@/components/Pagination';
-import type { IMedicine, IPrescription } from '@/interfaces/priscription';
+import type { IPrescription } from '@/interfaces/priscription';
 
 
 const fmt = (d: string) =>
     new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
 
-const MedicineBadge = ({ med }: { med: IMedicine }) => (
-    <div className="flex items-start gap-3 p-4 rounded-2xl border border-blue-100 bg-blue-50/70 hover:bg-blue-50 transition-colors">
-        <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <Pill className="w-4 h-4 text-blue-600" />
-        </div>
-        <div className="min-w-0 flex-1">
-            <p className="font-bold text-gray-800 text-sm leading-tight truncate">{med.name}</p>
-            <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5">
-                <span className="text-xs font-semibold text-blue-600">{med.dosage}</span>
-                <span className="text-xs text-gray-400">•</span>
-                <span className="text-xs text-gray-500">{med.duration}</span>
-            </div>
-        </div>
-    </div>
-);
+
 
 const DetailModal = ({
     prescription,

@@ -239,7 +239,6 @@ const SpecializationManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
   const [filter, setFilter] = useState<FilterType>('all');
   const [limit] = useState(5);
 
@@ -258,7 +257,7 @@ const SpecializationManagement = () => {
   // Fetch specializations with filter support
   const fetchSpecializations = useCallback(async () => {
     try {
-      const params: any = {
+      const params: { page: number; limit: number; search: string; filter?: FilterType } = {
         page: currentPage,
         limit,
         search: searchQuery,
@@ -271,7 +270,7 @@ const SpecializationManagement = () => {
       const res = await hospitalApi.getSpecializations(params);
       const { data, total, limit: resLimit } = res.data.data || {};
       setSpecializations(data || []);
-      setTotalItems(total || 0);
+      // setTotalItems(total || 0);
       setTotalPages(Math.ceil((total || 0) / (resLimit || limit)) || 1);
     } catch (error) {
       console.error('Failed to fetch specializations:', error);

@@ -3,14 +3,10 @@ import {
   LayoutDashboard,
   CalendarCheck,
   CalendarOff,
-  Hash,
-  MessageSquare,
-  FileText,
   Wallet,
   ChevronLeft,
   ChevronRight,
   Stethoscope,
-  LogOut,
   Ticket,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
@@ -81,7 +77,7 @@ const DoctorSidebar = () => {
       <div className="flex items-center justify-between px-4 py-5 border-b border-gray-100">
         {!collapsed && (
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shrink-0">
               <Stethoscope className="w-4 h-4 text-white" />
             </div>
             <span className="text-lg font-semibold text-gray-800">MedSync</span>
@@ -112,7 +108,7 @@ const DoctorSidebar = () => {
                 }
               `}
             >
-              <span className={`flex-shrink-0 ${isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-600'}`}>
+              <span className={`shrink-0 ${isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-600'}`}>
                 {item.icon}
               </span>
               {!collapsed && (

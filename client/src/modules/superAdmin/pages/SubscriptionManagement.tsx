@@ -79,7 +79,7 @@ const SubscriptionManagement = () => {
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchQuery, activeTab, fetchSubscriptions]);
+  }, [searchQuery, activeTab, fetchSubscriptions, currentPage]);
 
   const handleConfirmToggle = async () => {
     if (!confirmTarget) return;
@@ -177,7 +177,7 @@ const SubscriptionManagement = () => {
         isLoading={isLoading}
         tabs={['All', 'Active', 'Inactive']}
         activeTab={activeTab}
-        onTabChange={(tab) => setActiveTab(tab as any)}
+        onTabChange={(tab) => setActiveTab(tab as typeof activeTab)}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         searchPlaceholder="Search by plan name or ID..."

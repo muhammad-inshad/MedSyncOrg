@@ -242,7 +242,7 @@ const tableColumns: TableColumn<LeaveColumnKey>[] = [
 const renderRow = (leave: IDoctorLeave & { isExpired: boolean }) => {
   const session = leave.leaveSession ? sessionConfig[leave.leaveSession] : null;
   const SessionIcon = session?.icon;
-  const isExpired = leave.isExpired;
+  // const isExpired = leave.isExpired;
 
   return (
     <>
@@ -287,7 +287,7 @@ const renderRow = (leave: IDoctorLeave & { isExpired: boolean }) => {
         )}
       </td>
 
-      <td className="px-6 py-4 max-w-[200px]">
+      <td className="px-6 py-4 max-w-50">
         <p className="text-xs text-slate-600 font-medium line-clamp-2">{leave.reason || "—"}</p>
       </td>
 
@@ -549,7 +549,7 @@ const filterTabs: { key: FilterType; label: string }[] = [
 
       {/* Reject Modal */}
       {showRejectModal && selectedLeave && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-slate-900/70 flex items-center justify-center z-[60] p-4">
+        <div className="fixed inset-0 backdrop-blur-sm bg-slate-900/70 flex items-center justify-center z-60 p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl p-8 space-y-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center">
@@ -569,7 +569,7 @@ const filterTabs: { key: FilterType; label: string }[] = [
                 value={rejectReason}
                 onChange={e => setRejectReason(e.target.value)}
                 placeholder="Explain why this leave request is being rejected..."
-                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all min-h-[130px] resize-none text-slate-600 font-medium"
+                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 outline-none transition-all min-h-32.5 resize-none text-slate-600 font-medium"
               />
             </div>
 
@@ -595,7 +595,7 @@ const filterTabs: { key: FilterType; label: string }[] = [
       {/* Zoom Modal */}
       {showZoomModal && selectedLeave?.photo && (
         <div 
-          className="fixed inset-0 bg-slate-900/95 flex items-center justify-center z-[70] p-4 cursor-zoom-out"
+          className="fixed inset-0 bg-slate-900/95 flex items-center justify-center z-70 p-4 cursor-zoom-out"
           onClick={() => setShowZoomModal(false)}
         >
           <div className="relative max-w-4xl w-full flex flex-col items-center">

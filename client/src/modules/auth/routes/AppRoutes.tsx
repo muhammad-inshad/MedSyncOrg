@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { COMMON_ROUTES } from "@/constants/frontend/common/common.routes";
 import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
 import LogIn from "../pages/Loginpage";

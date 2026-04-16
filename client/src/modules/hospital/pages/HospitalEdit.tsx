@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { z } from 'zod';
-import { Upload, Building2, Mail, Phone, MapPin, Calendar, CreditCard, Save, X, Eye, EyeOff, Shield, Image as ImageIcon, Trash2, ArrowLeft } from 'lucide-react';
+import { Upload, Building2, Mail, Phone, MapPin, Calendar, Save, X,  Image as ImageIcon, Trash2, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { IHospital } from '@/interfaces/IHospital';
 
@@ -408,7 +408,7 @@ const HospitalEdit = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <div className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+      <div className="flex-1 bg-linear-to-br from-blue-50 to-indigo-100 py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <button
             onClick={handleCancel}
@@ -419,7 +419,7 @@ const HospitalEdit = () => {
           </button>
 
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
+            <div className="bg-linear-to-r from-blue-600 to-indigo-600 px-8 py-6">
               <h1 className="text-3xl font-bold text-white flex items-center gap-3">
                 <Building2 className="w-8 h-8" />
                 Edit Hospital Information
@@ -726,7 +726,7 @@ const HospitalEdit = () => {
                   type="button"
                   onClick={handleSubmit}
                   disabled={isLoading}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="w-5 h-5" />
                   {isLoading ? 'Saving...' : 'Save Changes'}

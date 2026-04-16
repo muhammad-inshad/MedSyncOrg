@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Ban, User, Mail, Phone, ShieldCheck, ShieldAlert, Users, UserCheck, UserX, Clock, icons } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Search, Plus, Edit2, Ban, User, Mail, Phone, ShieldCheck, ShieldAlert, Users, UserCheck, UserX } from 'lucide-react';
 import { hospitalApi } from '@/constants/backend/hospital/hospital.api';
 import { HOSPITAL_ROUTES } from '@/constants/frontend/hospital/hospital.routes';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +11,6 @@ import { StatsCards } from "../tables/StatsCards";
 import { FilterTabs } from "../tables/FilterTabs";
 import { DataTable, type TableColumn } from "../tables/DataTable";
 import { COMMENT_TYPES } from '@/constants/comments/comments';
-import { set } from 'mongoose';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -27,25 +26,11 @@ const PatientManagement = () => {
   const [filter, setFilter] = useState<FilterType>('all');
   const [totalPages, setTotalPages] = useState(0);
   const navigate = useNavigate();
-  const [toatl,setTotal]=useState(0);
+  const [total,setTotal]=useState(0);
   const [active,setActive]=useState(0);
   const [blocked,setBlocked]=useState(0);
 
-  // Fetch patients when page or filter changes
-  useEffect(() => {
-    fetchPatients(currentPage);
-    fetchStats();
-  }, [currentPage, filter]);
-
-  // Debounced search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentPage(1);
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
-
-  const fetchPatients = async (page: number) => {
+  const fetchPatients = useCallback(async (page: number) => {
     try {
       setIsLoading(true);
       const response = await hospitalApi.getAllPatients({
@@ -64,20 +49,34 @@ const PatientManagement = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [searchQuery, filter]);
 
-const fetchStats = async () => {
-  try {
-    const response = await hospitalApi.getCommonStats(
-      COMMENT_TYPES.PATIENT_MANAGEMENT
-    );
-    setTotal(response.data.data.stats.total);
-    setActive(response.data.data.stats.active);
-    setBlocked(response.data.data.stats.blocked);
-  } catch (error) {
-    console.error("Error fetching stats:", error);
-  }
-};
+  const fetchStats = useCallback(async () => {
+    try {
+      const response = await hospitalApi.getCommonStats(
+        COMMENT_TYPES.PATIENT_MANAGEMENT
+      );
+      setTotal(response.data.data.stats.total);
+      setActive(response.data.data.stats.active);
+      setBlocked(response.data.data.stats.blocked);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  }, []);
+
+  // Fetch patients when page or filter changes
+  useEffect(() => {
+    fetchPatients(currentPage);
+    fetchStats();
+  }, [currentPage, fetchPatients, fetchStats]);
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const handleEdit = (patient: IPatient) => {
     navigate(HOSPITAL_ROUTES.HOSPITALPATIENTEDIT, { state: { patient } });
@@ -131,7 +130,7 @@ const fetchStats = async () => {
   const stats=[
     {
       label:"Total Patients",
-      value:toatl,
+      value:total,
       icon:Users,
       color: "text-slate-600",
       bg: "bg-slate-100",

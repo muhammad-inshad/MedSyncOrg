@@ -84,7 +84,7 @@ interface PaymentSuccessProps {
   message?: string;
   redirectPath: string;
   redirectLabel?: string;
-  pollingFunc?: (sessionId: string) => Promise<any>;
+  pollingFunc?: (sessionId: string) => Promise<unknown>;
   successMessage?: string;
   failureRedirectPath?: string;
 }

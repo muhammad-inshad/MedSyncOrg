@@ -22,18 +22,13 @@ const DoctorProtectedRoute = () => {
     (state: RootState) => state.auth
   );
 
-  useEffect(() => {
-    const savedRole = localStorage.getItem("role");
+useEffect(() => {
+  const savedRole = localStorage.getItem("role");
 
-    if (!savedRole) {
-      if (loading) dispatch(stopLoading());
-      return;
-    }
-
-    // Always re-verify on navigation to catch "blocked" status in real-time
+  if (savedRole) {
     dispatch(initializeAuth(savedRole));
-
-  }, [dispatch, location.pathname]);
+  }
+}, [dispatch]);
 
   if (loading) return <FullScreenLoader />;
 

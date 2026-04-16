@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Plus, Trash2, Loader2 } from 'lucide-react';
 import { doctorApi } from '@/constants/backend/doctor/doctor.api';
+import axios from 'axios';
 import toast from 'react-hot-toast';
 import { z } from 'zod';
 import type { IMedicine, PrescriptionModalProps, SavePrescriptionPayload } from '@/interfaces/priscription';
@@ -74,9 +75,13 @@ const PrescriptionModal = ({
       onSuccess?.();
       onClose();
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Prescription save error:", error);
-      toast.error(error?.response?.data?.message || "Failed to save prescription. Please try again.");
+      let errorMessage = "Failed to save prescription. Please try again.";
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

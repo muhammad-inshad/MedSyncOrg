@@ -31,7 +31,7 @@ const hospitalSlice = createSlice({
       })
       .addCase(loadHospitalData.rejected, (state, action) => {
         state.loading = false;
-        const payload = action.payload as any;
+        const payload = action.payload as { status?: number } | undefined;
         if (payload?.status !== 402) {
           state.hospital = null;
         }

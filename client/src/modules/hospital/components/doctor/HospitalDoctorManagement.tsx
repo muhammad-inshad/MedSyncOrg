@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Search, Plus, Edit2, Ban, User, Mail, ShieldCheck, ShieldAlert, Stethoscope, GraduationCap, Users, UserCheck, UserX, Clock } from "lucide-react";
 import { hospitalApi } from "@/constants/backend/hospital/hospital.api";
 import { HOSPITAL_ROUTES } from "@/constants/frontend/hospital/hospital.routes";
@@ -10,7 +10,6 @@ import Pagination from "@/components/Pagination";
 import { StatsCards } from "../tables/StatsCards";
 import { FilterTabs } from "../tables/FilterTabs";
 import { DataTable, type TableColumn } from "../tables/DataTable";
-import { set } from "mongoose";
 
 
 
@@ -29,28 +28,10 @@ const HospitalDoctorManagement = () => {
   const [totaldoctors, setTotalDoctors] = useState(0);
   const [activeDoctors, setActiveDoctors] = useState(0);
   const [blockedDoctors, setBlockedDoctors] = useState(0);
-  const [pendingDoctors, setPendingDoctors] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const navigate = useNavigate();
 
-  // Fetch doctors when page or filter changes
-  useEffect(() => {
-    fetchDoctors(currentPage);
-  }, [currentPage, filter]);
-
- useEffect(() => {
-  const timer = setTimeout(() => {
-    setCurrentPage(1);         
-  }, 500);
-
-  return () => clearTimeout(timer);
-}, [searchQuery]);
-
-useEffect(() => {
-  fetchDoctors(currentPage);
-  fetchStaus()
-}, [currentPage, searchQuery, filter]);
-  const fetchDoctors = async (page: number) => {
+  const fetchDoctors = useCallback(async (page: number) => {
     try {
       setIsLoading(true);
       const response = await hospitalApi.getAllDoctors({
@@ -70,21 +51,37 @@ useEffect(() => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [searchQuery, filter]);
 
-       const fetchStaus = async () => {
-        try {
-          const res = await hospitalApi.getDoctorStatus();
-          console.log(res.data)
-         setTotalDoctors(res.data.data.total);
-    setActiveDoctors(res.data.data.active);
-    setBlockedDoctors(res.data.data.blocked);
-    setPendingDoctors(res.data.data.pending);
-    console.log(totaldoctors,activeDoctors,blockedDoctors)
-  } catch (error) {
-    console.error("Failed to fetch doctor status:", error);
-  }
-      };
+  const fetchStaus = useCallback(async () => {
+    try {
+      const res = await hospitalApi.getDoctorStatus();
+      console.log(res.data)
+      setTotalDoctors(res.data.data.total);
+      setActiveDoctors(res.data.data.active);
+      setBlockedDoctors(res.data.data.blocked);
+    } catch (error) {
+      console.error("Failed to fetch doctor status:", error);
+    }
+  }, []);
+
+  // Fetch doctors when page or filter changes
+  useEffect(() => {
+    fetchDoctors(currentPage);
+  }, [currentPage, fetchDoctors]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    fetchDoctors(currentPage);
+    fetchStaus()
+  }, [currentPage, fetchDoctors, fetchStaus]);
 
   const handleEdit = (doctor: IDoctor) => {
     navigate(HOSPITAL_ROUTES.HOSPITALDOCTOREDIT, { state: doctor.id });

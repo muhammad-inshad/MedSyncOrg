@@ -308,7 +308,7 @@ const SubscriptionHospital = () => {
       const rawData = response.data.data || [];
       const pagination = response.data.pagination || {};
 
-      const mappedData: IHospitalSubscription[] = rawData.map((item: any) => ({
+      const mappedData: IHospitalSubscription[] = rawData.map((item: Record<string, unknown>) => ({
         id: item.id,
         hospitalId: item.id,
         hospitalName: item.hospitalName,
@@ -325,7 +325,7 @@ const SubscriptionHospital = () => {
         durationUnit: item.subscription?.durationUnit || 'months',
         duration: item.subscription?.duration ?? 0,
         logoUrl: item.logo || '',
-      }));
+      })) as IHospitalSubscription[];
 
       setHospitals(mappedData);
       setTotalPages(pagination.totalPages || 0);

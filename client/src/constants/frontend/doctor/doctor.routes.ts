@@ -6,4 +6,5 @@ export const DOCTOR_ROUTES = {
     UPCOMING_APPOINTMENTS:"/doctor/upcoming-appointments",
     APPLY_LEAVE:"/doctor/apply-leave",
     CONSELTATION:"/docor/conseltation",
+    WALLET:"/doctor/wallet"
 };

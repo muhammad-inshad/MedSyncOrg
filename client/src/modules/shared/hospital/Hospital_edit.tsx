@@ -213,7 +213,7 @@ const Hospital_edit = () => {
     setIsLoading(true);
 
     try {
-      const response = await hospitalApi.editHospital(hospitalId, formData as any);
+      const response = await hospitalApi.editHospital(hospitalId, formData as unknown as Parameters<typeof hospitalApi.editHospital>[1]);
       if (response.status === 200 || response.status === 204) {
         toast.success('Hospital information updated successfully!');
         navigate(HOSPITAL_ROUTES.HOSPITALDASHBOARD);

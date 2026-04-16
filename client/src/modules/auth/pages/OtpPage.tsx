@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { authApi } from '../../../constants/backend/auth/auth.api';
 import toast from 'react-hot-toast';
@@ -21,7 +21,7 @@ const OtpPage = () => {
   const signupData = location.state?.signupData;
   const purpose = location.state?.purpose;
 
-  const handleConfirm = async () => {
+  const handleConfirm = useCallback(async () => {
     if (isTimerExpired || isLoading || isConfirming.current) {
       if (isTimerExpired) toast.error(AUTH_MESSAGES.COMMON.OTP_EXPIRED);
       return;
@@ -78,14 +78,13 @@ const OtpPage = () => {
       setIsLoading(false);
       isConfirming.current = false;
     }
-  };
+  }, [otp, isTimerExpired, isLoading, signupData, purpose, navigate, role]);
 
   useEffect(() => {
     const isAllowed = localStorage.getItem('otpPageAllowed');
     const storedExpiration = localStorage.getItem('otpExpirationTime');
 
     if (!isAllowed || !location.state?.signupData) {
-      // Clear potentially stale state
       localStorage.removeItem('otpPageAllowed');
       localStorage.removeItem('otpExpirationTime');
       navigate(PATIENT_ROUTES.LOGIN, { replace: true });
@@ -147,12 +146,7 @@ const OtpPage = () => {
     }
   }, [timer]);
 
-  useEffect(() => {
-    if (otp.join('').length === 6 && !isTimerExpired) {
-      handleConfirm();
-    }
-  }, [otp, isTimerExpired]);
-
+ 
   if (!signupData) {
     return <Navigate to={PATIENT_ROUTES.SIGNUP} replace />;
   }

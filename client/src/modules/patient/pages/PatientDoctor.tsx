@@ -97,6 +97,8 @@ export default function PatientDoctor() {
 
   const getDoctors = useCallback(async (id: string, page: number, query: string) => {
     try {
+      // Move any synchronous state updates here if needed, 
+      // but ensure they don't trigger cascading renders in the effect below.
       const res = await patientApi.getDoctorsByDepartment(id, page, limit, query);
       if (res.data.success) {
         setDoctors(res.data.data.data);
@@ -117,7 +119,10 @@ export default function PatientDoctor() {
 
   useEffect(() => {
     if (departmentId) {
-      getDoctors(departmentId, currentPage, searchQuery);
+      // Use a self-invoking async function to ensure the entire call is treat as async by the effect's sync body
+      (async () => {
+        await getDoctors(departmentId, currentPage, searchQuery);
+      })();
     }
   }, [departmentId, currentPage, searchQuery, getDoctors]);
 

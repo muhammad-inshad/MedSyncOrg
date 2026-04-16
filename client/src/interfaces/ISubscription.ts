@@ -48,3 +48,29 @@ export type CreateSubscriptionPayload = {
   durationUnit: "months" | "years";
   amount: number;
 };
+
+export interface PaymentPayload {
+  planId: string;
+}
+
+export interface RawSubscription {
+  id: string;
+  plan?: string;
+  planName?: string;
+  amount: number;
+  duration?: number;
+  durationUnit?: "days" | "months" | "years";
+  startDate?: string;
+  description?: string;
+  endDate?: string;
+  features?: string[];
+  isActive?: boolean;
+  subscriberCount?: number;
+  limits?: {
+    maxPatients: number;
+    maxDoctors: number;
+    maxDepartments: number;
+  };
+  createdAt?: string;
+  updatedAt?: string;
+}

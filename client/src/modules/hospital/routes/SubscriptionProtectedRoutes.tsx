@@ -19,32 +19,30 @@ const SubscriptionProtectedRoutes = () => {
   const dispatch = useAppDispatch();
   const location = useLocation();
 
-  useEffect(() => {
-    if (!hospital && user?._id) {
-      dispatch(loadHospitalData({ hospitalId: user._id }));
-    }
-  }, [hospital, user, dispatch]);
-
-
-  useEffect(() => {
-    const checkSubscription = async () => {
-      try {
-        const res = await hospitalApi.getSubscriptonForProtection();
-        console.log(res);
-        if (res.data?.data === true) {
-          setIsAllowed(true);
-        } else {
-          setIsAllowed(false);
-        }
-      } catch (error) {
-        console.error(error);
-        setIsAllowed(false);
+ useEffect(() => {
+  let cancelled = false;
+  
+  const init = async () => {
+    try {
+      // 1. Load hospital data (if needed)
+      if (!hospital && user?._id) {
+        await dispatch(loadHospitalData({ hospitalId: user._id }));
       }
-    };
+      
+      // 2. Check subscription
+      const res = await hospitalApi.getSubscriptonForProtection();
+      if (!cancelled) {
+        setIsAllowed(res.data?.data === true);
+      }
+    } catch (error) {
+      console.error(error);
+      if (!cancelled) setIsAllowed(false);
+    }
+  };
 
-    checkSubscription();
-  }, []);
-
+  init();
+  return () => { cancelled = true; };
+}, [user?._id, dispatch, location.pathname, hospital]);
  
   const isExpired = React.useMemo(() => {
     if (!hospital?.subscription) return false;

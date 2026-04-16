@@ -1,8 +1,7 @@
 import { hospitalApi } from '@/constants/backend/hospital/hospital.api';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { showToast } from '@/utils/toastUtils';
-import type { ISubscription } from '@/interfaces/ISubscription';
-import { Plus } from 'lucide-react';
+import type { ISubscription, RawSubscription } from '@/interfaces/ISubscription';
 import { useAppSelector } from '@/hooks/redux';
 import type { HospitalProfile } from '@/store/auth/auth.type';
 
@@ -43,7 +42,6 @@ const BillingModal = ({ plan, onClose }: { plan: ISubscription; onClose: () => v
   const taxRate = 0.1;
   const taxAmount = plan.amount * taxRate;
   const totalAmount = plan.amount + taxAmount;
- 
   const handlePayment = async () => {
     try {
       const res = await hospitalApi.createPaymentSession({ planId: plan.id });
@@ -120,21 +118,19 @@ const HospitalSubscription = () => {
   const [selectedPlan, setSelectedPlan] = useState<ISubscription | null>(null);
   const hospital = useAppSelector((state) => state.auth.profileData);
   const subscription = (hospital as HospitalProfile)?.subscription ?? null;
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const fetchSubscriptions = async () => {
+const fetchSubscriptions = useCallback(async () => {
   try {
     setLoading(true);
     const response = await hospitalApi.getsubscription();
-   
+
     if (response.data?.success && response.data?.data?.data) {
-      const plans = response.data.data.data.map((item: any) => ({
+      const plans: ISubscription[] = response.data.data.data.map((item: RawSubscription) => ({
         ...item,
-        plan: item.plan || item.planName 
+        plan: item.plan || item.planName || ''
       }));
-      
+
       setSubscriptionPlans(plans);
-      console.log(subscriptionPlans)
     }
   } catch (error) {
     console.error("Error fetching subscriptions:", error);
@@ -142,11 +138,10 @@ const HospitalSubscription = () => {
   } finally {
     setLoading(false);
   }
-};
-
+}, []); 
   useEffect(() => {
     fetchSubscriptions();
-  }, []);
+  }, [fetchSubscriptions]);
 
   const filteredPlans = subscriptionPlans.filter(plan =>
     plan.plan?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -158,9 +153,6 @@ const HospitalSubscription = () => {
   }
 
   const { status, endDate } = subscription;
-
-  console.log("Status:", status);
-  console.log("EndDate:", endDate);
 
   if (status !== "active") {
     console.log("Status not active");
@@ -226,6 +218,7 @@ const HospitalSubscription = () => {
                   key={plan.id}
                   className={`relative bg-white border-t-4 ${colorMap[plan.plan] || 'border-t-indigo-500'} rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 flex flex-col p-8`}
                 >
+              
                   {plan.plan === "Premium" && (
                     <span className="absolute top-0 right-8 transform -translate-y-1/2 bg-indigo-600 text-white px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase">
                       Most Popular
@@ -241,7 +234,7 @@ const HospitalSubscription = () => {
 
                   <hr className="my-8 border-slate-100" />
 
-                 <div className="space-y-4 mb-8 flex-grow">
+                 <div className="space-y-4 mb-8 grow">
   {/* Display the Description */}
   <div className="text-slate-600 italic">
     {plan.description || "No description provided."}
@@ -287,21 +280,8 @@ const HospitalSubscription = () => {
           />
         )}
       </div>
-
-
     </div>
   );
 };
-
-const PlanFeature = ({ label }: { label: string }) => (
-  <div className="flex items-start">
-    <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 flex items-center justify-center mt-1">
-      <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-      </svg>
-    </div>
-    <span className="ml-3 text-slate-600 font-medium leading-tight">{label}</span>
-  </div>
-);
 
 export default HospitalSubscription;
