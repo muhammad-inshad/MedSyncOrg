@@ -19,8 +19,8 @@ export class Consultation {
 
             const page = parseInt(req.query.page as string) || 1;
             const limit = parseInt(req.query.limit as string) || 10;
-
-            const { appointments, total } = await this._appointmentService.getTodayConsultations(userId, { page, limit });
+            const shift=(req.query.shift as string)
+            const { appointments, total } = await this._appointmentService.getTodayConsultations(userId, { page, limit,shift });
             return ApiResponse.success(
                 res,
                 "Consultations fetched successfully",

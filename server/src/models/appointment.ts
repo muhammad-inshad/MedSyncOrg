@@ -34,6 +34,9 @@ export interface IAppointment extends Document {
 
   status: AppointmentStatus;
 
+  slotStartTime: string; 
+slotEndTime: string;   
+
   patientDetails: {
     name: string;
     age: number;
@@ -46,6 +49,7 @@ export interface IAppointment extends Document {
   bloodPressure?: string;
   heartRate?: string;
   weight?: string;
+  session?: "morning" | "afternoon" | "evening";
   createdAt: Date;
   updatedAt: Date;
   paymentId?: string;
@@ -64,6 +68,8 @@ const appointmentSchema = new Schema<IAppointment>(
       ref: "Doctor",
       required: true,
     },
+    slotStartTime: { type: String, required: true },
+slotEndTime: { type: String, required: true },
 
     hospitalId: {
       type: Schema.Types.ObjectId,
@@ -123,6 +129,10 @@ const appointmentSchema = new Schema<IAppointment>(
     paymentId: {
       type: String,
     },
+    session: {
+      type: String,
+      enum: ["morning", "afternoon", "evening"]
+    }
   },
   {
     timestamps: true,

@@ -70,4 +70,5 @@ router.get("/dashboard-stats",dashbordController.getstatus.bind(dashbordControll
 router.get("/getdoctorstatus",dashbordController.getDoctorStatus.bind(dashbordController))
 router.get("/kyc-stats",dashbordController.getKycStats.bind(dashbordController))
 router.get("/common-stats", dashbordController.getCommonStats.bind(dashbordController));
+
 export default router;

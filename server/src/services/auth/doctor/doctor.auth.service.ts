@@ -66,35 +66,24 @@ export class DoctorAuthService implements IDoctorAuthService {
             );
         }
         const hashedPassword = await bcrypt.hash(body.password, 10);
-        const doctorData: Partial<IDoctor> = {
-            name: body.name,
-            email: body.email,
-            password: hashedPassword,
-            hospital_id: new Types.ObjectId(body.hospital_id),
-            phone: body.phone,
-            address: body.address,
-            specialization: body.specialization,
-            qualification: body.qualification,
-            experience: body.experience,
-            department: body.department,
-            about: body.about,
-            licence: licenseUrl,
-            profileImage: profileImageUrl,
-            isActive: true,
-            isAccountVerified: false,
-            reviewStatus: "pending",
-            consultationTime: {
-                start: "09:00 AM",
-                end: "05:00 PM",
-            },
-
-            payment: {
-                type: "fixed",
-                payoutCycle: "monthly",
-                patientsPerDayLimit: 10,
-                fixedSalary: 0,
-            },
-        };
+      const doctorData: Partial<IDoctor> = {
+  name: body.name,
+  email: body.email,
+  password: hashedPassword,
+  hospital_id: new Types.ObjectId(body.hospital_id),
+  phone: body.phone,
+  address: body.address,
+  specialization_id: body.specialization,
+  qualification: body.qualification,
+  experience: body.experience,
+  department_id: body.department,
+  about: body.about,
+  licence: licenseUrl,
+  profileImage: profileImageUrl,
+  isActive: true,
+  isAccountVerified: false,
+  reviewStatus: "pending",
+};
 
         const created = await this._doctorRepo.create(doctorData);
         return this._doctorMapper.toDTO(created);

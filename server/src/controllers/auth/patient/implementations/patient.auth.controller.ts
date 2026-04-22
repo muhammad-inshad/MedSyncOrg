@@ -25,7 +25,7 @@ class patientAuthController implements IPatientAuthController {
       const loginData: LoginDTO = req.body;
 
       const result = await this.authService.login(loginData);
-
+      
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

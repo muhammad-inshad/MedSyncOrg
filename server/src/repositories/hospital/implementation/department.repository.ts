@@ -10,7 +10,8 @@ export class DepartmentRepository extends BaseRepository<IDepartment> implements
 
     async findByHospitalId(hospitalId: string, page: number = 1, limit: number = 6, search: string = ""): Promise<{ data: IDepartment[], total: number }> {
         const query: FilterQuery<IDepartment> = {
-            hospital_id: new Types.ObjectId(hospitalId)
+            hospital_id: new Types.ObjectId(hospitalId),
+             isActive: true,
         };
 
         if (search) {
@@ -26,7 +27,7 @@ export class DepartmentRepository extends BaseRepository<IDepartment> implements
             this.model.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).exec(),
             this.model.countDocuments(query).exec()
         ]);
-
+    
         return { data, total };
     }
 }

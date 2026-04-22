@@ -1,8 +1,9 @@
+import { ClientSession } from "mongoose";
 import { IAppointment } from "../../models/appointment.ts";
 import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
 
 export interface IAppointmentRepository extends IBaseRepository<IAppointment> {
-    findByDoctorAndDate(doctorId: string, date: Date, options?: { page: number; limit: number }): Promise<{ appointments: IAppointment[]; total: number }>;
+    findByDoctorAndDate(doctorId: string, date: string | Date , options?: { page: number; limit: number }): Promise<{ appointments: IAppointment[]; total: number }>;
     countByDoctorAndDate(doctorId: string, date: Date): Promise<number>;
     findUpcomingAppointments(
         doctorId: string,
@@ -10,13 +11,15 @@ export interface IAppointmentRepository extends IBaseRepository<IAppointment> {
             page: number;
             limit: number;
             search?: string;
-            date?: Date
+            date?: Date;
+                  
         }
     ): Promise<{ appointments: IAppointment[]; total: number }>;
     findDuplicate(
         doctorId: string,
         date: Date,
-        patient: { name: string; age: number; email?: string }
+        patient: { name: string; age: number; email?: string },
+            session?: ClientSession   
     ): Promise<IAppointment | null>;
     findPatientAppointments(
         patientId: string,
@@ -31,5 +34,8 @@ export interface IAppointmentRepository extends IBaseRepository<IAppointment> {
     findPatientAppointmentsToday(patientId: string): Promise<IAppointment[]>;
     findByPaymentId(paymentId: string): Promise<IAppointment | null>;
     getPatientEmail(appointmentId: string): Promise<string | null>;
-    
+    findtodayconseltation( doctorId: string,
+  dateString: string,
+  options?: { page: number; limit: number,shift:string}):Promise<{ appointments: IAppointment[]; total: number }> 
+    countByDoctorDateAndSession(doctorId: string, date: Date, session: string, mongoSession?: ClientSession): Promise<number>;
 }

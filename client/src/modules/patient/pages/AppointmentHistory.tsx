@@ -200,7 +200,7 @@ useEffect(() => {
                                     <div className="flex items-center gap-4 px-6 py-4">
                                         <img src={appt.doctorId.profileImage} alt={appt.doctorId.name}
                                             onClick={() => setSelected(appt)}
-                                            className="w-14 h-14 rounded-full object-cover border-2 flex-shrink-0 cursor-pointer"
+                                            className="w-14 h-14 rounded-full object-cover border-2 shrink-0 cursor-pointer"
                                             style={{ borderColor: '#e2e8f0' }} />
 
                                         <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setSelected(appt)}>
@@ -220,7 +220,7 @@ useEffect(() => {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-2 flex-shrink-0">
+                                        <div className="flex items-center gap-2 shrink-0">
                                             {appt.status === 'pending' && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setCancelTarget(appt); }}

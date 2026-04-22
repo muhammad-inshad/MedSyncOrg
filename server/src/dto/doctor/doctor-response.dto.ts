@@ -77,3 +77,12 @@ export type DeptSpecQualResponse = {
   specializations: ISpecialization[];
   qualifications: IQualification[];
 };
+
+export interface CreateDoctorSchedulePayload {
+    daysOfWeek: number[];                  
+    session: 'morning' | 'afternoon' | 'evening';
+    startTime: string;                      
+    endTime: string;                    
+    slotDuration: number;      
+    doctorId?:string          
+}

@@ -50,6 +50,7 @@ export class AppointmentMapper implements IMapper<IAppointment, AppointmentRespo
             heartRate: appointment.heartRate,
             weight: appointment.weight,
             cancelReason: appointment.cancelReason || null,
+            session: appointment.session || null,
 
             createdAt: appointment.createdAt instanceof Date
                 ? appointment.createdAt.toISOString()

@@ -1,4 +1,4 @@
-export interface DepartmentResponseDTO {
+export interface DepartmentResponse {
   _id: string;
   departmentName: string;
   description?: string;
@@ -6,7 +6,7 @@ export interface DepartmentResponseDTO {
   doctorCount?: number;
 }
 
-export interface QualificationResponseDTO {
+export interface QualificationResponse {
   _id: string;
   name: string;
   qualificationName: string;
@@ -14,7 +14,7 @@ export interface QualificationResponseDTO {
   image?: string;
 }
 
-export interface SpecializationResponseDTO {
+export interface SpecializationResponse {
   _id: string;
   name: string;
   description?: string;
@@ -22,7 +22,7 @@ export interface SpecializationResponseDTO {
   department_id: string;
 }
 
-export interface HospitalResponseDTO {
+export interface HospitalResponse{
   id:string;
   _id: string;
   hospitalName: string;
@@ -46,9 +46,9 @@ export interface HospitalResponseDTO {
   pincode: string;
   about?: string;
   licence?: string;
-  departments: DepartmentResponseDTO[];
-  qualifications: QualificationResponseDTO[];
-  specializations: SpecializationResponseDTO[];
+  departments: DepartmentResponse[];
+  qualifications: QualificationResponse[];
+  specializations: SpecializationResponse[];
   totalDepartments: number;
   currentPage: number;
   totalPages: number;

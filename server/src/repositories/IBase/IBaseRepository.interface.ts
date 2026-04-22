@@ -1,6 +1,6 @@
-import { FilterQuery } from "mongoose";
+import { ClientSession, FilterQuery } from "mongoose";
 export interface IBaseRepository<T> {
-    create(data: Partial<T>): Promise<T>;
+    create(data: Partial<T>,session?: ClientSession): Promise<T>;
     findById(id: string): Promise<T | null>;
     findAll(): Promise<T[]>;
     update(id: string, data: Partial<T>): Promise<T | null>;

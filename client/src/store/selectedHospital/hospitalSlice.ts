@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { loadHospitalData } from "./authThunk";
-import type { HospitalResponseDTO } from "@/dto/hospital/HospitalResponseDTO";
+import type { HospitalResponseDTO } from "@/interfaces/HospitalResponse";
 
 interface HospitalState {  
   hospital: HospitalResponseDTO | null;  

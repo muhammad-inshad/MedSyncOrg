@@ -8,7 +8,7 @@ import { useAppSelector, useAppDispatch } from "@/hooks/redux";
 import { loadHospitalData } from "@/store/selectedHospital/authThunk";
 import { useNavigate } from "react-router-dom";
 import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
-import type { HospitalResponseDTO } from "@/dto/hospital/HospitalResponseDTO";
+import type { HospitalResponseDTO } from "@/interfaces/HospitalResponse";
 import { setHospitalSession } from "@/utils/session";
 
 

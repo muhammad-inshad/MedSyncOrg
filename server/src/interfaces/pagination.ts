@@ -3,6 +3,7 @@ export interface PaginationMeta {
     limit: number;
     totalItems: number;
     totalPages?: number;
+      currentPage?: number;
     hasNextPage?: boolean;
     hasPrevPage?: boolean;
 }

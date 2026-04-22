@@ -13,6 +13,7 @@ import { MESSAGES } from "../../../constants/messages.ts";
 import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 import { IAppointment, AppointmentStatus } from "../../../models/appointment.ts";
 import { IPaginationResult } from "../../../types/hospital.types.ts";
+import { MongoServerError } from "mongodb";
 import bcrypt from "bcryptjs";
 import { selectedHospitalDto,HospitalResponseDTO, SelectedHospitalSchema } from "../../../dto/hospital/hospital-response.dto.ts";
 import { PatientResponseDTO } from "../../../dto/patient/patient-response.dto.ts";
@@ -22,10 +23,15 @@ import { PatientMapper } from "../../../mappers/patient.mapper.ts";
 import { HospitalMapper } from "../../../mappers/hospital.mapper.ts";
 import { DoctorMapper } from "../../../mappers/doctor.mapper.ts";
 import { AppointmentMapper } from "../../../mappers/appointment.mapper.ts";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { IPrescriptionRepository } from "../../../repositories/Prescription/prescription.repository.interface.ts";
 import { PrescriptionMapper } from "../../../mappers/prescription.mapper.ts";
 import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-response.dto.ts";
+import { ISlotRepository } from "../../../repositories/slot/slot.repository.interface.ts";
+import { SlotMapper } from "../../../mappers/slot.mapper.ts";
+import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.ts";
+import { date } from "zod";
+
 
 export class PatientService implements IPatientService {
   constructor(
@@ -43,6 +49,8 @@ export class PatientService implements IPatientService {
     private readonly _appointmentMapper: AppointmentMapper,
     private readonly _priscriptionRepo: IPrescriptionRepository,
     private readonly _prescriptionMapper: PrescriptionMapper,
+    private readonly _slotreppo:ISlotRepository,
+    private readonly _slotemapper:SlotMapper
   ) {}
 
   async getProfile(userId: string): Promise<PatientResponseDTO | null> {
@@ -124,6 +132,7 @@ export class PatientService implements IPatientService {
     const departmentsWithCounts = await Promise.all(
       departmentsResult.data.map(async (dept) => {
         const d = dept.toObject ? dept.toObject() : dept;
+        
         const doctorCount = await this._doctorRepo.countByDepartment(id, d._id.toString());
         return {  
           ...d,
@@ -172,13 +181,24 @@ export class PatientService implements IPatientService {
 }
 
   async getDoctorDepartment(id: string, page: number, limit: number, search: string): Promise<IPaginationResult<DoctorResponseDTO>> {
-    const result = await this._doctorRepo.findWithPagination({
-      page,
-      limit,
-      search,
-      searchFields: ["name", "specialization"],
-      filter: { department: id, isActive: true, reviewStatus: "approved" }
-    });
+    
+    const deptId = new mongoose.Types.ObjectId(id);
+
+  const result = await this._doctorRepo.findWithPagination({
+    page,
+    limit,
+    search,
+    searchFields: ["name", "specialization"],
+    filter: {
+      isActive: true,
+      reviewStatus: "approved",
+      $or: [
+        { department: id },
+        {department_id: deptId },
+      ],
+    },
+  });
+
     return {
       ...result,
       data: result.data.map(d => this._doctorMapper.toDTO(d))
@@ -193,73 +213,158 @@ export class PatientService implements IPatientService {
     return this._doctorMapper.toDTO(doctor!);
   }
 
-  async getAvailableSlots(doctorId: string, date: string): Promise<{ tokenInfo: { availableSlots: number; totalSlots: number; bookedTokens: number; maxTokens: number; status: "Available" | "Filling Fast" | "Fully Booked" } }> {
-    const appointmentDate = new Date(date);
-    const [doctor, bookedTokens] = await Promise.all([
-      this._doctorRepo.findById(doctorId),
-      this._appointmentRepo.countByDoctorAndDate(doctorId, appointmentDate)
-    ]);
-
-    if (!doctor) {
-      ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
-    }
-
-    const maxTokens = doctor.payment?.patientsPerDayLimit || 20;
-    const availableSlots = maxTokens - bookedTokens;
-
-    let status: "Available" | "Filling Fast" | "Fully Booked" = "Available";
-    if (bookedTokens >= maxTokens) {
-      status = "Fully Booked";
-    } else if (bookedTokens >= maxTokens * 0.8) {
-      status = "Filling Fast";
-    }
-
-    return {
-      tokenInfo: {
-        availableSlots: availableSlots > 0 ? availableSlots : 0,
-        totalSlots: maxTokens,
-        bookedTokens,
-        maxTokens,
-        status
-      }
-    };
-  }
-
-  async bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<void> {
-    const { doctorId, appointmentDate, patientDetails,hospitalId} = data;
+ async getAvailableSlots(doctorId: string, date: string): Promise<{ 
+  slots: SlotResponseDTO[]; 
+  appointments: IAppointment[];
+  total: number 
+}> {
+  const localDate = new Date(date + 'T00:00:00'); 
+  const startOfDay = new Date(localDate);
+  startOfDay.setHours(0, 0, 0, 0); 
   
+  const endOfDay = new Date(localDate);
+  endOfDay.setHours(23, 59, 59, 999); 
 
-    if (!doctorId || !appointmentDate || !patientDetails||!hospitalId) {
-        console.error("[PatientService.bookAppointment] Error: Missing critical details:", { doctorId, appointmentDate, patientDetails });
-        ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Missing appointment details");
+  const dayOfWeek = localDate.getDay();
+
+  const [availableSlots, { appointments, total }] = await Promise.all([
+    this._slotreppo.findByDoctorId(doctorId),
+    this._appointmentRepo.findByDoctorAndDate(doctorId, date) 
+  ]);
+
+  const filteredSlots = availableSlots.filter(slot => 
+    slot.isActive === true && 
+    slot.daysOfWeek?.includes(dayOfWeek)
+  );
+
+  const slotDTOs = this._slotemapper.toDTOList(filteredSlots);
+
+  return {
+    slots: slotDTOs,
+    appointments,
+    total
+  };
+}
+async bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<void> {
+    const { doctorId, appointmentDate, patientDetails, hospitalId, session } = data;
+
+    if (!doctorId || !appointmentDate || !patientDetails || !hospitalId || !session) {
+        ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Missing required appointment details");
     }
 
-    const dateObj = new Date(appointmentDate!);
+    const dateObj = new Date(appointmentDate);
 
-    const duplicate = await this._appointmentRepo.findDuplicate(doctorId!.toString(), dateObj, patientDetails!);
-    if (duplicate) {
-      ApiResponse.throwError(HttpStatusCode.CONFLICT, MESSAGES.PATIENT.ALREADYBOOKED);
+    const doctorSchedules = await this._slotreppo.findByDoctorId(doctorId.toString());
+
+    const selectedSchedule = doctorSchedules.find(s =>
+        s.session === session &&
+        s.isActive &&
+        s.daysOfWeek.includes(dateObj.getDay())
+    );
+
+    if (!selectedSchedule) {
+        ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, `No ${session} session available`);
     }
 
-    const count = await this._appointmentRepo.countByDoctorAndDate(doctorId!.toString(), dateObj);
-    const tokenNumber = count + 1;
-    
-    const appointmentData: Partial<IAppointment> = { ...data };
-    if (appointmentData.bloodPressure === "") delete appointmentData.bloodPressure;
-    if (appointmentData.heartRate === "") delete appointmentData.heartRate;
-    if (appointmentData.weight === "") delete appointmentData.weight;
+    const mongoSession = await mongoose.startSession();
 
-    const result = await this._appointmentRepo.create({
-      ...appointmentData,
-      bookedBy: new Types.ObjectId(patientId),
-      tokenNumber,
-      status: AppointmentStatus.PENDING
-    });
-    console.log(`[PatientService.bookAppointment] SUCCESS! Appointment created with ID: ${result._id}`);
-    await this._userRepo.addHospital(patientId, hospitalId.toString());
-    
-  }
+    try {
+        for (let attempt = 0; attempt < 3; attempt++) {
 
+            mongoSession.startTransaction();
+
+            try {
+                const duplicate = await this._appointmentRepo.findDuplicate(
+                    doctorId.toString(),
+                    dateObj,
+                    patientDetails!,
+                    mongoSession
+                );
+
+                if (duplicate) {
+                    ApiResponse.throwError(HttpStatusCode.CONFLICT, MESSAGES.PATIENT.ALREADYBOOKED);
+                }
+
+                const sessionBookedCount = await this._appointmentRepo.countByDoctorDateAndSession(
+                    doctorId.toString(),
+                    dateObj,
+                    session,
+                    mongoSession
+                );
+
+                if (sessionBookedCount >= selectedSchedule.tokenPerDay) {
+                    ApiResponse.throwError(
+                        HttpStatusCode.BAD_REQUEST,
+                        `No more slots available for ${session}`
+                    );
+                }
+
+                const tokenNumber = sessionBookedCount + 1;
+
+                const [startHour, startMinute] = selectedSchedule.startTime.split(':').map(Number);
+                const startMinutes = startHour * 60 + (startMinute || 0);
+                const visitMinutes = startMinutes + (sessionBookedCount * selectedSchedule.slotDuration);
+
+                const visitHour = Math.floor(visitMinutes / 60);
+                const visitMin = visitMinutes % 60;
+
+                const visitTime = `${visitHour.toString().padStart(2, '0')}:${visitMin.toString().padStart(2, '0')}`;
+
+                const endMinutes = visitMinutes + selectedSchedule.slotDuration;
+                const endHour = Math.floor(endMinutes / 60);
+                const endMin = endMinutes % 60;
+
+                const slotEndTime = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
+
+                const appointmentData: Partial<IAppointment> = { ...data };
+
+                if (appointmentData.bloodPressure === "") delete appointmentData.bloodPressure;
+                if (appointmentData.heartRate === "") delete appointmentData.heartRate;
+                if (appointmentData.weight === "") delete appointmentData.weight;
+
+      
+                const result = await this._appointmentRepo.create(
+                    {
+                        ...appointmentData,
+                        bookedBy: new Types.ObjectId(patientId),
+                        tokenNumber,
+                        visitTime,
+                        slotStartTime: visitTime,
+                        slotEndTime,
+                        status: AppointmentStatus.PENDING,
+                    },
+                    mongoSession
+                );
+
+            
+                await this._userRepo.addHospital(
+                    patientId,
+                    hospitalId.toString(),
+                    mongoSession
+                );
+
+                await mongoSession.commitTransaction();
+
+                console.log(" Appointment created:", result._id);
+                return;
+
+            } catch (error:unknown) {
+                await mongoSession.abortTransaction();
+    if (error instanceof MongoServerError && error.code === 11000) {
+        console.log("Token conflict, retrying...");
+        continue;
+    }
+                throw error;
+            }
+        }
+
+        // If all retries fail
+        ApiResponse.throwError(HttpStatusCode.CONFLICT, "High traffic, please try again");
+
+    } finally {
+        mongoSession.endSession();
+    }
+}
   async checkDuplicateAppointment(doctorId: string, date: string, patient: { name: string; age: number; email?: string }): Promise<AppointmentResponseDTO | null> {
     const dateObj = new Date(date);
     const result = await this._appointmentRepo.findDuplicate(doctorId, dateObj, patient);
@@ -318,5 +423,6 @@ getPrescriptions = async (patientId: string,query: { page: number; limit: number
         limit: result.limit,
     };
 };
-   
+
+ 
 }

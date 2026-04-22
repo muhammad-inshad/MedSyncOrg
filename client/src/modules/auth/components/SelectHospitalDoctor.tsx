@@ -4,7 +4,7 @@ import Pagination from "@/components/Pagination";
 import { useAppSelector, useAppDispatch } from "@/hooks/redux";
 import { loadHospitalData } from "@/store/selectedHospital/authThunk";
 import { useNavigate } from "react-router-dom";
-import type { HospitalResponseDTO } from "@/dto/hospital/HospitalResponseDTO";
+import type { HospitalResponseDTO } from "@/interfaces/HospitalResponse";
 import { authApi } from "@/constants/backend/auth/auth.api";
 import Navbar from "@/modules/patient/components/Navbar";
 import { COMMON_ROUTES } from "@/constants/frontend/common/common.routes";
@@ -86,7 +86,7 @@ const SelectHospitalDoctor: React.FC = () => {
                 <div
                   key={hospital._id}
                   onClick={() =>
-                    !selecting && handleSelectHospital(hospital._id)
+                    !selecting && handleSelectHospital(hospital.id)
                   }
                   className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer flex flex-col h-full"
                 >

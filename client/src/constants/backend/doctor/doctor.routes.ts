@@ -8,5 +8,6 @@ export const DOCTOR_MANAGEMENT = {
     DOCTOR_APPLAY_LEAVE: "/api/doctor/leaves",
     GET_LEAVES: "/api/doctor/leaves",
     GET_APPOIMENTS:"/api/doctor/consultation",
-    SAVE_PRISCRIPTION:"/api/doctor/prescription"
+    SAVE_PRISCRIPTION:"/api/doctor/prescription",
+    CREATEDOCTORSCHEDULE:"/api/doctor/schedules"
 };

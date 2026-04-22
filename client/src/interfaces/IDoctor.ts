@@ -42,3 +42,12 @@ department_id?:string;
   createdAt: string; // Date → string (ISO format)
   updatedAt: string;
 }
+
+
+export interface CreateDoctorSchedulePayload {
+    daysOfWeek: number[];                  
+    session: 'morning' | 'afternoon' | 'evening';
+    startTime: string;                      
+    endTime: string;                    
+    slotDuration: number;                
+}

@@ -1,6 +1,7 @@
 import api from "@/lib/api";
 import { DOCTOR_MANAGEMENT } from "./doctor.routes";
 import type { IPrescriptionData } from "@/interfaces/IAppointment";
+import type { CreateDoctorSchedulePayload } from "@/interfaces/IDoctor";
 
 export const doctorApi = {
     editProfile: (data: FormData) =>
@@ -32,7 +33,7 @@ export const doctorApi = {
     getDoctorLeaves: (params?: { page?: number; limit?: number; startDate?: string; endDate?: string }) =>
         api.get(DOCTOR_MANAGEMENT.GET_LEAVES, { params }),
 
-    getConsultation: (params?: { page?: number; limit?: number }) => 
+    getConsultation: (params?: { page?: number; limit?: number,shift:string }) => 
         api.get(DOCTOR_MANAGEMENT.GET_APPOIMENTS, { params }),
 
     updateAppointmentStatus: (id: string) =>
@@ -42,5 +43,14 @@ export const doctorApi = {
         api.post(DOCTOR_MANAGEMENT.SAVE_PRISCRIPTION, { 
             appointmentId: id, 
             ...data 
-        })
+        }),
+    createDoctorSchedule: (data: CreateDoctorSchedulePayload) =>
+        api.post(DOCTOR_MANAGEMENT.CREATEDOCTORSCHEDULE, data),  
+
+    getDoctorSchedules: (params?: { page?: number; limit?: number }) =>
+        api.get(DOCTOR_MANAGEMENT.CREATEDOCTORSCHEDULE, { params }),  
+
+    deleteDoctorSchedule: (id: string,status:boolean) =>
+        api.patch(`${DOCTOR_MANAGEMENT.CREATEDOCTORSCHEDULE}/${id}`,{status}),
+    
 };

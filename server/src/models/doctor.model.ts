@@ -81,7 +81,6 @@ const doctorSchema = new Schema<IDoctor>(
       required: [true, 'Phone is required'],
     },
 
-    //  NEW: Address field
     address: {
       type: String,
       required: [true, 'Address is required'],
@@ -195,7 +194,7 @@ const doctorSchema = new Schema<IDoctor>(
 
     monthlyAmount: {
         type: Number,
-        required: [true, 'Monthly salary is required'],
+        required: [false, 'Monthly salary is required'],
         min: [0, 'Salary cannot be negative'],
       },
 

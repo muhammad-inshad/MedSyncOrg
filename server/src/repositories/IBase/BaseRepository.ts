@@ -1,13 +1,13 @@
-import { Model, Document, FilterQuery, UpdateQuery } from 'mongoose';
+import { Model, Document, FilterQuery, UpdateQuery, ClientSession } from 'mongoose';
 import { IBaseRepository } from './IBaseRepository.interface.ts';
 
 export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     constructor(protected readonly model: Model<T>) { }
-
-    async create(data: Partial<T>): Promise<T> {
-        const createdEntity = new this.model(data);
-        return await createdEntity.save();
-    }
+    
+async create(data: Partial<T>, session?: ClientSession): Promise<T> {
+    const createdEntity = new this.model(data);
+    return await createdEntity.save(session ? { session } : undefined);
+}
 
     async findById(id: string): Promise<T | null> {
         return await this.model.findById(id).exec();

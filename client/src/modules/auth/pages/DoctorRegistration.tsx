@@ -223,7 +223,7 @@ const DoctorRegistrationForm: React.FC = () => {
                 <select {...register('qualification')} className={inputClass(!!errors.qualification)}>
                   <option value="">{AUTH_MESSAGES.SIGNUP.SELECT}</option>
                   {qualifications.map(q => (
-                    <option key={q.id} value={q.name}>
+                    <option key={q.id} value={q.id}>
                       {q.name}
                     </option>
                   ))}
@@ -250,7 +250,7 @@ const DoctorRegistrationForm: React.FC = () => {
                 <select {...register('specialization')} className={inputClass(!!errors.specialization)}>
                   <option value="">{AUTH_MESSAGES.SIGNUP.SELECT}</option>
                   {specializations.map(s => (
-                    <option key={s.id} value={s.name}>{s.name}</option>
+                    <option key={s.id} value={s.id}>{s.name}</option>
                   ))}
                 </select>
                 {errors.specialization && <p className={errorClass}>{errors.specialization.message}</p>}

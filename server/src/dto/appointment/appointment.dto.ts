@@ -47,6 +47,13 @@ export interface IAppointmentCheckoutData {
     hospitalId: string;
     appointmentDate: string;
     mode: "online" | "offline";
+    
+
+    tokenNumber: number;
+    slotStartTime: string; 
+    slotEndTime: string;
+    session?: "morning" | "afternoon" | "evening";
+
     patientDetails: {
         name: string;
         age: number;
@@ -54,6 +61,7 @@ export interface IAppointmentCheckoutData {
         email?: string;
         address?: string;
     };
+    
     bloodPressure?: string;
     heartRate?: string;
     weight?: string;

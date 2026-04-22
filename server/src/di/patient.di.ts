@@ -27,6 +27,10 @@ import { SubscriptionRepository } from "../repositories/superAdmin/subscription/
 import { LiveTokenController } from "../controllers/patient/LiveToken.controller.ts";
 import { PrescriptionRepository } from "../repositories/Prescription/prescription.repository.ts";
 import PrescriptionModel from "../models/prescription.model.ts";
+import { SlotRepository } from "../repositories/slot/slot.repository.ts";
+import { DoctorScheduleModel } from "../models/DoctorSlot.ts";
+import { SlotMapper } from "../mappers/slot.mapper.ts";
+
 export const patientContainer = () => {
   const tokenService = new TokenService();
   const userRepository = new UserRepository(Patient);
@@ -44,6 +48,8 @@ export const patientContainer = () => {
   const appointmentMapper = new AppointmentMapper();
   const prescriptionMapper = new PrescriptionMapper();
   const priscriptionRepo= new PrescriptionRepository(PrescriptionModel);
+  const slotReppo=new SlotRepository(DoctorScheduleModel)
+  const slotmapper=new SlotMapper()
   const patientService = new PatientService(
     userRepository,
     hospitalRepository,
@@ -58,7 +64,9 @@ export const patientContainer = () => {
     doctorMapper,
     appointmentMapper,
     priscriptionRepo,
-    prescriptionMapper
+    prescriptionMapper,
+    slotReppo,
+    slotmapper
   );
   const patientController = new PatientController(patientService);
   const patientAuthMiddleware = new PatientAuthMiddleware(tokenService, userRepository);

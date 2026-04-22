@@ -4,6 +4,7 @@ import {
   CalendarCheck,
   CalendarOff,
   Wallet,
+  CalendarDays,
   ChevronLeft,
   ChevronRight,
   Stethoscope,
@@ -40,8 +41,14 @@ const sidebarItems: SidebarItem[] = [
   {
     label: 'conseltation',
     icon: <Ticket className="w-5 h-5" />,
-    path: DOCTOR_ROUTES.CONSELTATION, // e.g. '/doctor/token'
+    path: DOCTOR_ROUTES.CONSELTATION,
   },
+
+{
+  label: "Slot Management",
+  icon: <CalendarDays className="w-5 h-5" />,
+  path: DOCTOR_ROUTES.SLOTMANAGEMENT
+},
   {
     label: 'Wallet',
     icon: <Wallet className="w-5 h-5" />,

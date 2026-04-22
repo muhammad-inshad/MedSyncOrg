@@ -6,6 +6,7 @@ import { IAppointment } from "../../../models/appointment.ts";
 import { IPatient } from "../../../models/Patient.model.ts";
 import { IPaginationResult } from "../../../types/hospital.types.ts";
 import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-response.dto.ts";
+import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.ts";
 
 export interface IPatientService {
   getProfile(userId: string): Promise<PatientResponseDTO | null>;
@@ -16,7 +17,8 @@ export interface IPatientService {
   selectedHospital(id: string, page: number, limit: number, search: string): Promise<selectedHospitalDto>;
   getDoctorDepartment(id: string, page: number, limit: number, search: string): Promise<IPaginationResult<DoctorResponseDTO>>;
   getDoctorById(id: string): Promise<DoctorResponseDTO>;
-  getAvailableSlots(doctorId: string, date: string): Promise<{ tokenInfo: { availableSlots: number; totalSlots: number; bookedTokens: number; maxTokens: number; status: "Available" | "Filling Fast" | "Fully Booked" } }>;
+  getAvailableSlots(doctorId: string, date: string): Promise<{ slots: SlotResponseDTO[]; appointments: IAppointment[],total:number
+  }>;
   bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<void>;
   checkDuplicateAppointment(doctorId: string, date: string, patient: { name: string; age: number; email?: string }): Promise<AppointmentResponseDTO | null>;
   getAppoimentHistory(patientId: string, query: { page: number; limit: number; search: string }): Promise<{ data: AppointmentResponseDTO[]; total: number }>;

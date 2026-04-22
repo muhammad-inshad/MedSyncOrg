@@ -38,15 +38,24 @@ export class AppointmentService implements IAppointments {
         };
     }
 
-    async getTodayConsultations(doctorId: string, options?: { page: number; limit: number }): Promise<{ appointments: AppointmentResponseDTO[]; total: number }> {
-        const today = new Date();
-        console.log(options)
-        const res = await this._appointmentRepo.findByDoctorAndDate(doctorId, today, options);
-        return {
-            appointments: res.appointments.map(app => this._appointmentMapper.toDTO(app)),
-            total: res.total
-        };
-    }
+   async getTodayConsultations(
+  doctorId: string,
+  options?: { page: number; limit: number,shift:string}
+): Promise<{ appointments: AppointmentResponseDTO[]; total: number }> {
+  const today = new Date();
+  const dateString = today.toISOString().split("T")[0]; 
+
+  const res = await this._appointmentRepo.findtodayconseltation(
+    doctorId,
+    dateString,
+    options
+  );
+
+  return {
+    appointments: res.appointments.map((app) => this._appointmentMapper.toDTO(app)),
+    total: res.total,
+  };
+}
 
     async updateStatus(appointmentId: string, status: AppointmentStatus): Promise<AppointmentResponseDTO | null> {
         const updated = await this._appointmentRepo.update(appointmentId, { status });

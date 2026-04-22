@@ -9,6 +9,6 @@ export class QualificationRepository extends BaseRepository<IQualification> impl
     }
 
     async findByHospitalId(hospitalId: string): Promise<IQualification[]> {
-        return await this.model.find({ hospital_id: hospitalId }).sort({ createdAt: -1 }).exec();
+        return await this.model.find({ hospital_id: hospitalId , isActive: true,}).sort({ createdAt: -1 }).exec();
     }
 }

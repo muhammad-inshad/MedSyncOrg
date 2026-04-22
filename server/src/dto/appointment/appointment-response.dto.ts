@@ -35,6 +35,7 @@ export const AppointmentResponseSchema = z.object({
     heartRate: z.string().optional(),
     weight: z.string().optional(),
     cancelReason: z.string().optional().nullable(),
+    session: z.enum(["morning", "afternoon", "evening"]).optional().nullable(),
     createdAt: z.string(),
     updatedAt: z.string(),
 });

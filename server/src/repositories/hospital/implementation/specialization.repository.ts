@@ -10,10 +10,10 @@ export class SpecializationRepository extends BaseRepository<ISpecialization> im
     }
 
     async findByHospitalId(hospitalId: string): Promise<ISpecialization[]> {
-        return this.model.find({ hospital_id: new Types.ObjectId(hospitalId) });
+        return this.model.find({ hospital_id: new Types.ObjectId(hospitalId), isActive: true,});
     }
 
     async findByDepartmentId(departmentId: string): Promise<ISpecialization[]> {
-        return this.model.find({ department_id: new Types.ObjectId(departmentId) });
+        return this.model.find({ department_id: new Types.ObjectId(departmentId), isActive: true, });
     }
 }

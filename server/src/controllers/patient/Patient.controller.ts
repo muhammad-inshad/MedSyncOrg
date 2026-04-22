@@ -15,6 +15,7 @@ class PatientController {
     try {
       const user = req.user as unknown as ITokenPayload;
       const userId = user?.userId;
+     
       if (!userId) {
         ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED || "Unauthorized");
       }
@@ -133,7 +134,9 @@ class PatientController {
     try {
       const { doctorId } = req.params;
       const { date } = req.query;
+  
       const slots = await this.patientService.getAvailableSlots(doctorId, date as string);
+      
       return ApiResponse.success(res, "Slots fetched successfully", slots);
     } catch (error) {
       next(error);
@@ -148,6 +151,7 @@ class PatientController {
       if (!patientId) {
         return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED || "Unauthorized");
       }
+      console.log(patientId,req.body)
      await this.patientService.bookAppointment(patientId, req.body);
       return ApiResponse.success(res, "Appointment booked successfully", null, HttpStatusCode.CREATED);
     } catch (error) {

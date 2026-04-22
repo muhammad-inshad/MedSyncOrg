@@ -16,6 +16,7 @@ interface IBookingData {
     bloodPressure: string;
     heartRate: string;
     weight: string;
+    session?: "morning" | "afternoon" | "evening";
     doctorName?: string;
 }
 

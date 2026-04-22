@@ -22,7 +22,7 @@ export class PatientAuthMiddleware {
       }
 
       const payload = this._tokenService.verifyAccessToken(token);
-
+  
       if (payload.role !== "patient") {
         logger.warn(`Attempted patient access by role: ${payload.role}`);
         return res.status(HttpStatusCode.FORBIDDEN).json({ message: "Insufficient permissions" });

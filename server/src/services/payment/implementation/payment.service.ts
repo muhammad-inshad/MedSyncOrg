@@ -10,7 +10,7 @@ import { ISubscription } from "../../../models/subscription.ts";
 
 import { IPatientService } from "../../patient/interfaces/patient.service.interfaces.ts";
 import { IAppointmentCheckoutData } from "../../../dto/appointment/appointment.dto.ts";
-import { IAppointment, AppointmentMode } from "../../../models/appointment.ts";
+import { IAppointment, AppointmentMode, AppointmentStatus } from "../../../models/appointment.ts";
 import { CheckoutResponseDTO } from "../../../dto/payment/checkout-response.dto.ts";
 import { PaymentMapper } from "../../../mappers/payment.mapper.ts";
 
@@ -29,17 +29,18 @@ export class PaymentService implements IPaymentService {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Subscription plan not found");
         }
 
-          const baseAmount = plan.amount;
-          const taxRate = 0.1; 
-          const taxAmount = baseAmount * taxRate;
-          const totalAmount = baseAmount + taxAmount;
+        const baseAmount = plan.amount;
+        const taxRate = 0.1; 
+        const taxAmount = baseAmount * taxRate;
+        const totalAmount = baseAmount + taxAmount;
+
         if (baseAmount === 0 || totalAmount === 0) {
             const startDate = new Date();
             const endDate = new Date();
             const duration = plan.duration || 1;
             const unit = plan.durationUnit || "months";
           
-         if (unit === "months") endDate.setMonth(endDate.getMonth() + duration);
+            if (unit === "months") endDate.setMonth(endDate.getMonth() + duration);
             else if (unit === "years") endDate.setFullYear(endDate.getFullYear() + duration);
 
             await this.hospitalRepository.update(hospitalId, {
@@ -79,33 +80,37 @@ export class PaymentService implements IPaymentService {
             cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/hospital/subscription`,
         });
 
-
-    return this.paymentMapper.toCheckoutDTO(session.url);
-}
+        return this.paymentMapper.toCheckoutDTO(session.url);
+    }
 
     async createAppointmentCheckoutSession(appointmentData: IAppointmentCheckoutData, patientId: string): Promise<CheckoutResponseDTO> {
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
         
-const metadata = {
-  type: "appointment",
-  patientId: String(patientId),
-  doctorId: String(appointmentData.doctorId),
-  hospitalId: String(appointmentData.hospitalId),
-  appointmentDate: String(appointmentData.appointmentDate),
-  mode: appointmentData.mode,
+        const metadata = {
+            type: "appointment",
+            patientId: String(patientId),
+            doctorId: String(appointmentData.doctorId),
+            hospitalId: String(appointmentData.hospitalId),
+            appointmentDate: String(appointmentData.appointmentDate),
+            mode: appointmentData.mode,
+            
+            // Missing required fields added here
+            slotStartTime: appointmentData.slotStartTime,
+            slotEndTime: appointmentData.slotEndTime,
+            tokenNumber: String(appointmentData.tokenNumber),
+            session: appointmentData.session || "",
 
-  patientName: appointmentData.patientDetails.name,
-  patientAge: String(appointmentData.patientDetails.age),
-  patientPhone: appointmentData.patientDetails.phone,
-  patientEmail: appointmentData.patientDetails.email || "",
-  patientAddress: appointmentData.patientDetails.address || "",
+            patientName: appointmentData.patientDetails.name,
+            patientAge: String(appointmentData.patientDetails.age),
+            patientPhone: appointmentData.patientDetails.phone,
+            patientEmail: appointmentData.patientDetails.email || "",
+            patientAddress: appointmentData.patientDetails.address || "",
 
-  bloodPressure: appointmentData.bloodPressure || "",
-  heartRate: appointmentData.heartRate || "",
-  weight: appointmentData.weight || "",
-
-  doctorName: appointmentData.doctorName || ""
-};
+            bloodPressure: appointmentData.bloodPressure || "",
+            heartRate: appointmentData.heartRate || "",
+            weight: appointmentData.weight || "",
+            doctorName: appointmentData.doctorName || ""
+        };
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
@@ -118,7 +123,7 @@ const metadata = {
                             name: `Appointment with Dr. ${appointmentData.doctorName || 'Doctor'}`,
                             description: `Appointment on ${new Date(appointmentData.appointmentDate).toLocaleDateString()}`,
                         },
-                        unit_amount: 50000,
+                        unit_amount: 50000, // Ensure this matches your logic (e.g., 500 INR)
                     },
                     quantity: 1,
                 },
@@ -130,8 +135,6 @@ const metadata = {
 
         return this.paymentMapper.toCheckoutDTO(session.url);
     }
-
-
 
     async handleWebhook(signature: string, payload: string | Buffer): Promise<void> {
         let event;
@@ -147,28 +150,28 @@ const metadata = {
         }
 
         if (event && event.type === "checkout.session.completed") {
-            console.log("Processing checkout.session.completed event");
             const session = event.data.object as Stripe.Checkout.Session;
             const metadata = session.metadata;
 
-            if (!metadata) {
-                console.error("Missing metadata in Stripe session", session.id);
-                return;
-            }
+            if (!metadata) return;
 
             if (metadata.type === "appointment") {
-                const { patientId } = metadata;
-                if (!patientId) {
-                    console.error("Missing critical patientId in metadata");
-                    return;
-                }
-        
                 try {
+                    // CRITICAL FIX: Reconstructing the exact object required by AppointmentModel
                     const appointmentData: Partial<IAppointment> = {
+                        bookedBy: new Types.ObjectId(metadata.patientId),
                         doctorId: new Types.ObjectId(metadata.doctorId),
                         hospitalId: new Types.ObjectId(metadata.hospitalId),
                         appointmentDate: new Date(metadata.appointmentDate),
                         mode: metadata.mode as AppointmentMode,
+                        status: AppointmentStatus.PENDING,
+                        
+                        // Mapping the required strings/numbers back
+                        slotStartTime: metadata.slotStartTime,
+                        slotEndTime: metadata.slotEndTime,
+                        tokenNumber: Number(metadata.tokenNumber),
+                        session: metadata.session as "morning" | "afternoon" | "evening" | undefined,
+
                         patientDetails: {
                             name: metadata.patientName,
                             age: Number(metadata.patientAge),
@@ -182,9 +185,7 @@ const metadata = {
                         paymentId: session.id,
                     };
 
-                    console.log("Reconstructed Appointment Data from Metadata:", JSON.stringify(appointmentData, null, 2));
-                    console.log("Booking appointment for patient:", patientId);
-                    await this.patientService.bookAppointment(patientId, appointmentData);
+                    await this.patientService.bookAppointment(metadata.patientId, appointmentData);
                     console.log("Appointment booked successfully via webhook");
                 } catch (error) {
                     console.error("ERROR during webhook appointment processing:", error);
@@ -193,31 +194,21 @@ const metadata = {
                 return;
             }
 
-
+            // Subscription Logic...
             const { planId, hospitalId } = metadata;
-            if (!planId || !hospitalId) {
-                console.error("Missing planId or hospitalId in Stripe session metadata");
-                return;
-            }
+            if (planId && hospitalId) {
+                const plan = await this.subscriptionRepository.findById(planId);
+                const hospital = await this.hospitalRepository.findById(hospitalId);
 
-            const plan = await this.subscriptionRepository.findById(planId);
-            const hospital = await this.hospitalRepository.findById(hospitalId);
+                if (plan && hospital) {
+                    const duration = plan.duration || 1;
+                    const unit = plan.durationUnit || "months";
+                    const startDate = new Date();
+                    const endDate = new Date();
+                   
+                    if (unit === "months") endDate.setMonth(endDate.getMonth() + duration);
+                    else if (unit === "years") endDate.setFullYear(endDate.getFullYear() + duration);
 
-            if (!plan) console.error(`Plan not found for ID: ${planId}`);
-            if (!hospital) console.error(`Hospital not found for ID: ${hospitalId}`);
-
-            if (plan && hospital) {
-                console.log("Plan and Hospital found, updating records...");
-                const duration = plan.duration || 1;
-                const unit = plan.durationUnit || "months";
-                
-                const startDate = new Date();
-                const endDate = new Date();
-               
-                 if (unit === "months") endDate.setMonth(endDate.getMonth() + duration);
-                else if (unit === "years") endDate.setFullYear(endDate.getFullYear() + duration);
-
-                try {
                     await this.hospitalRepository.update(hospitalId, {
                         subscription: {
                             plan: plan.planName,
@@ -227,24 +218,16 @@ const metadata = {
                             endDate,
                         }
                     });
-                    console.log("Hospital subscription updated successfully");
 
-                    const subscriptionData: Partial<ISubscription> = {
-                     
+                    await this.subscriptionRepository.create({
                         planName: plan.planName,
                         amount: plan.amount,
                         status: "active",
                         startDate,
                         endDate,
-                    };
-                    await this.subscriptionRepository.create(subscriptionData);
-                    console.log("Subscription record created successfully");
-                } catch (dbError) {
-                    console.error("Database error during webhook processing:", dbError);
+                    } as Partial<ISubscription>);
                 }
             }
-        } else {
-            console.log(`Event type ${event?.type} ignored`);
         }
     }
 }

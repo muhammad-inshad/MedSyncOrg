@@ -27,6 +27,11 @@ import { DepartmentMapper } from "../mappers/department.mapper.ts";
 import { QualificationMapper } from "../mappers/qualification.mapper.ts";
 import { SpecializationMapper } from "../mappers/specialization.mapper.ts";
 import { PrescriptionRepository } from "../repositories/Prescription/prescription.repository.ts";
+import { DoctorSlotManagementController } from "../controllers/doctor/DoctorSlotManagement.controller.ts";
+import { SlotMangementService } from "../services/doctor/implementations/SlotManagement.service.ts";
+import { SlotMapper } from "../mappers/slot.mapper.ts";
+import { SlotRepository } from "../repositories/slot/slot.repository.ts";
+import { DoctorScheduleModel } from "../models/DoctorSlot.ts";
 
 export const doctorContainer = () => {
   const doctorRepository = new DoctorRepository(DoctorModel);
@@ -39,14 +44,17 @@ export const doctorContainer = () => {
   const leaveRepo = new LeaveRepository();
   const appointmentRepo = new AppointmentRepository();
   const appointmentMapper = new AppointmentMapper();
+  const slotmapper=new SlotMapper()
+   const slotRepo=new SlotRepository(DoctorScheduleModel)
   const prescriptionRepo = new PrescriptionRepository(PrescriptionModel);
   const appointmentService = new AppointmentService(appointmentRepo, appointmentMapper, prescriptionRepo);
   const consultation = new Consultation(appointmentService);
-
+  const slotservice=new SlotMangementService(slotRepo,slotmapper)
+  const slotcontroller=new DoctorSlotManagementController(slotservice)
   const departmentMapper = new DepartmentMapper();
   const qualificationMapper = new QualificationMapper();
   const specializationMapper = new SpecializationMapper();
-
+ 
   const doctorMapper = new DoctorMapper();
   const doctorLeaveMapper = new DoctorLeaveMapper();
 
@@ -87,6 +95,7 @@ export const doctorContainer = () => {
     doctorAuthMiddleware,
     appoimentController,
     consultation,
-    qualificationRepo
+    qualificationRepo,
+    slotcontroller
   };
 };

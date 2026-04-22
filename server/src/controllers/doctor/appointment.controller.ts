@@ -29,7 +29,6 @@ export class AppointmentController {
         date
       });
       logger.debug(`Fetching upcoming appointments for date: ${date}`);
-      console.log(total)
       return ApiResponse.success(res, "Upcoming appointments fetched successfully", appointments, HttpStatusCode.OK, {
         page,
         limit,

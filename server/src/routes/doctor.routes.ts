@@ -2,7 +2,7 @@ import { Router } from "express";
 import { doctorContainer } from "../di/doctor.di.ts";
 import { upload } from "../middleware/multer.middleware.ts";
 
-const { doctorcontroller, appoimentController,consultation } = doctorContainer()
+const { doctorcontroller, appoimentController,consultation,slotcontroller} = doctorContainer()
 const router = Router()
 
 
@@ -20,4 +20,7 @@ router.get("/consultation", consultation.getConsultation.bind(consultation))
 router.patch("/consultation/:id/status", consultation.markAsCompleted.bind(consultation))
 router.post("/prescription",consultation.prescription.bind(consultation))
 
+router.post("/schedules", slotcontroller.createDoctorSchedule.bind(slotcontroller));
+router.get("/schedules", slotcontroller.getDoctorSchedules.bind(slotcontroller));     // add this
+router.patch("/schedules/:id", slotcontroller.deleteDoctorSchedule.bind(slotcontroller)); // add this
 export default router
