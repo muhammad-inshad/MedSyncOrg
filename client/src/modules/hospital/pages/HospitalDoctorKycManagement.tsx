@@ -6,7 +6,7 @@ import type { IDoctor } from '@/interfaces/IDoctor';
 import { StatsCards } from "../components/tables/StatsCards";
 import { FilterTabs } from "../components/tables/FilterTabs";
 import { DataTable, type TableColumn } from "../components/tables/DataTable";
-
+import { useDebouncedCallback } from 'use-debounce';
 import Pagination from '@/components/Pagination';
 
 
@@ -67,18 +67,26 @@ const HospitalDoctorKycManagement = () => {
         fetchDoctors(currentPage);
           fetchkycStats();
     }, [currentPage, fetchDoctors, fetchkycStats]);
+const debouncedFetch = useDebouncedCallback(() => {
+  setCurrentPage(1);
+  fetchDoctors(1);
+}, 500);
 
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentPage !== 1) {
-                setCurrentPage(1);
-            } else {
-                fetchDoctors(1);
-            }
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [searchQuery, filter, fetchDoctors, currentPage]);
+useEffect(() => {
+  debouncedFetch();
+}, [searchQuery, filter, debouncedFetch]);
+
+    // useEffect(() => {
+    //     const timer = setTimeout(() => {
+    //         if (currentPage !== 1) {
+    //             setCurrentPage(1);
+    //         } else {
+    //             fetchDoctors(1);
+    //         }
+    //     }, 500);
+    //     return () => clearTimeout(timer);
+    // }, [searchQuery, filter, fetchDoctors, currentPage]);
 
     const handleStatusUpdate = async (id: string, status: string) => {
         try {
@@ -252,10 +260,9 @@ const renderRow = (doc: IDoctor) => (
                             type="text"
                             placeholder="Search by name, email..."
                             value={searchQuery}
-                            onChange={(e) => {
-                                setSearchQuery(e.target.value);
-                                setCurrentPage(1);
-                            }}
+                           onChange={(e) => {
+  setSearchQuery(e.target.value);
+}}
                             className="pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-full md:w-80 shadow-sm transition-all"
                         />
                     </div>

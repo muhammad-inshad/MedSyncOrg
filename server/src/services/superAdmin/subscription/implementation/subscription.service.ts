@@ -82,7 +82,6 @@ export class SubscriptionService implements ISubscriptionService {
     async subscribeHospital(page:number,limit:number, search:string,filter?:string):Promise<HospitalResponseDTO[]>{
       const skip = (page - 1) * limit;
       const qury:IsubscriptionFilter={}
-      console.log(filter)
       if(filter==="active"){
         qury.isActive=true
       }

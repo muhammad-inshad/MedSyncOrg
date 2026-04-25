@@ -173,7 +173,7 @@ const handleStartCall = async () => {
       };
         setIsCallActive(true);
         console.log("Peer connection ready");
-
+ if (!selectedAppointment) return;
         if (pendingOffer.current) {
             console.log("Processing pending offer...");
             await pc.setRemoteDescription(pendingOffer.current);

@@ -97,8 +97,7 @@ export default function PatientDoctor() {
 
   const getDoctors = useCallback(async (id: string, page: number, query: string) => {
     try {
-      // Move any synchronous state updates here if needed, 
-      // but ensure they don't trigger cascading renders in the effect below.
+
       const res = await patientApi.getDoctorsByDepartment(id, page, limit, query);
       if (res.data.success) {
         setDoctors(res.data.data.data);

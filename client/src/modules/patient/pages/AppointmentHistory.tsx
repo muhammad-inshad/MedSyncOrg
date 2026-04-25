@@ -7,6 +7,7 @@ import { useAppSelector } from '@/hooks/redux';
 import Pagination from '@/components/Pagination';
 import toast from 'react-hot-toast';
 import axios from "axios";
+import { useDebouncedCallback } from 'use-debounce';
 
 type AppointmentStatus = 'pending' | 'completed' | 'cancelled';
 type AppointmentMode = 'online' | 'offline';
@@ -53,12 +54,22 @@ const AppointmentHistory = () => {
     const [cancelReason, setCancelReason] = useState('');
     const [isCancelling, setIsCancelling] = useState(false);
 
-   
+    const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+
+   const handleSearch = useDebouncedCallback((value: string) => {
+  setDebouncedSearch(value);
+  setCurrentPage(1);
+}, 500);
+
+useEffect(() => {
+  handleSearch(searchQuery);
+}, [filter, handleSearch, searchQuery]);
+
 useEffect(() => {
     const fetch = async () => {
         setIsLoading(true);
         try {
-            const result = await patientApi.getAppoimentHistory(currentPage, limit, searchQuery);
+            const result = await patientApi.getAppoimentHistory(currentPage, limit, debouncedSearch);
             const responseData = result.data;
 
             if (responseData.success) {
@@ -104,7 +115,7 @@ useEffect(() => {
         }
     };
     fetch();
-}, [currentPage, searchQuery]);
+}, [currentPage, debouncedSearch]);
     useEffect(() => {
         setCurrentPage(1);
     }, [searchQuery, filter]);

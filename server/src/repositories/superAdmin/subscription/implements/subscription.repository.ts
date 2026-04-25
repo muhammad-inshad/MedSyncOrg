@@ -111,8 +111,8 @@ async findHospitalWithSubscrib(
 
   await this.updateExpiredSubscription();
 
-  const query: FilterQuery<IHospital> = { ...filter }; 
-
+  const query: FilterQuery<IHospital> = { ...filter,reviewStatus: "approved"}; 
+  
   if (search && search.trim() !== "") {
     query.hospitalName = { $regex: search, $options: "i" };
   }

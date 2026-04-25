@@ -8,7 +8,7 @@ import { IAppointmentRepository } from "../../../repositories/appointment/appoin
 import { IQualificationRepository } from "../../../repositories/hospital/qualification.repository.interface.ts";
 import { ISpecializationRepository } from "../../../repositories/hospital/specialization.repository.interface.ts";
 import { ISubscriptionRepository } from "../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.ts";
-import { HttpStatusCode } from "../../../constants/enums.ts";
+import { HttpStatusCode} from "../../../constants/enums.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
 import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 import { IAppointment, AppointmentStatus } from "../../../models/appointment.ts";
@@ -30,7 +30,8 @@ import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-respo
 import { ISlotRepository } from "../../../repositories/slot/slot.repository.interface.ts";
 import { SlotMapper } from "../../../mappers/slot.mapper.ts";
 import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.ts";
-import { date } from "zod";
+import pkg from 'rrule';
+const { RRule } = pkg;
 
 
 export class PatientService implements IPatientService {
@@ -155,6 +156,7 @@ export class PatientService implements IPatientService {
 
     const formattedSpecializations = specializations.map((s) => {
       const obj = s.toObject ? s.toObject() : s;
+
       return {
         _id: obj._id.toString(),
         name: String(obj.name || ""),
@@ -226,16 +228,27 @@ export class PatientService implements IPatientService {
   endOfDay.setHours(23, 59, 59, 999); 
 
   const dayOfWeek = localDate.getDay();
-
+console.log(dayOfWeek)
   const [availableSlots, { appointments, total }] = await Promise.all([
     this._slotreppo.findByDoctorId(doctorId),
     this._appointmentRepo.findByDoctorAndDate(doctorId, date) 
   ]);
 
-  const filteredSlots = availableSlots.filter(slot => 
-    slot.isActive === true && 
-    slot.daysOfWeek?.includes(dayOfWeek)
-  );
+ const filteredSlots = availableSlots.filter(slot => {
+  if (!slot.isActive) return false;
+
+  const rule = new RRule({
+    freq: RRule.WEEKLY,
+    byweekday: slot.daysOfWeek.map(day => [
+      RRule.SU, RRule.MO, RRule.TU, 
+      RRule.WE, RRule.TH, RRule.FR, RRule.SA
+    ][day]),
+    dtstart: new Date(date + 'T00:00:00'),
+  });
+
+  const occurrences = rule.between(startOfDay, endOfDay, true);
+  return occurrences.length > 0;
+});
 
   const slotDTOs = this._slotemapper.toDTOList(filteredSlots);
 

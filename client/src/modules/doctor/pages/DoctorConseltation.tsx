@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import DoctorSidebar from '../components/DoctorSidebar';
 
 import { 
@@ -33,8 +33,7 @@ const DoctorConsultation = () => {
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const localStream = useRef<MediaStream | null>(null);
-
-  const fetchConsultation = async (page: number) => {
+const fetchConsultation = useCallback(async (page: number) => {
     try {
       setLoading(true);
       const result = await doctorApi.getConsultation({ page, limit: 1, shift });
@@ -77,15 +76,14 @@ const DoctorConsultation = () => {
     } finally {
       setLoading(false);
     }
-  };
-
+  }, [shift]); 
   useEffect(() => {
     setCurrentIndex(1);
   }, [shift]);
 
   useEffect(() => {
     fetchConsultation(currentIndex);
-  }, [currentIndex, shift]);
+  }, [currentIndex,shift,fetchConsultation]);
 
   useEffect(() => {
     if (!currentAppointment) return;
