@@ -46,8 +46,8 @@ export class HospitalService implements IHospitalService {
         let limits: HospitalResponseDTO['subscription']['limits'] | undefined;
         if (hospital!.subscription?.plan) {
             const planName = hospital!.subscription.plan.charAt(0).toUpperCase() + hospital!.subscription.plan.slice(1);
-            const planDetails = await this._subscriptionRepo.findByPlanName(planName);
-            console.log(planDetails)
+             await this._subscriptionRepo.findByPlanName(planName);
+           
         }
       
         return this._hospitalMapper.toDTO(hospital!, limits, currentCounts);

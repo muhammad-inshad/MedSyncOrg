@@ -42,7 +42,7 @@ export class HospitalSubscriptionService implements IHospitalSubscriptionService
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Hospital not found");
         }
         const subscription = hospital.subscription;
-        console.log(type)
+      
         if (!subscription || !subscription.plan) {
             ApiResponse.throwError(HttpStatusCode.PAYMENT_REQUIRED, "No active subscription plan found. Please subscribe to continue.");
         }

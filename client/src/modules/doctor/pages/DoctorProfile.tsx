@@ -225,22 +225,10 @@ const DoctorProfilePage: React.FC = () => {
                   <h3 className="text-xl font-bold text-gray-900">Availability</h3>
                 </div>
                 <div className="mt-auto bg-gray-50 p-5 rounded-xl flex items-center justify-between gap-6">
-                  <div>
-                    <div className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">
-                      From
-                    </div>
-                    <div className="font-bold text-gray-800">
-                      {userData.consultationTime?.start || '—'}
-                    </div>
-                  </div>
+                
                   <ArrowRight className="text-gray-400" />
                   <div className="text-right">
-                    <div className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-1">
-                      To
-                    </div>
-                    <div className="font-bold text-gray-800">
-                      {userData.consultationTime?.end || '—'}
-                    </div>
+                  
                   </div>
                 </div>
               </div>
@@ -254,26 +242,7 @@ const DoctorProfilePage: React.FC = () => {
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900">Practice & Payment Info</h2>
               </div>
-              <div className="grid sm:grid-cols-3 gap-6">
-                {[
-                  { label: 'Payment Model', value: userData.payment?.type || '—' },
-                  { label: 'Payout Cycle', value: userData.payment?.payoutCycle || 'Monthly' },
-                  {
-                    label: 'Daily Limit',
-                    value: `${userData.payment?.patientsPerDayLimit || 0} patients`,
-                  },
-                ].map((item, i) => (
-                  <div
-                    key={i}
-                    className="bg-gray-50 p-6 rounded-xl hover:bg-gray-100 transition"
-                  >
-                    <div className="text-xs uppercase tracking-wide text-gray-500 font-semibold mb-2">
-                      {item.label}
-                    </div>
-                    <div className="text-xl font-bold text-gray-900 capitalize">{item.value}</div>
-                  </div>
-                ))}
-              </div>
+          
             </section>
 
             {/* License */}

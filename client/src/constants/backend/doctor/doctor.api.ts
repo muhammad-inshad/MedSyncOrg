@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 import { DOCTOR_MANAGEMENT } from "./doctor.routes";
 import type { IPrescriptionData } from "@/interfaces/IAppointment";
-import type { CreateDoctorSchedulePayload } from "@/interfaces/IDoctor";
+import type { CreateDoctorSchedulePayload, SalaryHikeRequestinterface } from "@/interfaces/IDoctor";
 
 export const doctorApi = {
     editProfile: (data: FormData) =>
@@ -52,5 +52,10 @@ export const doctorApi = {
 
     deleteDoctorSchedule: (id: string,status:boolean) =>
         api.patch(`${DOCTOR_MANAGEMENT.CREATEDOCTORSCHEDULE}/${id}`,{status}),
+
+    salaryIncreaseRequest:(data:SalaryHikeRequestinterface)=>
+        api.post(DOCTOR_MANAGEMENT.SALARY_INCREASE_REQUEST,data),
     
+    getSalaryIncreaseRequest: (doctorId: string) =>
+        api.get(DOCTOR_MANAGEMENT.SALARY_INCREASE_REQUEST, { params: { doctorId } }),
 };

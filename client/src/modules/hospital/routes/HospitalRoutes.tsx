@@ -18,15 +18,19 @@ import DoctorLeaveManagement from '../pages/DoctorLeaveMenagement'
 import Subscription from '../pages/HospitalSubscription'
 import PaymentSuccess from '../../shared/pages/PaymentSuccess'
 import SubscriptionProtectedRoutes from './SubscriptionProtectedRoutes';
-
+import HospitalLayout from "./HospitalLayout";
+import HospitalFinance from '../pages/HospitalFinance'
 
 const HospitalRoutes = () => {
     return (
         <Routes>
             <Route path={HOSPITAL_ROUTES.HOSPITALSIGNUP} element={<HospitalSignup />} />
             <Route element={<HospitalProtectedRoute />}>
+            <Route element={<HospitalLayout/>}>
+                          <Route path={HOSPITAL_ROUTES.HOSPITALDASHBOARD} element={<HospitalDashboard />} />
+                      <Route path={HOSPITAL_ROUTES.HOSPITAL_SUBSCRIPTION} element={<Subscription/>}/>
                 <Route element={<SubscriptionProtectedRoutes />}>
-                    <Route path={HOSPITAL_ROUTES.HOSPITALDASHBOARD} element={<HospitalDashboard />} />
+                
                     <Route path={HOSPITAL_ROUTES.HOSPITALDOCTORMANGEMENT} element={<HospitalDoctorManagement />} />
                     <Route path={HOSPITAL_ROUTES.HOSPITALDOCTORKYC} element={<HospitalDoctorKycManagement />} />
                     <Route path={HOSPITAL_ROUTES.HOSPITALDOCTOREDIT} element={<HospitalDoctorEditPage />} />
@@ -39,8 +43,7 @@ const HospitalRoutes = () => {
                      <Route path={HOSPITAL_ROUTES.HOSPITAL_QULIFICATION_MANGEMENT} element={<QualificationManagement/>}/>
                       <Route path={HOSPITAL_ROUTES.HOSPITAL_SPECIALIZATION_MANGEMENT} element={<SpecializationManagement/>}/>
                       <Route path={HOSPITAL_ROUTES.DOCTOR_LEAVE_MANAGEMENT}element={<DoctorLeaveManagement/>}/>
-
-                      <Route path={HOSPITAL_ROUTES.HOSPITAL_SUBSCRIPTION} element={<Subscription/>}/>
+                      <Route path={HOSPITAL_ROUTES.HOSPITAL_FINANCE} element={<HospitalFinance/>}/>
                       <Route path={HOSPITAL_ROUTES.HOSPITAL_PAYMENT_SUCCESS} element={
                         <PaymentSuccess 
                           redirectPath={HOSPITAL_ROUTES.HOSPITALDASHBOARD}
@@ -50,6 +53,7 @@ const HospitalRoutes = () => {
                         />
                       } />
                 </Route>
+            </Route>
             </Route>
         </Routes>
     )

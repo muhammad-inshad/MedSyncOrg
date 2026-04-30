@@ -66,4 +66,5 @@ export interface IAppointmentCheckoutData {
     heartRate?: string;
     weight?: string;
     doctorName?: string;
+    totalAmount?: number;
 }

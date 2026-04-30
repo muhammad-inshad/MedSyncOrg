@@ -151,6 +151,14 @@ export const hospitalApi = {
 
     getDashboardStats:()=>api.get(HOSPITAL_MANAGEMENT.GETDASHBOARDSTATS),
 
-    getDoctorStatus:() => api.get(HOSPITAL_MANAGEMENT.GET_DOCTOR_STATUS)
+    getDoctorStatus:() => api.get(HOSPITAL_MANAGEMENT.GET_DOCTOR_STATUS),
+
+    getdoctorsalaryrequest:(params?: {page?: number;limit?: number;status?: string;search?: string;}) =>
+        api.get(HOSPITAL_MANAGEMENT.GET_DOCTOR_SALARY_REQUEST,{ 
+    params 
+  }),
+
+    updateSalaryRequestStatus: (id: string, data: { status: 'APPROVED' | 'REJECTED'; approvedAmount?: number; note: string, hospitalCommission?: number;}) =>
+        api.patch(HOSPITAL_MANAGEMENT.UPDATE_DOCTOR_SALARY_REQUEST_STATUS(id), data),
 };
                                    

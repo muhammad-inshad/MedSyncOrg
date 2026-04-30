@@ -3,4 +3,5 @@ import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
 
 export interface ISlotRepository extends IBaseRepository<IDoctorSchedule>{
     findByDoctorId(doctorId: string): Promise<IDoctorSchedule[]>
+    findExistingSchedule(doctorId: string,daysOfWeek: number[],session: string): Promise<string[]| null>;
 }

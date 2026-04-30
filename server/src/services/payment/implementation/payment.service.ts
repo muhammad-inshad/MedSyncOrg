@@ -85,7 +85,7 @@ export class PaymentService implements IPaymentService {
 
     async createAppointmentCheckoutSession(appointmentData: IAppointmentCheckoutData, patientId: string): Promise<CheckoutResponseDTO> {
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-        
+  
         const metadata = {
             type: "appointment",
             patientId: String(patientId),
@@ -93,8 +93,7 @@ export class PaymentService implements IPaymentService {
             hospitalId: String(appointmentData.hospitalId),
             appointmentDate: String(appointmentData.appointmentDate),
             mode: appointmentData.mode,
-            
-            // Missing required fields added here
+ 
             slotStartTime: appointmentData.slotStartTime,
             slotEndTime: appointmentData.slotEndTime,
             tokenNumber: String(appointmentData.tokenNumber),
@@ -109,7 +108,8 @@ export class PaymentService implements IPaymentService {
             bloodPressure: appointmentData.bloodPressure || "",
             heartRate: appointmentData.heartRate || "",
             weight: appointmentData.weight || "",
-            doctorName: appointmentData.doctorName || ""
+            doctorName: appointmentData.doctorName || "",
+            totalAmount: String(appointmentData.totalAmount || 0),
         };
 
         const session = await stripe.checkout.sessions.create({
@@ -123,7 +123,7 @@ export class PaymentService implements IPaymentService {
                             name: `Appointment with Dr. ${appointmentData.doctorName || 'Doctor'}`,
                             description: `Appointment on ${new Date(appointmentData.appointmentDate).toLocaleDateString()}`,
                         },
-                        unit_amount: 50000, // Ensure this matches your logic (e.g., 500 INR)
+                        unit_amount: Math.round(Number(metadata.totalAmount) * 100) || 0, 
                     },
                     quantity: 1,
                 },
@@ -183,10 +183,11 @@ export class PaymentService implements IPaymentService {
                         heartRate: metadata.heartRate,
                         weight: metadata.weight,
                         paymentId: session.id,
+                        totalAmount: Number(metadata.totalAmount)
                     };
 
                     await this.patientService.bookAppointment(metadata.patientId, appointmentData);
-                    console.log("Appointment booked successfully via webhook");
+                 
                 } catch (error) {
                     console.error("ERROR during webhook appointment processing:", error);
                     throw error; 

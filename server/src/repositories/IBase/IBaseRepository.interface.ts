@@ -11,4 +11,5 @@ export interface IBaseRepository<T> {
     findByIdWithPassword(id: string): Promise<T | null>;
     countDocuments(filter?: object): Promise<number>;
     findByFilter(filter: FilterQuery<T>): Promise<T[]>;
+    findOne(filter: FilterQuery<T>): Promise<T | null>;
 }

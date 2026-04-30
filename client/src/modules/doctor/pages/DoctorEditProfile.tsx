@@ -160,23 +160,10 @@ const DoctorEditProfile: React.FC = () => {
                 department: userData.department || '',
                 specialization: userData.specialization || '',
                 about: userData.about || '',
-                consultationTime: {
-                    start: userData.consultationTime?.start?.replace(/\s?(AM|PM)/g, '') || '',
-                    end: userData.consultationTime?.end?.replace(/\s?(AM|PM)/g, '') || '',
-                },
-                payment: {
-                    type: userData.payment?.type || 'commission',
-                    commissionPercentage: userData.payment?.commissionPercentage?.toString() || '',
-                    fixedSalary: userData.payment?.fixedSalary?.toString() || '',
-                    payoutCycle: userData.payment?.payoutCycle || 'monthly',
-                    patientsPerDayLimit: userData.payment?.patientsPerDayLimit?.toString() || '20',
-                },
+          
             });
 
-            setTimePeriods({
-                start: userData.consultationTime?.start?.includes('PM') ? 'PM' : 'AM',
-                end: userData.consultationTime?.end?.includes('PM') ? 'PM' : 'AM'
-            });
+           
 
             if (userData.profileImage) setProfilePreview(userData.profileImage);
             if (userData.licence) setLicensePreview(userData.licence);

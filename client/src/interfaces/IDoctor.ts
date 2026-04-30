@@ -1,3 +1,4 @@
+
 export interface IDoctor {
 
   id: string; // MongoDB ID
@@ -50,4 +51,12 @@ export interface CreateDoctorSchedulePayload {
     startTime: string;                      
     endTime: string;                    
     slotDuration: number;                
+}
+
+export interface SalaryHikeRequestinterface{
+  doctorId:string,
+  hospitalId:string,
+  requestedSalary:string,
+  reason:string,
+  currentSalary:number
 }

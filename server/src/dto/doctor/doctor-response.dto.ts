@@ -20,19 +20,12 @@ export const DoctorResponseSchema = z.object({
     rating: z.number(),
     reviewCount: z.number(),
     isActive: z.boolean(),
+    salary:z.number(),
     isAccountVerified: z.boolean(),
-    walletBalance: z.number(),
     reviewStatus: z.enum(["pending", "approved", "revision", "rejected"]),
     reapplyDate: z.union([z.date(), z.string()]).nullable().optional(), // Add .nullable()
     hospital_id: z.string().nullable().optional(),
     rejectionReason: z.string().optional(),
-    availableSlots: z.array(z.string()),
-    consultationTime: z.object({
-        start: z.string(),
-        end: z.string(),
-    }),
-    monthlyAmount: z.number(),
-    patientsPerDayLimit: z.number(),
     createdAt: z.union([z.date(), z.string()]),
     updatedAt: z.union([z.date(), z.string()]),
 });
@@ -51,15 +44,6 @@ export interface UpdateDoctorDTO {
   hospital_id?: Types.ObjectId | string;
   about?: string;
   licence?: string;
-  consultationTime?: {
-    start: string;
-    end: string;
-  };
-
-  availableSlots?: string[];
-
-  monthlyAmount?: number;
-  patientsPerDayLimit?: number;
 
   profileImage?: string;
   isActive?: boolean | string;
@@ -85,4 +69,12 @@ export interface CreateDoctorSchedulePayload {
     endTime: string;                    
     slotDuration: number;      
     doctorId?:string          
+}
+
+export interface SalaryHikeRequestinterface{
+  doctorId:string,
+  hospitalId:string,
+  requestedSalary:string,
+  reason:string
+  currentSalary:number
 }

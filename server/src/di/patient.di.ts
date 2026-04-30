@@ -21,15 +21,16 @@ import { HospitalMapper } from "../mappers/hospital.mapper.ts";
 import { DoctorMapper } from "../mappers/doctor.mapper.ts";
 import { AppointmentMapper } from "../mappers/appointment.mapper.ts";
 import { PrescriptionMapper } from "../mappers/prescription.mapper.ts";
-
+import {WalletRepository} from "../repositories/wallet/wallet.repository.ts"
 import { SubscriptionRepository } from "../repositories/superAdmin/subscription/implements/subscription.repository.ts";
-
+import {Wallet} from "../models/wallet.model.ts"
 import { LiveTokenController } from "../controllers/patient/LiveToken.controller.ts";
 import { PrescriptionRepository } from "../repositories/Prescription/prescription.repository.ts";
 import PrescriptionModel from "../models/prescription.model.ts";
 import { SlotRepository } from "../repositories/slot/slot.repository.ts";
 import { DoctorScheduleModel } from "../models/DoctorSlot.ts";
 import { SlotMapper } from "../mappers/slot.mapper.ts";
+import { HospitalDoctorConfigRepository } from "../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.ts";
 
 export const patientContainer = () => {
   const tokenService = new TokenService();
@@ -45,11 +46,14 @@ export const patientContainer = () => {
   const patientMapper = new PatientMapper();
   const hospitalMapper = new HospitalMapper();
   const doctorMapper = new DoctorMapper();
+  const walletRepository=new WalletRepository(Wallet);
   const appointmentMapper = new AppointmentMapper();
   const prescriptionMapper = new PrescriptionMapper();
   const priscriptionRepo= new PrescriptionRepository(PrescriptionModel);
   const slotReppo=new SlotRepository(DoctorScheduleModel)
   const slotmapper=new SlotMapper()
+  const HospitalDoctorConfigRepo = new HospitalDoctorConfigRepository();
+
   const patientService = new PatientService(
     userRepository,
     hospitalRepository,
@@ -66,7 +70,9 @@ export const patientContainer = () => {
     priscriptionRepo,
     prescriptionMapper,
     slotReppo,
-    slotmapper
+    slotmapper,
+    HospitalDoctorConfigRepo,
+     walletRepository,
   );
   const patientController = new PatientController(patientService);
   const patientAuthMiddleware = new PatientAuthMiddleware(tokenService, userRepository);

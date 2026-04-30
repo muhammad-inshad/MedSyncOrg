@@ -13,12 +13,21 @@ export class SlotMangementService implements ISlotMangement {
         private readonly _slotmapper:SlotMapper
     ) {}
 
-   async createSchedule(data: CreateDoctorSchedulePayload): Promise<void> {
-
+async createSchedule(data: CreateDoctorSchedulePayload): Promise<void> {
   if (!data.doctorId || !data.daysOfWeek?.length || !data.session) {
     ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Missing required fields");
   }
 
+   const existingSchedule =await this._slotrepo.findExistingSchedule(data.doctorId,data.daysOfWeek,data.session)
+   if (existingSchedule) {
+    const cheack=existingSchedule.includes(data.session)
+     if(existingSchedule.length>0&&cheack){
+  ApiResponse.throwError(
+    HttpStatusCode.CONFLICT,
+    `Schedule already created for the selected days and session on ${existingSchedule.join(",")}`
+  );
+}
+}
   const [startH, startM] = data.startTime.split(":").map(Number);
   const [endH, endM] = data.endTime.split(":").map(Number);
 

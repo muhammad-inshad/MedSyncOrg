@@ -53,6 +53,7 @@ slotEndTime: string;
   createdAt: Date;
   updatedAt: Date;
   paymentId?: string;
+  totalAmount?: number;
 }
 
 const appointmentSchema = new Schema<IAppointment>(

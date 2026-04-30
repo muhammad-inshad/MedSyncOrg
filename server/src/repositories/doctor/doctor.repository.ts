@@ -43,4 +43,8 @@ async countPendingDoctor(hospitalId: string): Promise<number> {
     reviewStatus: "pending",
   }).exec();
 }
+
+async updateDoctorSalary(doctorId: string | Types.ObjectId, salary: number): Promise<void> {
+  await this.model.findByIdAndUpdate(doctorId, { salary });
+}
 }

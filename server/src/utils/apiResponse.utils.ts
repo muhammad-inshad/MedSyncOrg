@@ -21,6 +21,8 @@ export class ApiResponse {
         });
     }
 
+    
+
     static error<T>(
         res: Response,
         message: string = MESSAGES.SERVER.ERROR,

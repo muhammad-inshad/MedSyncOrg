@@ -6,7 +6,6 @@ import { useAppDispatch } from "../../../hooks/redux";
 import { initializeAuth } from "@/store/auth/authThunks";
 import { stopLoading, logout } from "@/store/auth/authSlice";
 import FullScreenLoader from "@/components/FullScreenLoader";
-
 import { COMMON_ROUTES } from "@/constants/frontend/common/common.routes";
 
 interface MongooseUser {

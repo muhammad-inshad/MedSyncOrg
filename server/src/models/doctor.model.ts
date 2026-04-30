@@ -1,53 +1,39 @@
 import { Schema, model, Document, Types } from "mongoose";
 import { Role } from "../constants/enums.ts";
 
-export interface IDoctorPayment {
-  type: string;
-  payoutCycle: string;
-  patientsPerDayLimit: number;
-  fixedSalary: number;
-}
+
 
 export interface IDoctor extends Document {
-  payment: IDoctorPayment;
   name: string;
   email: string;
   password: string;
   phone: string;
   address: string;
-  role: Role;   
+  role: Role;
   specialization?: string;
   qualification: string;
   experience: string;
   department: string;
   hospital_id: Types.ObjectId;
   about: string;
-  department_id?:string;
-  specialization_id?:string;
+  department_id?: string;
+  specialization_id?: string;
   licence: string;
   profileImage: string;
+
+  salary: number;
 
   rating: number;
   reviewCount: number;
 
   isActive: boolean;
   isAccountVerified: boolean;
-  walletBalance: number;
 
   reviewStatus: "pending" | "approved" | "revision" | "rejected";
   reapplyDate?: Date;
   rejectionReason?: string;
 
   availableSlots: string[];
-
-  consultationTime: {
-    start: string;
-    end: string;
-  };
-
-  
-    monthlyAmount: number;
-    patientsPerDayLimit: number;
 
   createdAt: Date;
   updatedAt: Date;
@@ -60,8 +46,6 @@ const doctorSchema = new Schema<IDoctor>(
       required: [true, 'Doctor name is required'],
       trim: true,
     },
-
-
 
     email: {
       type: String,
@@ -113,10 +97,10 @@ const doctorSchema = new Schema<IDoctor>(
     },
 
     role: {
-  type: String,
-  enum: Object.values(Role),
-  default: Role.DOCTOR,
-},
+      type: String,
+      enum: Object.values(Role),
+      default: Role.DOCTOR,
+    },
 
     licence: {
       type: String,
@@ -131,6 +115,12 @@ const doctorSchema = new Schema<IDoctor>(
     about: {
       type: String,
       required: [true, 'About is required'],
+    },
+
+    salary: {
+      type: Number,
+      default: 0,
+      required: false
     },
 
     rating: {
@@ -155,11 +145,6 @@ const doctorSchema = new Schema<IDoctor>(
       default: false,
     },
 
-    walletBalance: {
-      type: Number,
-      default: 0,
-    },
-
     reviewStatus: {
       type: String,
       enum: ["pending", "approved", "revision", "rejected"],
@@ -176,34 +161,6 @@ const doctorSchema = new Schema<IDoctor>(
       trim: true,
     },
 
-    availableSlots: {
-      type: [String],
-      default: [],
-    },
-
-    consultationTime: {
-      start: {
-        type: String,
-        required: false,
-      },
-      end: {
-        type: String,
-        required: false,
-      },
-    },
-
-    monthlyAmount: {
-        type: Number,
-        required: [false, 'Monthly salary is required'],
-        min: [0, 'Salary cannot be negative'],
-      },
-
-      patientsPerDayLimit: {
-        type: Number,
-        required: false,
-        default: 20,
-        max: [20, 'Maximum tokens per day cannot exceed 20'],
-      },
   },
   {
     timestamps: true,

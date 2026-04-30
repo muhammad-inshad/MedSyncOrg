@@ -1,34 +1,76 @@
-import { useState } from 'react';
-import { Search, Bell, Settings, User, MessageSquare, FileText, Phone } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Search, Bell, Settings, User, TrendingUp, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store/store';
+
+import { doctorApi } from '@/constants/backend/doctor/doctor.api';
 import DoctorDashbord from '../../../assets/images/DoctorDashbord.png';
 import { Link, useNavigate } from 'react-router-dom';
 import { DOCTOR_ROUTES } from '@/constants/frontend/doctor/doctor.routes';
 import DoctorSidebar from '../components/DoctorSidebar';
+import SalaryHikeRequestModal from '../components/SalaryHikeRequestModal';
 
+
+interface SalaryHikeStatus {
+  _id: string;
+  status: string;
+  requestedAmount: number;
+  approvedAmount?: number;
+  approvalNote?: string;
+  rejectionReason?: string;
+  createdAt: string;
+}
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
-  const [appointments] = useState([
-    { id: 1, name: 'John Smith', time: '9:00 AM', status: 'Confirmed' },
-    { id: 2, name: 'Emily Jones', time: '9:30 AM', status: 'Confirmed' },
-    { id: 3, name: 'Michael Williams', time: '10:00 AM', status: 'Pending' },
-    { id: 4, name: 'Sarah Brown', time: '10:15 AM', status: 'Canceled' },
-  ]);
+  const [showSalaryModal, setShowSalaryModal] = useState(false);
+  const [latestRequest, setLatestRequest] = useState<SalaryHikeStatus | null>(null);
+  const [isFetchingStatus, setIsFetchingStatus] = useState(true);
 
-  const [earningsData] = useState([120, 150, 130, 180, 280, 310, 290]);
+  const { user } = useSelector((state: RootState) => state.auth);
+  const doctorId = user?.id;
 
-  const getStatusColor = (status: unknown) => {
-    switch (status) {
-      case 'Confirmed': return 'text-green-600';
-      case 'Pending':   return 'text-yellow-600';
-      case 'Canceled':  return 'text-red-600';
-      default:          return 'text-gray-600';
+  const fetchSalaryStatus = useCallback(async () => {
+    if (!doctorId) {
+      console.log("No doctorId available, skipping fetch");
+      return;
+    }
+    try {
+      setIsFetchingStatus(true);
+      const res = await doctorApi.getSalaryIncreaseRequest(doctorId);
+      if (res.data?.success) {
+        console.log("Fetched salary status:", res.data.data);
+        setLatestRequest(res.data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch salary status:', error);
+    } finally {
+      setIsFetchingStatus(false);
+    }
+  }, [doctorId]);
+
+  useEffect(() => {
+    fetchSalaryStatus();
+  }, [fetchSalaryStatus]);
+
+  const getStatusColor = (status: string) => {
+    switch (status.toUpperCase()) {
+      case 'PENDING': return 'bg-amber-50 border-amber-200 text-amber-700';
+      case 'APPROVED': return 'bg-emerald-50 border-emerald-200 text-emerald-700';
+      case 'REJECTED': return 'bg-rose-50 border-rose-200 text-rose-700';
+      default: return 'bg-gray-50 border-gray-200 text-gray-700';
     }
   };
 
+  const getStatusIcon = (status: string) => {
+    switch (status.toUpperCase()) {
+      case 'PENDING': return <Clock className="w-5 h-5 text-amber-500" />;
+      case 'APPROVED': return <CheckCircle className="w-5 h-5 text-emerald-500" />;
+      case 'REJECTED': return <XCircle className="w-5 h-5 text-rose-500" />;
+      default: return <TrendingUp className="w-5 h-5 text-gray-500" />;
+    }
+  };
  
-  const maxEarning = Math.max(...earningsData);
-
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* ── Sidebar ── */}
@@ -56,7 +98,7 @@ const DoctorDashboard = () => {
                     className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <button className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
+                <button onClick={() => setShowSalaryModal(true)} className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
                   Start Consultation
                 </button>
                 <Bell className="w-6 h-6 text-gray-600 cursor-pointer" />
@@ -84,7 +126,7 @@ const DoctorDashboard = () => {
             <div className="relative px-8 py-16">
               <h1 className="text-4xl font-bold text-gray-800 mb-4">Doctor Dashboard</h1>
               <p className="text-gray-700 mb-6 max-w-md">
-                Welcome back, Dr. Anya Sharma. Manage your appointments, patients, and earnings all in one place.
+                Welcome back, Dr. {user?.name?.split(' ').pop() || 'Doctor'}. Manage your appointments, patients, and earnings all in one place.
               </p>
               <div className="flex space-x-4">
                 <button className="px-6 py-2 bg-white text-gray-800 rounded-lg hover:bg-gray-100 transition">
@@ -97,185 +139,105 @@ const DoctorDashboard = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Upcoming Appointments */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Upcoming Appointments</h2>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3 px-4 text-gray-600 font-medium">Patient Name</th>
-                        <th className="text-left py-3 px-4 text-gray-600 font-medium">Time</th>
-                        <th className="text-left py-3 px-4 text-gray-600 font-medium">Status</th>
-                        <th className="text-left py-3 px-4 text-gray-600 font-medium">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {appointments.map((appointment) => (
-                        <tr key={appointment.id} className="border-b last:border-b-0 hover:bg-gray-50">
-                          <td className="py-4 px-4 text-gray-800">{appointment.name}</td>
-                          <td className="py-4 px-4 text-gray-600">{appointment.time}</td>
-                          <td className={`py-4 px-4 font-medium ${getStatusColor(appointment.status)}`}>
-                            {appointment.status}
-                          </td>
-                          <td className="py-4 px-4">
-                            <button className="text-blue-500 hover:text-blue-600">View Details</button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Bottom Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Wallet/Earnings */}
-                <div className="bg-white rounded-xl shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Wallet / Earnings</h3>
-                  <p className="text-sm text-gray-500 mb-4">This month's earnings so far.</p>
-                  <div className="text-3xl font-bold text-gray-800 mb-4">12,450.75</div>
-                  <div className="flex items-end space-x-1 h-32">
-                    {earningsData.map((value, index) => (
-                      <div
-                        key={index}
-                        className="flex-1 bg-blue-400 rounded-t"
-                        style={{ height: `${(value / maxEarning) * 100}%` }}
-                      />
-                    ))}
-                  </div>
-                  <div className="mt-4 pt-4 border-t">
-                    <button className="w-full py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                      Wallet
-                    </button>
-                  </div>
-                </div>
-
-                {/* Chat & Lab Results */}
-                <div className="bg-white rounded-xl shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Chat & Lab Results</h3>
-                  <p className="text-sm text-gray-500 mb-4">Access patient chats and view lab results.</p>
-                  <div className="space-y-3">
-                    <button className="w-full px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center space-x-2">
-                      <MessageSquare className="w-5 h-5" />
-                      <span>Patient Chat</span>
-                    </button>
-                    <button className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition flex items-center justify-center space-x-2">
-                      <FileText className="w-5 h-5" />
-                      <span>View Lab Results</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">            {/* Right Column */}
             <div className="space-y-6">
-              {/* Start Consultation */}
-              <div className="bg-blue-500 rounded-xl shadow-sm p-6 text-center">
-                <button className="w-full py-3 bg-white text-blue-500 rounded-lg hover:bg-gray-100 transition font-semibold text-lg">
-                  Start Consultation
-                </button>
-              </div>
-
-              {/* Live Token Status */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Live Token Status</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-500 mb-1">Now Serving</p>
-                    <p className="text-3xl font-bold text-blue-500">A-102</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500 mb-1">Next Patient</p>
-                    <p className="text-3xl font-bold text-gray-800">A-103</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Need Assistance */}
-              <div className="bg-indigo-900 rounded-xl shadow-sm p-6 text-white">
-                <h3 className="text-lg font-semibold mb-2">Need Assistance?</h3>
-                <p className="text-sm text-indigo-200 mb-4">
-                  Get in touch with our support team for any queries or issues.
-                </p>
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-start space-x-3">
-                    <MessageSquare className="w-5 h-5 mt-1" />
-                    <div>
-                      <p className="font-medium">IT Support</p>
-                      <p className="text-sm text-indigo-200">support@medsync.com</p>
+              {/* Salary Hike Status Updates */}
+              {!isFetchingStatus && latestRequest && (
+                <div className={`rounded-2xl border p-6 space-y-4 shadow-sm transition-all duration-300 ${getStatusColor(latestRequest.status)}`}>
+                  <div className="flex items-center justify-between border-b border-black/5 pb-3">
+                    <div className="flex items-center gap-2.5 font-bold uppercase tracking-wider text-xs">
+                      {getStatusIcon(latestRequest.status)}
+                      {latestRequest.status === 'PENDING' ? 'Request Under Review' : `Request ${latestRequest.status}`}
                     </div>
+                    <span className="text-[10px] font-medium opacity-60 uppercase tracking-tighter">
+                      {new Date(latestRequest.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
                   </div>
-                  <div className="flex items-start space-x-3">
-                    <Phone className="w-5 h-5 mt-1" />
-                    <div>
-                      <p className="font-medium">Emergency Line</p>
-                      <p className="text-sm text-indigo-200">+1 (555) 123-4567</p>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="opacity-70 font-medium">Requested Hike:</span>
+                      <span className="font-bold tabular-nums">₹{latestRequest.requestedAmount?.toLocaleString()}</span>
                     </div>
+                    
+                    {latestRequest.status === 'APPROVED' && latestRequest.approvedAmount && (
+                      <div className="flex justify-between items-center text-sm p-2.5 bg-white/40 rounded-xl">
+                        <span className="text-emerald-900/70 font-semibold italic">Final Approved:</span>
+                        <span className="font-black text-emerald-800 tabular-nums">₹{latestRequest.approvedAmount.toLocaleString()}</span>
+                      </div>
+                    )}
+
+                    {(latestRequest.approvalNote || latestRequest.rejectionReason) && (
+                      <div className="p-4 bg-white/50 rounded-xl text-xs leading-relaxed text-slate-700 italic border border-white/40 shadow-inner">
+                        <span className="font-bold not-italic flex items-center gap-1.5 mb-1.5 text-[10px] uppercase tracking-wider opacity-70">
+                          {latestRequest.status === 'REJECTED' ? (
+                            <>
+                              <AlertCircle className="w-3 h-3 text-rose-500" />
+                              Reason for Rejection:
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="w-3 h-3 text-emerald-500" />
+                              Note from Management:
+                            </>
+                          )}
+                        </span>
+                        <p className="pl-4.5 border-l-2 border-black/5 ml-0.5">
+                          "{latestRequest.status === 'REJECTED' ? latestRequest.rejectionReason : latestRequest.approvalNote}"
+                        </p>
+                      </div>
+                    )}
                   </div>
+
+                  {latestRequest.status === 'REJECTED' && (
+                    <button
+                      onClick={() => setShowSalaryModal(true)}
+                      className="w-full py-3 bg-rose-600 text-white rounded-xl hover:bg-rose-700 transition-all font-bold text-sm shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 active:scale-[0.98]"
+                    >
+                      <TrendingUp className="w-4 h-4" /> Re-request Salary Hike
+                    </button>
+                  )}
                 </div>
-                <button className="w-full py-2 bg-white text-indigo-900 rounded-lg hover:bg-gray-100 transition font-medium">
-                  Contact Support
-                </button>
-              </div>
+              )}
+
+              {/* Main Request Button (only shows when no pending/rejected request exists) */}
+              {(!latestRequest || latestRequest.status === 'APPROVED') && (
+                <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl shadow-xl shadow-blue-600/20 p-8 text-center border border-blue-400/20">
+                  <div className="mb-4 bg-white/20 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto backdrop-blur-sm">
+                    <TrendingUp className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-white font-bold text-lg mb-2">Grow Your Earnings</h3>
+                  <p className="text-blue-100 text-xs mb-6 leading-relaxed">Submit a request for a salary increment based on your performance.</p>
+                  <button 
+                    onClick={() => setShowSalaryModal(true)}  
+                    className="w-full py-4 bg-white text-blue-600 rounded-xl hover:bg-blue-50 transition-all font-bold text-sm uppercase tracking-widest shadow-lg active:scale-[0.98]"
+                  >
+                    Request Salary Hike
+                  </button>
+                </div>
+              )}
+
+              {latestRequest?.status === 'PENDING' && (
+                <div className="bg-white rounded-2xl shadow-sm p-8 text-center border border-slate-100 flex flex-col items-center">
+                   <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mb-4">
+                     <Clock className="w-8 h-8 text-amber-500 animate-pulse" />
+                   </div>
+                   <h3 className="font-bold text-slate-800 text-lg">Processing Request</h3>
+                   <p className="text-slate-500 text-sm mt-2 max-w-[200px]">The management is currently reviewing your application.</p>
+                </div>
+              )}
+
+              <SalaryHikeRequestModal
+                isOpen={showSalaryModal}
+                onClose={() => {
+                  setShowSalaryModal(false);
+                  fetchSalaryStatus();
+                }}
+              />
             </div>
           </div>
         </main>
 
-        {/* Footer */}
-        <footer className="bg-indigo-900 text-white mt-12">
-          <div className="px-4 sm:px-6 lg:px-8 py-12">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              <div>
-                <h3 className="text-2xl font-bold mb-4">MEDDICAL</h3>
-                <p className="text-indigo-200 text-sm">
-                  Leading the Way in Medical Excellence, Trusted Care.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Important Links</h4>
-                <ul className="space-y-2 text-indigo-200 text-sm">
-                  <li><a href="#" className="hover:text-white">Appointment</a></li>
-                  <li><a href="#" className="hover:text-white">Doctors</a></li>
-                  <li><a href="#" className="hover:text-white">Services</a></li>
-                  <li><a href="#" className="hover:text-white">About Us</a></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Contact Us</h4>
-                <ul className="space-y-2 text-indigo-200 text-sm">
-                  <li>Call: (237) 681-812-255</li>
-                  <li>Email: fildineesoe@gmail.com</li>
-                  <li>Address: 0123 Some place</li>
-                  <li>Some country</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Newsletter</h4>
-                <div className="flex">
-                  <input
-                    type="email"
-                    placeholder="Enter your email address"
-                    className="flex-1 px-4 py-2 rounded-l-lg text-gray-800 focus:outline-none"
-                  />
-                  <button className="px-4 py-2 bg-blue-500 rounded-r-lg hover:bg-blue-600">→</button>
-                </div>
-              </div>
-            </div>
-            <div className="border-t border-indigo-800 mt-8 pt-8 flex justify-between items-center">
-              <p className="text-sm text-indigo-200">© 2021 Hospital's name All Rights Reserved by PNTEC-LTD</p>
-              <div className="flex space-x-4">
-                <a href="#" className="w-8 h-8 bg-indigo-800 rounded-full flex items-center justify-center hover:bg-indigo-700">in</a>
-                <a href="#" className="w-8 h-8 bg-indigo-800 rounded-full flex items-center justify-center hover:bg-indigo-700">f</a>
-                <a href="#" className="w-8 h-8 bg-indigo-800 rounded-full flex items-center justify-center hover:bg-indigo-700">@</a>
-              </div>
-            </div>
-          </div>
-        </footer>
       </div>
     </div>
   );

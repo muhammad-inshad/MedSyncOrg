@@ -54,7 +54,6 @@ app.use("/api/doctor", doctorAuthMiddleware.handle, doctorRoutes);
 app.use("/api/hospital", hospitalAuthMiddleware.handle, hospitalRoutes);
 app.use("/api/superadmin", superAdminAuthMiddleware, superAdminRoutes);
 
-
 app.use(errorHandler);
 
 export default app;

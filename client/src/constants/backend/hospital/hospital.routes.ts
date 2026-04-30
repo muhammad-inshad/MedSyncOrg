@@ -42,4 +42,6 @@ export const HOSPITAL_MANAGEMENT = {
     GETDASHBOARDSTATS:"/api/hospital/dashboard-stats",
     GET_DOCTOR_STATUS:"/api/hospital/getdoctorstatus",
     KYC_STATS:"/api/hospital/kyc-stats",
+    GET_DOCTOR_SALARY_REQUEST:"/api/hospital/doctors-salary-requests",
+    UPDATE_DOCTOR_SALARY_REQUEST_STATUS: (id: string) => `/api/hospital/doctors-salary-requests/${id}/status`
 };

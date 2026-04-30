@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -96,6 +96,8 @@ export default function PatientAppointment() {
   const [serviceType, setServiceType] = useState<"offline" | "online">("offline");
   const [paymentMethod, setPaymentMethod] = useState<"online" | "cash">("online");
 
+  const [totalfee, setTotalFee] = useState<number | null>(null);
+
   const [form, setForm] = useState({
     fullName: "",
     age: "",
@@ -152,6 +154,31 @@ export default function PatientAppointment() {
     };
     fetchDoctor();
   }, [doctorId, navigate]);
+useEffect(() => {
+  const fetchDoctorFee = async () => {
+    if (!doctorId || !doctor) return;
+
+    try {
+      const res = await patientApi.getDoctorfee(doctorId);
+
+      if (res.data.success) {
+
+        const doctorfee = res.data.data.fee.doctorFee || 0;
+        const hospitalCommission = res.data.data.fee.hospitalCommission || 0;
+
+        const commissionAmount = (doctorfee * hospitalCommission) / 100;
+        const totalAmount = doctorfee + commissionAmount;
+
+        setTotalFee(totalAmount);
+      }
+    } catch (error) {
+      console.error("Error fetching doctor fee:", error);
+      toast.error("Failed to fetch doctor fee");
+    }
+  };
+
+  fetchDoctorFee();
+}, [doctor]);
 
   useEffect(() => {
     const fetchWeekAvailability = async () => {
@@ -343,6 +370,7 @@ export default function PatientAppointment() {
         toast.error("Doctor or hospital not found");
         return;
       }
+      const selectedSlot = getSelectedSlot();
 
       const bookingData = {
         doctorId: doctor.id,
@@ -350,6 +378,10 @@ export default function PatientAppointment() {
         appointmentDate: selectedDate.toISOString(),
         mode: serviceType,
         session: selectedSession,
+         slotStartTime: selectedSlot?.startTime || '',     
+  slotEndTime: selectedSlot?.endTime || '',   
+ tokenNumber: nextToken,      
+  doctorName: doctor.name,   
         patientDetails: {
           name: form.fullName,
           age: Number(form.age),
@@ -360,6 +392,7 @@ export default function PatientAppointment() {
         bloodPressure: form.bloodPressure,
         heartRate: form.heartRate,
         weight: form.weight,
+       
       };
 
       if (paymentMethod === "cash") {
@@ -372,9 +405,10 @@ export default function PatientAppointment() {
         }
       } else {
         const res = await patientApi.createAppointmentPaymentSession({
-          bookingData: { ...bookingData, doctorName: doctor.name },
+          bookingData: { ...bookingData, totalAmount: totalfee, doctorName: doctor.name },
         });
         if (res.data.success) {
+          console.log("Payment session created successfully:", res.data.url);
           window.location.href = res.data.url;
         } else {
           toast.error("Payment failed");
@@ -708,6 +742,14 @@ export default function PatientAppointment() {
                 </div>
               </div>
 
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 mb-3 uppercase">Total Fee</label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-700 font-medium">₹</span>
+                    <span className="text-xl font-bold text-[#0d2b4e]">{totalfee !== null ? totalfee : "--"}</span>
+                  </div>
+                </div>       
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-3 uppercase">Service Type</label>
@@ -727,6 +769,8 @@ export default function PatientAppointment() {
                     ))}
                   </div>
                 </div>
+
+              
 
                 <div>
                   <label className="block text-xs font-bold text-gray-500 mb-3 uppercase">Payment Method</label>

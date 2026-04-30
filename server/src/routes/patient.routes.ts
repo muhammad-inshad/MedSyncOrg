@@ -23,4 +23,5 @@ router.patch("/appointments/:id/cancel",patientController.appoinmentCancel.bind(
 router.get("/appointments/status/:sessionId", patientController.checkAppointmentStatus.bind(patientController));
 router.get("/livetoken", liveToken.getToken.bind(liveToken));
 router.get("/prescriptions", patientController.getPrescriptions.bind(patientController));   
+router.get("/doctors/:doctorId/fee", patientController.getDoctorFee.bind(patientController));
 export default router;

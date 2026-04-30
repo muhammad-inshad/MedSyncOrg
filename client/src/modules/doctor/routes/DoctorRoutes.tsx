@@ -8,6 +8,7 @@ import UpcomingAppointments from "../pages/UpcomingAppointments";
 import DoctorLeaveManagement from "../pages/DoctorLeaveManagement";
 import DoctorConsultation from "../pages/DoctorConseltation";
 import DoctorSlotManagement from "../pages/DoctorSlotManagement";
+import DoctorWallet from "../pages/DoctorWallet";
 
 
 const DoctorRoutes = () => {
@@ -21,6 +22,7 @@ const DoctorRoutes = () => {
         <Route path={DOCTOR_ROUTES.APPLY_LEAVE} element={<DoctorLeaveManagement />} />
         <Route path={DOCTOR_ROUTES.CONSELTATION} element={<DoctorConsultation/>}/>
         <Route path={DOCTOR_ROUTES.SLOTMANAGEMENT} element={<DoctorSlotManagement/>}/>
+        <Route path={DOCTOR_ROUTES.WALLET} element={<DoctorWallet/>}/>
       </Route>
     </Routes>
   );

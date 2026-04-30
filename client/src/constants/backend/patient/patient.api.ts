@@ -18,6 +18,7 @@ interface IBookingData {
     weight: string;
     session?: "morning" | "afternoon" | "evening";
     doctorName?: string;
+    totalAmount?: number|null;
 }
 
 export const patientApi = {
@@ -66,6 +67,9 @@ export const patientApi = {
         api.get(PATIENT_MANAGEMENT.CHECK_APPOINTMENT_STATUS(sessionId)),
 
     getPrescriptions: ( page: number = 1, limit: number = 5, search: string = "") => 
-         api.get(`${PATIENT_MANAGEMENT.PRESCRIPTIONS}?page=${page}&limit=${limit}&search=${search}`)
+         api.get(`${PATIENT_MANAGEMENT.PRESCRIPTIONS}?page=${page}&limit=${limit}&search=${search}`),
+
+    getDoctorfee: (doctorId: string) =>
+        api.get(PATIENT_MANAGEMENT.GET_DOCTOR_FEE(doctorId)),
     
 };

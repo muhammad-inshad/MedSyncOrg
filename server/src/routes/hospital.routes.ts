@@ -8,7 +8,7 @@ const router = express.Router();
 const { specializationManagement } = specializationContainer()
 const { qualificationManagement } = qualificationContainer()
 const { departmentManagement } = departmentContiner()
-const { doctorManagement, patientManagement, hospitalController, hospitalSubscriptionController,dashbordController } = hospitalContainer();
+const { doctorManagement, patientManagement, hospitalController, hospitalSubscriptionController,dashbordController,doctorSalaryController} = hospitalContainer();
 
 
 router.get("/me", hospitalController.getHospitalProfile.bind(hospitalController));
@@ -70,5 +70,10 @@ router.get("/dashboard-stats",dashbordController.getstatus.bind(dashbordControll
 router.get("/getdoctorstatus",dashbordController.getDoctorStatus.bind(dashbordController))
 router.get("/kyc-stats",dashbordController.getKycStats.bind(dashbordController))
 router.get("/common-stats", dashbordController.getCommonStats.bind(dashbordController));
+
+
+router.get("/doctors-salary-requests", doctorSalaryController.getDoctorSalaryRequests.bind(doctorSalaryController));
+router.patch("/doctors-salary-requests/:id/status", doctorSalaryController.updateSalaryRequestStatus.bind(doctorSalaryController));
+
 
 export default router;

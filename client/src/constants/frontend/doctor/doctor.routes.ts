@@ -7,5 +7,5 @@ export const DOCTOR_ROUTES = {
     APPLY_LEAVE:"/doctor/apply-leave",
     CONSELTATION:"/docor/conseltation",
     WALLET:"/doctor/wallet",
-    SLOTMANAGEMENT:"/doctor/slotmanagement"
+    SLOTMANAGEMENT:"/doctor/slotmanagement",
 };

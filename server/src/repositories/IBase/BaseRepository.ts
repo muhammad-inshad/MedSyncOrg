@@ -70,6 +70,10 @@ async create(data: Partial<T>, session?: ClientSession): Promise<T> {
         return { data, total, page, limit };
     }
     async findByFilter(filter: FilterQuery<T>): Promise<T[]> {
-    return await this.model.find(filter).exec();
-}
+        return await this.model.find(filter).exec();
+    }
+
+    async findOne(filter: FilterQuery<T>): Promise<T | null> {
+        return await this.model.findOne(filter).exec();
+    }
 }

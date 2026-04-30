@@ -16,5 +16,6 @@ export const PATIENT_MANAGEMENT = {
     TODAY_APPOINTMENTS: "/api/patient/appointments/today",
     CHECK_APPOINTMENT_STATUS: (sessionId: string) => `/api/patient/appointments/status/${sessionId}`,
     PRESCRIPTIONS: "/api/patient/prescriptions",
-    STATUS: "/api/patient/status"
+    STATUS: "/api/patient/status",
+    GET_DOCTOR_FEE: (doctorId: string) => `/api/patient/doctors/${doctorId}/fee`
 };

@@ -145,7 +145,6 @@ class PatientController {
 
   bookAppointment = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      
       const user = req.user as unknown as ITokenPayload;
       const patientId = user?.userId;
       if (!patientId) {
@@ -251,6 +250,14 @@ class PatientController {
     }
 
 }
+getDoctorFee = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { doctorId } = req.params;
+    const fee = await this.patientService.getDoctorFee(doctorId);
+    return ApiResponse.success(res, "Doctor fee fetched successfully", { fee });
+  } catch (error) {
+    next(error);
+  }
 }
-
+}
 export default PatientController;

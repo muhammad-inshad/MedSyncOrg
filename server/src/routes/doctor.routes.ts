@@ -2,7 +2,7 @@ import { Router } from "express";
 import { doctorContainer } from "../di/doctor.di.ts";
 import { upload } from "../middleware/multer.middleware.ts";
 
-const { doctorcontroller, appoimentController,consultation,slotcontroller} = doctorContainer()
+const { doctorcontroller, appoimentController,consultation,slotcontroller,doctorDashboard} = doctorContainer()
 const router = Router()
 
 
@@ -21,6 +21,9 @@ router.patch("/consultation/:id/status", consultation.markAsCompleted.bind(consu
 router.post("/prescription",consultation.prescription.bind(consultation))
 
 router.post("/schedules", slotcontroller.createDoctorSchedule.bind(slotcontroller));
-router.get("/schedules", slotcontroller.getDoctorSchedules.bind(slotcontroller));     // add this
-router.patch("/schedules/:id", slotcontroller.deleteDoctorSchedule.bind(slotcontroller)); // add this
+router.get("/schedules", slotcontroller.getDoctorSchedules.bind(slotcontroller));   
+router.patch("/schedules/:id", slotcontroller.deleteDoctorSchedule.bind(slotcontroller)); 
+
+router.post("/salary-increase-request",doctorDashboard.SALARY_INCREASE_REQUEST .bind(doctorDashboard))
+router.get("/salary-increase-request", doctorDashboard.GET_SALARY_INCREASE_REQUEST.bind(doctorDashboard))
 export default router

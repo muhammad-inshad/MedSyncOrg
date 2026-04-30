@@ -226,12 +226,7 @@ export class DoctorManagementService implements IDoctorManagementService {
       isActive: true,
       isAccountVerified: true,
       reviewStatus: "pending",
-      consultationTime: {
-        start: "09:00 AM",
-        end: "05:00 PM",
-      },
-      monthlyAmount: 0,
-      patientsPerDayLimit: 10,
+
     };
 
     const created = await this._doctorRepo.create(doctorData);
@@ -264,14 +259,7 @@ export class DoctorManagementService implements IDoctorManagementService {
         "doctors/license",
       );
     }
-    let consultationTime = data.consultationTime;
-    if (typeof consultationTime === "string") {
-      try {
-        consultationTime = JSON.parse(consultationTime);
-      } catch (e) {
-        Logger.error("Failed to parse consultationTime", e);
-      }
-    }
+
 
     const updateData: Partial<IDoctor> = {
       ...data,
@@ -282,13 +270,7 @@ export class DoctorManagementService implements IDoctorManagementService {
         : undefined,
       profileImage: profileImageUrl,
       licence: licenseUrl,
-      consultationTime: {
-        start: consultationTime?.start || doctor.consultationTime.start,
-        end: consultationTime?.end || doctor.consultationTime.end,
-      },
-      monthlyAmount: Number(data.monthlyAmount) || doctor.monthlyAmount,
-      patientsPerDayLimit:
-        Number(data.patientsPerDayLimit) || doctor.patientsPerDayLimit,
+
       isActive: data.isActive === "true" || data.isActive === true,
       isAccountVerified:
         data.isAccountVerified === "true" || data.isAccountVerified === true,

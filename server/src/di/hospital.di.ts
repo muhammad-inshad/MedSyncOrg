@@ -37,6 +37,11 @@ import { SpecializationMapper } from "../mappers/specialization.mapper.ts";
 import { SpecializationRepository } from "../repositories/hospital/implementation/specialization.repository.ts";
 import { Dashbord } from '../controllers/hospital/hospital/implementation/dashbord.controller.ts';
 import { DashbordService } from "../services/hospital/hospital/implementations/dashbord.service.ts";
+import { SalaryrequestRepository } from "../repositories/salaryhike/salaryhike.repository.ts";
+import { SalaryRequestModel } from "../models/SalaryRequest.model.ts";
+import {  DoctorSalaryservice } from "../services/hospital/doctor/implementations/doctor.salary.service.ts";
+import { DoctorSalaryController } from "../controllers/hospital/doctor/implementations/doctor.salary.controller.ts";
+import { HospitalDoctorConfigRepository } from "../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.ts";
 
 export const hospitalContainer = () => {
     const hospitalRepo = new HospitalRepository(HospitalModel);
@@ -54,7 +59,11 @@ export const hospitalContainer = () => {
     const qualificationRepo = new QualificationRepository(QualificationModel);
     const qualificationMapper = new QualificationMapper();
     const specializationRepo = new SpecializationRepository();
+    const HospitalDoctorConfigRepo = new HospitalDoctorConfigRepository();
     const specializationMapper = new SpecializationMapper();
+    const salaryRequestRepo = new SalaryrequestRepository(SalaryRequestModel);
+    const doctorSalaryService = new DoctorSalaryservice(salaryRequestRepo, doctorRepo,HospitalDoctorConfigRepo);  
+    const doctorSalaryController = new DoctorSalaryController(doctorSalaryService);
 
     const hospitalMapper = new HospitalMapper();
 
@@ -145,6 +154,7 @@ const dashbordController = new Dashbord(dashbordservice);
         hospitalSubscriptionController,
         qualificationService,
         specializationService,
-        dashbordController
+        dashbordController,
+        doctorSalaryController
     };
 }

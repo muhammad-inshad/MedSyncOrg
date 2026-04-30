@@ -30,8 +30,8 @@ import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-respo
 import { ISlotRepository } from "../../../repositories/slot/slot.repository.interface.ts";
 import { SlotMapper } from "../../../mappers/slot.mapper.ts";
 import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.ts";
-import pkg from 'rrule';
-const { RRule } = pkg;
+import { HospitalDoctorConfigRepository } from "../../../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.ts";
+import { IWalletRepository } from "../../../repositories/wallet/wallet.repository.interface.ts";
 
 
 export class PatientService implements IPatientService {
@@ -51,7 +51,9 @@ export class PatientService implements IPatientService {
     private readonly _priscriptionRepo: IPrescriptionRepository,
     private readonly _prescriptionMapper: PrescriptionMapper,
     private readonly _slotreppo:ISlotRepository,
-    private readonly _slotemapper:SlotMapper
+    private readonly _slotemapper:SlotMapper,
+    private readonly _HospitalDoctorConfigRepo: HospitalDoctorConfigRepository,
+    private readonly _walletRepository:IWalletRepository
   ) {}
 
   async getProfile(userId: string): Promise<PatientResponseDTO | null> {
@@ -93,7 +95,7 @@ export class PatientService implements IPatientService {
       filter: { isActive: true, reviewStatus: "approved" }
     });
 
-    console.log(result)
+  
     
     return {
       ...result,
@@ -215,40 +217,52 @@ export class PatientService implements IPatientService {
     return this._doctorMapper.toDTO(doctor!);
   }
 
- async getAvailableSlots(doctorId: string, date: string): Promise<{ 
+async getAvailableSlots(doctorId: string, date: string): Promise<{ 
   slots: SlotResponseDTO[]; 
   appointments: IAppointment[];
   total: number 
 }> {
-  const localDate = new Date(date + 'T00:00:00'); 
-  const startOfDay = new Date(localDate);
-  startOfDay.setHours(0, 0, 0, 0); 
-  
-  const endOfDay = new Date(localDate);
-  endOfDay.setHours(23, 59, 59, 999); 
 
-  const dayOfWeek = localDate.getDay();
-console.log(dayOfWeek)
+  const [year, month, day] = date.split('-').map(Number);
+  
+  // Use UTC date construction to get correct day of week
+  const utcDate = new Date(Date.UTC(year, month - 1, day));
+  const dayOfWeek = utcDate.getUTCDay(); // 0=Sun, 1=Mon ... 6=Sat
+
   const [availableSlots, { appointments, total }] = await Promise.all([
     this._slotreppo.findByDoctorId(doctorId),
-    this._appointmentRepo.findByDoctorAndDate(doctorId, date) 
+    this._appointmentRepo.findByDoctorAndDate(doctorId, date)
   ]);
 
- const filteredSlots = availableSlots.filter(slot => {
-  if (!slot.isActive) return false;
+  const filteredSlots = availableSlots.filter(slot => {
+    if (!slot.isActive) return false;
 
-  const rule = new RRule({
-    freq: RRule.WEEKLY,
-    byweekday: slot.daysOfWeek.map(day => [
-      RRule.SU, RRule.MO, RRule.TU, 
-      RRule.WE, RRule.TH, RRule.FR, RRule.SA
-    ][day]),
-    dtstart: new Date(date + 'T00:00:00'),
+
+    if (!slot.daysOfWeek.includes(dayOfWeek)) return false;
+
+    // Check validFrom - slot shouldn't apply before its start date
+    if (slot.validFrom) {
+      const validFromDate = new Date(slot.validFrom);
+      const validFromUTC = new Date(Date.UTC(
+        validFromDate.getUTCFullYear(),
+        validFromDate.getUTCMonth(),
+        validFromDate.getUTCDate()
+      ));
+      if (utcDate < validFromUTC) return false;
+    }
+
+    if (slot.validUntil) {
+      const validUntilDate = new Date(slot.validUntil);
+      const validUntilUTC = new Date(Date.UTC(
+        validUntilDate.getUTCFullYear(),
+        validUntilDate.getUTCMonth(),
+        validUntilDate.getUTCDate()
+      ));
+      if (utcDate > validUntilUTC) return false;
+    }
+
+    return true;
   });
-
-  const occurrences = rule.between(startOfDay, endOfDay, true);
-  return occurrences.length > 0;
-});
 
   const slotDTOs = this._slotemapper.toDTOList(filteredSlots);
 
@@ -259,11 +273,67 @@ console.log(dayOfWeek)
   };
 }
 async bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<void> {
-    const { doctorId, appointmentDate, patientDetails, hospitalId, session } = data;
-
+    const { doctorId, appointmentDate, patientDetails, hospitalId, session, totalAmount } = data;
+    console.log("sugalle")
+console.log("Booking appointment with data:", { doctorId, appointmentDate, patientDetails, hospitalId, session, totalAmount });
     if (!doctorId || !appointmentDate || !patientDetails || !hospitalId || !session) {
         ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Missing required appointment details");
     }
+
+    if (totalAmount !== undefined && totalAmount < 0) {
+      console.log("Invalid totalAmount, must be non-negative");
+
+  const doctorObjectId = new Types.ObjectId(
+    typeof doctorId === "object" ? doctorId._id : doctorId
+  );
+
+  const hospitalObjectId = new Types.ObjectId(
+    typeof hospitalId === "object" ? hospitalId._id : hospitalId
+  );
+
+  const findhospitalWallate = await this._walletRepository.findOne({
+    ownerId: hospitalObjectId,
+  });
+
+  const findDoctorWallate = await this._walletRepository.findOne({
+    ownerId: doctorObjectId,
+  });
+
+  const config = await this._HospitalDoctorConfigRepo.findOne({
+    hospitalId: hospitalObjectId,
+    doctorId: doctorObjectId,
+  });
+
+  if (!config) {
+    throw new Error("Config not found");
+  }
+
+  const doctorFee = config.doctorFee || 0;
+  const commissionPercent = config.hospitalCommission || 0;
+
+  const hospitalAmount = (doctorFee * commissionPercent) / 100;
+  const doctorAmount = doctorFee;
+
+  if (!findhospitalWallate) {
+    await this._walletRepository.create({
+      ownerId: hospitalObjectId,
+      balance: hospitalAmount,
+    });
+  } else {
+    findhospitalWallate.balance += hospitalAmount;
+    await findhospitalWallate.save();
+  }
+
+  if (!findDoctorWallate) {
+    await this._walletRepository.create({
+      ownerId: doctorObjectId,
+      balance: doctorAmount,
+    });
+  } else {
+    findDoctorWallate.balance += doctorAmount;
+    await findDoctorWallate.save();
+  }
+}
 
     const dateObj = new Date(appointmentDate);
 
@@ -358,7 +428,7 @@ async bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<v
 
                 await mongoSession.commitTransaction();
 
-                console.log(" Appointment created:", result._id);
+  
                 return;
 
             } catch (error:unknown) {
@@ -437,5 +507,12 @@ getPrescriptions = async (patientId: string,query: { page: number; limit: number
     };
 };
 
+getDoctorFee = async (doctorId: string): Promise<{ doctorFee: number; hospitalCommission: number }> => {
+  const doctor = await this._HospitalDoctorConfigRepo.findOne({ doctorId });
+  if (!doctor) {
+    ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
+  }
+  return { doctorFee: doctor.doctorFee, hospitalCommission: doctor.hospitalCommission }; 
+}
  
 }

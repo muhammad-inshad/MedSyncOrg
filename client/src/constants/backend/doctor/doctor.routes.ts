@@ -9,5 +9,6 @@ export const DOCTOR_MANAGEMENT = {
     GET_LEAVES: "/api/doctor/leaves",
     GET_APPOIMENTS:"/api/doctor/consultation",
     SAVE_PRISCRIPTION:"/api/doctor/prescription",
-    CREATEDOCTORSCHEDULE:"/api/doctor/schedules"
+    CREATEDOCTORSCHEDULE:"/api/doctor/schedules",
+    SALARY_INCREASE_REQUEST: "/api/doctor/salary-increase-request"
 };

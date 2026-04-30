@@ -28,4 +28,5 @@ export interface IPatientService {
   getPrescriptions(patientId: string, query: { page: number; limit: number; search: string }): Promise<{
     data: PrescriptionResponseDTO[]; total: number; page: number; limit: number;
   }>;
+  getDoctorFee(doctorId: string): Promise<{ doctorFee: number; hospitalCommission: number }>;
 }

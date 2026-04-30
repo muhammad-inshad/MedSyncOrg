@@ -41,17 +41,7 @@ export interface DoctorProfile extends BaseUser {
   address: string;
   department: string;
   about: string;
-  consultationTime?: {
-    start?: string;
-    end?: string;
-  };
-  payment?: {
-    type?: "commission" | "fixed";
-    commissionPercentage?: number;
-    fixedSalary?: number;
-    payoutCycle?: "weekly" | "monthly";
-    patientsPerDayLimit?: number;
-  };
+  salary:number
   hospital_id?: string;
 }
 
@@ -67,7 +57,7 @@ export interface HospitalProfile extends BaseUser {
   };
 }
 
-export type ProfileData = PatientProfile | DoctorProfile | HospitalProfile;
+export type ProfileData = PatientProfile | DoctorProfile | HospitalProfile ;
 
 export interface AuthState {
   user: BaseUser | null;

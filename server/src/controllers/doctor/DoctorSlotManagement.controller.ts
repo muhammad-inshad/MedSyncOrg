@@ -9,18 +9,14 @@ export class DoctorSlotManagementController {
 
     createDoctorSchedule = async (req: Request, res: Response, next: NextFunction) => {
         try {
-    
             const doctorId = req.user?.doctorID || req.user?.userId;   
-            
             if (!doctorId) {
                 return ApiResponse.unauthorized(res, "Doctor ID not found in token");
             }
-
             const scheduleData = {
                 ...req.body,
                 doctorId,
             };
-
             await this.slotservice.createSchedule(scheduleData);
 
             return ApiResponse.created(res, "Recurring schedule created successfully");

@@ -33,6 +33,11 @@ import { SlotMapper } from "../mappers/slot.mapper.ts";
 import { SlotRepository } from "../repositories/slot/slot.repository.ts";
 import { DoctorScheduleModel } from "../models/DoctorSlot.ts";
 
+import { DoctorDashboardService } from "../services/doctor/implementations/doctorDashbord.service.ts";
+import { SalaryrequestRepository } from "../repositories/salaryhike/salaryhike.repository.ts";
+import { SalaryRequestModel } from "../models/SalaryRequest.model.ts";
+import { DoctorDashboard } from "../controllers/doctor/doctorDashboard.controller.ts";
+
 export const doctorContainer = () => {
   const doctorRepository = new DoctorRepository(DoctorModel);
   const tokenService = new TokenService();
@@ -54,6 +59,9 @@ export const doctorContainer = () => {
   const departmentMapper = new DepartmentMapper();
   const qualificationMapper = new QualificationMapper();
   const specializationMapper = new SpecializationMapper();
+  const doctordashbordrepository=new SalaryrequestRepository(SalaryRequestModel)
+  const doctordashbordservice=new DoctorDashboardService(doctordashbordrepository,doctorRepository)
+  const doctorDashboard=new DoctorDashboard(doctordashbordservice)
  
   const doctorMapper = new DoctorMapper();
   const doctorLeaveMapper = new DoctorLeaveMapper();
@@ -96,6 +104,7 @@ export const doctorContainer = () => {
     appoimentController,
     consultation,
     qualificationRepo,
-    slotcontroller
+    slotcontroller,
+    doctorDashboard
   };
 };

@@ -10,7 +10,6 @@ export class DoctorMapper implements IMapper<IDoctor, DoctorResponseDTO> {
             email: doctor.email,
             phone: doctor.phone,
             address: doctor.address,
-            // Ensure department and specialization are strings if they come as ObjectIds
             specialization: doctor.specialization?.toString() || "",
             qualification: doctor.qualification,
             experience: doctor.experience,
@@ -23,17 +22,10 @@ export class DoctorMapper implements IMapper<IDoctor, DoctorResponseDTO> {
             reviewCount: Number(doctor.reviewCount) || 0,
             isActive: Boolean(doctor.isActive),
             isAccountVerified: Boolean(doctor.isAccountVerified),
-            walletBalance: Number(doctor.walletBalance) || 0,
             reviewStatus: doctor.reviewStatus as "pending" | "approved" | "revision" | "rejected",
             reapplyDate: doctor.reapplyDate,
             rejectionReason: doctor.rejectionReason,
-            availableSlots: Array.isArray(doctor.availableSlots) ? doctor.availableSlots : [],
-            consultationTime: {
-                start: doctor.consultationTime?.start || "",
-                end: doctor.consultationTime?.end || "",
-            },
-            monthlyAmount: Number(doctor.monthlyAmount) || 0,
-            patientsPerDayLimit: Number(doctor.patientsPerDayLimit) || 0,
+            salary:doctor.salary,
             createdAt: doctor.createdAt,
             updatedAt: doctor.updatedAt,
         };

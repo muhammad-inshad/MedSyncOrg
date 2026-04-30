@@ -14,6 +14,7 @@ import DoctorSidebar from '../components/DoctorSidebar';
 import { doctorApi } from '@/constants/backend/doctor/doctor.api';
 import toast from 'react-hot-toast';
 import Pagination from '@/components/Pagination';
+import axios, { AxiosError } from 'axios';
 
 type SlotSession = 'morning' | 'afternoon' | 'evening';
 
@@ -152,6 +153,7 @@ export default function DoctorSlotManagement() {
         } catch (error) {
             console.error('Failed to fetch schedules', error);
             toast.error('Failed to load your schedules');
+         
         } finally {
             setIsLoading(false);
         }
@@ -214,8 +216,18 @@ export default function DoctorSlotManagement() {
             setForm(EMPTY_FORM);
             setErrors({});
             fetchSchedules();
-        } catch {
-            toast.error('Failed to create schedule');
+        } catch(error:unknown){
+            if (axios.isAxiosError(error)) {
+              const message = (error as AxiosError<{ message: string }>).response?.data?.message;
+                toast.error(message || "Something went wrong");
+                   const timer = setTimeout(() => {
+    setShowForm(false);
+  }, 3000);
+  fetchSchedules()
+    return () => clearTimeout(timer);
+  } else {
+    toast.error("Something went wrong");
+  }
         } finally {
             setSubmitting(false);
         }
@@ -234,8 +246,13 @@ export default function DoctorSlotManagement() {
                 toast.success(confirmDelete.status ? 'Schedule deactivated' : 'Schedule activated');
                 fetchSchedules();
             }
-        } catch {
-            toast.error('Failed to update schedule');
+        } catch(error:unknown){
+               if (axios.isAxiosError(error)) {
+              const message = (error as AxiosError<{ message: string }>).response?.data?.message;
+                toast.error(message || "Something went wrong");
+  } else {
+    toast.error("Something went wrong");
+  }
         } finally {
             setDeletingId(null);
             setConfirmDelete(null);
