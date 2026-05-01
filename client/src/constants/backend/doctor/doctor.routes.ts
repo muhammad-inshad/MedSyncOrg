@@ -10,5 +10,7 @@ export const DOCTOR_MANAGEMENT = {
     GET_APPOIMENTS:"/api/doctor/consultation",
     SAVE_PRISCRIPTION:"/api/doctor/prescription",
     CREATEDOCTORSCHEDULE:"/api/doctor/schedules",
-    SALARY_INCREASE_REQUEST: "/api/doctor/salary-increase-request"
+    SALARY_INCREASE_REQUEST: "/api/doctor/salary-increase-request",
+    GET_WALLET:"/api/doctor/wallet",
+    WITHDRAW:"/api/doctor/withdraw/wallet"
 };

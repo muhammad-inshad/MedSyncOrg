@@ -3,6 +3,7 @@ import { ApiResponse } from "../../utils/apiResponse.utils.ts";
 import { IdoctorDashbord } from "../../services/doctor/interfaces/doctorDashbord.service.interfaces.ts";
 import { HttpStatusCode } from "../../constants/enums.ts";
 import { AppError } from "../../errors/app.error.ts";
+import { ITokenPayload } from "../../dto/auth/token-payload.dto.ts";
 
 
 export class DoctorDashboard{
@@ -51,4 +52,36 @@ GET_SALARY_INCREASE_REQUEST = async (
     return ApiResponse.error(res, "Failed to fetch salary hike request", error);
   }
 };
+
+GET_WALLET = async (  req: Request,
+  res: Response,
+  next: NextFunction) => {
+  try {
+     const user = req.user as unknown as ITokenPayload;
+     const doctorID = user?.doctorID || user?.userId;
+      if (!doctorID) {
+        ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Unauthorized");
+      }
+    const result = await this._service.getwallet(doctorID); 
+      return ApiResponse.success(res, "Wallet information fetched successfully", result, HttpStatusCode.OK);
+  } catch (error: unknown) {
+    throw new AppError("Failed to fetch wallet information", HttpStatusCode.INTERNAL_SERVER_ERROR);
+  }
+}
+
+WITHDRAW = async (  req: Request,
+  res: Response,
+  next: NextFunction) => {  
+  try {     const user = req.user as unknown as ITokenPayload;
+     const doctorID = user?.doctorID || user?.userId; 
+      if (!doctorID) {
+        ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Unauthorized");
+      }
+    const result = await this._service.withdraw(doctorID,req.body.amount);
+    
+      return ApiResponse.success(res, "Withdrawal request submitted successfully", result, HttpStatusCode.OK);
+  } catch (error: unknown) {
+    throw new AppError("Failed to process withdrawal request", HttpStatusCode.INTERNAL_SERVER_ERROR);
+  }
+}
 }

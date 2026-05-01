@@ -26,4 +26,6 @@ router.patch("/schedules/:id", slotcontroller.deleteDoctorSchedule.bind(slotcont
 
 router.post("/salary-increase-request",doctorDashboard.SALARY_INCREASE_REQUEST .bind(doctorDashboard))
 router.get("/salary-increase-request", doctorDashboard.GET_SALARY_INCREASE_REQUEST.bind(doctorDashboard))
+router.get("/wallet", doctorDashboard.GET_WALLET.bind(doctorDashboard))
+router.post("/withdraw/wallet", doctorDashboard.WITHDRAW.bind(doctorDashboard))
 export default router

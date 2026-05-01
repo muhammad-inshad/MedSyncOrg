@@ -10,7 +10,8 @@ export class AppointmentService implements IAppointments {
     constructor(
         private readonly _appointmentRepo: IAppointmentRepository,
         private readonly _appointmentMapper: IMapper<IAppointment, AppointmentResponseDTO>,
-        private readonly _prescriptionRepo: IPrescriptionRepository
+        private readonly _prescriptionRepo: IPrescriptionRepository,
+        private readonly _doctorrepo:I
     ) { }
     
 
@@ -58,6 +59,11 @@ export class AppointmentService implements IAppointments {
 }
 
     async updateStatus(appointmentId: string, status: AppointmentStatus): Promise<AppointmentResponseDTO | null> {
+        const findpaymentstatus=await this._appointmentRepo.findOne({appointmentId});
+    
+        if(findpaymentstatus?.paymentstatus==="pending"){ 
+              const finddoctor=await this.
+        }
         const updated = await this._appointmentRepo.update(appointmentId, { status });
         return updated ? this._appointmentMapper.toDTO(updated) : null;
     }

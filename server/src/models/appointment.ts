@@ -54,6 +54,7 @@ slotEndTime: string;
   updatedAt: Date;
   paymentId?: string;
   totalAmount?: number;
+  paymentstatus?:string;
 }
 
 const appointmentSchema = new Schema<IAppointment>(
@@ -82,6 +83,10 @@ slotEndTime: { type: String, required: true },
       type: Date,
       required: true,
     },
+
+   paymentstatus:{
+    type:String,
+   },
 
     tokenNumber: {
       type: Number,

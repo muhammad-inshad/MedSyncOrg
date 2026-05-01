@@ -1,35 +1,121 @@
-import React, { useState } from 'react'
-import DoctorSidebar from '../components/DoctorSidebar'
-
-const transactions = [
-  { date: 'Apr 26', label: 'Consultation — Rahul M.', amount: '+₹800', type: 'credit' },
-  { date: 'Apr 25', label: 'Withdrawal to SBI ****4821', amount: '−₹2,000', type: 'debit' },
-  { date: 'Apr 24', label: 'Consultation — Priya K.', amount: '+₹1,200', type: 'credit' },
-  { date: 'Apr 23', label: 'Withdrawal to HDFC ****2293', amount: '−₹5,000', type: 'debit' },
-]
-
-const BALANCE = 24500
+import React, { useEffect, useState } from 'react';
+import DoctorSidebar from '../components/DoctorSidebar';
+import { doctorApi } from '@/constants/backend/doctor/doctor.api';
+import toast from 'react-hot-toast';
 
 const DoctorWallet = () => {
-  const [amount, setAmount] = useState('')
-  const [bank, setBank] = useState('SBI — ****4821')
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  // Wallet Data States
+  const [balance, setBalance] = useState<number>(0);
+  const [totalEarned, setTotalEarned] = useState<number>(0);
+  const [totalWithdrawn, setTotalWithdrawn] = useState<number>(0);
+  const [transactions, setTransactions] = useState<{ amount: number; type: "credit" | "debit"; date: string }[]>([]); 
 
-  const handleWithdraw = () => {
-    setError('')
-    setSuccess('')
-    const amt = parseFloat(amount)
-    if (!amt || amt <= 0) return setError('Please enter a valid amount.')
-    if (amt > BALANCE) return setError(`Amount exceeds available balance of ₹${BALANCE.toLocaleString('en-IN')}.`)
-    setSuccess(`₹${amt.toLocaleString('en-IN')} withdrawal request submitted successfully.`)
-    setAmount('')
-  }
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
 
-  const setPreset = (v: number) => {
-    setAmount(String(v))
-    setError('')
-    setSuccess('')
+  // Withdrawal Form States
+  const [amount, setAmount] = useState<string>('');
+  const [withdrawError, setWithdrawError] = useState<string>('');
+  const [success, setSuccess] = useState<string>('');
+
+  // Fetch Wallet Data
+ 
+    const fetchWalletData = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const result = await doctorApi.getwallet();
+    
+
+        if (result?.data?.success && result.data.data) {
+          const walletData = result.data.data;
+          console.log("Wallet Data:", walletData);
+
+          setBalance(walletData.balance || 0);
+          setTotalEarned(walletData.totalenrnings || 0);
+          setTotalWithdrawn(walletData.totalwithdrawn || 0);
+
+          // Set transactions from API
+          if (walletData.Transaction && Array.isArray(walletData.Transaction)) {
+            setTransactions(walletData.Transaction);
+          } else {
+            setTransactions([]);
+          }
+        } else {
+          setError("Failed to load wallet information");
+        }
+      } catch (err: unknown) {
+        console.error("Error fetching wallet:", err);
+        setError("Something went wrong while fetching wallet data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+     useEffect(() => {
+      
+    fetchWalletData();
+  }, []);
+
+  // Format date to "Apr 30" format
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-IN', { 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  // Format amount with sign
+  const formatAmount = (amount: number, type: string) => {
+    const formatted = `₹${Math.abs(amount).toLocaleString('en-IN')}`;
+    return type === 'credit' ? `+${formatted}` : `−${formatted}`;
+  };
+
+  const handleWithdraw = async() => {
+    setWithdrawError('');
+    setSuccess('');
+
+    const amt = parseFloat(amount);
+
+    if (!amt || amt <= 0) {
+      return setWithdrawError('Please enter a valid amount.');
+    }
+
+    if (amt > balance) {
+      return setWithdrawError(`Amount exceeds available balance of ₹${balance.toLocaleString('en-IN')}.`);
+    }
+
+    const result= await doctorApi.withdraw({ amount: amt });
+   if (result?.data?.success) {
+  toast.success(result.data.message || "Withdrawal successful");
+  setAmount('');
+    fetchWalletData();
+} else {
+  toast.error(result?.data?.message || "Failed to process withdrawal");
+}
+
+  };
+
+  const setPreset = (value: number) => {
+    setAmount(String(value));
+    setWithdrawError('');
+    setSuccess('');
+  };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-gray-50">
+        <DoctorSidebar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900 mb-4" />
+            <p className="text-gray-500">Loading wallet...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -40,25 +126,37 @@ const DoctorWallet = () => {
       <div className="flex-1 p-6 overflow-y-auto">
         <h1 className="text-xl font-semibold text-gray-800 mb-6">My Wallet</h1>
 
-        {/* Two-column grid */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
+            {error}
+          </div>
+        )}
+
         <div className="grid grid-cols-3 gap-4 max-w-6xl">
-
-          {/* Left column */}
+          {/* Left Column */}
           <div className="col-span-2 space-y-4">
-
             {/* Balance Card */}
             <div className="bg-white border border-gray-200 rounded-xl p-6">
               <p className="text-xs text-gray-500 mb-1">Available balance</p>
-              <p className="text-4xl font-medium tracking-tight text-gray-900">₹24,500.00</p>
-              <p className="text-xs text-gray-400 mt-1">Last updated: today, 2:40 PM</p>
-              <div className="grid grid-cols-2 gap-3 mt-5">
+              <p className="text-4xl font-medium tracking-tight text-gray-900">
+                ₹{balance.toLocaleString('en-IN')}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Last updated: today, {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+
+              <div className="grid grid-cols-2 gap-3 mt-6">
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-xs text-gray-500 mb-1">Total earned</p>
-                  <p className="text-base font-medium text-gray-800">₹1,02,300</p>
+                  <p className="text-base font-medium text-gray-800">
+                    ₹{totalEarned.toLocaleString('en-IN')}
+                  </p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <p className="text-xs text-gray-500 mb-1">Withdrawn</p>
-                  <p className="text-base font-medium text-gray-800">₹77,800</p>
+                  <p className="text-base font-medium text-gray-800">
+                    ₹{totalWithdrawn.toLocaleString('en-IN')}
+                  </p>
                 </div>
               </div>
             </div>
@@ -73,27 +171,21 @@ const DoctorWallet = () => {
                   type="number"
                   placeholder="Enter amount"
                   value={amount}
-                  onChange={e => { setAmount(e.target.value); setError(''); setSuccess('') }}
+                  onChange={(e) => {
+                    setAmount(e.target.value);
+                    setWithdrawError('');
+                    setSuccess('');
+                  }}
                   className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-gray-300"
                 />
               </div>
 
-              <div>
-                <label className="text-xs text-gray-500 block mb-1">To bank account</label>
-                <select
-                  value={bank}
-                  onChange={e => setBank(e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-gray-300"
-                >
-                  <option>SBI — ****4821</option>
-                  <option>HDFC — ****2293</option>
-                </select>
-              </div>
+           
 
               <div className="flex gap-2 flex-wrap">
-                {[500, 1000, 5000, BALANCE].map((v, i) => (
+                {[500, 1000, 5000, Math.floor(balance)].map((v, i) => (
                   <button
-                    key={v}
+                    key={i}
                     onClick={() => setPreset(v)}
                     className="text-xs border border-gray-200 rounded-lg px-4 py-1.5 hover:bg-gray-50 transition-colors text-gray-600"
                   >
@@ -102,51 +194,70 @@ const DoctorWallet = () => {
                 ))}
               </div>
 
-              {error && <p className="text-xs text-red-500">{error}</p>}
+              {withdrawError && <p className="text-xs text-red-500">{withdrawError}</p>}
+              {success && <p className="text-xs text-green-600 text-center font-medium">{success}</p>}
 
               <button
                 onClick={handleWithdraw}
-                className="w-full bg-gray-900 text-white text-sm font-medium py-2.5 rounded-lg hover:bg-gray-700 transition-colors"
+                disabled={!amount || parseFloat(amount) > balance || parseFloat(amount) <= 0}
+                className="w-full bg-gray-900 hover:bg-black text-white text-sm font-medium py-3 rounded-lg transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                Withdraw
+                Request Withdrawal
               </button>
-
-              {success && <p className="text-xs text-green-600 text-center">{success}</p>}
             </div>
-
           </div>
 
-          {/* Right column — Transactions */}
-          <div className="col-span-1">
-            <div className="bg-white border border-gray-200 rounded-xl p-6 h-full">
-              <p className="text-sm font-semibold text-gray-800 mb-4">Recent transactions</p>
-              <div className="divide-y divide-gray-100">
-                {transactions.map((t, i) => (
-                  <div key={i} className="flex justify-between items-center py-3.5">
-                    <div className="flex items-center gap-3">
-                      {/* Icon dot */}
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold
-                        ${t.type === 'credit' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'}`}>
-                        {t.type === 'credit' ? '↑' : '↓'}
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-700">{t.label}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{t.date}</p>
-                      </div>
-                    </div>
-                    <span className={`text-sm font-medium ${t.type === 'credit' ? 'text-green-600' : 'text-red-500'}`}>
-                      {t.amount}
-                    </span>
-                  </div>
-                ))}
+          {/* Right Column - Transactions (Now Dynamic) */}
+       <div className="col-span-1">
+  <div className="bg-white border border-gray-200 rounded-xl p-6 h-full">
+    <p className="text-sm font-semibold text-gray-800 mb-4">
+      Recent transactions
+    </p>
+
+    <div className="divide-y divide-gray-100 max-h-[400px] overflow-y-auto pr-2">
+      {transactions.length > 0 ? (
+        transactions.map((t, i) => (
+          <div key={i} className="flex justify-between items-center py-3.5">
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold
+                ${t.type === 'credit'
+                  ? 'bg-green-50 text-green-600'
+                  : 'bg-red-50 text-red-500'}`}
+              >
+                {t.type === 'credit' ? '↑' : '↓'}
+              </div>
+              <div>
+                <p className="text-sm text-gray-700">
+                  {t.type === 'credit' ? 'Consultation' : 'Withdrawal'}
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {formatDate(t.date)}
+                </p>
               </div>
             </div>
-          </div>
 
+            <span
+              className={`text-sm font-medium ${
+                t.type === 'credit' ? 'text-green-600' : 'text-red-500'
+              }`}
+            >
+              {formatAmount(t.amount, t.type)}
+            </span>
+          </div>
+        ))
+      ) : (
+        <div className="text-center py-8 text-gray-400 text-sm">
+          No transactions yet
+        </div>
+      )}
+    </div>
+  </div>
+</div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default DoctorWallet
+export default DoctorWallet;

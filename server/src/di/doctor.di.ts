@@ -38,6 +38,9 @@ import { SalaryrequestRepository } from "../repositories/salaryhike/salaryhike.r
 import { SalaryRequestModel } from "../models/SalaryRequest.model.ts";
 import { DoctorDashboard } from "../controllers/doctor/doctorDashboard.controller.ts";
 
+import { WalletRepository } from "../repositories/wallet/wallet.repository.ts";
+import { Wallet } from "../models/wallet.model.ts";
+
 export const doctorContainer = () => {
   const doctorRepository = new DoctorRepository(DoctorModel);
   const tokenService = new TokenService();
@@ -59,8 +62,9 @@ export const doctorContainer = () => {
   const departmentMapper = new DepartmentMapper();
   const qualificationMapper = new QualificationMapper();
   const specializationMapper = new SpecializationMapper();
+  const WalletRepo = new WalletRepository(Wallet);
   const doctordashbordrepository=new SalaryrequestRepository(SalaryRequestModel)
-  const doctordashbordservice=new DoctorDashboardService(doctordashbordrepository,doctorRepository)
+  const doctordashbordservice=new DoctorDashboardService(doctordashbordrepository,doctorRepository,WalletRepo)
   const doctorDashboard=new DoctorDashboard(doctordashbordservice)
  
   const doctorMapper = new DoctorMapper();

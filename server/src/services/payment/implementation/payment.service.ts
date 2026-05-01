@@ -185,7 +185,6 @@ export class PaymentService implements IPaymentService {
                         paymentId: session.id,
                         totalAmount: Number(metadata.totalAmount)
                     };
-
                     await this.patientService.bookAppointment(metadata.patientId, appointmentData);
                  
                 } catch (error) {

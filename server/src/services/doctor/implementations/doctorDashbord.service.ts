@@ -7,11 +7,11 @@ import { HttpStatusCode } from "../../../constants/enums.ts";
 import { AppError } from "../../../errors/app.error.ts";
 import { IDoctorRepository } from "../../../repositories/doctor/doctor.repository.interface.ts";
 import { ISalaryRequest } from "../../../models/SalaryRequest.model.ts";
-
+import { IWalletRepository } from "../../../repositories/wallet/wallet.repository.interface.ts";
 
 
 export class DoctorDashboardService implements IdoctorDashbord{
-    constructor(private readonly _repository:IsalaryRepository,private readonly _doctorRepo:IDoctorRepository){}
+    constructor(private readonly _repository:IsalaryRepository,private readonly _doctorRepo:IDoctorRepository,private readonly _walletRepo: IWalletRepository){}
     async salaryincreserequest(data:SalaryHikeRequestinterface):Promise<boolean>{
    
       const payload = {
@@ -35,4 +35,61 @@ export class DoctorDashboardService implements IdoctorDashbord{
         const result= await this._repository.findLatestByDoctorId(new Types.ObjectId(doctorId));
         return result;
     }
+
+  async getwallet(doctorId: string): Promise<{ balance: number ,totalenrnings:number,totalwithdrawn:number,Transaction?: {
+    amount: number;
+    type: "credit" | "debit";
+    date: string;
+  }[]}> {
+
+  const doctor = await this._walletRepo.findByFilter({
+    ownerId: new Types.ObjectId(doctorId)
+  });
+
+  if (!doctor || doctor.length === 0) {
+    throw new AppError("Doctor not found", HttpStatusCode.NOT_FOUND);
+  }
+
+
+  return {
+    balance: doctor[0].balance,
+    totalenrnings: doctor[0].totalearnings || 0,
+    totalwithdrawn: doctor[0].totalwithdrawn || 0,
+    Transaction: (doctor[0].Transaction || []).map(tx => ({
+      amount: tx.amount,
+      type: tx.type,
+      date: tx.date.toISOString(),
+    })),
+  };
+}
+
+async withdraw(doctorId: string, amount: number): Promise<boolean> {
+  const doctor = await this._walletRepo.findByFilter({
+    ownerId: new Types.ObjectId(doctorId)
+  });
+
+  if (!doctor || doctor.length === 0) {
+    throw new AppError("Doctor not found", HttpStatusCode.NOT_FOUND);
+  }
+
+  const wallet = doctor[0];
+
+  if (wallet.balance < amount) {
+    throw new AppError("Insufficient balance", HttpStatusCode.BAD_REQUEST);
+  }
+
+  wallet.balance -= amount;
+  wallet.totalwithdrawn = (wallet.totalwithdrawn || 0) + amount;
+
+  wallet.Transaction = wallet.Transaction || [];
+  wallet.Transaction.push({
+    amount: amount,
+    type: "debit",
+    date: new Date()
+  });
+
+  await wallet.save(); 
+
+  return true;
+}
 }

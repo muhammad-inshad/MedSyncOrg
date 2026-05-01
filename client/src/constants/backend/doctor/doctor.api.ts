@@ -58,4 +58,10 @@ export const doctorApi = {
     
     getSalaryIncreaseRequest: (doctorId: string) =>
         api.get(DOCTOR_MANAGEMENT.SALARY_INCREASE_REQUEST, { params: { doctorId } }),
+
+    getwallet:()=>
+        api.get(DOCTOR_MANAGEMENT.GET_WALLET),
+
+    withdraw:(data:{amount:number})=>
+        api.post(DOCTOR_MANAGEMENT.WITHDRAW,data)
 };

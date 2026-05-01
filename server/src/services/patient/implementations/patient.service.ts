@@ -274,13 +274,12 @@ async getAvailableSlots(doctorId: string, date: string): Promise<{
 }
 async bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<void> {
     const { doctorId, appointmentDate, patientDetails, hospitalId, session, totalAmount } = data;
-    console.log("sugalle")
-console.log("Booking appointment with data:", { doctorId, appointmentDate, patientDetails, hospitalId, session, totalAmount });
+  
     if (!doctorId || !appointmentDate || !patientDetails || !hospitalId || !session) {
         ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Missing required appointment details");
     }
 
-    if (totalAmount !== undefined && totalAmount < 0) {
+    if (totalAmount !== undefined && totalAmount>0) {
       console.log("Invalid totalAmount, must be non-negative");
 
   const doctorObjectId = new Types.ObjectId(
@@ -321,6 +320,13 @@ console.log("Booking appointment with data:", { doctorId, appointmentDate, patie
     });
   } else {
     findhospitalWallate.balance += hospitalAmount;
+    findhospitalWallate.totalearnings = (findhospitalWallate.totalearnings || 0) + hospitalAmount;
+    findhospitalWallate.Transaction = findhospitalWallate.Transaction || [];
+    findhospitalWallate.Transaction.push({
+      amount: hospitalAmount,
+      type: "credit",
+      date: new Date(),
+    });
     await findhospitalWallate.save();
   }
 
@@ -331,6 +337,13 @@ console.log("Booking appointment with data:", { doctorId, appointmentDate, patie
     });
   } else {
     findDoctorWallate.balance += doctorAmount;
+    findDoctorWallate.totalearnings = (findDoctorWallate.totalearnings || 0) + doctorAmount;
+    findDoctorWallate.Transaction = findDoctorWallate.Transaction || [];
+    findDoctorWallate.Transaction.push({
+      amount: doctorAmount,
+      type: "credit",
+      date: new Date(),
+    });
     await findDoctorWallate.save();
   }
 }
@@ -405,7 +418,11 @@ console.log("Booking appointment with data:", { doctorId, appointmentDate, patie
                 if (appointmentData.heartRate === "") delete appointmentData.heartRate;
                 if (appointmentData.weight === "") delete appointmentData.weight;
 
-      
+                 if (totalAmount === undefined) {
+                    appointmentData.paymentstatus = "pending";
+                 }else{
+                    appointmentData.paymentstatus = "paid";
+                 }
                 const result = await this._appointmentRepo.create(
                     {
                         ...appointmentData,
