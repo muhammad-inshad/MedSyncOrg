@@ -160,5 +160,15 @@ export const hospitalApi = {
 
     updateSalaryRequestStatus: (id: string, data: { status: 'APPROVED' | 'REJECTED'; approvedAmount?: number; note: string, hospitalCommission?: number;}) =>
         api.patch(HOSPITAL_MANAGEMENT.UPDATE_DOCTOR_SALARY_REQUEST_STATUS(id), data),
+
+    getwallet:()=>api.get(HOSPITAL_MANAGEMENT.GET_WALLET),
+    withdraw:(data: { amount: number })=>api.post(HOSPITAL_MANAGEMENT.WITHDRAW, data),
+
+    getAppoimentREQCansalation:()=>api.get(HOSPITAL_MANAGEMENT.GETREQCANCALATION),
+
+    approveconcalation:(id:string)=>api.patch(HOSPITAL_MANAGEMENT.APPROVECANCALTION(id)),
+
+    rejectCancellation:(id:string, reason: string)=>api.post(HOSPITAL_MANAGEMENT.REJECTCANCALTION(id),{ reason })
+     
 };
                                    

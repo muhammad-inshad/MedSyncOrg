@@ -32,4 +32,8 @@ router.post("/subscription",subscriptionController.addSubscription.bind(subscrip
 router.patch("/subscription/toggle", subscriptionController.toggleSubscription.bind(subscriptionController));
 router.patch("/subscription/:id", subscriptionController.updateSubscription.bind(subscriptionController));
 
+// Wallet Management
+router.get("/wallet", dashboardController.getWallet.bind(dashboardController));
+router.post("/wallet/withdraw", dashboardController.withdraw.bind(dashboardController));
+
 export default router;

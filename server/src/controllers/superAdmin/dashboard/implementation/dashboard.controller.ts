@@ -33,4 +33,37 @@ export class SuperAdminDashboardController implements ISuperAdminDashboardContro
             next(error);
         }
     };
+
+    getWallet = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const user = req.user as unknown as ITokenPayload;
+            const superAdminId = user?.userId;
+
+            if (!superAdminId) {
+                ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Unauthorized");
+                return;
+            }
+            const walletData = await this.service.getWallet(superAdminId);
+            ApiResponse.success(res, "Wallet data fetched successfully", walletData);
+        } catch (error: unknown) {
+            next(error);
+        }
+    };
+
+    withdraw = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const { amount } = req.body;
+            const user = req.user as unknown as ITokenPayload;
+            const superAdminId = user?.userId;  
+
+            if (!superAdminId) {
+                ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, "Unauthorized");
+                return;
+            }
+            const result = await this.service.withdraw(superAdminId, amount);
+            ApiResponse.success(res, "Withdrawal successful", result);
+        } catch (error: unknown) {
+            next(error);
+        }
+        };
 }

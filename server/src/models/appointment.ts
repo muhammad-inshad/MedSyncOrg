@@ -6,6 +6,8 @@ export enum AppointmentStatus {
   PENDING = "pending",
   COMPLETED = "completed",
   CANCELLED = "cancelled",
+  PROCESSING = "processing",
+  REJECTED = "rejected",
 }
 
 export enum AppointmentMode {
@@ -34,8 +36,12 @@ export interface IAppointment extends Document {
 
   status: AppointmentStatus;
 
-  slotStartTime: string; 
-slotEndTime: string;   
+  slotStartTime: string;
+  slotEndTime: string;
+
+  cancelRequest?:boolean;
+
+  requsetRejectedReason?:string;
 
   patientDetails: {
     name: string;
@@ -54,7 +60,7 @@ slotEndTime: string;
   updatedAt: Date;
   paymentId?: string;
   totalAmount?: number;
-  paymentstatus?:string;
+  paymentstatus?: string;
 }
 
 const appointmentSchema = new Schema<IAppointment>(
@@ -71,7 +77,7 @@ const appointmentSchema = new Schema<IAppointment>(
       required: true,
     },
     slotStartTime: { type: String, required: true },
-slotEndTime: { type: String, required: true },
+    slotEndTime: { type: String, required: true },
 
     hospitalId: {
       type: Schema.Types.ObjectId,
@@ -79,14 +85,22 @@ slotEndTime: { type: String, required: true },
       required: true,
     },
 
+    requsetRejectedReason: {
+      type: String,
+    },
+    cancelRequest: {
+      type: Boolean,
+      default: false,
+    },
+
     appointmentDate: {
       type: Date,
       required: true,
     },
 
-   paymentstatus:{
-    type:String,
-   },
+    paymentstatus: {
+      type: String,
+    },
 
     tokenNumber: {
       type: Number,

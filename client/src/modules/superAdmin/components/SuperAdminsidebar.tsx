@@ -9,7 +9,8 @@ import {
   Shield,
   LogOut,
   Hospital,
-  UserPlus
+  UserPlus,
+  Wallet
 } from 'lucide-react'
 import { SUPERADMIN_ROUTES } from '@/constants/frontend/superAdmin/superAdmin.routes'
 import { authApi } from '@/constants/backend/auth/auth.api';
@@ -38,7 +39,8 @@ const SuperAdminSidebar = () => {
     { icon: CreditCard, label: 'Subscriptions', path: SUPERADMIN_ROUTES.SUBSCRIPTIONS },
     { icon: Shield, label: 'KYC Verification', path: SUPERADMIN_ROUTES.KYC },
     { icon: UserPlus, label: 'Patient Management', path: SUPERADMIN_ROUTES.PATIENT },
-    { icon: Building2, label: 'Subscribed Hospital', path: SUPERADMIN_ROUTES.SHOWSUBSCRIPTION }
+    { icon: Building2, label: 'Subscribed Hospital', path: SUPERADMIN_ROUTES.SHOWSUBSCRIPTION },
+    {icon:Wallet,label:"Wallet",path:SUPERADMIN_ROUTES.WALLET}
   ]
 
   return (

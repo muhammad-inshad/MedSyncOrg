@@ -75,5 +75,9 @@ router.get("/common-stats", dashbordController.getCommonStats.bind(dashbordContr
 router.get("/doctors-salary-requests", doctorSalaryController.getDoctorSalaryRequests.bind(doctorSalaryController));
 router.patch("/doctors-salary-requests/:id/status", doctorSalaryController.updateSalaryRequestStatus.bind(doctorSalaryController));
 
-
+router.get("/wallet", dashbordController.getWallet.bind(dashbordController));
+router.post("/wallet/withdraw", dashbordController.withdraw.bind(dashbordController));
+router.get("/REQCansation",dashbordController.getReqcancalation.bind(dashbordController))
+router.patch("/:id/REQCansation",dashbordController.approvecancellation.bind(dashbordController))
+router.post("/:id/REQCansation",dashbordController.rejectcancellation.bind(dashbordController))
 export default router;

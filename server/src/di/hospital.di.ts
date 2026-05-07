@@ -42,6 +42,9 @@ import { SalaryRequestModel } from "../models/SalaryRequest.model.ts";
 import {  DoctorSalaryservice } from "../services/hospital/doctor/implementations/doctor.salary.service.ts";
 import { DoctorSalaryController } from "../controllers/hospital/doctor/implementations/doctor.salary.controller.ts";
 import { HospitalDoctorConfigRepository } from "../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.ts";
+import { WalletRepository } from "../repositories/wallet/wallet.repository.ts";
+import { Wallet } from "../models/wallet.model.ts";
+import { AppointmentMapper } from "../mappers/appointment.mapper.ts";
 
 export const hospitalContainer = () => {
     const hospitalRepo = new HospitalRepository(HospitalModel);
@@ -64,7 +67,8 @@ export const hospitalContainer = () => {
     const salaryRequestRepo = new SalaryrequestRepository(SalaryRequestModel);
     const doctorSalaryService = new DoctorSalaryservice(salaryRequestRepo, doctorRepo,HospitalDoctorConfigRepo);  
     const doctorSalaryController = new DoctorSalaryController(doctorSalaryService);
-
+     const WalletRepo = new WalletRepository(Wallet);
+    const appoimentmapper=new AppointmentMapper()
     const hospitalMapper = new HospitalMapper();
 
     const hospitalSubscriptionService = new HospitalSubscriptionService(
@@ -138,7 +142,7 @@ export const hospitalContainer = () => {
         tokenService,
         hospitalRepo
     );
-  const dashbordservice = new DashbordService(doctorRepo, userRepo, departmentRepo, specializationRepo, qualificationRepo);
+  const dashbordservice = new DashbordService(doctorRepo, userRepo, departmentRepo, specializationRepo, qualificationRepo,WalletRepo,appointmentRepo,appoimentmapper,HospitalDoctorConfigRepo);
 const dashbordController = new Dashbord(dashbordservice);
 
     return {

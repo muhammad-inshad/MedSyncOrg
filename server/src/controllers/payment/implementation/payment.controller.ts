@@ -21,12 +21,16 @@ export class PaymentController implements IPaymentController {
                 ApiResponse.error(res, "Plan ID is required", null, HttpStatusCode.BAD_REQUEST);
                 return;
             }
+
+            console.log("Initiating checkout with planId:", planId, "and hospitalId:", hospitalId);
             const result = await this.paymentService.createCheckoutSession(planId, hospitalId);
+            console.log("Created Stripe Checkout Session:", result);
             res.status(HttpStatusCode.OK).json({
                 success: true,
                 url: result.url,
             });
         } catch (error: unknown) {
+            logger.error("Checkout session creation failed:", error);
             const statusCode = error instanceof AppError ? error.statusCode : HttpStatusCode.INTERNAL_SERVER_ERROR;
             const message = error instanceof Error ? error.message : "Payment failed";
             res.status(statusCode).json({
@@ -55,6 +59,7 @@ export class PaymentController implements IPaymentController {
                 url: result.url,
             });
         } catch (error: unknown) {
+            logger.error("Appointment checkout failed:", error);
             const statusCode = error instanceof AppError ? error.statusCode : HttpStatusCode.INTERNAL_SERVER_ERROR;
             const message = error instanceof Error ? error.message : "Payment failed";
             res.status(statusCode).json({

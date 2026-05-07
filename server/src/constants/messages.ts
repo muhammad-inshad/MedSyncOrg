@@ -1,3 +1,4 @@
+
 export const MESSAGES = {
     AUTH: {
         LOGIN_SUCCESS: "Login successful",
@@ -58,4 +59,12 @@ export const MESSAGES = {
         ADDED:"successfully created new subscription"
     },
     DASHBOARD_STATS_FETCHED: "Dashboard stats fetched successfully",
+
+    WALLET: {
+        FETCH_SUCCESS: "Wallet details fetched successfully",
+        ADD_SUCCESS: "Amount added to wallet successfully",
+        NOT_FOUND: "Wallet not found",
+        INSUFFICIENT_FUNDS: "Insufficient funds in wallet",
+        WITHDRAW_SUCCESS: "Amount withdrawn from wallet successfully",
+    }
 };

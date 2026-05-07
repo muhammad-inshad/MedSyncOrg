@@ -14,6 +14,6 @@ export const PATIENT_ROUTES = {
     LIVETOKEN:"/patient/livetoken",
     PAYMENT_SUCCESS:"/patient/payment-success",
     PAYMENT_FAILED:"/patient/payment-failed",
-    PRISCRIPTION:"/patient/priscriptions"
-    
+    PRISCRIPTION:"/patient/priscriptions",
+    WALLET: "/patient/wallet"
 };

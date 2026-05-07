@@ -20,6 +20,8 @@ import {
   GraduationCap,
   HeartPulse,
   DollarSign,
+  Wallet,
+  CheckCircle,
 } from 'lucide-react';
 import { HOSPITAL_ROUTES } from '@/constants/frontend/hospital/hospital.routes';
 
@@ -50,6 +52,8 @@ const HospitalSidbar = ({ isOpen, setIsOpen }: HospitalSidebarProps) => {
      { icon: Umbrella, label: 'DoctorLeaveManagement',path:HOSPITAL_ROUTES.DOCTOR_LEAVE_MANAGEMENT},
     { icon: Bell, label: 'Subscription',path:HOSPITAL_ROUTES.HOSPITAL_SUBSCRIPTION},
     { icon:DollarSign, label: 'Finance',path:HOSPITAL_ROUTES.HOSPITAL_FINANCE},
+    {icon:Wallet,label:"Wallet",path:HOSPITAL_ROUTES.HOSPITAL_WALLET},
+    {icon:CheckCircle ,label:"appoiments cancelation",path:HOSPITAL_ROUTES.HOSPITAL_APPOINTMENT_CANCELATION},
   ];
  
   const handleClick = (item: MenuItem) => {

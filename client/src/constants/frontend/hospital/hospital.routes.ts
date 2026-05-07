@@ -16,5 +16,7 @@ export const HOSPITAL_ROUTES = {
     DOCTOR_LEAVE_MANAGEMENT:"/hospital/doctor-leave-menagement",
     HOSPITAL_SUBSCRIPTION:"/hospital/subscription",
     HOSPITAL_PAYMENT_SUCCESS: "/hospital/payment-success",
-    HOSPITAL_FINANCE:"/hospital/finance"
+    HOSPITAL_FINANCE:"/hospital/finance",
+    HOSPITAL_WALLET:"/hospital/wallet",
+    HOSPITAL_APPOINTMENT_CANCELATION:"/hospital/appointment-cancelation",
 };

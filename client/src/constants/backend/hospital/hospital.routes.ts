@@ -43,5 +43,10 @@ export const HOSPITAL_MANAGEMENT = {
     GET_DOCTOR_STATUS:"/api/hospital/getdoctorstatus",
     KYC_STATS:"/api/hospital/kyc-stats",
     GET_DOCTOR_SALARY_REQUEST:"/api/hospital/doctors-salary-requests",
-    UPDATE_DOCTOR_SALARY_REQUEST_STATUS: (id: string) => `/api/hospital/doctors-salary-requests/${id}/status`
+    UPDATE_DOCTOR_SALARY_REQUEST_STATUS: (id: string) => `/api/hospital/doctors-salary-requests/${id}/status`,
+        GET_WALLET:"/api/hospital/wallet",
+        WITHDRAW:"/api/hospital/wallet/withdraw",
+        GETREQCANCALATION:"/api/hospital/REQCansation",
+        APPROVECANCALTION:(id:string)=>`/api/hospital/${id}/REQCansation`,
+        REJECTCANCALTION:(id:string)=>`/api/hospital/${id}/REQCansation`
 };

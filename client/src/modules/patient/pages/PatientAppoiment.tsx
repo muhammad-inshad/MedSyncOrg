@@ -304,7 +304,8 @@ useEffect(() => {
     slotStart.setHours(hours, minutes || 0, 0, 0);
 
     const oneHourBefore = new Date(slotStart.getTime() - 60 * 60 * 1000);
-    return now < oneHourBefore;
+    // return now < oneHourBefore;
+    return true
   };
 
   const isTodayBookingClosed = !isBookingAllowed() && isSameDay(selectedDate, startOfToday());
@@ -404,9 +405,11 @@ useEffect(() => {
           toast.error(res.data.message);
         }
       } else {
+
         const res = await patientApi.createAppointmentPaymentSession({
           bookingData: { ...bookingData, totalAmount: totalfee, doctorName: doctor.name },
         });
+   
         if (res.data.success) {
           console.log("Payment session created successfully:", res.data.url);
           window.location.href = res.data.url;
@@ -639,7 +642,7 @@ useEffect(() => {
                           })()
                         : false;
 
-                    const disabled = !isAvailable || isExpiredToday;
+                    const disabled =  isExpiredToday;
 
                     return (
                       <button

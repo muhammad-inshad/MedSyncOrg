@@ -18,4 +18,4 @@ initSocket(server);
 
 server.listen(PORT, () => {
   logger.info(`Server running on http://localhost:${PORT}`);
-});
+});

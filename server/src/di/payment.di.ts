@@ -6,6 +6,8 @@ import { PaymentController } from "../controllers/payment/implementation/payment
 import { PaymentMapper } from "../mappers/payment.mapper.ts";
 import { TokenService } from "../services/token/token.service.ts";
 import { patientContainer } from "./patient.di.ts";
+import { WalletRepository } from "../repositories/wallet/wallet.repository.ts";
+import { Wallet } from "../models/wallet.model.ts";
 
 export const paymentContainer = () => {
     const hospitalRepo = new HospitalRepository(HospitalModel);
@@ -13,7 +15,8 @@ export const paymentContainer = () => {
     const token=new TokenService()
     const { patientService } = patientContainer();
     const paymentMapper = new PaymentMapper();
-    const paymentService = new PaymentService(subscriptionRepo, hospitalRepo, patientService, paymentMapper);
+    const WalletRepo = new WalletRepository(Wallet);
+    const paymentService = new PaymentService(subscriptionRepo, hospitalRepo, patientService, paymentMapper, WalletRepo);
     const paymentController = new PaymentController(paymentService,token);
 
     return {

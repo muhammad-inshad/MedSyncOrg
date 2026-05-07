@@ -46,6 +46,9 @@ const PatientProfile: React.FC = () => {
   const handileViwHistory=()=>{
     navigate(PATIENT_ROUTES.VIEW_APPOIMENTS_HISTORY)
   }
+  const handleOpenWallet = () => {
+    navigate(PATIENT_ROUTES.WALLET);
+  }
 
   const livetoken=()=>{
     navigate(PATIENT_ROUTES.LIVETOKEN)
@@ -215,7 +218,7 @@ const PatientProfile: React.FC = () => {
                 </div>
                 <h3 className="text-base font-semibold text-gray-800">Wallet</h3>
               </div>
-              <button className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
+              <button onClick={() => handleOpenWallet()} className="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors">
                 Open Wallet
               </button>
             </div>

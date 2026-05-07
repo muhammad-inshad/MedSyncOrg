@@ -20,6 +20,8 @@ import PaymentSuccess from '../../shared/pages/PaymentSuccess'
 import SubscriptionProtectedRoutes from './SubscriptionProtectedRoutes';
 import HospitalLayout from "./HospitalLayout";
 import HospitalFinance from '../pages/HospitalFinance'
+import HospitalWallet from '../pages/HospitalWallet'
+import AppointmentsCancellationReq from '../pages/AppoimentsCancelationReq'
 
 const HospitalRoutes = () => {
     return (
@@ -44,6 +46,8 @@ const HospitalRoutes = () => {
                       <Route path={HOSPITAL_ROUTES.HOSPITAL_SPECIALIZATION_MANGEMENT} element={<SpecializationManagement/>}/>
                       <Route path={HOSPITAL_ROUTES.DOCTOR_LEAVE_MANAGEMENT}element={<DoctorLeaveManagement/>}/>
                       <Route path={HOSPITAL_ROUTES.HOSPITAL_FINANCE} element={<HospitalFinance/>}/>
+                      <Route path={HOSPITAL_ROUTES.HOSPITAL_WALLET} element={<HospitalWallet/>}/>
+                       <Route path={HOSPITAL_ROUTES.HOSPITAL_APPOINTMENT_CANCELATION} element={<AppointmentsCancellationReq/>}/>
                       <Route path={HOSPITAL_ROUTES.HOSPITAL_PAYMENT_SUCCESS} element={
                         <PaymentSuccess 
                           redirectPath={HOSPITAL_ROUTES.HOSPITALDASHBOARD}

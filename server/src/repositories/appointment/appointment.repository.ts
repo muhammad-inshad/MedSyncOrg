@@ -9,8 +9,7 @@ import { IAppointmentRepository } from "./appointment.repository.interface.ts";
 
 export class AppointmentRepository
   extends BaseRepository<IAppointment>
-  implements IAppointmentRepository
-{
+  implements IAppointmentRepository {
   constructor() {
     super(AppointmentModel);
   }
@@ -331,4 +330,5 @@ export class AppointmentRepository
       .session(mongoSession ?? null)
       .exec();
   }
+
 }

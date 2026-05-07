@@ -38,6 +38,7 @@ export const AppointmentResponseSchema = z.object({
     session: z.enum(["morning", "afternoon", "evening"]).optional().nullable(),
     createdAt: z.string(),
     updatedAt: z.string(),
+    rejectionReason: z.string().optional().nullable(),
 });
 
 export type AppointmentResponseDTO = z.infer<typeof AppointmentResponseSchema>;

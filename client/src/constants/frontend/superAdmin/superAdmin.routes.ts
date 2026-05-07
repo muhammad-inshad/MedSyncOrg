@@ -11,5 +11,6 @@ export const SUPERADMIN_ROUTES = {
     EDITPATIENT:'/superadmin/editpatient',
     ADDSUBSCRIPTION:"/superadmin/addsubscription",
     EDITSUBSCRIPTION:"/superadmin/editsubscription",
-    SHOWSUBSCRIPTION:"/superadmin/showsubscription"
+    SHOWSUBSCRIPTION:"/superadmin/showsubscription",
+    WALLET:"/superadmin/wallet"
 };

@@ -24,4 +24,7 @@ router.get("/appointments/status/:sessionId", patientController.checkAppointment
 router.get("/livetoken", liveToken.getToken.bind(liveToken));
 router.get("/prescriptions", patientController.getPrescriptions.bind(patientController));   
 router.get("/doctors/:doctorId/fee", patientController.getDoctorFee.bind(patientController));
+router.get("/wallet", patientController.getWallet.bind(patientController));
+router.post("/wallet/add", patientController.addToWallet.bind(patientController));
+router.post("/wallet/withdraw", patientController.withdrawFromWallet.bind(patientController));
 export default router;

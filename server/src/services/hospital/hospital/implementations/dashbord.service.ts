@@ -6,6 +6,12 @@ import { IDepartmentRepository } from "../../../../repositories/hospital/departm
 import { ISpecializationRepository } from "../../../../repositories/hospital/specialization.repository.interface.ts";
 import { IQualificationRepository } from "../../../../repositories/hospital/qualification.repository.interface.ts";
 import { COMMENT_TYPES } from "../../../../constants/Comments/Comment.ts";
+import { IWalletRepository } from "../../../../repositories/wallet/wallet.repository.interface.ts";
+import { IAppointmentRepository } from "../../../../repositories/appointment/appointment.repository.interface.ts";
+import { AppointmentMapper } from "../../../../mappers/appointment.mapper.ts";
+import { AppointmentResponseDTO } from "../../../../dto/appointment/appointment-response.dto.ts";
+import { AppointmentStatus } from "../../../../models/appointment.ts";
+import { IHospitalDoctorConfigRepository } from "../../../../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.interface.ts";
 
 export class DashbordService implements IDashbord {
 
@@ -14,7 +20,11 @@ export class DashbordService implements IDashbord {
     private readonly _userRepo: IUserRepository,
     private readonly _departmentRepo: IDepartmentRepository,
     private readonly _specializationRepo: ISpecializationRepository,
-    private readonly _qualificationRepo: IQualificationRepository
+    private readonly _qualificationRepo: IQualificationRepository,
+    private readonly _walletRepo: IWalletRepository,
+    private readonly _appoiments:IAppointmentRepository,
+    private readonly _appoimentmapper:AppointmentMapper,
+    private readonly _hospitaldoctorcnfigRepo:IHospitalDoctorConfigRepository
   ) {}
 
   async getDashboardStats(hospitalId: string) {
@@ -95,5 +105,137 @@ export class DashbordService implements IDashbord {
   }
 
   return { total: 0, active: 0, blocked: 0 };
+}
+
+getWallet = async (hospitalId: string): Promise<{
+  balance: number;
+  totalenrnings: number;
+  totalwithdrawn: number;
+  transactions: {
+    amount: number;
+    type: 'credit' | 'debit';
+    date: Date;
+    description: string;
+  }[];
+}> => {
+  const wallet = await this._walletRepo.findOne({
+    ownerId: new Types.ObjectId(hospitalId),
+  });
+
+  if (!wallet) {
+    return {
+      balance: 0,
+      totalenrnings: 0,
+      totalwithdrawn: 0,
+      transactions: [],
+    };
+  }
+
+  return {
+    balance: wallet.balance,
+     totalenrnings: wallet.totalearnings || 0,
+    totalwithdrawn: wallet.totalwithdrawn || 0,
+    transactions: (wallet.Transaction || []).map(tx => ({
+      amount: tx.amount,
+      type: tx.type,
+      date: tx.date,
+      description: tx.type === 'credit' ? 'Earning from appointment' : 'Withdrawal',
+    })),
+  };
+};
+
+  withdraw = async (hospitalId: string, amount: number): Promise<{
+  success: boolean;
+  message: string;
+}> => {
+  const wallet = await this._walletRepo.findOne({ ownerId: new Types.ObjectId(hospitalId) });
+  if (!wallet) {
+    return { success: false, message: "Wallet not found" };
+  }
+  if (wallet.balance < amount) {
+    return { success: false, message: "Insufficient balance" };
+  }
+  await this._walletRepo.debitWallet(hospitalId, amount);
+  return { success: true, message: "Withdrawal successful" };
+};
+
+getReqcancalation = async (hospitalId:string): Promise<AppointmentResponseDTO[]> => {
+
+  const appointments = await this._appoiments.findByFilter({
+    cancelRequest: true,hospitalId:hospitalId
+  });
+
+  return appointments.map((appointment) =>
+    this._appoimentmapper.toDTO(appointment)
+  );
+};
+
+approvecancellation = async (id: string,hospitalId:string): Promise<boolean> => {
+
+  const result = await this._appoiments.update(id, {
+    cancelRequest: false,
+    status: AppointmentStatus.CANCELLED
+  });
+const finduser = await this._appoiments.findById(id);
+
+if (!finduser) {
+  return false;
+}
+
+const patient = finduser.bookedBy as Types.ObjectId;
+const doctor = finduser.doctorId;
+
+let patientwallet = await this._walletRepo.findOne({
+  ownerId: patient,
+});
+
+if (!patientwallet) {
+  patientwallet = await this._walletRepo.create({
+    ownerId: patient,
+  });
+}
+
+const hospitalwallet = await this._walletRepo.findOne({
+  ownerId: hospitalId,
+});
+
+const hospitalbalance = hospitalwallet?.balance ?? 0;
+
+const hospitalDoctorConfig =
+  await this._hospitaldoctorcnfigRepo.findByFilter({
+    hospitalId,
+    doctorId: doctor,
+  });
+
+const amount = hospitalDoctorConfig[0]?.doctorFee ?? 0;
+
+if (amount <= hospitalbalance) {
+
+  await this._walletRepo.debitWallet(
+    hospitalId.toString(),
+    amount
+  );
+
+  await this._walletRepo.creditWallet(
+    patient.toString(),
+    amount
+  );
+}
+
+return true;
+};
+
+async rejectcancellation(
+  id: string,
+  reason: string
+): Promise<boolean> {
+
+  const result = await this._appoiments.update(id, {
+    cancelRequest: false,
+    rejectionReason: reason,
+    status: AppointmentStatus.REJECTED,
+  });
+
+  return !!result;
 }
 }

@@ -38,4 +38,5 @@ export interface IAppointmentRepository extends IBaseRepository<IAppointment> {
   dateString: string,
   options?: { page: number; limit: number,shift:string}):Promise<{ appointments: IAppointment[]; total: number }> 
     countByDoctorDateAndSession(doctorId: string, date: Date, session: string, mongoSession?: ClientSession): Promise<number>;
+
 }

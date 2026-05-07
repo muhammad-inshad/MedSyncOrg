@@ -13,24 +13,27 @@ import { IAppointmentCheckoutData } from "../../../dto/appointment/appointment.d
 import { IAppointment, AppointmentMode, AppointmentStatus } from "../../../models/appointment.ts";
 import { CheckoutResponseDTO } from "../../../dto/payment/checkout-response.dto.ts";
 import { PaymentMapper } from "../../../mappers/payment.mapper.ts";
+import logger from "../../../utils/logger.ts";
+import { IWalletRepository } from "../../../repositories/wallet/wallet.repository.interface.ts";
 
 export class PaymentService implements IPaymentService {
     constructor(
         private readonly subscriptionRepository: ISubscriptionRepository,
         private readonly hospitalRepository: IHospitalRepository,
         private readonly patientService: IPatientService,
-        private readonly paymentMapper: PaymentMapper
-    ) {}
+        private readonly paymentMapper: PaymentMapper,
+        private readonly _WalletRepository: IWalletRepository
+    ) { }
 
     async createCheckoutSession(planId: string, hospitalId: string): Promise<CheckoutResponseDTO> {
         const plan = await this.subscriptionRepository.findById(planId);
-        
+
         if (!plan) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Subscription plan not found");
         }
 
         const baseAmount = plan.amount;
-        const taxRate = 0.1; 
+        const taxRate = 0.1;
         const taxAmount = baseAmount * taxRate;
         const totalAmount = baseAmount + taxAmount;
 
@@ -39,7 +42,7 @@ export class PaymentService implements IPaymentService {
             const endDate = new Date();
             const duration = plan.duration || 1;
             const unit = plan.durationUnit || "months";
-          
+
             if (unit === "months") endDate.setMonth(endDate.getMonth() + duration);
             else if (unit === "years") endDate.setFullYear(endDate.getFullYear() + duration);
 
@@ -56,36 +59,42 @@ export class PaymentService implements IPaymentService {
             return { url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/hospital/payment-success?plan=free` };
         }
 
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ["card"],
-            mode: "payment",
-            line_items: [
-                {
-                    price_data: {
-                        currency: "inr",
-                        product_data: {
-                            name: plan.planName,
-                            description: plan.description || `Subscription for ${plan.planName}`,
+        logger.info(`[PaymentService] Creating Hospital Subscription Stripe session for plan: ${plan.planName}`);
+        try {
+            const session = await stripe.checkout.sessions.create({
+                payment_method_types: ["card"],
+                mode: "payment",
+                line_items: [
+                    {
+                        price_data: {
+                            currency: "inr",
+                            product_data: {
+                                name: plan.planName,
+                                description: plan.description || `Subscription for ${plan.planName}`,
+                            },
+                            unit_amount: Math.round(totalAmount * 100),
                         },
-                        unit_amount: Math.round(totalAmount * 100), 
+                        quantity: 1,
                     },
-                    quantity: 1,
+                ],
+                metadata: {
+                    planId: planId,
+                    hospitalId: hospitalId,
                 },
-            ],
-            metadata: {
-                planId: planId,
-                hospitalId: hospitalId,
-            },
-            success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/hospital/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/hospital/subscription`,
-        });
+                success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/hospital/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/hospital/subscription`,
+            });
 
-        return this.paymentMapper.toCheckoutDTO(session.url);
+            return this.paymentMapper.toCheckoutDTO(session.url);
+        } catch (error) {
+            logger.error(`[PaymentService] Hospital subscription session creation failed: ${error instanceof Error ? error.message : String(error)}`);
+            throw error;
+        }
     }
 
     async createAppointmentCheckoutSession(appointmentData: IAppointmentCheckoutData, patientId: string): Promise<CheckoutResponseDTO> {
         const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-  
+
         const metadata = {
             type: "appointment",
             patientId: String(patientId),
@@ -93,7 +102,7 @@ export class PaymentService implements IPaymentService {
             hospitalId: String(appointmentData.hospitalId),
             appointmentDate: String(appointmentData.appointmentDate),
             mode: appointmentData.mode,
- 
+
             slotStartTime: appointmentData.slotStartTime,
             slotEndTime: appointmentData.slotEndTime,
             tokenNumber: String(appointmentData.tokenNumber),
@@ -112,33 +121,40 @@ export class PaymentService implements IPaymentService {
             totalAmount: String(appointmentData.totalAmount || 0),
         };
 
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ["card"],
-            mode: "payment",
-            line_items: [
-                {
-                    price_data: {
-                        currency: "inr",
-                        product_data: {
-                            name: `Appointment with Dr. ${appointmentData.doctorName || 'Doctor'}`,
-                            description: `Appointment on ${new Date(appointmentData.appointmentDate).toLocaleDateString()}`,
-                        },
-                        unit_amount: Math.round(Number(metadata.totalAmount) * 100) || 0, 
-                    },
-                    quantity: 1,
-                },
-            ],
-            metadata,
-            success_url: `${frontendUrl}/patient/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${frontendUrl}/patient/payment-failed`,
-        });
 
-        return this.paymentMapper.toCheckoutDTO(session.url);
+        try {
+            const session = await stripe.checkout.sessions.create({
+                payment_method_types: ["card"],
+                mode: "payment",
+                line_items: [
+                    {
+                        price_data: {
+                            currency: "inr",
+                            product_data: {
+                                name: `Appointment with Dr. ${appointmentData.doctorName || 'Doctor'}`,
+                                description: `Appointment on ${new Date(appointmentData.appointmentDate).toLocaleDateString()}`,
+                            },
+                            unit_amount: Math.round(Number(metadata.totalAmount) * 100) || 0,
+                        },
+                        quantity: 1,
+                    },
+                ],
+                metadata,
+                success_url: `${frontendUrl}/patient/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${frontendUrl}/patient/payment-failed`,
+            });
+
+            return this.paymentMapper.toCheckoutDTO(session.url);
+        } catch (error) {
+            logger.error(`[PaymentService] Stripe session creation failed: ${error instanceof Error ? error.message : String(error)}`);
+            throw error;
+        }
     }
 
     async handleWebhook(signature: string, payload: string | Buffer): Promise<void> {
         let event;
         try {
+
             event = stripe.webhooks.constructEvent(
                 payload,
                 signature,
@@ -156,6 +172,7 @@ export class PaymentService implements IPaymentService {
             if (!metadata) return;
 
             if (metadata.type === "appointment") {
+                logger.info(`[PaymentService.handleWebhook] Processing appointment for patient: ${metadata.patientId}`);
                 try {
                     // CRITICAL FIX: Reconstructing the exact object required by AppointmentModel
                     const appointmentData: Partial<IAppointment> = {
@@ -165,7 +182,7 @@ export class PaymentService implements IPaymentService {
                         appointmentDate: new Date(metadata.appointmentDate),
                         mode: metadata.mode as AppointmentMode,
                         status: AppointmentStatus.PENDING,
-                        
+
                         // Mapping the required strings/numbers back
                         slotStartTime: metadata.slotStartTime,
                         slotEndTime: metadata.slotEndTime,
@@ -186,10 +203,10 @@ export class PaymentService implements IPaymentService {
                         totalAmount: Number(metadata.totalAmount)
                     };
                     await this.patientService.bookAppointment(metadata.patientId, appointmentData);
-                 
+                    logger.info(`[PaymentService.handleWebhook] Appointment successfully processed via webhook`);
                 } catch (error) {
-                    console.error("ERROR during webhook appointment processing:", error);
-                    throw error; 
+                    logger.error(`[PaymentService.handleWebhook] ERROR during webhook appointment processing: ${error instanceof Error ? error.message : String(error)}`);
+                    throw error;
                 }
                 return;
             }
@@ -205,7 +222,7 @@ export class PaymentService implements IPaymentService {
                     const unit = plan.durationUnit || "months";
                     const startDate = new Date();
                     const endDate = new Date();
-                   
+
                     if (unit === "months") endDate.setMonth(endDate.getMonth() + duration);
                     else if (unit === "years") endDate.setFullYear(endDate.getFullYear() + duration);
 
@@ -218,6 +235,10 @@ export class PaymentService implements IPaymentService {
                             endDate,
                         }
                     });
+
+                   const superAdminId = process.env.SUPER_ADMIN_ID!;
+
+await this._WalletRepository.creditWallet(superAdminId, plan.amount);
 
                     await this.subscriptionRepository.create({
                         planName: plan.planName,

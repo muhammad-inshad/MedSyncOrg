@@ -31,20 +31,7 @@ export class AppointmentMapper implements IMapper<IAppointment, AppointmentRespo
             status: appointment.status,
             mode: appointment.mode,
             tokenNumber: appointment.tokenNumber,
-
-            prescription: appointment.prescription ? {
-                medicines: appointment.prescription.medicines.map(m => ({
-                    name: m.name,
-                    dosage: m.dosage,
-                    duration: m.duration,
-                })),
-                notes: appointment.prescription.notes,
-                prescribedAt: appointment.prescription.prescribedAt instanceof Date
-                    ? appointment.prescription.prescribedAt.toISOString()
-                    : appointment.prescription.prescribedAt
-                        ? new Date(appointment.prescription.prescribedAt).toISOString()
-                        : undefined,
-            } : undefined,
+            rejectionReason:appointment?.rejectionReason,
 
             bloodPressure: appointment.bloodPressure,
             heartRate: appointment.heartRate,

@@ -259,5 +259,49 @@ getDoctorFee = async (req: Request, res: Response, next: NextFunction) => {
     next(error);
   }
 }
+
+getWallet = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = req.user as unknown as ITokenPayload;  
+    const patientId = user?.userId;
+    if (!patientId) {
+      return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
+    }
+    const wallet = await this.patientService.getWallet(patientId);
+    return ApiResponse.success(res, "Wallet fetched successfully", wallet);
+  } catch (error) {
+    next(error);
+  }
+}
+
+addToWallet = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = req.user as unknown as ITokenPayload;  
+    const patientId = user?.userId;
+    if (!patientId) {
+      return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
+    }
+    const { amount } = req.body;
+    await this.patientService.addToWallet(patientId, amount);
+    return ApiResponse.success(res, "Amount added to wallet successfully");
+  } catch (error) {
+    next(error);
+  }
+}
+withdrawFromWallet = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = req.user as unknown as ITokenPayload;
+    const patientId = user?.userId;
+    if (!patientId) {
+      return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
+    }
+    const { amount } = req.body;
+    await this.patientService.withdrawFromWallet(patientId, amount);
+    return ApiResponse.success(res, "Amount withdrawn from wallet successfully");
+  } catch (error) {
+    next(error);
+  }
+}
+
 }
 export default PatientController;

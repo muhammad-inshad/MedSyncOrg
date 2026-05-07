@@ -1,79 +1,79 @@
-import { Model, Document, FilterQuery, UpdateQuery, ClientSession } from 'mongoose';
-import { IBaseRepository } from './IBaseRepository.interface.ts';
+    import { Model, Document, FilterQuery, UpdateQuery, ClientSession } from 'mongoose';
+    import { IBaseRepository } from './IBaseRepository.interface.ts';
 
-export class BaseRepository<T extends Document> implements IBaseRepository<T> {
-    constructor(protected readonly model: Model<T>) { }
-    
-async create(data: Partial<T>, session?: ClientSession): Promise<T> {
-    const createdEntity = new this.model(data);
-    return await createdEntity.save(session ? { session } : undefined);
-}
-
-    async findById(id: string): Promise<T | null> {
-        return await this.model.findById(id).exec();
+    export class BaseRepository<T extends Document> implements IBaseRepository<T> {
+        constructor(protected readonly model: Model<T>) { }
+        
+    async create(data: Partial<T>, session?: ClientSession): Promise<T> {
+        const createdEntity = new this.model(data);
+        return await createdEntity.save(session ? { session } : undefined);
     }
 
-    async findAll(): Promise<T[]> {
-        return await this.model.find().exec();
-    }
-
-    async update(id: string, data: Partial<T>): Promise<T | null> {
-        const updateData = { ...data } as Partial<T>;
-        delete updateData._id;
-        delete updateData.id;
-
-        const updated = await this.model.findByIdAndUpdate(id, updateData as UpdateQuery<T>, { new: true }).exec();
-        return updated;
-    }
-
-    async delete(id: string): Promise<boolean> {
-        const result = await this.model.findByIdAndDelete(id).exec();
-        return !!result;
-    }
-
-    async countDocuments(filter: FilterQuery<T> = {}): Promise<number> {
-        return await this.model.countDocuments(filter).exec();
-    }
-
-    async findByEmail(email: string): Promise<T | null> {
-        return await this.model.findOne({ email } as FilterQuery<T>).exec();
-    }
-
-    async findByEmailWithPassword(email: string): Promise<T | null> {
-        return await this.model.findOne({ email } as FilterQuery<T>).select('+password').exec();
-    }
-
-    async findByIdWithPassword(id: string): Promise<T | null> {
-        return await this.model.findById(id).select('+password').exec();
-    }
-
-    async findWithPagination(options: { page: number; limit: number; search?: string; searchFields?: string[]; filter?: object }): Promise<{ data: T[]; total: number; page: number; limit: number }> {
-        const { page, limit, search, searchFields, filter } = options;
-        const skip = (page - 1) * limit;
-
-        let query: FilterQuery<T> = filter ? { ...filter } : {};
-
-        if (search && searchFields && searchFields.length > 0) {
-            const searchRegex = new RegExp(search, 'i');
-            const searchConditions = searchFields.map(field => ({ [field]: searchRegex }));
-            query = {
-                ...query,
-                $or: searchConditions
-            } as FilterQuery<T>;
+        async findById(id: string): Promise<T | null> {
+            return await this.model.findById(id).exec();
         }
 
-        const [data, total] = await Promise.all([
-            this.model.find(query).skip(skip).limit(limit).exec(),
-            this.model.countDocuments(query).exec()
-        ]);
+        async findAll(): Promise<T[]> {
+            return await this.model.find().exec();
+        }
 
-        return { data, total, page, limit };
-    }
-    async findByFilter(filter: FilterQuery<T>): Promise<T[]> {
-        return await this.model.find(filter).exec();
-    }
+        async update(id: string, data: Partial<T>): Promise<T | null> {
+            const updateData = { ...data } as Partial<T>;
+            delete updateData._id;
+            delete updateData.id;
 
-    async findOne(filter: FilterQuery<T>): Promise<T | null> {
-        return await this.model.findOne(filter).exec();
+            const updated = await this.model.findByIdAndUpdate(id, updateData as UpdateQuery<T>, { new: true }).exec();
+            return updated;
+        }
+
+        async delete(id: string): Promise<boolean> {
+            const result = await this.model.findByIdAndDelete(id).exec();
+            return !!result;
+        }
+
+        async countDocuments(filter: FilterQuery<T> = {}): Promise<number> {
+            return await this.model.countDocuments(filter).exec();
+        }
+
+        async findByEmail(email: string): Promise<T | null> {
+            return await this.model.findOne({ email } as FilterQuery<T>).exec();
+        }
+
+        async findByEmailWithPassword(email: string): Promise<T | null> {
+            return await this.model.findOne({ email } as FilterQuery<T>).select('+password').exec();
+        }
+
+        async findByIdWithPassword(id: string): Promise<T | null> {
+            return await this.model.findById(id).select('+password').exec();
+        }
+
+        async findWithPagination(options: { page: number; limit: number; search?: string; searchFields?: string[]; filter?: object }): Promise<{ data: T[]; total: number; page: number; limit: number }> {
+            const { page, limit, search, searchFields, filter } = options;
+            const skip = (page - 1) * limit;
+
+            let query: FilterQuery<T> = filter ? { ...filter } : {};
+
+            if (search && searchFields && searchFields.length > 0) {
+                const searchRegex = new RegExp(search, 'i');
+                const searchConditions = searchFields.map(field => ({ [field]: searchRegex }));
+                query = {
+                    ...query,
+                    $or: searchConditions
+                } as FilterQuery<T>;
+            }
+
+            const [data, total] = await Promise.all([
+                this.model.find(query).skip(skip).limit(limit).exec(),
+                this.model.countDocuments(query).exec()
+            ]);
+
+            return { data, total, page, limit };
+        }
+        async findByFilter(filter: FilterQuery<T>): Promise<T[]> {
+            return await this.model.find(filter).exec();
+        }
+
+        async findOne(filter: FilterQuery<T>): Promise<T | null> {
+            return await this.model.findOne(filter).exec();
+        }
     }
-}

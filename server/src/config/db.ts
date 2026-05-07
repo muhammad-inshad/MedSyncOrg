@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import logger from "../utils/logger.ts";
+import dns from "node:dns";
+
+// Fix for Node.js SRV resolution issue on certain networks
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 dotenv.config();
 

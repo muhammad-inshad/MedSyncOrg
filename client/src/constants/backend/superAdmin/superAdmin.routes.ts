@@ -22,5 +22,7 @@ export const SUPERADMIN_MANAGEMENT = {
     CREATE_SUBSCRIPTION: "/api/superadmin/subscription",
   TOGGLE_SUBSCRIPTION: "/api/superadmin/subscription/toggle",
   EDIT_SUBSCRIPTION: (id: string) => `/api/superadmin/subscription/${id}`,
-  GET_HOSPITAL_SUBSCRIPTIONS:"/api/superadmin/subscribeHospital"
+  GET_HOSPITAL_SUBSCRIPTIONS:"/api/superadmin/subscribeHospital",
+  GET_WALLET:"/api/superadmin/wallet",
+  WITHDRAW:"/api/superadmin/wallet/withdraw"
 };

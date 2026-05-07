@@ -65,4 +65,75 @@ export class Dashbord {
       next(error);
     } 
   };
+
+  getWallet = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const hospitalId = req.user?.userId;
+      if (!hospitalId) {
+        ApiResponse.unauthorized(res, "Hospital ID not found in token");
+        return;
+      }
+
+      const wallet = await this._dashbord.getWallet(hospitalId);
+      ApiResponse.success(res, "Wallet details fetched successfully", wallet);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  withdraw = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const hospitalId = req.user?.userId;
+      if (!hospitalId) {
+        ApiResponse.unauthorized(res, "Hospital ID not found in token");
+        return;
+      }
+
+      const { amount } = req.body;
+      const withdrawal = await this._dashbord.withdraw(hospitalId, amount);
+      ApiResponse.success(res, "Withdrawal processed successfully", withdrawal);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+
+  getReqcancalation=async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const hospitalId = req.user?.userId;
+      if (!hospitalId) {
+        ApiResponse.unauthorized(res, "Hospital ID not found in token");
+        return;
+      }
+     const result=await this._dashbord.getReqcancalation(hospitalId)
+     ApiResponse.success(res,"data featched successfully",result)
+    } catch (error) {
+       next(error)
+    }
+  }
+
+  approvecancellation=async(req: Request, res: Response, next: NextFunction):Promise<void>=>{
+    try {
+    const { id } = req.params;
+     const hospitalId = req.user?.userId;
+      if (!hospitalId) {
+        ApiResponse.unauthorized(res, "Hospital ID not found in token");
+        return;
+      }
+    const result=await this._dashbord.approvecancellation(id,hospitalId)
+    ApiResponse.success(res,"approve success",result)
+    } catch (error) {
+      next(error)
+    }
+  }
+  rejectcancellation=async(req: Request, res: Response, next: NextFunction):Promise<void>=>{
+    try {
+      const {id}=req.params
+      const {reason}=req.body
+      const result=await this._dashbord.rejectcancellation(id,reason)
+      ApiResponse.success(res,"success the reject",result)
+    } catch (error) {
+        next(error)
+    }
+  }
 }

@@ -356,7 +356,6 @@ const fetchConsultation = useCallback(async (page: number) => {
           onClose={() => setIsModalOpen(false)}
           patientName={currentAppointment?.patientDetails.name || ''}
           appointmentId={currentAppointment?._id || null}
-          onSuccess={() => handleMarkAsCompleted()}
         />
       </main>
     </div>

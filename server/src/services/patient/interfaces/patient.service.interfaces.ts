@@ -29,4 +29,13 @@ export interface IPatientService {
     data: PrescriptionResponseDTO[]; total: number; page: number; limit: number;
   }>;
   getDoctorFee(doctorId: string): Promise<{ doctorFee: number; hospitalCommission: number }>;
+
+  getWallet(patientId: string):  Promise<{balance: number;totalenrnings: number;totalwithdrawn: number;Transaction?: {
+    amount: number;
+    type: "credit" | "debit";
+    date: string;
+  }[];
+}>;
+  addToWallet(patientId: string, amount: number): Promise<void>;
+  withdrawFromWallet(patientId: string, amount: number): Promise<void>;
 }

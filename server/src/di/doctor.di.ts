@@ -32,14 +32,16 @@ import { SlotMangementService } from "../services/doctor/implementations/SlotMan
 import { SlotMapper } from "../mappers/slot.mapper.ts";
 import { SlotRepository } from "../repositories/slot/slot.repository.ts";
 import { DoctorScheduleModel } from "../models/DoctorSlot.ts";
-
 import { DoctorDashboardService } from "../services/doctor/implementations/doctorDashbord.service.ts";
 import { SalaryrequestRepository } from "../repositories/salaryhike/salaryhike.repository.ts";
 import { SalaryRequestModel } from "../models/SalaryRequest.model.ts";
 import { DoctorDashboard } from "../controllers/doctor/doctorDashboard.controller.ts";
-
 import { WalletRepository } from "../repositories/wallet/wallet.repository.ts";
 import { Wallet } from "../models/wallet.model.ts";
+
+import { HospitalDoctorConfigRepository } from "../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.ts";
+import { HospitalDoctorConfigModel } from "../models/HospitalDoctorConfigModel.ts";
+import { PrescriptionMapper } from "../mappers/prescription.mapper.ts";
 
 export const doctorContainer = () => {
   const doctorRepository = new DoctorRepository(DoctorModel);
@@ -52,11 +54,12 @@ export const doctorContainer = () => {
   const leaveRepo = new LeaveRepository();
   const appointmentRepo = new AppointmentRepository();
   const appointmentMapper = new AppointmentMapper();
+  const prescriptionMapper = new PrescriptionMapper();
   const slotmapper=new SlotMapper()
    const slotRepo=new SlotRepository(DoctorScheduleModel)
   const prescriptionRepo = new PrescriptionRepository(PrescriptionModel);
-  const appointmentService = new AppointmentService(appointmentRepo, appointmentMapper, prescriptionRepo);
-  const consultation = new Consultation(appointmentService);
+  const HospitalDoctorConfigRepo = new HospitalDoctorConfigRepository();
+
   const slotservice=new SlotMangementService(slotRepo,slotmapper)
   const slotcontroller=new DoctorSlotManagementController(slotservice)
   const departmentMapper = new DepartmentMapper();
@@ -67,6 +70,10 @@ export const doctorContainer = () => {
   const doctordashbordservice=new DoctorDashboardService(doctordashbordrepository,doctorRepository,WalletRepo)
   const doctorDashboard=new DoctorDashboard(doctordashbordservice)
  
+  const appointmentService = new AppointmentService(appointmentRepo, appointmentMapper, prescriptionRepo,HospitalDoctorConfigRepo,WalletRepo,prescriptionMapper);
+
+  const consultation = new Consultation(appointmentService);
+
   const doctorMapper = new DoctorMapper();
   const doctorLeaveMapper = new DoctorLeaveMapper();
 

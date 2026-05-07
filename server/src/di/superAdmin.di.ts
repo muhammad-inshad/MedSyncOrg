@@ -27,6 +27,9 @@ import { UserRepository } from "../repositories/patient/user.repository.ts";
 import { Patient } from "../models/Patient.model.ts";
 import { PatientMapper } from "../mappers/patient.mapper.ts";
 import { SuperAdminRepository } from "../repositories/superAdmin/implements/superAdmin.repository.ts";
+import { WalletRepository } from "../repositories/wallet/wallet.repository.ts";
+import { Wallet } from "../models/wallet.model.ts";
+
 
 export const superAdminContainer = () => {
   const superAdminRepo = new SuperAdminRepository(SuperAdminModel);
@@ -41,8 +44,10 @@ export const superAdminContainer = () => {
   const kycHospitalMapper = new KycHospitalMapper();
   const subscriptionMapper = new SubscriptionMapper();
 
+  const WalletRepo = new WalletRepository(Wallet);
+  
   // Dashboard Module
-  const dashboardService = new SuperAdminDashboardService(superAdminRepo, kycRepo, doctorRepo, patientRepo);
+  const dashboardService = new SuperAdminDashboardService(superAdminRepo, kycRepo, doctorRepo, patientRepo,WalletRepo);
   const dashboardController = new SuperAdminDashboardController(dashboardService);
 
   // Hospital Management Module

@@ -8,14 +8,14 @@ import { IAppointmentRepository } from "../../../repositories/appointment/appoin
 import { IQualificationRepository } from "../../../repositories/hospital/qualification.repository.interface.ts";
 import { ISpecializationRepository } from "../../../repositories/hospital/specialization.repository.interface.ts";
 import { ISubscriptionRepository } from "../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.ts";
-import { HttpStatusCode} from "../../../constants/enums.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
 import { MESSAGES } from "../../../constants/messages.ts";
 import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 import { IAppointment, AppointmentStatus } from "../../../models/appointment.ts";
 import { IPaginationResult } from "../../../types/hospital.types.ts";
 import { MongoServerError } from "mongodb";
 import bcrypt from "bcryptjs";
-import { selectedHospitalDto,HospitalResponseDTO, SelectedHospitalSchema } from "../../../dto/hospital/hospital-response.dto.ts";
+import { selectedHospitalDto, HospitalResponseDTO, SelectedHospitalSchema } from "../../../dto/hospital/hospital-response.dto.ts";
 import { PatientResponseDTO } from "../../../dto/patient/patient-response.dto.ts";
 import { DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.ts";
 import { AppointmentResponseDTO } from "../../../dto/appointment/appointment-response.dto.ts";
@@ -32,6 +32,7 @@ import { SlotMapper } from "../../../mappers/slot.mapper.ts";
 import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.ts";
 import { HospitalDoctorConfigRepository } from "../../../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.ts";
 import { IWalletRepository } from "../../../repositories/wallet/wallet.repository.interface.ts";
+import logger from "../../../utils/logger.ts";
 
 
 export class PatientService implements IPatientService {
@@ -50,11 +51,11 @@ export class PatientService implements IPatientService {
     private readonly _appointmentMapper: AppointmentMapper,
     private readonly _priscriptionRepo: IPrescriptionRepository,
     private readonly _prescriptionMapper: PrescriptionMapper,
-    private readonly _slotreppo:ISlotRepository,
-    private readonly _slotemapper:SlotMapper,
+    private readonly _slotreppo: ISlotRepository,
+    private readonly _slotemapper: SlotMapper,
     private readonly _HospitalDoctorConfigRepo: HospitalDoctorConfigRepository,
-    private readonly _walletRepository:IWalletRepository
-  ) {}
+    private readonly _walletRepository: IWalletRepository
+  ) { }
 
   async getProfile(userId: string): Promise<PatientResponseDTO | null> {
     const patient = await this._userRepo.findById(userId);
@@ -80,9 +81,9 @@ export class PatientService implements IPatientService {
       search: query.search,
       searchFields: ["name", "email", "phone"]
     });
-    return { 
-      data: result.data.map(p => this._patientMapper.toDTO(p)), 
-      total: result.total 
+    return {
+      data: result.data.map(p => this._patientMapper.toDTO(p)),
+      total: result.total
     };
   }
 
@@ -95,8 +96,8 @@ export class PatientService implements IPatientService {
       filter: { isActive: true, reviewStatus: "approved" }
     });
 
-  
-    
+
+
     return {
       ...result,
       data: result.data.map(h => this._hospitalMapper.toDTO(h))
@@ -120,7 +121,7 @@ export class PatientService implements IPatientService {
   }
 
   async selectedHospital(id: string, page: number = 1, limit: number = 6, search: string = ""): Promise<selectedHospitalDto> {
-    
+
     const hospital = await this._hospitalRepo.findById(id);
     if (!hospital) {
       ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.ADMIN.NOT_FOUND);
@@ -135,9 +136,9 @@ export class PatientService implements IPatientService {
     const departmentsWithCounts = await Promise.all(
       departmentsResult.data.map(async (dept) => {
         const d = dept.toObject ? dept.toObject() : dept;
-        
+
         const doctorCount = await this._doctorRepo.countByDepartment(id, d._id.toString());
-        return {  
+        return {
           ...d,
           _id: d._id.toString(),
           doctorCount
@@ -182,26 +183,26 @@ export class PatientService implements IPatientService {
     };
 
     return SelectedHospitalSchema.parse(selectedHospitalData);
-}
+  }
 
   async getDoctorDepartment(id: string, page: number, limit: number, search: string): Promise<IPaginationResult<DoctorResponseDTO>> {
-    
+
     const deptId = new mongoose.Types.ObjectId(id);
 
-  const result = await this._doctorRepo.findWithPagination({
-    page,
-    limit,
-    search,
-    searchFields: ["name", "specialization"],
-    filter: {
-      isActive: true,
-      reviewStatus: "approved",
-      $or: [
-        { department: id },
-        {department_id: deptId },
-      ],
-    },
-  });
+    const result = await this._doctorRepo.findWithPagination({
+      page,
+      limit,
+      search,
+      searchFields: ["name", "specialization"],
+      filter: {
+        isActive: true,
+        reviewStatus: "approved",
+        $or: [
+          { department: id },
+          { department_id: deptId },
+        ],
+      },
+    });
 
     return {
       ...result,
@@ -217,254 +218,232 @@ export class PatientService implements IPatientService {
     return this._doctorMapper.toDTO(doctor!);
   }
 
-async getAvailableSlots(doctorId: string, date: string): Promise<{ 
-  slots: SlotResponseDTO[]; 
-  appointments: IAppointment[];
-  total: number 
-}> {
+  async getAvailableSlots(doctorId: string, date: string): Promise<{
+    slots: SlotResponseDTO[];
+    appointments: IAppointment[];
+    total: number
+  }> {
 
-  const [year, month, day] = date.split('-').map(Number);
-  
-  // Use UTC date construction to get correct day of week
-  const utcDate = new Date(Date.UTC(year, month - 1, day));
-  const dayOfWeek = utcDate.getUTCDay(); // 0=Sun, 1=Mon ... 6=Sat
+    const [year, month, day] = date.split('-').map(Number);
 
-  const [availableSlots, { appointments, total }] = await Promise.all([
-    this._slotreppo.findByDoctorId(doctorId),
-    this._appointmentRepo.findByDoctorAndDate(doctorId, date)
-  ]);
+    // Use UTC date construction to get correct day of week
+    const utcDate = new Date(Date.UTC(year, month - 1, day));
+    const dayOfWeek = utcDate.getUTCDay(); // 0=Sun, 1=Mon ... 6=Sat
 
-  const filteredSlots = availableSlots.filter(slot => {
-    if (!slot.isActive) return false;
+    const [availableSlots, { appointments, total }] = await Promise.all([
+      this._slotreppo.findByDoctorId(doctorId),
+      this._appointmentRepo.findByDoctorAndDate(doctorId, date)
+    ]);
+
+    const filteredSlots = availableSlots.filter(slot => {
+      if (!slot.isActive) return false;
 
 
-    if (!slot.daysOfWeek.includes(dayOfWeek)) return false;
+      if (!slot.daysOfWeek.includes(dayOfWeek)) return false;
 
-    // Check validFrom - slot shouldn't apply before its start date
-    if (slot.validFrom) {
-      const validFromDate = new Date(slot.validFrom);
-      const validFromUTC = new Date(Date.UTC(
-        validFromDate.getUTCFullYear(),
-        validFromDate.getUTCMonth(),
-        validFromDate.getUTCDate()
-      ));
-      if (utcDate < validFromUTC) return false;
-    }
+      // Check validFrom - slot shouldn't apply before its start date
+      if (slot.validFrom) {
+        const validFromDate = new Date(slot.validFrom);
+        const validFromUTC = new Date(Date.UTC(
+          validFromDate.getUTCFullYear(),
+          validFromDate.getUTCMonth(),
+          validFromDate.getUTCDate()
+        ));
+        if (utcDate < validFromUTC) return false;
+      }
 
-    if (slot.validUntil) {
-      const validUntilDate = new Date(slot.validUntil);
-      const validUntilUTC = new Date(Date.UTC(
-        validUntilDate.getUTCFullYear(),
-        validUntilDate.getUTCMonth(),
-        validUntilDate.getUTCDate()
-      ));
-      if (utcDate > validUntilUTC) return false;
-    }
+      if (slot.validUntil) {
+        const validUntilDate = new Date(slot.validUntil);
+        const validUntilUTC = new Date(Date.UTC(
+          validUntilDate.getUTCFullYear(),
+          validUntilDate.getUTCMonth(),
+          validUntilDate.getUTCDate()
+        ));
+        if (utcDate > validUntilUTC) return false;
+      }
 
-    return true;
-  });
+      return true;
+    });
 
-  const slotDTOs = this._slotemapper.toDTOList(filteredSlots);
+    const slotDTOs = this._slotemapper.toDTOList(filteredSlots);
 
-  return {
-    slots: slotDTOs,
-    appointments,
-    total
-  };
-}
-async bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<void> {
+    return {
+      slots: slotDTOs,
+      appointments,
+      total
+    };
+  }
+  async bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<void> {
     const { doctorId, appointmentDate, patientDetails, hospitalId, session, totalAmount } = data;
-  
+
     if (!doctorId || !appointmentDate || !patientDetails || !hospitalId || !session) {
-        ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Missing required appointment details");
+      ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Missing required appointment details");
     }
 
-    if (totalAmount !== undefined && totalAmount>0) {
-      console.log("Invalid totalAmount, must be non-negative");
+    if (totalAmount !== undefined && totalAmount > 0) {
+      logger.info(`[PatientService] Processing payment-related wallet updates for amount: ${totalAmount}`);
 
-  const doctorObjectId = new Types.ObjectId(
-    typeof doctorId === "object" ? doctorId._id : doctorId
-  );
+      const doctorObjectId = new Types.ObjectId(
+        typeof doctorId === "object" ? doctorId._id : doctorId
+      );
 
-  const hospitalObjectId = new Types.ObjectId(
-    typeof hospitalId === "object" ? hospitalId._id : hospitalId
-  );
+      const hospitalObjectId = new Types.ObjectId(
+        typeof hospitalId === "object" ? hospitalId._id : hospitalId
+      );
 
-  const findhospitalWallate = await this._walletRepository.findOne({
-    ownerId: hospitalObjectId,
-  });
+      const findhospitalWallate = await this._walletRepository.findOne({
+        ownerId: hospitalObjectId,
+      });
 
-  const findDoctorWallate = await this._walletRepository.findOne({
-    ownerId: doctorObjectId,
-  });
+     
 
-  const config = await this._HospitalDoctorConfigRepo.findOne({
-    hospitalId: hospitalObjectId,
-    doctorId: doctorObjectId,
-  });
+      const config = await this._HospitalDoctorConfigRepo.findOne({
+        hospitalId: hospitalObjectId,
+        doctorId: doctorObjectId,
+      });
 
-  if (!config) {
-    throw new Error("Config not found");
-  }
+      if (!config) {
+        logger.error(`[PatientService] Config not found for hospital: ${hospitalObjectId} and doctor: ${doctorObjectId}`);
+        throw new Error("Hospital-Doctor configuration not found");
+      }
 
-  const doctorFee = config.doctorFee || 0;
-  const commissionPercent = config.hospitalCommission || 0;
+      const doctorFee = config.doctorFee || 0;
+      const commissionPercent = config.hospitalCommission || 0;
 
-  const hospitalAmount = (doctorFee * commissionPercent) / 100;
-  const doctorAmount = doctorFee;
+      const hospitalAmount = (doctorFee * commissionPercent) / 100;
+      const doctorAmount = doctorFee;
 
-  if (!findhospitalWallate) {
-    await this._walletRepository.create({
-      ownerId: hospitalObjectId,
-      balance: hospitalAmount,
-    });
-  } else {
-    findhospitalWallate.balance += hospitalAmount;
-    findhospitalWallate.totalearnings = (findhospitalWallate.totalearnings || 0) + hospitalAmount;
-    findhospitalWallate.Transaction = findhospitalWallate.Transaction || [];
-    findhospitalWallate.Transaction.push({
-      amount: hospitalAmount,
-      type: "credit",
-      date: new Date(),
-    });
-    await findhospitalWallate.save();
-  }
+      const finalAmount=hospitalAmount+doctorAmount
 
-  if (!findDoctorWallate) {
-    await this._walletRepository.create({
-      ownerId: doctorObjectId,
-      balance: doctorAmount,
-    });
-  } else {
-    findDoctorWallate.balance += doctorAmount;
-    findDoctorWallate.totalearnings = (findDoctorWallate.totalearnings || 0) + doctorAmount;
-    findDoctorWallate.Transaction = findDoctorWallate.Transaction || [];
-    findDoctorWallate.Transaction.push({
-      amount: doctorAmount,
-      type: "credit",
-      date: new Date(),
-    });
-    await findDoctorWallate.save();
-  }
-}
+      if (!findhospitalWallate) {
+        await this._walletRepository.create({
+          ownerId: hospitalObjectId,
+        });
+      }  
+       
+        await this._walletRepository.creditWallet(hospitalId.toString(), finalAmount);
+      
+      
+    }
 
     const dateObj = new Date(appointmentDate);
 
     const doctorSchedules = await this._slotreppo.findByDoctorId(doctorId.toString());
 
     const selectedSchedule = doctorSchedules.find(s =>
-        s.session === session &&
-        s.isActive &&
-        s.daysOfWeek.includes(dateObj.getDay())
+      s.session === session &&
+      s.isActive &&
+      s.daysOfWeek.includes(dateObj.getDay())
     );
 
     if (!selectedSchedule) {
-        ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, `No ${session} session available`);
+      ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, `No ${session} session available`);
     }
 
     const mongoSession = await mongoose.startSession();
 
     try {
-        for (let attempt = 0; attempt < 3; attempt++) {
+      for (let attempt = 0; attempt < 3; attempt++) {
 
-            mongoSession.startTransaction();
+        mongoSession.startTransaction();
 
-            try {
-                const duplicate = await this._appointmentRepo.findDuplicate(
-                    doctorId.toString(),
-                    dateObj,
-                    patientDetails!,
-                    mongoSession
-                );
+        try {
+          const duplicate = await this._appointmentRepo.findDuplicate(
+            doctorId.toString(),
+            dateObj,
+            patientDetails!,
+            mongoSession
+          );
 
-                if (duplicate) {
-                    ApiResponse.throwError(HttpStatusCode.CONFLICT, MESSAGES.PATIENT.ALREADYBOOKED);
-                }
+          if (duplicate) {
+            ApiResponse.throwError(HttpStatusCode.CONFLICT, MESSAGES.PATIENT.ALREADYBOOKED);
+          }
 
-                const sessionBookedCount = await this._appointmentRepo.countByDoctorDateAndSession(
-                    doctorId.toString(),
-                    dateObj,
-                    session,
-                    mongoSession
-                );
+          const sessionBookedCount = await this._appointmentRepo.countByDoctorDateAndSession(
+            doctorId.toString(),
+            dateObj,
+            session,
+            mongoSession
+          );
 
-                if (sessionBookedCount >= selectedSchedule.tokenPerDay) {
-                    ApiResponse.throwError(
-                        HttpStatusCode.BAD_REQUEST,
-                        `No more slots available for ${session}`
-                    );
-                }
+          if (sessionBookedCount >= selectedSchedule.tokenPerDay) {
+            ApiResponse.throwError(
+              HttpStatusCode.BAD_REQUEST,
+              `No more slots available for ${session}`
+            );
+          }
 
-                const tokenNumber = sessionBookedCount + 1;
+          const tokenNumber = sessionBookedCount + 1;
 
-                const [startHour, startMinute] = selectedSchedule.startTime.split(':').map(Number);
-                const startMinutes = startHour * 60 + (startMinute || 0);
-                const visitMinutes = startMinutes + (sessionBookedCount * selectedSchedule.slotDuration);
+          const [startHour, startMinute] = selectedSchedule.startTime.split(':').map(Number);
+          const startMinutes = startHour * 60 + (startMinute || 0);
+          const visitMinutes = startMinutes + (sessionBookedCount * selectedSchedule.slotDuration);
 
-                const visitHour = Math.floor(visitMinutes / 60);
-                const visitMin = visitMinutes % 60;
+          const visitHour = Math.floor(visitMinutes / 60);
+          const visitMin = visitMinutes % 60;
 
-                const visitTime = `${visitHour.toString().padStart(2, '0')}:${visitMin.toString().padStart(2, '0')}`;
+          const visitTime = `${visitHour.toString().padStart(2, '0')}:${visitMin.toString().padStart(2, '0')}`;
 
-                const endMinutes = visitMinutes + selectedSchedule.slotDuration;
-                const endHour = Math.floor(endMinutes / 60);
-                const endMin = endMinutes % 60;
+          const endMinutes = visitMinutes + selectedSchedule.slotDuration;
+          const endHour = Math.floor(endMinutes / 60);
+          const endMin = endMinutes % 60;
 
-                const slotEndTime = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
+          const slotEndTime = `${endHour.toString().padStart(2, '0')}:${endMin.toString().padStart(2, '0')}`;
 
-                const appointmentData: Partial<IAppointment> = { ...data };
+          const appointmentData: Partial<IAppointment> = { ...data };
 
-                if (appointmentData.bloodPressure === "") delete appointmentData.bloodPressure;
-                if (appointmentData.heartRate === "") delete appointmentData.heartRate;
-                if (appointmentData.weight === "") delete appointmentData.weight;
+          if (appointmentData.bloodPressure === "") delete appointmentData.bloodPressure;
+          if (appointmentData.heartRate === "") delete appointmentData.heartRate;
+          if (appointmentData.weight === "") delete appointmentData.weight;
 
-                 if (totalAmount === undefined) {
-                    appointmentData.paymentstatus = "pending";
-                 }else{
-                    appointmentData.paymentstatus = "paid";
-                 }
-                const result = await this._appointmentRepo.create(
-                    {
-                        ...appointmentData,
-                        bookedBy: new Types.ObjectId(patientId),
-                        tokenNumber,
-                        visitTime,
-                        slotStartTime: visitTime,
-                        slotEndTime,
-                        status: AppointmentStatus.PENDING,
-                    },
-                    mongoSession
-                );
+          if (totalAmount === undefined) {
+            appointmentData.paymentstatus = "pending";
+          } else {
+            appointmentData.paymentstatus = "paid";
+          }
+          const result = await this._appointmentRepo.create(
+            {
+              ...appointmentData,
+              bookedBy: new Types.ObjectId(patientId),
+              tokenNumber,
+              visitTime,
+              slotStartTime: visitTime,
+              slotEndTime,
+              status: AppointmentStatus.PENDING,
+            },
+            mongoSession
+          );
 
-            
-                await this._userRepo.addHospital(
-                    patientId,
-                    hospitalId.toString(),
-                    mongoSession
-                );
 
-                await mongoSession.commitTransaction();
+          await this._userRepo.addHospital(
+            patientId,
+            hospitalId.toString(),
+            mongoSession
+          );
 
-  
-                return;
+          await mongoSession.commitTransaction();
+          logger.info(`[PatientService] Appointment successfully booked with Token: ${tokenNumber}`);
 
-            } catch (error:unknown) {
-                await mongoSession.abortTransaction();
-    if (error instanceof MongoServerError && error.code === 11000) {
-        console.log("Token conflict, retrying...");
-        continue;
-    }
-                throw error;
-            }
+
+          return;
+
+        } catch (error: unknown) {
+          await mongoSession.abortTransaction();
+          if (error instanceof MongoServerError && error.code === 11000) {
+            console.log("Token conflict, retrying...");
+            continue;
+          }
+          throw error;
         }
+      }
 
-        // If all retries fail
-        ApiResponse.throwError(HttpStatusCode.CONFLICT, "High traffic, please try again");
+      // If all retries fail
+      ApiResponse.throwError(HttpStatusCode.CONFLICT, "High traffic, please try again");
 
     } finally {
-        mongoSession.endSession();
+      mongoSession.endSession();
     }
-}
+  }
   async checkDuplicateAppointment(doctorId: string, date: string, patient: { name: string; age: number; email?: string }): Promise<AppointmentResponseDTO | null> {
     const dateObj = new Date(date);
     const result = await this._appointmentRepo.findDuplicate(doctorId, dateObj, patient);
@@ -474,9 +453,9 @@ async bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<v
 
   async getAppoimentHistory(patientId: string, query: { page: number; limit: number; search: string }): Promise<{ data: AppointmentResponseDTO[]; total: number }> {
     const result = await this._appointmentRepo.findPatientAppointments(patientId, query);
-    return { 
-      data: result.appointments.map(a => this._appointmentMapper.toDTO(a)), 
-      total: result.total 
+    return {
+      data: result.appointments.map(a => this._appointmentMapper.toDTO(a)),
+      total: result.total
     };
   }
 
@@ -487,7 +466,8 @@ async bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<v
 
   async cancelAppointment(data: { id: string; reason: string }): Promise<void> {
     const updated = await this._appointmentRepo.update(data.id, {
-      status: AppointmentStatus.CANCELLED,
+      status: AppointmentStatus.PROCESSING,
+      cancelRequest: true,
       cancelReason: data.reason
     });
     if (!updated) {
@@ -500,36 +480,87 @@ async bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<v
     return !!appointment;
   }
 
-getPrescriptions = async (patientId: string,query: { page: number; limit: number; search: string }): Promise<{ data: PrescriptionResponseDTO[]; total: number; page: number; limit: number }> => {
+  getPrescriptions = async (patientId: string, query: { page: number; limit: number; search: string }): Promise<{ data: PrescriptionResponseDTO[]; total: number; page: number; limit: number }> => {
     const patient = await this._userRepo.findById(patientId);
     if (!patient) {
-        ApiResponse.throwError(
-            HttpStatusCode.NOT_FOUND,
-            MESSAGES.PATIENT.NOT_FOUND
-        );
+      ApiResponse.throwError(
+        HttpStatusCode.NOT_FOUND,
+        MESSAGES.PATIENT.NOT_FOUND
+      );
     }
 
     const result = await this._priscriptionRepo.findPrescriptionsPaginated({
-        email: patient.email,
-        page: query.page,
-        limit: query.limit,
-        search: query.search,
+      email: patient.email,
+      page: query.page,
+      limit: query.limit,
+      search: query.search,
     });
 
     return {
-        data: result.data.map(rx => this._prescriptionMapper.toDTO(rx)),
-        total: result.total,
-        page: result.page,
-        limit: result.limit,
+      data: result.data.map(rx => this._prescriptionMapper.toDTO(rx)),
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
     };
-};
+  };
 
-getDoctorFee = async (doctorId: string): Promise<{ doctorFee: number; hospitalCommission: number }> => {
-  const doctor = await this._HospitalDoctorConfigRepo.findOne({ doctorId });
-  if (!doctor) {
-    ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
+  getDoctorFee = async (doctorId: string): Promise<{ doctorFee: number; hospitalCommission: number }> => {
+    const doctor = await this._HospitalDoctorConfigRepo.findOne({ doctorId });
+    if (!doctor) {
+      ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.DOCTOR.NOT_FOUND);
+    }
+    return { doctorFee: doctor.doctorFee, hospitalCommission: doctor.hospitalCommission };
   }
-  return { doctorFee: doctor.doctorFee, hospitalCommission: doctor.hospitalCommission }; 
+
+ async getWallet(
+  patientId: string
+): Promise<{
+  balance: number;
+  totalenrnings: number;
+  totalwithdrawn: number;
+  Transaction?: {
+    amount: number;
+    type: "credit" | "debit";
+    date: string;
+  }[];
+}> {
+
+  const wallet = await this._walletRepository.findOne({
+    ownerId: new Types.ObjectId(patientId),
+  });
+
+  if (!wallet) {
+    return {
+      balance: 0,
+      totalenrnings: 0,
+      totalwithdrawn: 0,
+      Transaction: [],
+    };
+  }
+
+  return {
+    balance: wallet.balance,
+    totalenrnings: wallet.totalearnings || 0,
+    totalwithdrawn: wallet.totalwithdrawn || 0,
+
+    Transaction: (wallet.Transaction || []).map((tx) => ({
+      amount: tx.amount,
+      type: tx.type,
+      date: tx.date.toISOString(),
+    })),
+  };
 }
- 
+
+  async addToWallet(patientId: string, amount: number): Promise<void> {
+    await this._walletRepository.creditWallet(patientId, amount);
+  } 
+  async withdrawFromWallet(patientId: string, amount: number): Promise<void> {
+    const wallet = await this._walletRepository.findOne({ ownerId: new Types.ObjectId(patientId) });
+    if (!wallet) {
+      ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.WALLET.NOT_FOUND);
+    }
+    await this._walletRepository.debitWallet(patientId, amount);
+  }
+
+
 }

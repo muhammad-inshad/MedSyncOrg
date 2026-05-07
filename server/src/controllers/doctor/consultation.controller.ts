@@ -37,6 +37,7 @@ export class Consultation {
     markAsCompleted = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
+   
             const updated = await this._appointmentService.updateStatus(id, AppointmentStatus.COMPLETED);
 
             if (!updated) {

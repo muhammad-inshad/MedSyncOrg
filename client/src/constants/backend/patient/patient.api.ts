@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import { PATIENT_MANAGEMENT } from "./patient.routes";
+import { get } from "react-hook-form";
 
 interface IBookingData {
     doctorId: string;
@@ -71,5 +72,12 @@ export const patientApi = {
 
     getDoctorfee: (doctorId: string) =>
         api.get(PATIENT_MANAGEMENT.GET_DOCTOR_FEE(doctorId)),
+
+    getWallet: () =>
+        api.get(PATIENT_MANAGEMENT.GET_WALLET),
+    addToWallet: (data: { amount: number }) =>
+        api.post(PATIENT_MANAGEMENT.ADD_TO_WALLET, data),
+    withdraw: (data: { amount: number }) =>
+        api.post(PATIENT_MANAGEMENT.WITHDRAW, data),
     
 };

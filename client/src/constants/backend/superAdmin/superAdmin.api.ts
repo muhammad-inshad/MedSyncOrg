@@ -71,6 +71,10 @@ export const superAdminApi = {
         api.patch(SUPERADMIN_MANAGEMENT.TOGGLE_SUBSCRIPTION, data),
 
    getHospitalSubscriptions:(params:PaginationParams)=>(
-     api.get(SUPERADMIN_MANAGEMENT.GET_HOSPITAL_SUBSCRIPTIONS,{params}))
+     api.get(SUPERADMIN_MANAGEMENT.GET_HOSPITAL_SUBSCRIPTIONS,{params})),
+
+    getwallet:()=>api.get(SUPERADMIN_MANAGEMENT.GET_WALLET),
+
+    withdraw:(data:{amount:number})=>api.post(SUPERADMIN_MANAGEMENT.WITHDRAW, data)
    
 };
