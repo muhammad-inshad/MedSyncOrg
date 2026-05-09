@@ -47,4 +47,8 @@ async countPendingDoctor(hospitalId: string): Promise<number> {
 async updateDoctorSalary(doctorId: string | Types.ObjectId, salary: number): Promise<void> {
   await this.model.findByIdAndUpdate(doctorId, { salary });
 }
+
+async findDoctorFromHospitalCount():Promise<void>{
+  
+}
 }

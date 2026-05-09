@@ -51,7 +51,7 @@ export const superAdminContainer = () => {
   const dashboardController = new SuperAdminDashboardController(dashboardService);
 
   // Hospital Management Module
-  const hospitalService = new SuperAdminHospitalService(kycRepo, hospitalRepo, hospitalMapper, subscriptionRepo);
+  const hospitalService = new SuperAdminHospitalService(kycRepo, hospitalRepo, hospitalMapper, subscriptionRepo,doctorRepo);
   const hospitalController = new SuperAdminHospitalController(hospitalService);
 
   // KYC Management Module

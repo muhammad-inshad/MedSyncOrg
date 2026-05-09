@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -178,7 +178,7 @@ useEffect(() => {
   };
 
   fetchDoctorFee();
-}, [doctor]);
+}, [doctor,doctorId]);
 
   useEffect(() => {
     const fetchWeekAvailability = async () => {
@@ -296,15 +296,14 @@ useEffect(() => {
 
     if (!isSameDay(selectedDate, startOfToday())) return true;
 
-    const now = new Date();
+    
     const today = startOfToday();
     const [hours, minutes] = slot.startTime.split(":").map(Number);
 
     const slotStart = new Date(today);
     slotStart.setHours(hours, minutes || 0, 0, 0);
 
-    const oneHourBefore = new Date(slotStart.getTime() - 60 * 60 * 1000);
-    // return now < oneHourBefore;
+  
     return true
   };
 

@@ -12,7 +12,7 @@ export class SlotRepository extends BaseRepository<IDoctorSchedule> implements I
         return await this.model.find({ doctorId,isActive: true}).exec();
     }
 
-    async findExistingSchedule(doctorId: string,daysOfWeek: number[],session: string):Promise<string[]|null>{
+    async findExistingSchedule(doctorId: string,daysOfWeek: number[]):Promise<string[]|null>{
        const result = await this.model.aggregate([
     {
       $match: {

@@ -1,4 +1,4 @@
-import { Building2, Hospital, TrendingUp, AlertCircle, Wallet, TrendingDown } from 'lucide-react';
+import { Building2, TrendingUp, Wallet, TrendingDown } from 'lucide-react';
 import SuperAdminsidebar from '@/modules/superAdmin/components/SuperAdminsidebar';
 import { useEffect, useState } from 'react';
 import { superAdminApi } from '@/constants/backend/superAdmin/superAdmin.api';
@@ -13,6 +13,16 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+
+interface TooltipProps {
+  active?: boolean;
+  payload?: {
+    name: string;
+    value: number;
+    color: string;
+  }[];
+  label?: string;
+}
 
 interface Transaction {
   amount: number;
@@ -149,12 +159,12 @@ export default function SuperAdminDashboard() {
   ];
 
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs">
           <p className="font-semibold text-gray-700 mb-2">{label}</p>
-          {payload.map((entry: any) => (
+          {payload.map((entry) => (
             <div key={entry.name} className="flex items-center gap-2 mb-1">
               <span
                 className="w-2.5 h-2.5 rounded-full inline-block"

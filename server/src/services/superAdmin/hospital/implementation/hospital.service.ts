@@ -9,13 +9,15 @@ import bcrypt from "bcryptjs";
 import { ISuperAdminKYCRepository } from "../../../../repositories/superAdmin/interfaces/superAdminkyc.repository.interface.ts";
 import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.ts";
 import { ISubscriptionRepository } from "../../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.ts";
+import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
 
 export class SuperAdminHospitalService implements ISuperAdminHospitalService {
     constructor(
         private readonly kycRepo: ISuperAdminKYCRepository,
         private readonly hospitalRepo: IHospitalRepository,
         private readonly hospitalMapper: HospitalMapper,
-        private readonly subscriptionRepo: ISubscriptionRepository
+        private readonly subscriptionRepo: ISubscriptionRepository,
+        private readonly _doctorRepo:IDoctorRepository
     ) { }
 
    async hospitalManagement(options: { page: number; limit: number; search?: string; isActive?: boolean }): Promise<IHospitalManagementResult> {
@@ -29,6 +31,7 @@ export class SuperAdminHospitalService implements ISuperAdminHospitalService {
         filter.isActive = isActive;
     }
 
+
     const result = await this.kycRepo.findWithPagination({
         page,
         limit,
@@ -36,6 +39,9 @@ export class SuperAdminHospitalService implements ISuperAdminHospitalService {
         searchFields: ["hospitalName", "email"],
         filter
     });
+   
+    
+
 
     return {
         data: result.data.map(h => this.hospitalMapper.toDTO(h as IHospital)),

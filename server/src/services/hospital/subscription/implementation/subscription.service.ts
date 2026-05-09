@@ -38,6 +38,7 @@ export class HospitalSubscriptionService implements IHospitalSubscriptionService
 
     async checkSubscriptionLimit(hospitalId: string, type: "maxDoctors" | "maxPatients" | "maxDepartments"): Promise<void> {
         const hospital = await this.hospitalRepository.findById(hospitalId);
+        console.log(type)
         if (!hospital) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Hospital not found");
         }

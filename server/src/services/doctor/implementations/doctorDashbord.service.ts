@@ -2,7 +2,6 @@ import { Types } from "mongoose";
 import { SalaryHikeRequestinterface } from "../../../dto/doctor/doctor-response.dto.ts";
 import { IsalaryRepository } from "../../../repositories/salaryhike/salaryhike.repository.interface.ts";
 import { IdoctorDashbord } from "../interfaces/doctorDashbord.service.interfaces.ts";
-import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 import { HttpStatusCode } from "../../../constants/enums.ts";
 import { AppError } from "../../../errors/app.error.ts";
 import { IDoctorRepository } from "../../../repositories/doctor/doctor.repository.interface.ts";

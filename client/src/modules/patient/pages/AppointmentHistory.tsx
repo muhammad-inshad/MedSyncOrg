@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/modules/patient/components/Navbar';
 import Footer from '../components/Footer';
-import { Calendar, Clock, Hash, ChevronRight, MapPin, Monitor, X, Activity, Heart, Weight, User, Phone, Mail, Home, Ban, Loader2 } from 'lucide-react';
+import { Calendar, Clock, Hash, ChevronRight, MapPin, Monitor, X, Ban, Loader2 } from 'lucide-react';
 import { patientApi } from '@/constants/backend/patient/patient.api';
 import { useAppSelector } from '@/hooks/redux';
 import Pagination from '@/components/Pagination';

@@ -91,12 +91,13 @@ const HospitalWallet = () => {
       if (result?.data?.success) {
         toast.success(result.data.message || "Withdrawal successful");
         setAmount('');
-        fetchWalletData();  // ✅ Refresh + reverse order
+        fetchWalletData();  
       } else {
         toast.error(result?.data?.message || "Failed to process withdrawal");
       }
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Withdrawal failed");
+    } catch (err) {
+      console.log(err)
+      toast.error("Withdrawal failed");
     }
   };
 

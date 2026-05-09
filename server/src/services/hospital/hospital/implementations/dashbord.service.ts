@@ -176,6 +176,7 @@ approvecancellation = async (id: string,hospitalId:string): Promise<boolean> => 
     cancelRequest: false,
     status: AppointmentStatus.CANCELLED
   });
+  console.log(result)
 const finduser = await this._appoiments.findById(id);
 
 if (!finduser) {

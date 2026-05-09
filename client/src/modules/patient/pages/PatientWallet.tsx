@@ -34,7 +34,6 @@ const PatientWallet = () => {
 
             if (result?.data?.success && result.data.data) {
                 const walletData = result.data.data;
-console.log(result.data)
                 setBalance(walletData.balance || 0);
                 setTotalAdded(walletData.totalAdded || 0);
                 setTotalSpent(walletData.totalSpent || 0);
@@ -94,6 +93,7 @@ console.log(result.data)
         const amt = parseFloat(addAmount);
 
         if (!amt || amt <= 0) return setAddError('Please enter a valid amount.');
+        
 
         const result = await patientApi.addToWallet({ amount: amt });
         if (result?.data?.success) {

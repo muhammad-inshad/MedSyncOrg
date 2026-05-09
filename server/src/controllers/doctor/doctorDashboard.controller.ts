@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import {  Request, Response } from "express";
 import { ApiResponse } from "../../utils/apiResponse.utils.ts";
 import { IdoctorDashbord } from "../../services/doctor/interfaces/doctorDashbord.service.interfaces.ts";
 import { HttpStatusCode } from "../../constants/enums.ts";
@@ -11,7 +11,6 @@ export class DoctorDashboard{
 SALARY_INCREASE_REQUEST = async (
   req: Request,
   res: Response,
-  next: NextFunction
 ) => {
   try {
     const result = await this._service.salaryincreserequest(req.body);
@@ -31,7 +30,6 @@ SALARY_INCREASE_REQUEST = async (
 GET_SALARY_INCREASE_REQUEST = async (
   req: Request,
   res: Response,
-  next: NextFunction
 ) => {
   try {
     const doctorId = req.query.doctorId as string;
@@ -54,8 +52,7 @@ GET_SALARY_INCREASE_REQUEST = async (
 };
 
 GET_WALLET = async (  req: Request,
-  res: Response,
-  next: NextFunction) => {
+  res: Response,) => {
   try {
      const user = req.user as unknown as ITokenPayload;
      const doctorID = user?.doctorID || user?.userId;
@@ -65,13 +62,13 @@ GET_WALLET = async (  req: Request,
     const result = await this._service.getwallet(doctorID); 
       return ApiResponse.success(res, "Wallet information fetched successfully", result, HttpStatusCode.OK);
   } catch (error: unknown) {
+      console.log(error)
     throw new AppError("Failed to fetch wallet information", HttpStatusCode.INTERNAL_SERVER_ERROR);
   }
 }
 
 WITHDRAW = async (  req: Request,
-  res: Response,
-  next: NextFunction) => {  
+  res: Response,) => {  
   try {     const user = req.user as unknown as ITokenPayload;
      const doctorID = user?.doctorID || user?.userId; 
       if (!doctorID) {
@@ -81,6 +78,7 @@ WITHDRAW = async (  req: Request,
     
       return ApiResponse.success(res, "Withdrawal request submitted successfully", result, HttpStatusCode.OK);
   } catch (error: unknown) {
+    console.log(error)
     throw new AppError("Failed to process withdrawal request", HttpStatusCode.INTERNAL_SERVER_ERROR);
   }
 }

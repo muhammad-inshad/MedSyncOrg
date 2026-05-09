@@ -40,7 +40,6 @@ import { WalletRepository } from "../repositories/wallet/wallet.repository.ts";
 import { Wallet } from "../models/wallet.model.ts";
 
 import { HospitalDoctorConfigRepository } from "../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.ts";
-import { HospitalDoctorConfigModel } from "../models/HospitalDoctorConfigModel.ts";
 import { PrescriptionMapper } from "../mappers/prescription.mapper.ts";
 
 export const doctorContainer = () => {

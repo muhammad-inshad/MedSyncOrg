@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/modules/patient/components/Navbar';
 import Footer from '../components/Footer';
+import jsPDF from 'jspdf';
 import {
     Calendar, ChevronRight, X, Pill, FileText,
-    Building2, Loader2, ClipboardList, Search
+    Building2, Loader2, ClipboardList, Search, Download
 } from 'lucide-react';
 import { patientApi } from '@/constants/backend/patient/patient.api';
 import Pagination from '@/components/Pagination';
@@ -14,6 +15,166 @@ const fmt = (d: string) =>
     new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
 
+const downloadPrescriptionPdf = (prescription: IPrescription) => {
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const margin = 48;
+    const contentW = pageW - margin * 2;
+    let y = 0;
+
+    // ── Header banner ──────────────────────────────────────────────
+    doc.setFillColor(13, 27, 75);
+    doc.rect(0, 0, pageW, 80, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.setTextColor(255, 255, 255);
+    doc.text('Prescription', margin, 34);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(147, 197, 253);
+    doc.text('PATIENT PORTAL', margin, 52);
+
+    doc.setFontSize(10);
+    doc.setTextColor(200, 220, 255);
+    doc.text(`Issued: ${fmt(prescription.createdAt)}`, pageW - margin, 34, { align: 'right' });
+    doc.text(`${prescription.medicines.length} medicine${prescription.medicines.length !== 1 ? 's' : ''}`, pageW - margin, 52, { align: 'right' });
+
+    y = 100;
+
+    // ── Doctor & Hospital ──────────────────────────────────────────
+    const cardH = 68;
+    const halfW = contentW / 2 - 6;
+
+    // Doctor card
+    doc.setFillColor(240, 245, 255);
+    doc.roundedRect(margin, y, halfW, cardH, 8, 8, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(59, 130, 246);
+    doc.text('DOCTOR', margin + 14, y + 18);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(17, 24, 39);
+    doc.text(prescription.doctor_id.name, margin + 14, y + 36);
+    if (prescription.doctor_id.specialization) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(75, 85, 99);
+        doc.text(prescription.doctor_id.specialization, margin + 14, y + 52);
+    }
+
+    // Hospital card
+    const hx = margin + halfW + 12;
+    doc.setFillColor(240, 253, 244);
+    doc.roundedRect(hx, y, halfW, cardH, 8, 8, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(5, 150, 105);
+    doc.text('HOSPITAL', hx + 14, y + 18);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(17, 24, 39);
+    doc.text(prescription.hospital_id.name, hx + 14, y + 36);
+    if (prescription.hospital_id.address) {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(75, 85, 99);
+        const addr = doc.splitTextToSize(prescription.hospital_id.address, halfW - 28);
+        doc.text(addr[0], hx + 14, y + 52);
+    }
+
+    y += cardH + 28;
+
+    // ── Medicines heading ──────────────────────────────────────────
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(156, 163, 175);
+    doc.text('PRESCRIBED MEDICINES', margin, y);
+    y += 14;
+
+    // ── Medicine rows ──────────────────────────────────────────────
+    prescription.medicines.forEach((med) => {
+        const rowH = 62;
+        if (y + rowH > doc.internal.pageSize.getHeight() - 60) {
+            doc.addPage();
+            y = margin;
+        }
+
+        doc.setFillColor(239, 246, 255);
+        doc.roundedRect(margin, y, contentW, rowH, 8, 8, 'F');
+
+        // Pill badge
+        doc.setFillColor(219, 234, 254);
+        doc.roundedRect(margin + 14, y + 14, 34, 34, 6, 6, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        doc.setTextColor(37, 99, 235);
+        doc.text('Rx', margin + 16, y + 36);
+
+        // Medicine name
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(17, 24, 39);
+        doc.text(med.name, margin + 58, y + 26);
+
+        // Labels
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(107, 114, 128);
+        doc.text('DOSAGE', margin + 58, y + 42);
+        doc.text('DURATION', margin + 58 + contentW / 3, y + 42);
+
+        // Values
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(29, 78, 216);
+        doc.text(med.dosage, margin + 58, y + 55);
+        doc.text(med.duration, margin + 58 + contentW / 3, y + 55);
+
+        y += rowH + 10;
+    });
+
+    // ── Notes ──────────────────────────────────────────────────────
+    if (prescription.notes) {
+        if (y + 80 > doc.internal.pageSize.getHeight() - 60) {
+            doc.addPage();
+            y = margin;
+        }
+        y += 8;
+        doc.setFillColor(255, 251, 235);
+        const noteLines = doc.splitTextToSize(prescription.notes, contentW - 28);
+        const noteH = Math.max(60, noteLines.length * 14 + 32);
+        doc.roundedRect(margin, y, contentW, noteH, 8, 8, 'F');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(217, 119, 6);
+        doc.text("DOCTOR'S NOTES", margin + 14, y + 18);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(55, 65, 81);
+        doc.text(noteLines, margin + 14, y + 34);
+    }
+
+    // ── Footer on every page ───────────────────────────────────────
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        const pgH = doc.internal.pageSize.getHeight();
+        doc.setFillColor(243, 244, 246);
+        doc.rect(0, pgH - 36, pageW, 36, 'F');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(156, 163, 175);
+        doc.text('Generated from Patient Portal', margin, pgH - 14);
+        doc.text(`Page ${i} of ${pageCount}`, pageW - margin, pgH - 14, { align: 'right' });
+    }
+
+    doc.save(`prescription-${prescription.doctor_id.name.replace(/\s+/g, '-')}-${fmt(prescription.createdAt)}.pdf`);
+};
 
 
 const DetailModal = ({
@@ -23,6 +184,7 @@ const DetailModal = ({
     prescription: IPrescription;
     onClose: () => void;
 }) => (
+
     <div
         className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6 bg-black/60 backdrop-blur-md"
         onClick={onClose}
@@ -42,12 +204,23 @@ const DetailModal = ({
                     </div>
                     <h2 className="text-white font-bold text-lg tracking-tight">Prescription Details</h2>
                 </div>
-                <button
-                    onClick={onClose}
-                    className="w-9 h-9 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all active:scale-95"
-                >
-                    <X className="w-5 h-5 text-white" />
-                </button>
+                <div className="flex items-center gap-2">
+                    {/* Download PDF Button */}
+                    <button
+                        onClick={() => downloadPrescriptionPdf(prescription)}
+                        className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-all active:scale-95"
+                        title="Download as PDF"
+                    >
+                        <Download className="w-4 h-4" />
+                        <span className="hidden sm:inline">Download PDF</span>
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="w-9 h-9 rounded-2xl bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all active:scale-95"
+                    >
+                        <X className="w-5 h-5 text-white" />
+                    </button>
+                </div>
             </div>
 
             <div className="p-6 sm:p-8 space-y-8 overflow-y-auto max-h-[calc(92vh-73px)]">
@@ -97,7 +270,7 @@ const DetailModal = ({
                         </div>
                     ))}
                 </div>
-<div>
+                <div>
                     <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-5 pl-1">
                         PRESCRIBED MEDICINES
                     </h3>

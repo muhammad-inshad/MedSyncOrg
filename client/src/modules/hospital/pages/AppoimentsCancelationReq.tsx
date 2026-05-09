@@ -61,7 +61,7 @@ const ITEMS_PER_PAGE = 10;
 
 const AppointmentsCancellationReq = () => {
   const [requests, setRequests]               = useState<CancellationRequest[]>([]);
-  const [activeFilter, setActiveFilter]       = useState("all");
+  const [activeFilter]       = useState("all");
   const [selectedReq, setSelectedReq]         = useState<CancellationRequest | null>(null);
   const [showRejectInput, setShowRejectInput] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");

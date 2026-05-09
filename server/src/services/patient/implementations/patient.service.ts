@@ -413,7 +413,7 @@ export class PatientService implements IPatientService {
             },
             mongoSession
           );
-
+console.log(result)
 
           await this._userRepo.addHospital(
             patientId,
