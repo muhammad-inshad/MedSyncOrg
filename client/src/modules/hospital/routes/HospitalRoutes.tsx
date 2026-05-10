@@ -47,6 +47,7 @@ const HospitalRoutes = () => {
                       <Route path={HOSPITAL_ROUTES.DOCTOR_LEAVE_MANAGEMENT}element={<DoctorLeaveManagement/>}/>
                       <Route path={HOSPITAL_ROUTES.HOSPITAL_FINANCE} element={<HospitalFinance/>}/>
                       <Route path={HOSPITAL_ROUTES.HOSPITAL_WALLET} element={<HospitalWallet/>}/>
+                      
                        <Route path={HOSPITAL_ROUTES.HOSPITAL_APPOINTMENT_CANCELATION} element={<AppointmentsCancellationReq/>}/>
                       <Route path={HOSPITAL_ROUTES.HOSPITAL_PAYMENT_SUCCESS} element={
                         <PaymentSuccess 
