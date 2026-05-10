@@ -48,7 +48,6 @@ const ResetPassword = () => {
       await authApi.resetPassword({
         email,
         password: password,
-        role: role
       });
 
       toast.success(AUTH_MESSAGES.RESET_PASSWORD.SUCCESS);
