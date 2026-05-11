@@ -7,4 +7,8 @@ export class HospitalDoctorConfigRepository extends BaseRepository<IHospitalDoct
     constructor() {
       super(HospitalDoctorConfigModel);
     }   
+
+    async findByDoctorIdHOspitalid(id: string) {
+  return await this.model.findOne({ doctorId: id });
+}
 }
