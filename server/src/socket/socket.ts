@@ -4,7 +4,9 @@ import { Server, Socket } from "socket.io";
 export const initSocket = (server: HTTPServer) => {
   const io = new Server(server, {
     cors: {
-      origin: "*",
+      origin: [process.env.FRONTEND_URL || 'http://localhost:5173', 'https://med-sync-org-72v5.vercel.app'],
+      methods: ["GET", "POST"],
+      credentials: true
     },
   });
 

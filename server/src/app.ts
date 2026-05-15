@@ -23,6 +23,7 @@ const { doctorAuthMiddleware } = doctorContainer();
 
 
 const app = express();
+app.set('trust proxy', 1);
 
 app.use((req, _res, next) => {
   next();
@@ -32,7 +33,17 @@ app.use(passport.initialize());
 
 app.use(cookieParser());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      process.env.FRONTEND_URL || 'http://localhost:5173',
+      'https://med-sync-org-72v5.vercel.app'
+    ];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 
