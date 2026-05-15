@@ -25,21 +25,26 @@ class patientAuthController implements IPatientAuthController {
       const loginData: LoginDTO = req.body;
 
       const result = await this.authService.login(loginData);
-      
-      res.cookie('refreshToken', result.refreshToken, {
+
+      const cookieOptions = {
         httpOnly: true,
         secure: true,
-        sameSite: 'none',
-        maxAge: Number(process.env.MAX_AGE_REFRESH_TOKEN) || 7 * 24 * 60 * 60 * 1000,
+        sameSite: "none" as const,
         path: "/",
+      };
+
+      res.cookie("refreshToken", result.refreshToken, {
+        ...cookieOptions,
+        maxAge:
+          Number(process.env.MAX_AGE_REFRESH_TOKEN) ||
+          7 * 24 * 60 * 60 * 1000,
       });
 
       res.cookie("accessToken", result.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: Number(process.env.MAX_AGE_ACCESS_TOKEN) || 15 * 60 * 1000,
-        path: "/",
+        ...cookieOptions,
+        maxAge:
+          Number(process.env.MAX_AGE_ACCESS_TOKEN) ||
+          15 * 60 * 1000,
       });
 
       return ApiResponse.success(res, "Login successful", {
@@ -62,23 +67,31 @@ class patientAuthController implements IPatientAuthController {
 
       if (!refreshToken) {
         const authHeader = req.headers.authorization;
+
         if (authHeader && authHeader.startsWith("Refresh ")) {
           refreshToken = authHeader.substring(8);
         }
       }
 
       if (!refreshToken) {
-        return ApiResponse.unauthorized(res, MESSAGES.AUTH.SESSION_EXPIRED || "Session expired");
+        return ApiResponse.unauthorized(
+          res,
+          MESSAGES.AUTH.SESSION_EXPIRED || "Session expired"
+        );
       }
 
       const result = await this.authService.refreshAccessToken(refreshToken);
+
       res.cookie("accessToken", result.accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: Number(process.env.MAX_AGE_ACCESS_TOKEN) || 15 * 60 * 1000,
+        secure: true,
+        sameSite: "none",
+        maxAge:
+          Number(process.env.MAX_AGE_ACCESS_TOKEN) ||
+          15 * 60 * 1000,
         path: "/",
       });
+
       return ApiResponse.success(res, "Token refreshed successfully", {
         accessToken: result.accessToken
       });
@@ -87,10 +100,20 @@ class patientAuthController implements IPatientAuthController {
     }
   };
 
-  resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+  resetPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const { email, password, role } = req.body
-      const result = await this.authService.resetPassword(email, password, role);
+      const { email, password, role } = req.body;
+
+      const result = await this.authService.resetPassword(
+        email,
+        password,
+        role
+      );
+
       return ApiResponse.success(res, result.message);
     } catch (error: unknown) {
       next(error);
@@ -100,14 +123,18 @@ class patientAuthController implements IPatientAuthController {
   logout = async (req: Request, res: Response) => {
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict" as const,
+      secure: true,
+      sameSite: "none" as const,
       path: "/",
     };
+
     res.clearCookie("accessToken", cookieOptions);
     res.clearCookie("refreshToken", cookieOptions);
 
-    return ApiResponse.success(res, MESSAGES.AUTH.LOGOUT_SUCCESS);
+    return ApiResponse.success(
+      res,
+      MESSAGES.AUTH.LOGOUT_SUCCESS
+    );
   };
 }
 
