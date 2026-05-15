@@ -26,6 +26,7 @@ const app = express();
 app.set('trust proxy', 1);
 
 app.use((req, _res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url} - Origin: ${req.headers.origin}`);
   next();
 });
 
@@ -33,23 +34,7 @@ app.use(passport.initialize());
 
 app.use(cookieParser());
 app.use(cors({
-  origin: (origin, callback) => {
-
-    if (!origin || origin.endsWith('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      callback(null, true);
-    } else {
-      const allowedOrigins = [
-        process.env.FRONTEND_URL,
-        'https://med-sync-org-72v5.vercel.app'
-      ].filter(Boolean) as string[];
-      
-      if (allowedOrigins.some(o => origin.startsWith(o))) {
-        callback(null, true);
-      } else {
-        callback(null, false);
-      }
-    }
-  },
+  origin: true,
   credentials: true,
 }));
 

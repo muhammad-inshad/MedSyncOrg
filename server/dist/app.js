@@ -21,22 +21,13 @@ const { doctorAuthMiddleware } = doctorContainer();
 const app = express();
 app.set('trust proxy', 1);
 app.use((req, _res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url} - Origin: ${req.headers.origin}`);
     next();
 });
 app.use(passport.initialize());
 app.use(cookieParser());
 app.use(cors({
-    origin: (origin, callback) => {
-        const allowedOrigins = [
-            'https://med-sync-org-72v5.vercel.app'
-        ];
-        if (!origin || allowedOrigins.some(o => o && origin.startsWith(o))) {
-            callback(null, true);
-        }
-        else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: true,
     credentials: true,
 }));
 app.use("/api/payment/webhook", express.raw({ type: 'application/json' }));
