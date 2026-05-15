@@ -1,0 +1,26 @@
+import { z } from 'zod';
+export const DoctorResponseSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string().email(),
+    phone: z.string(),
+    address: z.string(),
+    specialization: z.string(),
+    qualification: z.string(),
+    experience: z.string(),
+    department: z.string(),
+    about: z.string(),
+    licence: z.string(),
+    profileImage: z.string(),
+    rating: z.number(),
+    reviewCount: z.number(),
+    isActive: z.boolean(),
+    salary: z.number(),
+    isAccountVerified: z.boolean(),
+    reviewStatus: z.enum(["pending", "approved", "revision", "rejected"]),
+    reapplyDate: z.union([z.date(), z.string()]).nullable().optional(), // Add .nullable()
+    hospital_id: z.string().nullable().optional(),
+    rejectionReason: z.string().optional(),
+    createdAt: z.union([z.date(), z.string()]),
+    updatedAt: z.union([z.date(), z.string()]),
+});
