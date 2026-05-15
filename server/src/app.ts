@@ -35,8 +35,6 @@ app.use(cookieParser());
 app.use(cors({
   origin: (origin, callback) => {
     const allowedOrigins = [
-      process.env.FRONTEND_URL,
-      'http://localhost:5173',
       'https://med-sync-org-72v5.vercel.app'
     ];
     if (!origin || allowedOrigins.some(o => o && origin.startsWith(o))) {
