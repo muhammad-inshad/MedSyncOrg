@@ -4,8 +4,6 @@ server/node_modules/
 .env
 server/.env
 client/.env
-dist/
-build/
 server/logs/
 *.log
 .vscode/
