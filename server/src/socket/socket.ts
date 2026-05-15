@@ -4,14 +4,33 @@ import { Server, Socket } from "socket.io";
 export const initSocket = (server: HTTPServer) => {
   const io = new Server(server, {
     cors: {
-      origin: [
-        process.env.FRONTEND_URL || 'http://localhost:5173',
-        'http://localhost:5173',
-        'https://med-sync-org-72v5.vercel.app'
-      ],
+      origin: (origin, callback) => {
+        const allowedOrigins = [
+          process.env.FRONTEND_URL,
+          'https://med-sync-org-72v5.vercel.app',
+          'http://localhost:5173'
+        ].filter(Boolean) as string[];
+
+        if (!origin || origin.endsWith('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+          callback(null, true);
+        } else {
+          const allowedOrigins = [
+            process.env.FRONTEND_URL,
+            'https://med-sync-org-72v5.vercel.app'
+          ].filter(Boolean) as string[];
+
+          if (allowedOrigins.some(o => origin.startsWith(o))) {
+            callback(null, true);
+          } else {
+            callback(null, false);
+          }
+        }
+      },
       methods: ["GET", "POST"],
       credentials: true
     },
+    transports: ["websocket", "polling"],
+    allowEIO3: true
   });
 
   io.on("connection", (socket: Socket) => {
