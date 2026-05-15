@@ -1,6 +1,6 @@
-import { IMapper } from "../interfaces/mapper.interface.ts";
-import { ISpecialization } from "../models/specialization.model.ts";
-import { SpecializationResponseDTO, SpecializationResponseSchema } from "../dto/hospital/specialization-response.dto.ts";
+import { IMapper } from "../interfaces/mapper.interface.js";
+import { ISpecialization } from "../models/specialization.model.js";
+import { SpecializationResponseDTO, SpecializationResponseSchema } from "../dto/hospital/specialization-response.dto.js";
 
 export class SpecializationMapper implements IMapper<ISpecialization, SpecializationResponseDTO> {
     toDTO(specialization: ISpecialization): SpecializationResponseDTO {

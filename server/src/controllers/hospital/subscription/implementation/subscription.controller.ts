@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { IHospitalSubscriptionService } from "../../../../services/hospital/subscription/interfaces/subscription.service.interface.ts";
-import { IHospitalSubscriptionController } from "../interfaces/subscription.controller.interface.ts";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
+import { IHospitalSubscriptionService } from "../../../../services/hospital/subscription/interfaces/subscription.service.interface.js";
+import { IHospitalSubscriptionController } from "../interfaces/subscription.controller.interface.js";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
 
 
 export class HospitalSubscriptionController implements IHospitalSubscriptionController {

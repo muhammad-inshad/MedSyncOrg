@@ -1,14 +1,14 @@
-import { generateOtp } from "../../../../utils/otp/otp.util.ts";
-import { UserRepository } from "../../../../repositories/patient/user.repository.ts";
-import { DoctorRepository } from "../../../../repositories/doctor/doctor.repository.ts";
-import { IPatientOtpAuthService } from "../interfaces/otp.auth.service.interface.ts";
-import { HttpStatusCode } from "../../../../constants/enums.ts";
-import { MESSAGES } from "../../../../constants/messages.ts";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { IEmailService } from "../interfaces/email.otp.interface.ts";
-import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.ts";
-import { IOtpRepository } from "../../../../repositories/otp/otp.repository.interface.ts";
-import { SuccessResponseDTO, SuccessResponseSchema } from "../../../../dto/auth/success-response.dto.ts";
+import { generateOtp } from "../../../../utils/otp/otp.util.js";
+import { UserRepository } from "../../../../repositories/patient/user.repository.js";
+import { DoctorRepository } from "../../../../repositories/doctor/doctor.repository.js";
+import { IPatientOtpAuthService } from "../interfaces/otp.auth.service.interface.js";
+import { HttpStatusCode } from "../../../../constants/enums.js";
+import { MESSAGES } from "../../../../constants/messages.js";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
+import { IEmailService } from "../interfaces/email.otp.interface.js";
+import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.js";
+import { IOtpRepository } from "../../../../repositories/otp/otp.repository.interface.js";
+import { SuccessResponseDTO, SuccessResponseSchema } from "../../../../dto/auth/success-response.dto.js";
 
 export class OtpService implements IPatientOtpAuthService {
   constructor(

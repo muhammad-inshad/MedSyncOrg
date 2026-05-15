@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { createCheckoutSession } from "../../services/payment/payment.service.ts";
-import { ApiResponse } from "../../utils/apiResponse.utils.ts";
+import { createCheckoutSession } from "../../services/payment/payment.service.js";
+import { ApiResponse } from "../../utils/apiResponse.utils.js";
 
-import logger from "../../utils/logger.ts";
+import logger from "../../utils/logger.js";
 
 export const checkoutPayment = async (req: Request, res: Response) => {
   try {
@@ -18,4 +18,4 @@ export const checkoutPayment = async (req: Request, res: Response) => {
    ApiResponse.internalServerError(res, "Failed to create checkout session");
    logger.error("Payment checkout error:", error);
   }
-};
+};

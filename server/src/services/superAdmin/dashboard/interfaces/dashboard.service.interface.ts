@@ -1,4 +1,4 @@
-import { ISuperAdmin } from "../../../../models/superAdmin.model.ts";
+import { ISuperAdmin } from "../../../../models/superAdmin.model.js";
 
 export interface IDashboardStats {
     totalHospitals: number;

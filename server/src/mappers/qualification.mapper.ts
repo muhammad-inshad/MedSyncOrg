@@ -1,6 +1,6 @@
-import { IMapper } from "../interfaces/mapper.interface.ts";
-import { IQualification } from "../models/qualification.model.ts";
-import { QualificationResponseDTO, QualificationResponseSchema } from "../dto/hospital/qualification-response.dto.ts";
+import { IMapper } from "../interfaces/mapper.interface.js";
+import { IQualification } from "../models/qualification.model.js";
+import { QualificationResponseDTO, QualificationResponseSchema } from "../dto/hospital/qualification-response.dto.js";
 
 export class QualificationMapper implements IMapper<IQualification, QualificationResponseDTO> {
     toDTO(qualification: IQualification): QualificationResponseDTO {

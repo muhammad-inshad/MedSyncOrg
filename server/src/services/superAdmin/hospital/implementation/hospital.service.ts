@@ -1,15 +1,15 @@
-import { ISuperAdminHospitalService, IHospitalManagementResult } from "../interfaces/hospital.service.interface.ts";
-import { HttpStatusCode } from "../../../../constants/enums.ts";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { IHospital } from "../../../../models/hospital.model.ts";
-import { uploadBufferToCloudinary } from "../../../../utils/cloudinaryUpload.ts";
-import { HospitalResponseDTO, HospitalStatusUpdateResponseDTO, HospitalStatusUpdateResponseSchema, CreateHospitalDTO, UpdateHospitalDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
-import { HospitalMapper } from "../../../../mappers/hospital.mapper.ts";
+import { ISuperAdminHospitalService, IHospitalManagementResult } from "../interfaces/hospital.service.interface.js";
+import { HttpStatusCode } from "../../../../constants/enums.js";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
+import { IHospital } from "../../../../models/hospital.model.js";
+import { uploadBufferToCloudinary } from "../../../../utils/cloudinaryUpload.js";
+import { HospitalResponseDTO, HospitalStatusUpdateResponseDTO, HospitalStatusUpdateResponseSchema, CreateHospitalDTO, UpdateHospitalDTO } from "../../../../dto/hospital/hospital-response.dto.js";
+import { HospitalMapper } from "../../../../mappers/hospital.mapper.js";
 import bcrypt from "bcryptjs";
-import { ISuperAdminKYCRepository } from "../../../../repositories/superAdmin/interfaces/superAdminkyc.repository.interface.ts";
-import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.ts";
-import { ISubscriptionRepository } from "../../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.ts";
-import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
+import { ISuperAdminKYCRepository } from "../../../../repositories/superAdmin/interfaces/superAdminkyc.repository.interface.js";
+import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.js";
+import { ISubscriptionRepository } from "../../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.js";
+import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.js";
 
 export class SuperAdminHospitalService implements ISuperAdminHospitalService {
     constructor(

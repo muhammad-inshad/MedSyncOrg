@@ -1,6 +1,6 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
-import { IDoctor } from "./doctor.model.ts";
-import { IPatient } from "./Patient.model.ts";
+import { IDoctor } from "./doctor.model.js";
+import { IPatient } from "./Patient.model.js";
 
 export enum AppointmentStatus {
   PENDING = "pending",

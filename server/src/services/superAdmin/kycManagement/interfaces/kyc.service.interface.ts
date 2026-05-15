@@ -1,4 +1,4 @@
-import { KycHospitalResponseDTO } from "../../../../dto/superAdmin/kyc/kyc-hospital-response.dto.ts";
+import { KycHospitalResponseDTO } from "../../../../dto/superAdmin/kyc/kyc-hospital-response.dto.js";
 
 export interface IKycHospitalsResult {
     data: KycHospitalResponseDTO[];

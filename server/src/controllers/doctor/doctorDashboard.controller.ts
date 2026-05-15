@@ -1,9 +1,9 @@
 import {  Request, Response } from "express";
-import { ApiResponse } from "../../utils/apiResponse.utils.ts";
-import { IdoctorDashbord } from "../../services/doctor/interfaces/doctorDashbord.service.interfaces.ts";
-import { HttpStatusCode } from "../../constants/enums.ts";
-import { AppError } from "../../errors/app.error.ts";
-import { ITokenPayload } from "../../dto/auth/token-payload.dto.ts";
+import { ApiResponse } from "../../utils/apiResponse.utils.js";
+import { IdoctorDashbord } from "../../services/doctor/interfaces/doctorDashbord.service.interfaces.js";
+import { HttpStatusCode } from "../../constants/enums.js";
+import { AppError } from "../../errors/app.error.js";
+import { ITokenPayload } from "../../dto/auth/token-payload.dto.js";
 
 
 export class DoctorDashboard{

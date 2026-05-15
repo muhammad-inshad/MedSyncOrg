@@ -1,6 +1,6 @@
-import { IMapper } from "../interfaces/mapper.interface.ts";
-import { IDepartment } from "../models/department.model.ts";
-import { DepartmentResponseDTO, DepartmentResponseSchema } from "../dto/hospital/department-response.dto.ts";
+import { IMapper } from "../interfaces/mapper.interface.js";
+import { IDepartment } from "../models/department.model.js";
+import { DepartmentResponseDTO, DepartmentResponseSchema } from "../dto/hospital/department-response.dto.js";
 
 export class DepartmentMapper implements IMapper<IDepartment, DepartmentResponseDTO> {
     toDTO(department: IDepartment): DepartmentResponseDTO {

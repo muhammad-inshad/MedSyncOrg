@@ -1,9 +1,9 @@
 import express from "express";
-import { upload } from "../middleware/multer.middleware.ts";
-import { hospitalContainer } from "../di/hospital.di.ts";
-import { departmentContiner } from "../di/department.di.ts";
-import { qualificationContainer } from "../di/qualification.di.ts";
-import { specializationContainer } from "../di/specialization.di.ts";
+import { upload } from "../middleware/multer.middleware.js";
+import { hospitalContainer } from "../di/hospital.di.js";
+import { departmentContiner } from "../di/department.di.js";
+import { qualificationContainer } from "../di/qualification.di.js";
+import { specializationContainer } from "../di/specialization.di.js";
 const router = express.Router();
 const { specializationManagement } = specializationContainer()
 const { qualificationManagement } = qualificationContainer()

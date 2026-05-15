@@ -1,8 +1,8 @@
-import { IMapper } from "../interfaces/mapper.interface.ts";
-import { IAppointment } from "../models/appointment.ts";
-import { AppointmentResponseDTO, AppointmentResponseSchema } from "../dto/appointment/appointment-response.dto.ts";
-import { IDoctor } from "../models/doctor.model.ts";
-import { IPatient } from "../models/Patient.model.ts";
+import { IMapper } from "../interfaces/mapper.interface.js";
+import { IAppointment } from "../models/appointment.js";
+import { AppointmentResponseDTO, AppointmentResponseSchema } from "../dto/appointment/appointment-response.dto.js";
+import { IDoctor } from "../models/doctor.model.js";
+import { IPatient } from "../models/Patient.model.js";
 
 export class AppointmentMapper implements IMapper<IAppointment, AppointmentResponseDTO> {
     toDTO(appointment: IAppointment): AppointmentResponseDTO {

@@ -1,15 +1,14 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
 import bcrypt from 'bcryptjs';
-import { Patient, IPatient } from '../models/Patient.model.ts';
-import { HospitalModel, IHospital } from '../models/hospital.model.ts';
-import { DoctorModel, IDoctor } from '../models/doctor.model.ts';
-import { Role } from '../constants/enums.ts';
-
+import { Patient, IPatient } from '../models/Patient.model.js';
+import { HospitalModel, IHospital } from '../models/hospital.model.js';
+import { DoctorModel, IDoctor } from '../models/doctor.model.js';
+import { Role } from '../constants/enums.js';
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID!,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-  callbackURL: "http://localhost:5000/api/auth/google/callback",
+  callbackURL: `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/google/callback`,
   passReqToCallback: true
 },
   async (req, _accessToken, _refreshToken, profile: Profile, done) => {

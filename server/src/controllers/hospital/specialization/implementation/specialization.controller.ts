@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { ISpecializationService } from "../../../../services/hospital/specialization/interfaces/specialization.service.interface.ts";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../../../constants/enums.ts";
-import logger from "../../../../utils/logger.ts";
+import { ISpecializationService } from "../../../../services/hospital/specialization/interfaces/specialization.service.interface.js";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
+import { HttpStatusCode } from "../../../../constants/enums.js";
+import logger from "../../../../utils/logger.js";
 
 
 export class SpecializationManagementController {

@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { ISuperAdminPatientManagementService } from "../../../../services/superAdmin/patient/interfaces/patient.management.service.interface.ts";
-import { ISuperAdminPatientManagementController } from "../interfaces/patient.management.controller.interface.ts";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../../../constants/enums.ts";
-import { MESSAGES } from "../../../../constants/messages.ts";
-import { AuthHOspitalPayload } from "../../../../dto/hospital/hospital-response.dto.ts";
-import { CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.ts";
+import { ISuperAdminPatientManagementService } from "../../../../services/superAdmin/patient/interfaces/patient.management.service.interface.js";
+import { ISuperAdminPatientManagementController } from "../interfaces/patient.management.controller.interface.js";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
+import { HttpStatusCode } from "../../../../constants/enums.js";
+import { MESSAGES } from "../../../../constants/messages.js";
+import { AuthHOspitalPayload } from "../../../../dto/hospital/hospital-response.dto.js";
+import { CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.js";
 
 export class SuperAdminPatientManagementController implements ISuperAdminPatientManagementController {
     constructor(private readonly _patientService: ISuperAdminPatientManagementService) { }

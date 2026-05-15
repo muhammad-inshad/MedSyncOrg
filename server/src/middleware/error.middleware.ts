@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { ApiResponse } from "../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../constants/enums.ts";
-import { MESSAGES } from "../constants/messages.ts";
-import logger from "../utils/logger.ts";
-import { AppError } from "../errors/app.error.ts";
+import { ApiResponse } from "../utils/apiResponse.utils.js";
+import { HttpStatusCode } from "../constants/enums.js";
+import { MESSAGES } from "../constants/messages.js";
+import logger from "../utils/logger.js";
+import { AppError } from "../errors/app.error.js";
 
 interface IError extends Error {
     statusCode?: number;

@@ -1,4 +1,4 @@
-import { SubscriptionResponseDTO } from "../../../../dto/subscription/subscription-response.dto.ts";
+import { SubscriptionResponseDTO } from "../../../../dto/subscription/subscription-response.dto.js";
 
 export interface IHospitalSubscriptionService {
     getActiveSubscriptions(page: number, limit: number, search: string): Promise<{ data: SubscriptionResponseDTO[]; total: number }>;

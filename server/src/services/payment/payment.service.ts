@@ -1,4 +1,4 @@
-import stripe from "../../config/stripe.ts";
+import stripe from "../../config/stripe.js";
 
 export const createCheckoutSession = async () => {
 

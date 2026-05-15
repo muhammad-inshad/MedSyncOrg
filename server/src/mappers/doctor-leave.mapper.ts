@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
-import { IMapper } from "../interfaces/mapper.interface.ts";
-import { IDoctorLeave } from "../models/doctorLeave.model.ts";
-import { DoctorLeaveResponseDTO, DoctorLeaveResponseSchema } from "../dto/doctor/doctor-leave-response.dto.ts";
+import { IMapper } from "../interfaces/mapper.interface.js";
+import { IDoctorLeave } from "../models/doctorLeave.model.js";
+import { DoctorLeaveResponseDTO, DoctorLeaveResponseSchema } from "../dto/doctor/doctor-leave-response.dto.js";
 
 export class DoctorLeaveMapper implements IMapper<IDoctorLeave, DoctorLeaveResponseDTO> {
     toDTO(leave: IDoctorLeave): DoctorLeaveResponseDTO {

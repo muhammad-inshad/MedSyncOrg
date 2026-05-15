@@ -1,11 +1,11 @@
 import mongoose, { ClientSession, FilterQuery, Types } from "mongoose";
-import { BaseRepository } from "../IBase/BaseRepository.ts";
+import { BaseRepository } from "../IBase/BaseRepository.js";
 import {
   IAppointment,
   AppointmentModel,
   AppointmentStatus,
-} from "../../models/appointment.ts";
-import { IAppointmentRepository } from "./appointment.repository.interface.ts";
+} from "../../models/appointment.js";
+import { IAppointmentRepository } from "./appointment.repository.interface.js";
 
 export class AppointmentRepository
   extends BaseRepository<IAppointment>

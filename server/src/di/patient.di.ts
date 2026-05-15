@@ -1,36 +1,36 @@
-import { UserRepository } from "../repositories/patient/user.repository.ts";
-import PatientController from "../controllers/patient/Patient.controller.ts";
-import { Patient } from "../models/Patient.model.ts";
-import { TokenService } from "../services/token/token.service.ts";
-import { HospitalRepository } from "../repositories/hospital/hospital.repository.ts";
-import { HospitalModel } from "../models/hospital.model.ts";
-import { PatientAuthMiddleware } from "../middleware/patient.auth.middleware.ts";
-import { DepartmentRepository } from "../repositories/hospital/implementation/department.repository.ts";
-import DepartmentModel from "../models/department.model.ts";
-import { DoctorRepository } from "../repositories/doctor/doctor.repository.ts";
-import { DoctorModel } from "../models/doctor.model.ts";
-import { AppointmentRepository } from "../repositories/appointment/appointment.repository.ts";
-import { QualificationRepository } from "../repositories/hospital/implementation/qualification.repository.ts";
-import QualificationModel from "../models/qualification.model.ts";
-import { SpecializationRepository } from "../repositories/hospital/implementation/specialization.repository.ts";
-import { PatientService } from "../services/patient/implementations/patient.service.ts";
-import { LiveTokenService } from "../services/patient/implementations/livetoken.service.ts";
-import { LiveTokenMapper } from "../mappers/livetoken.mapper.ts";
-import { PatientMapper } from "../mappers/patient.mapper.ts";
-import { HospitalMapper } from "../mappers/hospital.mapper.ts";
-import { DoctorMapper } from "../mappers/doctor.mapper.ts";
-import { AppointmentMapper } from "../mappers/appointment.mapper.ts";
-import { PrescriptionMapper } from "../mappers/prescription.mapper.ts";
-import {WalletRepository} from "../repositories/wallet/wallet.repository.ts"
-import { SubscriptionRepository } from "../repositories/superAdmin/subscription/implements/subscription.repository.ts";
-import {Wallet} from "../models/wallet.model.ts"
-import { LiveTokenController } from "../controllers/patient/LiveToken.controller.ts";
-import { PrescriptionRepository } from "../repositories/Prescription/prescription.repository.ts";
-import PrescriptionModel from "../models/prescription.model.ts";
-import { SlotRepository } from "../repositories/slot/slot.repository.ts";
-import { DoctorScheduleModel } from "../models/DoctorSlot.ts";
-import { SlotMapper } from "../mappers/slot.mapper.ts";
-import { HospitalDoctorConfigRepository } from "../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.ts";
+import { UserRepository } from "../repositories/patient/user.repository.js";
+import PatientController from "../controllers/patient/Patient.controller.js";
+import { Patient } from "../models/Patient.model.js";
+import { TokenService } from "../services/token/token.service.js";
+import { HospitalRepository } from "../repositories/hospital/hospital.repository.js";
+import { HospitalModel } from "../models/hospital.model.js";
+import { PatientAuthMiddleware } from "../middleware/patient.auth.middleware.js";
+import { DepartmentRepository } from "../repositories/hospital/implementation/department.repository.js";
+import DepartmentModel from "../models/department.model.js";
+import { DoctorRepository } from "../repositories/doctor/doctor.repository.js";
+import { DoctorModel } from "../models/doctor.model.js";
+import { AppointmentRepository } from "../repositories/appointment/appointment.repository.js";
+import { QualificationRepository } from "../repositories/hospital/implementation/qualification.repository.js";
+import QualificationModel from "../models/qualification.model.js";
+import { SpecializationRepository } from "../repositories/hospital/implementation/specialization.repository.js";
+import { PatientService } from "../services/patient/implementations/patient.service.js";
+import { LiveTokenService } from "../services/patient/implementations/livetoken.service.js";
+import { LiveTokenMapper } from "../mappers/livetoken.mapper.js";
+import { PatientMapper } from "../mappers/patient.mapper.js";
+import { HospitalMapper } from "../mappers/hospital.mapper.js";
+import { DoctorMapper } from "../mappers/doctor.mapper.js";
+import { AppointmentMapper } from "../mappers/appointment.mapper.js";
+import { PrescriptionMapper } from "../mappers/prescription.mapper.js";
+import {WalletRepository} from "../repositories/wallet/wallet.repository.js"
+import { SubscriptionRepository } from "../repositories/superAdmin/subscription/implements/subscription.repository.js";
+import {Wallet} from "../models/wallet.model.js"
+import { LiveTokenController } from "../controllers/patient/LiveToken.controller.js";
+import { PrescriptionRepository } from "../repositories/Prescription/prescription.repository.js";
+import PrescriptionModel from "../models/prescription.model.js";
+import { SlotRepository } from "../repositories/slot/slot.repository.js";
+import { DoctorScheduleModel } from "../models/DoctorSlot.js";
+import { SlotMapper } from "../mappers/slot.mapper.js";
+import { HospitalDoctorConfigRepository } from "../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.js";
 
 export const patientContainer = () => {
   const tokenService = new TokenService();

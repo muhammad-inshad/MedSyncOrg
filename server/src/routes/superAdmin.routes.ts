@@ -1,6 +1,6 @@
 import express from "express";
-import { superAdminContainer } from "../di/superAdmin.di.ts";
-import { upload } from "../middleware/multer.middleware.ts";
+import { superAdminContainer } from "../di/superAdmin.di.js";
+import { upload } from "../middleware/multer.middleware.js";
 
 const router = express.Router();
 const { dashboardController, hospitalController, kycController, patientManagementController, subscriptionController } = superAdminContainer();

@@ -1,4 +1,4 @@
-import { AppointmentResponseDTO } from "../../../../dto/appointment/appointment-response.dto.ts";
+import { AppointmentResponseDTO } from "../../../../dto/appointment/appointment-response.dto.js";
 
 export interface IDashbord {
   getDashboardStats(hospitalId:string): Promise<{

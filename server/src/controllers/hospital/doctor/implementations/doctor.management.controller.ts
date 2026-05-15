@@ -1,16 +1,16 @@
 import { NextFunction, Request, Response } from "express";
-import { IDoctorManagementService } from "../../../../services/hospital/doctor/interfaces/IDoctorManagementService.ts";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { IDoctorManagementController } from "../interfaces/doctor.management.controller.interface.ts";
-import { HttpStatusCode } from "../../../../constants/enums.ts";
-import { IDoctorFilter } from "../../../../types/hospital.types.ts";
-import { DoctorUploadFiles } from "../../../../types/doctor.types.ts";
-import { DoctorDTO } from "../../../../dto/auth/signup.dto.ts";
-import { MESSAGES } from "../../../../constants/messages.ts";
+import { IDoctorManagementService } from "../../../../services/hospital/doctor/interfaces/IDoctorManagementService.js";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
+import { IDoctorManagementController } from "../interfaces/doctor.management.controller.interface.js";
+import { HttpStatusCode } from "../../../../constants/enums.js";
+import { IDoctorFilter } from "../../../../types/hospital.types.js";
+import { DoctorUploadFiles } from "../../../../types/doctor.types.js";
+import { DoctorDTO } from "../../../../dto/auth/signup.dto.js";
+import { MESSAGES } from "../../../../constants/messages.js";
 import { FilterQuery } from 'mongoose';
-import { IDoctor } from "../../../../models/doctor.model.ts";
-import { ITokenPayload } from "../../../../services/token/token.service.interface.ts";
-import logger from "../../../../utils/logger.ts";
+import { IDoctor } from "../../../../models/doctor.model.js";
+import { ITokenPayload } from "../../../../services/token/token.service.interface.js";
+import logger from "../../../../utils/logger.js";
 
 export class DoctorManagementController implements IDoctorManagementController {
   constructor(private readonly _doctorManagementService: IDoctorManagementService) { }

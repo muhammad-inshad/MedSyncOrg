@@ -1,5 +1,5 @@
-import { IDoctorSchedule } from "../../models/DoctorSlot.ts";
-import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
+import { IDoctorSchedule } from "../../models/DoctorSlot.js";
+import { IBaseRepository } from "../IBase/IBaseRepository.interface.js";
 
 export interface ISlotRepository extends IBaseRepository<IDoctorSchedule>{
     findByDoctorId(doctorId: string): Promise<IDoctorSchedule[]>

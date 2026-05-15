@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { IDoctorSalaryService } from "../../../../services/hospital/doctor/interfaces/doctor.salary.service.interface.ts";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
+import { IDoctorSalaryService } from "../../../../services/hospital/doctor/interfaces/doctor.salary.service.interface.js";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
 
 export class DoctorSalaryController {
   constructor(private readonly _doctorSalaryService: IDoctorSalaryService) {}

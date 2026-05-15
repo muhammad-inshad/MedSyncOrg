@@ -1,5 +1,5 @@
-import { SuccessResponseDTO } from "../../../../dto/auth/success-response.dto.ts";
-import { OtpResponseDTO } from "../../../../dto/auth/otp-response.dto.ts";
+import { SuccessResponseDTO } from "../../../../dto/auth/success-response.dto.js";
+import { OtpResponseDTO } from "../../../../dto/auth/otp-response.dto.js";
 
 export type OtpData = {
   otp: string;

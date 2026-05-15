@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import logger from "../../utils/logger.ts";
+import logger from "../../utils/logger.js";
 
-import { HttpStatusCode } from "../../constants/enums.ts";
-import { DoctorUploadFiles } from "../../types/doctor.types.ts";
-import { ITokenPayload } from "../../services/token/token.service.interface.ts";
-import { ApiResponse } from "../../utils/apiResponse.utils.ts";
-import { IDoctorService } from "../../services/doctor/interfaces/doctor.service.interfaces.ts";
+import { HttpStatusCode } from "../../constants/enums.js";
+import { DoctorUploadFiles } from "../../types/doctor.types.js";
+import { ITokenPayload } from "../../services/token/token.service.interface.js";
+import { ApiResponse } from "../../utils/apiResponse.utils.js";
+import { IDoctorService } from "../../services/doctor/interfaces/doctor.service.interfaces.js";
 
 class DoctorController {
   constructor(private readonly _doctorService: IDoctorService) { }

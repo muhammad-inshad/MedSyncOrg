@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
-import { IDoctor } from "../../models/doctor.model.ts";
-import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
+import { IDoctor } from "../../models/doctor.model.js";
+import { IBaseRepository } from "../IBase/IBaseRepository.interface.js";
 
 
 export interface IDoctorRepository extends IBaseRepository<IDoctor> {

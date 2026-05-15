@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { IPatientManagementService } from "../../../../services/hospital/patient/interfaces/patient.management.service.interface.ts";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { IPatientManagementController } from "../interfaces/patient.management.controller.interface.ts";
-import { MESSAGES } from "../../../../constants/messages.ts";
-import { HttpStatusCode } from "../../../../constants/enums.ts";
-import { AuthHOspitalPayload } from "../../../../dto/hospital/hospital-response.dto.ts";
+import { IPatientManagementService } from "../../../../services/hospital/patient/interfaces/patient.management.service.interface.js";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
+import { IPatientManagementController } from "../interfaces/patient.management.controller.interface.js";
+import { MESSAGES } from "../../../../constants/messages.js";
+import { HttpStatusCode } from "../../../../constants/enums.js";
+import { AuthHOspitalPayload } from "../../../../dto/hospital/hospital-response.dto.js";
 
 export class PatientManagementController implements IPatientManagementController {
   constructor(private readonly _patientManagementService: IPatientManagementService) { }

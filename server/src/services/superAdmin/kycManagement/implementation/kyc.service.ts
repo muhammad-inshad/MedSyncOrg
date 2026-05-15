@@ -1,7 +1,7 @@
-import { ISuperAdminKycService, IKycHospitalsResult } from "../interfaces/kyc.service.interface.ts";
-import { IHospital } from "../../../../models/hospital.model.ts";
-import { KycHospitalMapper } from "../../../../mappers/kyc-hospital.mapper.ts";
-import { ISuperAdminKYCRepository } from "../../../../repositories/superAdmin/interfaces/superAdminkyc.repository.interface.ts";
+import { ISuperAdminKycService, IKycHospitalsResult } from "../interfaces/kyc.service.interface.js";
+import { IHospital } from "../../../../models/hospital.model.js";
+import { KycHospitalMapper } from "../../../../mappers/kyc-hospital.mapper.js";
+import { ISuperAdminKYCRepository } from "../../../../repositories/superAdmin/interfaces/superAdminkyc.repository.interface.js";
 
 
 export class SuperAdminKycService implements ISuperAdminKycService {

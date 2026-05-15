@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { Role } from "../constants/enums.ts";
+import { Role } from "../constants/enums.js";
 
 export interface IHospital extends Document {
   hospitalName: string;

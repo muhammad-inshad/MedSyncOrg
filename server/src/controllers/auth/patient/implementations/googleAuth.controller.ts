@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { ITokenService } from '../../../../services/token/token.service.interface.ts';
-import { IPatient } from '../../../../models/Patient.model.ts';
-import logger from '../../../../utils/logger.ts';
-
+import { ITokenService } from '../../../../services/token/token.service.interface.js';
+import { IPatient } from '../../../../models/Patient.model.js';
+import logger from '../../../../utils/logger.js';
 
 export class GoogleAuthController {
   private tokenService: ITokenService;
@@ -61,4 +60,4 @@ export class GoogleAuthController {
       next(error);
     }
   }
-}
+}

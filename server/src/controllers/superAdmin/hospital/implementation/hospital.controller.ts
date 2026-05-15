@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { ISuperAdminHospitalController } from "../interfaces/hospital.controller.interface.ts";
-import { ISuperAdminHospitalService } from "../../../../services/superAdmin/hospital/interfaces/hospital.service.interface.ts";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../../../constants/enums.ts";
-import { CreateHospitalDTO, UpdateHospitalDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
-import logger from "../../../../utils/logger.ts";
+import { ISuperAdminHospitalController } from "../interfaces/hospital.controller.interface.js";
+import { ISuperAdminHospitalService } from "../../../../services/superAdmin/hospital/interfaces/hospital.service.interface.js";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
+import { HttpStatusCode } from "../../../../constants/enums.js";
+import { CreateHospitalDTO, UpdateHospitalDTO } from "../../../../dto/hospital/hospital-response.dto.js";
+import logger from "../../../../utils/logger.js";
 
 
 export class SuperAdminHospitalController implements ISuperAdminHospitalController {

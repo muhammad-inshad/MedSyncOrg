@@ -1,8 +1,8 @@
-import { Igettoken } from "../interfaces/livetoken.service.interfaces.ts";
-import { IAppointmentRepository } from "../../../repositories/appointment/appointment.repository.interface.ts";
-import { IDoctor } from "../../../models/doctor.model.ts";
-import { LiveTokenResponseDTO } from "../../../dto/patient/livetoken-response.dto.ts";
-import { LiveTokenMapper } from "../../../mappers/livetoken.mapper.ts";
+import { Igettoken } from "../interfaces/livetoken.service.interfaces.js";
+import { IAppointmentRepository } from "../../../repositories/appointment/appointment.repository.interface.js";
+import { IDoctor } from "../../../models/doctor.model.js";
+import { LiveTokenResponseDTO } from "../../../dto/patient/livetoken-response.dto.js";
+import { LiveTokenMapper } from "../../../mappers/livetoken.mapper.js";
 import { Types } from "mongoose";
 
 export class LiveTokenService implements Igettoken {

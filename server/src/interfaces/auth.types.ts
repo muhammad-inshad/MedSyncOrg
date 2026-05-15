@@ -1,11 +1,11 @@
 
-import { IPatient } from "../models/Patient.model.ts";
-import { IHospital } from "../models/hospital.model.ts";
-import { IDoctor } from "../models/doctor.model.ts";
-import { PatientResponseDTO } from "../dto/patient/patient-response.dto.ts";
-import { DoctorResponseDTO } from "../dto/doctor/doctor-response.dto.ts";
-import { HospitalResponseDTO } from "../dto/hospital/hospital-response.dto.ts";
-import { SuperAdminResponseDTO } from "../dto/superAdmin/superAdmin-response.dto.ts";
+import { IPatient } from "../models/Patient.model.js";
+import { IHospital } from "../models/hospital.model.js";
+import { IDoctor } from "../models/doctor.model.js";
+import { PatientResponseDTO } from "../dto/patient/patient-response.dto.js";
+import { DoctorResponseDTO } from "../dto/doctor/doctor-response.dto.js";
+import { HospitalResponseDTO } from "../dto/hospital/hospital-response.dto.js";
+import { SuperAdminResponseDTO } from "../dto/superAdmin/superAdmin-response.dto.js";
 
 
 

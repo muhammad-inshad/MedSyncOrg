@@ -1,7 +1,7 @@
-import { IDoctorSchedule } from "../../models/DoctorSlot.ts";
-import { BaseRepository } from "../IBase/BaseRepository.ts";
+import { IDoctorSchedule } from "../../models/DoctorSlot.js";
+import { BaseRepository } from "../IBase/BaseRepository.js";
 import mongoose, { Model } from 'mongoose';
-import { ISlotRepository } from "./slot.repository.interface.ts";
+import { ISlotRepository } from "./slot.repository.interface.js";
 
 export class SlotRepository extends BaseRepository<IDoctorSchedule> implements ISlotRepository {
     constructor(model: Model<IDoctorSchedule>) {

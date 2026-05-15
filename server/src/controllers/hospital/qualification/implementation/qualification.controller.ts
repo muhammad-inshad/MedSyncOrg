@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { IQualificationService } from "../../../../services/hospital/qualification/interfaces/qualification.service.interface.ts";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../../../constants/enums.ts";
-import { IQualification } from "../../../../models/qualification.model.ts";
+import { IQualificationService } from "../../../../services/hospital/qualification/interfaces/qualification.service.interface.js";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
+import { HttpStatusCode } from "../../../../constants/enums.js";
+import { IQualification } from "../../../../models/qualification.model.js";
 
 export class QualificationManagementController {
     constructor(private readonly _qualificationService: IQualificationService) { }

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { patientContainer } from "../di/patient.di.ts";
+import { patientContainer } from "../di/patient.di.js";
 
 const { patientController,liveToken} = patientContainer();
 const router = Router();

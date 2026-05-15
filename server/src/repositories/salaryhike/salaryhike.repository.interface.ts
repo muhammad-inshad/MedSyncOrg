@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
-import { ISalaryRequest } from "../../models/SalaryRequest.model.ts";
-import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
+import { ISalaryRequest } from "../../models/SalaryRequest.model.js";
+import { IBaseRepository } from "../IBase/IBaseRepository.interface.js";
 
 export interface IsalaryRepository extends IBaseRepository<ISalaryRequest>{
   findDoctorId(doctorId: Types.ObjectId, hospitalId: Types.ObjectId): Promise<boolean>;

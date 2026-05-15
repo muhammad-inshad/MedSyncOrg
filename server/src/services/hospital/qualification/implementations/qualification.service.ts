@@ -1,11 +1,11 @@
-import { IQualification } from "../../../../models/qualification.model.ts";
-import { IQualificationRepository } from "../../../../repositories/hospital/qualification.repository.interface.ts";
-import { IQualificationService } from "../interfaces/qualification.service.interface.ts";
-import { ICloudinaryImageService } from "../../../image/interfaces/cloudinary.service.interface.ts";
-import { QualificationResponseDTO } from "../../../../dto/hospital/qualification-response.dto.ts";
-import { QualificationMapper } from "../../../../mappers/qualification.mapper.ts";
+import { IQualification } from "../../../../models/qualification.model.js";
+import { IQualificationRepository } from "../../../../repositories/hospital/qualification.repository.interface.js";
+import { IQualificationService } from "../interfaces/qualification.service.interface.js";
+import { ICloudinaryImageService } from "../../../image/interfaces/cloudinary.service.interface.js";
+import { QualificationResponseDTO } from "../../../../dto/hospital/qualification-response.dto.js";
+import { QualificationMapper } from "../../../../mappers/qualification.mapper.js";
 import { Types } from "mongoose";
-import { IQualificationFilter } from "../../../../types/hospital.types.ts";
+import { IQualificationFilter } from "../../../../types/hospital.types.js";
 
 export class QualificationService implements IQualificationService {
     constructor(

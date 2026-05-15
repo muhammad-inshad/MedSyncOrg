@@ -1,5 +1,5 @@
-import { IAppointmentCheckoutData } from "../../../dto/appointment/appointment.dto.ts";
-import { CheckoutResponseDTO } from "../../../dto/payment/checkout-response.dto.ts";
+import { IAppointmentCheckoutData } from "../../../dto/appointment/appointment.dto.js";
+import { CheckoutResponseDTO } from "../../../dto/payment/checkout-response.dto.js";
 
 export interface IPaymentService {
     createCheckoutSession(planId: string, hospitalId: string): Promise<CheckoutResponseDTO>;

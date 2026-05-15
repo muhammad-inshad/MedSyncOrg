@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
-import { HttpStatusCode } from "../constants/enums.ts";
+import { HttpStatusCode } from "../constants/enums.js";
 
-import { ITokenService } from "../services/token/token.service.interface.ts";
+import { ITokenService } from "../services/token/token.service.interface.js";
 
-import { IDoctorRepository } from "../repositories/doctor/doctor.repository.interface.ts";
-import logger from "../utils/logger.ts";
+import { IDoctorRepository } from "../repositories/doctor/doctor.repository.interface.js";
+import logger from "../utils/logger.js";
 
 export class DoctorAuthMiddleware {
   constructor(

@@ -1,4 +1,4 @@
-import { PatientResponseDTO, CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.ts";
+import { PatientResponseDTO, CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.js";
 
 export interface IPatientManagementService {
   addPatient(patientData: CreatePatientDTO, hospital_id: string, patientFile?: Express.Multer.File): Promise<PatientResponseDTO>;

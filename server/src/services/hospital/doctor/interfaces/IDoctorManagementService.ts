@@ -1,8 +1,8 @@
-import { IPaginationResult, IDoctorListOptions } from "../../../../types/hospital.types.ts";
-import { DoctorDTO } from "../../../../dto/auth/signup.dto.ts";
-import { DoctorUploadFiles } from "../../../../types/doctor.types.ts";
-import { DeptSpecQualResponse, DoctorResponseDTO, UpdateDoctorDTO } from "../../../../dto/doctor/doctor-response.dto.ts";
-import { DoctorLeaveResponseDTO } from "../../../../dto/doctor/doctor-leave-response.dto.ts";
+import { IPaginationResult, IDoctorListOptions } from "../../../../types/hospital.types.js";
+import { DoctorDTO } from "../../../../dto/auth/signup.dto.js";
+import { DoctorUploadFiles } from "../../../../types/doctor.types.js";
+import { DeptSpecQualResponse, DoctorResponseDTO, UpdateDoctorDTO } from "../../../../dto/doctor/doctor-response.dto.js";
+import { DoctorLeaveResponseDTO } from "../../../../dto/doctor/doctor-leave-response.dto.js";
 
 export interface IDoctorManagementService {
     getAllDoctors(options: IDoctorListOptions): Promise<IPaginationResult<DoctorResponseDTO>>;

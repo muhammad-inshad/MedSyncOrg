@@ -1,6 +1,6 @@
-import { IHospital } from "../../../../models/hospital.model.ts";
-import { ISubscription } from "../../../../models/subscription.ts";
-import { IBaseRepository } from "../../../IBase/IBaseRepository.interface.ts";
+import { IHospital } from "../../../../models/hospital.model.js";
+import { ISubscription } from "../../../../models/subscription.js";
+import { IBaseRepository } from "../../../IBase/IBaseRepository.interface.js";
 
 export interface ISubscriptionRepository extends IBaseRepository<ISubscription> {
     findAllWithPagination(skip: number, limit: number, search: string, status: string): Promise<ISubscription[]>;

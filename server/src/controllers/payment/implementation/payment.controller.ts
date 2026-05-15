@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { IPaymentController } from "../interfaces/payment.controller.interface.ts";
-import { IPaymentService } from "../../../services/payment/interfaces/payment.service.interface.ts";
-import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../../constants/enums.ts";
-import { AppError } from "../../../errors/app.error.ts";
-import { ITokenService } from "../../../services/token/token.service.interface.ts";
-import logger from "../../../utils/logger.ts";
+import { IPaymentController } from "../interfaces/payment.controller.interface.js";
+import { IPaymentService } from "../../../services/payment/interfaces/payment.service.interface.js";
+import { ApiResponse } from "../../../utils/apiResponse.utils.js";
+import { HttpStatusCode } from "../../../constants/enums.js";
+import { AppError } from "../../../errors/app.error.js";
+import { ITokenService } from "../../../services/token/token.service.interface.js";
+import logger from "../../../utils/logger.js";
 
 
 export class PaymentController implements IPaymentController {

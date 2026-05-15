@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 
-import { IDoctorAuthService } from "../../../services/auth/doctor/doctor.auth.service.interface.ts";
-import { DoctorUploadFiles } from "../../../types/doctor.types.ts";
-import { DoctorSignupDTO, LoginDTO } from "../../../dto/auth/signup.dto.ts";
-import { MESSAGES } from "../../../constants/messages.ts";
-import { IDoctorAuthController } from "./doctor.auth.controller.interface.ts";
-import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
+import { IDoctorAuthService } from "../../../services/auth/doctor/doctor.auth.service.interface.js";
+import { DoctorUploadFiles } from "../../../types/doctor.types.js";
+import { DoctorSignupDTO, LoginDTO } from "../../../dto/auth/signup.dto.js";
+import { MESSAGES } from "../../../constants/messages.js";
+import { IDoctorAuthController } from "./doctor.auth.controller.interface.js";
+import { ApiResponse } from "../../../utils/apiResponse.utils.js";
 
 export class DoctorAuthController implements IDoctorAuthController {
   constructor(private readonly _doctorAuthService: IDoctorAuthService) { }

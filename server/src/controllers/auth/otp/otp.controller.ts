@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { IPatientOtpAuthController } from "./otp.auth.controller.interface.ts";
-import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../../constants/enums.ts";
-import { IPatientOtpAuthService } from "../../../services/auth/otp/interfaces/otp.auth.service.interface.ts";
-import { MESSAGES } from "../../../constants/messages.ts";
+import { IPatientOtpAuthController } from "./otp.auth.controller.interface.js";
+import { ApiResponse } from "../../../utils/apiResponse.utils.js";
+import { HttpStatusCode } from "../../../constants/enums.js";
+import { IPatientOtpAuthService } from "../../../services/auth/otp/interfaces/otp.auth.service.interface.js";
+import { MESSAGES } from "../../../constants/messages.js";
 
 export default class OtpController implements IPatientOtpAuthController {
   constructor(private readonly otpService: IPatientOtpAuthService) { }

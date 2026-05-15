@@ -1,5 +1,5 @@
-import { SalaryHikeRequestinterface } from "../../../dto/doctor/doctor-response.dto.ts";
-import { ISalaryRequest } from "../../../models/SalaryRequest.model.ts";
+import { SalaryHikeRequestinterface } from "../../../dto/doctor/doctor-response.dto.js";
+import { ISalaryRequest } from "../../../models/SalaryRequest.model.js";
 
 
 export interface IdoctorDashbord{

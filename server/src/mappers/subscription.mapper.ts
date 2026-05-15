@@ -1,6 +1,6 @@
-import { IMapper } from "../interfaces/mapper.interface.ts";
-import { ISubscription } from "../models/subscription.ts";
-import { SubscriptionResponseDTO, SubscriptionResponseSchema } from "../dto/subscription/subscription-response.dto.ts";
+import { IMapper } from "../interfaces/mapper.interface.js";
+import { ISubscription } from "../models/subscription.js";
+import { SubscriptionResponseDTO, SubscriptionResponseSchema } from "../dto/subscription/subscription-response.dto.js";
 
 export class SubscriptionMapper implements IMapper<ISubscription, SubscriptionResponseDTO> {
  toDTO(subscription: ISubscription): SubscriptionResponseDTO {

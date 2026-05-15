@@ -1,6 +1,6 @@
-import { IMapper } from "../interfaces/mapper.interface.ts";
-import { IHospital } from "../models/hospital.model.ts";
-import { HospitalResponseDTO, HospitalResponseSchema } from "../dto/hospital/hospital-response.dto.ts";
+import { IMapper } from "../interfaces/mapper.interface.js";
+import { IHospital } from "../models/hospital.model.js";
+import { HospitalResponseDTO, HospitalResponseSchema } from "../dto/hospital/hospital-response.dto.js";
 import z from "zod";
 
 export class HospitalMapper implements IMapper<IHospital, HospitalResponseDTO> {

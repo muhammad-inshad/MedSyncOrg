@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { IDepartmentService } from "../../../../services/hospital/department/interfaces/department.service.interface.ts";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../../../constants/enums.ts";
-import { IDepartment } from "../../../../models/department.model.ts";
-import logger from "../../../../utils/logger.ts";
+import { IDepartmentService } from "../../../../services/hospital/department/interfaces/department.service.interface.js";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
+import { HttpStatusCode } from "../../../../constants/enums.js";
+import { IDepartment } from "../../../../models/department.model.js";
+import logger from "../../../../utils/logger.js";
 
 
 export class DepartmentManagementController {

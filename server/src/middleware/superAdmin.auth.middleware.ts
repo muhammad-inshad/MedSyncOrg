@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { HttpStatusCode } from "../constants/enums.ts";
+import { HttpStatusCode } from "../constants/enums.js";
 
-import logger from "../utils/logger.ts";
-import { superAdminContainer } from "../di/superAdmin.di.ts";
+import logger from "../utils/logger.js";
+import { superAdminContainer } from "../di/superAdmin.di.js";
 const { tokenService } = superAdminContainer();
 
 export function superAdminAuthMiddleware(req: Request, res: Response, next: NextFunction) {

@@ -1,7 +1,7 @@
 import express from "express";
-import { paymentContainer } from "../di/payment.di.ts";
-import { hospitalContainer } from "../di/hospital.di.ts";
-import { patientContainer } from "../di/patient.di.ts";
+import { paymentContainer } from "../di/payment.di.js";
+import { hospitalContainer } from "../di/hospital.di.js";
+import { patientContainer } from "../di/patient.di.js";
 
 const router = express.Router();
 const { paymentController } = paymentContainer();

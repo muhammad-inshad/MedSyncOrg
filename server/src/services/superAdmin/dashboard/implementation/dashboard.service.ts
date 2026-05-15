@@ -1,10 +1,10 @@
-import { ISuperAdminDashboardService, IDashboardStats } from "../interfaces/dashboard.service.interface.ts";
-import { ISuperAdmin } from "../../../../models/superAdmin.model.ts";
-import { ISuperAdminRepository } from "../../../../repositories/superAdmin/interfaces/superAdmin.repository.interface.ts";
-import { ISuperAdminKYCRepository } from "../../../../repositories/superAdmin/interfaces/superAdminkyc.repository.interface.ts";
-import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
-import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
-import { IWalletRepository } from "../../../../repositories/wallet/wallet.repository.interface.ts";
+import { ISuperAdminDashboardService, IDashboardStats } from "../interfaces/dashboard.service.interface.js";
+import { ISuperAdmin } from "../../../../models/superAdmin.model.js";
+import { ISuperAdminRepository } from "../../../../repositories/superAdmin/interfaces/superAdmin.repository.interface.js";
+import { ISuperAdminKYCRepository } from "../../../../repositories/superAdmin/interfaces/superAdminkyc.repository.interface.js";
+import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.js";
+import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.js";
+import { IWalletRepository } from "../../../../repositories/wallet/wallet.repository.interface.js";
 import { Types } from "mongoose";
 
 export class SuperAdminDashboardService implements ISuperAdminDashboardService {

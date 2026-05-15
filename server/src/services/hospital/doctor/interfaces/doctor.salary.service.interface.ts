@@ -1,4 +1,4 @@
-import { ISalaryRequest } from "../../../../models/SalaryRequest.model.ts";
+import { ISalaryRequest } from "../../../../models/SalaryRequest.model.js";
 
 export interface IDoctorSalaryService {
     getDoctorSalaryRequests(

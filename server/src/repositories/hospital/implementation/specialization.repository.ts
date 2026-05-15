@@ -1,7 +1,7 @@
-import { BaseRepository } from "../../IBase/BaseRepository.ts";
-import { ISpecialization } from "../../../models/specialization.model.ts";
-import { ISpecializationRepository } from "../specialization.repository.interface.ts";
-import Specialization from "../../../models/specialization.model.ts";
+import { BaseRepository } from "../../IBase/BaseRepository.js";
+import { ISpecialization } from "../../../models/specialization.model.js";
+import { ISpecializationRepository } from "../specialization.repository.interface.js";
+import Specialization from "../../../models/specialization.model.js";
 import { Types } from "mongoose";
 
 export class SpecializationRepository extends BaseRepository<ISpecialization> implements ISpecializationRepository {

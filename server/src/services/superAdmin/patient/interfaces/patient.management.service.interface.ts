@@ -1,5 +1,5 @@
-import { IPaginationResult } from "../../../../types/hospital.types.ts";
-import { PatientResponseDTO, CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.ts";
+import { IPaginationResult } from "../../../../types/hospital.types.js";
+import { PatientResponseDTO, CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.js";
 
 export interface ISuperAdminPatientManagementService {
     getAllPatients(options: { page: number; limit: number; search?: string; status?: string }): Promise<IPaginationResult<PatientResponseDTO>>;

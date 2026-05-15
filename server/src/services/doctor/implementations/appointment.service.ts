@@ -1,16 +1,16 @@
-import { IAppointmentRepository } from "../../../repositories/appointment/appointment.repository.interface.ts";
-import { IAppointments } from "../interfaces/appointment.service.interfaces.ts";
-import { AppointmentStatus } from "../../../models/appointment.ts";
-import { IPrescriptionData } from "../../../dto/appointment/appointment.dto.ts";
-import { IMapper } from "../../../interfaces/mapper.interface.ts";
-import { IAppointment } from "../../../models/appointment.ts";
-import { AppointmentResponseDTO } from "../../../dto/appointment/appointment-response.dto.ts";
-import { IPrescriptionRepository } from "../../../repositories/Prescription/prescription.repository.interface.ts";
-import { IWalletRepository } from "../../../repositories/wallet/wallet.repository.interface.ts";
-import { IHospitalDoctorConfigRepository } from "../../../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.interface.ts";
+import { IAppointmentRepository } from "../../../repositories/appointment/appointment.repository.interface.js";
+import { IAppointments } from "../interfaces/appointment.service.interfaces.js";
+import { AppointmentStatus } from "../../../models/appointment.js";
+import { IPrescriptionData } from "../../../dto/appointment/appointment.dto.js";
+import { IMapper } from "../../../interfaces/mapper.interface.js";
+import { IAppointment } from "../../../models/appointment.js";
+import { AppointmentResponseDTO } from "../../../dto/appointment/appointment-response.dto.js";
+import { IPrescriptionRepository } from "../../../repositories/Prescription/prescription.repository.interface.js";
+import { IWalletRepository } from "../../../repositories/wallet/wallet.repository.interface.js";
+import { IHospitalDoctorConfigRepository } from "../../../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.interface.js";
 import { Types } from "mongoose";
-import { PrescriptionMapper } from "../../../mappers/prescription.mapper.ts";
-import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-response.dto.ts";
+import { PrescriptionMapper } from "../../../mappers/prescription.mapper.js";
+import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-response.dto.js";
 
 export class AppointmentService implements IAppointments {
   constructor(

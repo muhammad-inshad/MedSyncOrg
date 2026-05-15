@@ -1,12 +1,12 @@
-import { PatientResponseDTO } from "../../../dto/patient/patient-response.dto.ts";
-import { HospitalResponseDTO, selectedHospitalDto } from "../../../dto/hospital/hospital-response.dto.ts";
-import { DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.ts";
-import { AppointmentResponseDTO } from "../../../dto/appointment/appointment-response.dto.ts";
-import { IAppointment } from "../../../models/appointment.ts";
-import { IPatient } from "../../../models/Patient.model.ts";
-import { IPaginationResult } from "../../../types/hospital.types.ts";
-import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-response.dto.ts";
-import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.ts";
+import { PatientResponseDTO } from "../../../dto/patient/patient-response.dto.js";
+import { HospitalResponseDTO, selectedHospitalDto } from "../../../dto/hospital/hospital-response.dto.js";
+import { DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.js";
+import { AppointmentResponseDTO } from "../../../dto/appointment/appointment-response.dto.js";
+import { IAppointment } from "../../../models/appointment.js";
+import { IPatient } from "../../../models/Patient.model.js";
+import { IPaginationResult } from "../../../types/hospital.types.js";
+import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-response.dto.js";
+import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.js";
 
 export interface IPatientService {
   getProfile(userId: string): Promise<PatientResponseDTO | null>;

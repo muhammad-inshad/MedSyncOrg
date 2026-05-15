@@ -1,11 +1,11 @@
-import { ISubscriptionRepository } from "../../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.ts";
-import { ISubscriptionService, ISubscriptionResult } from "../interfaces/subscription.service.interface.ts";
-import { SubscriptionMapper } from "../../../../mappers/subscription.mapper.ts";
-import { UpdateSubscriptionDTO, SubscriptionResponseDTO, CreateSubscription } from "../../../../dto/subscription/subscription-response.dto.ts";
-import { ISubscription } from "../../../../models/subscription.ts";
-import { HospitalResponseDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
-import { HospitalMapper } from "../../../../mappers/hospital.mapper.ts";
-import { IsubscriptionFilter } from "../../../../types/hospital.types.ts";
+import { ISubscriptionRepository } from "../../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.js";
+import { ISubscriptionService, ISubscriptionResult } from "../interfaces/subscription.service.interface.js";
+import { SubscriptionMapper } from "../../../../mappers/subscription.mapper.js";
+import { UpdateSubscriptionDTO, SubscriptionResponseDTO, CreateSubscription } from "../../../../dto/subscription/subscription-response.dto.js";
+import { ISubscription } from "../../../../models/subscription.js";
+import { HospitalResponseDTO } from "../../../../dto/hospital/hospital-response.dto.js";
+import { HospitalMapper } from "../../../../mappers/hospital.mapper.js";
+import { IsubscriptionFilter } from "../../../../types/hospital.types.js";
 
 export class SubscriptionService implements ISubscriptionService {
     constructor(

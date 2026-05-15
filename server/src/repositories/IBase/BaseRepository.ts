@@ -1,5 +1,5 @@
     import { Model, Document, FilterQuery, UpdateQuery, ClientSession } from 'mongoose';
-    import { IBaseRepository } from './IBaseRepository.interface.ts';
+    import { IBaseRepository } from './IBaseRepository.interface.js';
 
     export class BaseRepository<T extends Document> implements IBaseRepository<T> {
         constructor(protected readonly model: Model<T>) { }

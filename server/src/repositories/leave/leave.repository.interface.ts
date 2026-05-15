@@ -1,5 +1,5 @@
-import { IDoctorLeave } from "../../models/doctorLeave.model.ts";
-import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
+import { IDoctorLeave } from "../../models/doctorLeave.model.js";
+import { IBaseRepository } from "../IBase/IBaseRepository.interface.js";
 
 export interface ILeaveRepository extends IBaseRepository<IDoctorLeave> {
     findDoctorLeaves(options: {

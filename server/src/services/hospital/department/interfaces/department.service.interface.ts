@@ -1,5 +1,5 @@
-import { DepartmentResponseDTO } from "../../../../dto/hospital/department-response.dto.ts";
-import { IDepartment } from "../../../../models/department.model.ts";
+import { DepartmentResponseDTO } from "../../../../dto/hospital/department-response.dto.js";
+import { IDepartment } from "../../../../models/department.model.js";
 
 export interface IDepartmentService {
     getDepartments(hospitalId: string, page: number, limit: number, search?: string, filter?: "all" | "active" | "blocked" | undefined): Promise<{ data: DepartmentResponseDTO[]; total: number; page: number; limit: number }>;

@@ -1,12 +1,12 @@
 import { Types } from "mongoose";
-import { SalaryHikeRequestinterface } from "../../../dto/doctor/doctor-response.dto.ts";
-import { IsalaryRepository } from "../../../repositories/salaryhike/salaryhike.repository.interface.ts";
-import { IdoctorDashbord } from "../interfaces/doctorDashbord.service.interfaces.ts";
-import { HttpStatusCode } from "../../../constants/enums.ts";
-import { AppError } from "../../../errors/app.error.ts";
-import { IDoctorRepository } from "../../../repositories/doctor/doctor.repository.interface.ts";
-import { ISalaryRequest } from "../../../models/SalaryRequest.model.ts";
-import { IWalletRepository } from "../../../repositories/wallet/wallet.repository.interface.ts";
+import { SalaryHikeRequestinterface } from "../../../dto/doctor/doctor-response.dto.js";
+import { IsalaryRepository } from "../../../repositories/salaryhike/salaryhike.repository.interface.js";
+import { IdoctorDashbord } from "../interfaces/doctorDashbord.service.interfaces.js";
+import { HttpStatusCode } from "../../../constants/enums.js";
+import { AppError } from "../../../errors/app.error.js";
+import { IDoctorRepository } from "../../../repositories/doctor/doctor.repository.interface.js";
+import { ISalaryRequest } from "../../../models/SalaryRequest.model.js";
+import { IWalletRepository } from "../../../repositories/wallet/wallet.repository.interface.js";
 
 
 export class DoctorDashboardService implements IdoctorDashbord{

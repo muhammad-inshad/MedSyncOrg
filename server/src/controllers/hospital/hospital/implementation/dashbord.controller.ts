@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
-import { MESSAGES } from "../../../../constants/messages.ts";
-import { IDashbord } from "../../../../services/hospital/hospital/interfaces/dashbord.services.interfaces.ts";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
+import { MESSAGES } from "../../../../constants/messages.js";
+import { IDashbord } from "../../../../services/hospital/hospital/interfaces/dashbord.services.interfaces.js";
 
 export class Dashbord {
   constructor(private readonly _dashbord: IDashbord) {}

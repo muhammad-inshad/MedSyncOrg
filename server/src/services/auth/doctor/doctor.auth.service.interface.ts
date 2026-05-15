@@ -1,11 +1,11 @@
-import { DoctorDTO, LoginDTO } from "../../../dto/auth/signup.dto.ts";
-import { DoctorUploadFiles } from "../../../types/doctor.types.ts";
-import { AuthTokens } from "../../../interfaces/auth.types.ts";
-import { DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.ts";
-import { HospitalResponseDTO } from "../../../dto/hospital/hospital-response.dto.ts";
-import { DepartmentResponseDTO } from "../../../dto/hospital/department-response.dto.ts";
-import { QualificationResponseDTO } from "../../../dto/hospital/qualification-response.dto.ts";
-import { SpecializationResponseDTO } from "../../../dto/hospital/specialization-response.dto.ts";
+import { DoctorDTO, LoginDTO } from "../../../dto/auth/signup.dto.js";
+import { DoctorUploadFiles } from "../../../types/doctor.types.js";
+import { AuthTokens } from "../../../interfaces/auth.types.js";
+import { DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.js";
+import { HospitalResponseDTO } from "../../../dto/hospital/hospital-response.dto.js";
+import { DepartmentResponseDTO } from "../../../dto/hospital/department-response.dto.js";
+import { QualificationResponseDTO } from "../../../dto/hospital/qualification-response.dto.js";
+import { SpecializationResponseDTO } from "../../../dto/hospital/specialization-response.dto.js";
 
 export interface DoctorAuthResponse extends AuthTokens {
     user: DoctorResponseDTO;

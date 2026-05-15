@@ -1,4 +1,4 @@
-import { IHospital } from "../models/hospital.model.ts";
+import { IHospital } from "../models/hospital.model.js";
 
 export interface IDashboardStats {
     doctorCount: number;

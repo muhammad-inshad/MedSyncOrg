@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { userContainer } from '../di/auth.di.ts';
-import { doctorContainer } from '../di/doctor.di.ts';
-import { hospitalContainer } from "../di/hospital.di.ts";
-import { upload } from "../middleware/multer.middleware.ts";
-import { superAdminContainer } from "../di/superAdmin.di.ts";
+import { userContainer } from '../di/auth.di.js';
+import { doctorContainer } from '../di/doctor.di.js';
+import { hospitalContainer } from "../di/hospital.di.js";
+import { upload } from "../middleware/multer.middleware.js";
+import { superAdminContainer } from "../di/superAdmin.di.js";
 import passport from 'passport';
 
 
@@ -38,7 +38,10 @@ router.get('/google', (req, res, next) => {
   })(req, res, next);
 });
 router.get('/google/callback',
-  passport.authenticate('google', { session: false, failureRedirect: '/login' }),
+  passport.authenticate('google', { 
+    session: false, 
+    failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=auth_failed` 
+  }),
   googleAuthController.handleCallback.bind(googleAuthController)
 );
 

@@ -1,13 +1,13 @@
-import { HospitalRepository } from "../repositories/hospital/hospital.repository.ts";
-import { HospitalModel } from "../models/hospital.model.ts";
-import { SubscriptionRepository } from "../repositories/superAdmin/subscription/implements/subscription.repository.ts";
-import { PaymentService } from "../services/payment/implementation/payment.service.ts";
-import { PaymentController } from "../controllers/payment/implementation/payment.controller.ts";
-import { PaymentMapper } from "../mappers/payment.mapper.ts";
-import { TokenService } from "../services/token/token.service.ts";
-import { patientContainer } from "./patient.di.ts";
-import { WalletRepository } from "../repositories/wallet/wallet.repository.ts";
-import { Wallet } from "../models/wallet.model.ts";
+import { HospitalRepository } from "../repositories/hospital/hospital.repository.js";
+import { HospitalModel } from "../models/hospital.model.js";
+import { SubscriptionRepository } from "../repositories/superAdmin/subscription/implements/subscription.repository.js";
+import { PaymentService } from "../services/payment/implementation/payment.service.js";
+import { PaymentController } from "../controllers/payment/implementation/payment.controller.js";
+import { PaymentMapper } from "../mappers/payment.mapper.js";
+import { TokenService } from "../services/token/token.service.js";
+import { patientContainer } from "./patient.di.js";
+import { WalletRepository } from "../repositories/wallet/wallet.repository.js";
+import { Wallet } from "../models/wallet.model.js";
 
 export const paymentContainer = () => {
     const hospitalRepo = new HospitalRepository(HospitalModel);

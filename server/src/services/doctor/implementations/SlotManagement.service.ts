@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import { CreateDoctorSchedulePayload } from "../../../dto/doctor/doctor-response.dto.ts";
-import { SlotMapper } from "../../../mappers/slot.mapper.ts";
-import { ISlotRepository } from "../../../repositories/slot/slot.repository.interface.ts";
-import { ISlotMangement } from "../interfaces/slotMangement.service.interfaces.ts";
-import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.ts";
-import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../../constants/enums.ts";
+import { CreateDoctorSchedulePayload } from "../../../dto/doctor/doctor-response.dto.js";
+import { SlotMapper } from "../../../mappers/slot.mapper.js";
+import { ISlotRepository } from "../../../repositories/slot/slot.repository.interface.js";
+import { ISlotMangement } from "../interfaces/slotMangement.service.interfaces.js";
+import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.js";
+import { ApiResponse } from "../../../utils/apiResponse.utils.js";
+import { HttpStatusCode } from "../../../constants/enums.js";
 
 export class SlotMangementService implements ISlotMangement {
     constructor(

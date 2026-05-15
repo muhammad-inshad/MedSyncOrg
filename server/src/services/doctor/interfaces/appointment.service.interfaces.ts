@@ -1,7 +1,7 @@
-import { AppointmentResponseDTO } from "../../../dto/appointment/appointment-response.dto.ts";
-import { IPrescriptionData } from "../../../dto/appointment/appointment.dto.ts";
-import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-response.dto.ts";
-import { AppointmentStatus } from "../../../models/appointment.ts";
+import { AppointmentResponseDTO } from "../../../dto/appointment/appointment-response.dto.js";
+import { IPrescriptionData } from "../../../dto/appointment/appointment.dto.js";
+import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-response.dto.js";
+import { AppointmentStatus } from "../../../models/appointment.js";
 
 export interface IAppointments {
     getUpcomingAppointments(

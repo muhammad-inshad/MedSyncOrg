@@ -1,4 +1,4 @@
-import { CheckoutResponseDTO, CheckoutResponseSchema } from "../dto/payment/checkout-response.dto.ts";
+import { CheckoutResponseDTO, CheckoutResponseSchema } from "../dto/payment/checkout-response.dto.js";
 
 export class PaymentMapper {
     toCheckoutDTO(url: string | null): CheckoutResponseDTO {

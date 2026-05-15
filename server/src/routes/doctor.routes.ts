@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { doctorContainer } from "../di/doctor.di.ts";
-import { upload } from "../middleware/multer.middleware.ts";
+import { doctorContainer } from "../di/doctor.di.js";
+import { upload } from "../middleware/multer.middleware.js";
 
 const { doctorcontroller, appoimentController,consultation,slotcontroller,doctorDashboard} = doctorContainer()
 const router = Router()

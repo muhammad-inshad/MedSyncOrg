@@ -1,11 +1,11 @@
-import { ISpecialization } from "../../../../models/specialization.model.ts";
-import { ISpecializationRepository } from "../../../../repositories/hospital/specialization.repository.interface.ts";
-import { ISpecializationService } from "../interfaces/specialization.service.interface.ts";
-import { ICloudinaryImageService } from "../../../image/interfaces/cloudinary.service.interface.ts";
-import { SpecializationResponseDTO } from "../../../../dto/hospital/specialization-response.dto.ts";
-import { SpecializationMapper } from "../../../../mappers/specialization.mapper.ts";
+import { ISpecialization } from "../../../../models/specialization.model.js";
+import { ISpecializationRepository } from "../../../../repositories/hospital/specialization.repository.interface.js";
+import { ISpecializationService } from "../interfaces/specialization.service.interface.js";
+import { ICloudinaryImageService } from "../../../image/interfaces/cloudinary.service.interface.js";
+import { SpecializationResponseDTO } from "../../../../dto/hospital/specialization-response.dto.js";
+import { SpecializationMapper } from "../../../../mappers/specialization.mapper.js";
 import { Types } from "mongoose";
-import { IDepartmentFilter } from "../../../../types/hospital.types.ts";
+import { IDepartmentFilter } from "../../../../types/hospital.types.js";
 
 export class SpecializationService implements ISpecializationService {
     constructor(

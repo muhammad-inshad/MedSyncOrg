@@ -1,7 +1,7 @@
 
-import { IWallet } from "../../models/wallet.model.ts";
-import { IWalletRepository } from "./wallet.repository.interface.ts";
-import { BaseRepository } from "../IBase/BaseRepository.ts";
+import { IWallet } from "../../models/wallet.model.js";
+import { IWalletRepository } from "./wallet.repository.interface.js";
+import { BaseRepository } from "../IBase/BaseRepository.js";
 
 export class WalletRepository
   extends BaseRepository<IWallet>

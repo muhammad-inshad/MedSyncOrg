@@ -1,8 +1,8 @@
 // mappers/slot.mapper.ts
 
-import { IMapper } from "../interfaces/mapper.interface.ts";
-import { SlotResponseDTO, SlotResponseSchema } from "../dto/doctor/slot-response.dto.ts";
-import { IDoctorSchedule } from "../models/DoctorSlot.ts";
+import { IMapper } from "../interfaces/mapper.interface.js";
+import { SlotResponseDTO, SlotResponseSchema } from "../dto/doctor/slot-response.dto.js";
+import { IDoctorSchedule } from "../models/DoctorSlot.js";
 
 export class SlotMapper implements IMapper<IDoctorSchedule, SlotResponseDTO> {
   toDTO(slot: IDoctorSchedule): SlotResponseDTO {

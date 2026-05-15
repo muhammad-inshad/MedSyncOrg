@@ -1,4 +1,5 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
+
+import mongoose, { Document, Schema, Types } from "mongoose";
 
 export interface IDepartment extends Document {
   hospital_id: Types.ObjectId;

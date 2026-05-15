@@ -1,10 +1,10 @@
-import { IAppointments } from "../../services/doctor/interfaces/appointment.service.interfaces.ts";
+import { IAppointments } from "../../services/doctor/interfaces/appointment.service.interfaces.js";
 import { Request, Response, NextFunction } from "express";
-import { ApiResponse } from "../../utils/apiResponse.utils.ts";
-import { HttpStatusCode } from "../../constants/enums.ts";
-import { ITokenPayload } from "../../dto/auth/token-payload.dto.ts";
+import { ApiResponse } from "../../utils/apiResponse.utils.js";
+import { HttpStatusCode } from "../../constants/enums.js";
+import { ITokenPayload } from "../../dto/auth/token-payload.dto.js";
 
-import logger from "../../utils/logger.ts";
+import logger from "../../utils/logger.js";
 
 export class AppointmentController {
   constructor(private readonly _appointmentService: IAppointments) { }

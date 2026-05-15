@@ -1,5 +1,5 @@
 import { Schema, model, Document, Types } from "mongoose";
-import { IDoctor } from "./doctor.model.ts";
+import { IDoctor } from "./doctor.model.js";
 
 export interface IDoctorLeave extends Document {
   _id: Types.ObjectId;
