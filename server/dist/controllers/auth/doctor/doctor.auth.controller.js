@@ -20,15 +20,15 @@ export class DoctorAuthController {
                 const result = await this._doctorAuthService.loginDoctor(loginData);
                 res.cookie("refreshToken", result.refreshToken, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === "production",
-                    sameSite: "strict",
+                    secure: true,
+                    sameSite: "none",
                     maxAge: Number(process.env.MAX_AGE_REFRESH_TOKEN) || 7 * 24 * 60 * 60 * 1000,
                     path: "/",
                 });
                 res.cookie("accessToken", result.accessToken, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === "production",
-                    sameSite: "strict",
+                    secure: true,
+                    sameSite: "none",
                     maxAge: Number(process.env.MAX_AGE_ACCESS_TOKEN) || 15 * 60 * 1000,
                     path: "/",
                 });

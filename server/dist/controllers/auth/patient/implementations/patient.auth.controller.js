@@ -17,19 +17,21 @@ class patientAuthController {
             try {
                 const loginData = req.body;
                 const result = await this.authService.login(loginData);
-                res.cookie('refreshToken', result.refreshToken, {
+                const cookieOptions = {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    sameSite: 'strict',
-                    maxAge: Number(process.env.MAX_AGE_REFRESH_TOKEN) || 7 * 24 * 60 * 60 * 1000,
+                    secure: true,
+                    sameSite: "none",
                     path: "/",
+                };
+                res.cookie("refreshToken", result.refreshToken, {
+                    ...cookieOptions,
+                    maxAge: Number(process.env.MAX_AGE_REFRESH_TOKEN) ||
+                        7 * 24 * 60 * 60 * 1000,
                 });
                 res.cookie("accessToken", result.accessToken, {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === "production",
-                    sameSite: "strict",
-                    maxAge: Number(process.env.MAX_AGE_ACCESS_TOKEN) || 15 * 60 * 1000,
-                    path: "/",
+                    ...cookieOptions,
+                    maxAge: Number(process.env.MAX_AGE_ACCESS_TOKEN) ||
+                        15 * 60 * 1000,
                 });
                 return ApiResponse.success(res, "Login successful", {
                     accessToken: result.accessToken,
@@ -59,9 +61,10 @@ class patientAuthController {
                 const result = await this.authService.refreshAccessToken(refreshToken);
                 res.cookie("accessToken", result.accessToken, {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === "production",
-                    sameSite: "strict",
-                    maxAge: Number(process.env.MAX_AGE_ACCESS_TOKEN) || 15 * 60 * 1000,
+                    secure: true,
+                    sameSite: "none",
+                    maxAge: Number(process.env.MAX_AGE_ACCESS_TOKEN) ||
+                        15 * 60 * 1000,
                     path: "/",
                 });
                 return ApiResponse.success(res, "Token refreshed successfully", {
@@ -85,8 +88,8 @@ class patientAuthController {
         this.logout = async (req, res) => {
             const cookieOptions = {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
+                secure: true,
+                sameSite: "none",
                 path: "/",
             };
             res.clearCookie("accessToken", cookieOptions);

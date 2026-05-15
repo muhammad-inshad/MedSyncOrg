@@ -19,13 +19,24 @@ const { patientAuthMiddleware } = patientContainer();
 const { hospitalAuthMiddleware } = hospitalContainer();
 const { doctorAuthMiddleware } = doctorContainer();
 const app = express();
+app.set('trust proxy', 1);
 app.use((req, _res, next) => {
     next();
 });
 app.use(passport.initialize());
 app.use(cookieParser());
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: (origin, callback) => {
+        const allowedOrigins = [
+            'https://med-sync-org-72v5.vercel.app'
+        ];
+        if (!origin || allowedOrigins.some(o => o && origin.startsWith(o))) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
 }));
 app.use("/api/payment/webhook", express.raw({ type: 'application/json' }));
