@@ -18,11 +18,11 @@ export class AppointmentRepository
     doctorId: string,
     dateString: string,
   ): Promise<{ appointments: IAppointment[]; total: number }> {
-    const year = parseInt(dateString.split("-")[0]);
-    const month = parseInt(dateString.split("-")[1]) - 1;
-    const day = parseInt(dateString.split("-")[2]);
-    const startOfDay = new Date(year, month, day, 0, 0, 0, 0);
-    const endOfDay = new Date(year, month, day, 23, 59, 59, 999);
+    const [year, month, day] = dateString.split("-").map(Number);
+    const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+    startOfDay.setHours(startOfDay.getHours() - 12); // Buffer for UTC/IST shift
+    
+    const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
     const query = {
       doctorId,
       appointmentDate: {
@@ -48,12 +48,11 @@ export class AppointmentRepository
     dateString: string,
     options?: { page: number; limit: number; shift: string },
   ): Promise<{ appointments: IAppointment[]; total: number }> {
-    const year = parseInt(dateString.split("-")[0]);
-    const month = parseInt(dateString.split("-")[1]) - 1;
-    const day = parseInt(dateString.split("-")[2]);
+    const [year, month, day] = dateString.split("-").map(Number);
+    const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+    startOfDay.setHours(startOfDay.getHours() - 12); 
 
-    const startOfDay = new Date(year, month, day, 0, 0, 0, 0);
-    const endOfDay = new Date(year, month, day, 23, 59, 59, 999);
+    const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
 
     const baseQuery: FilterQuery<IAppointment> = {
       doctorId,
@@ -91,6 +90,7 @@ export class AppointmentRepository
   async countByDoctorAndDate(doctorId: string, date: Date): Promise<number> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
+    startOfDay.setHours(startOfDay.getHours() - 12);
 
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
@@ -164,6 +164,8 @@ export class AppointmentRepository
   ): Promise<IAppointment | null> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
+    startOfDay.setHours(startOfDay.getHours() - 12);
+
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
@@ -328,6 +330,7 @@ export class AppointmentRepository
   ): Promise<number> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
+    startOfDay.setHours(startOfDay.getHours() - 12);
 
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
