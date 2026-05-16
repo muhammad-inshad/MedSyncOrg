@@ -270,12 +270,13 @@ export class AppointmentRepository
   async findPatientAppointmentsToday(
     patientId: string,
   ): Promise<IAppointment[]> {
-    const today = new Date();
-    const startOfDay = new Date(today);
-    startOfDay.setHours(0, 0, 0, 0);
+    const now = new Date();
+    
+    // Create a range that covers the entire day in UTC
+    const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+    const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
 
-    const endOfDay = new Date(today);
-    endOfDay.setHours(23, 59, 59, 999);
+    console.log(`[Repository] Searching for patient ${patientId} between ${startOfDay.toISOString()} and ${endOfDay.toISOString()}`);
 
     return await this.model
       .find({
