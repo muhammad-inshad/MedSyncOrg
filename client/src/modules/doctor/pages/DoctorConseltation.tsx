@@ -101,15 +101,31 @@ const fetchConsultation = useCallback(async (page: number) => {
   const handleStartCall = async () => {
     try {
       let stream: MediaStream;
+      const constraints = {
+        video: { 
+          facingMode: "user",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      };
+
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
       } catch (e) {
-        console.warn("Could not get both video and audio, trying individual devices...", e);
+        console.warn("Could not get both video and audio with ideal constraints, falling back...", e);
         try {
-          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         } catch (e2) {
-          console.warn("Could not get video, trying audio only...", e2);
-          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          } catch (e3) {
+            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          }
         }
       }
       localStream.current = stream;
@@ -119,7 +135,14 @@ const fetchConsultation = useCallback(async (page: number) => {
       peerConnection.current = pc;
       stream.getTracks().forEach(track => pc.addTrack(track, stream));
 
-      pc.ontrack = (event) => setRemoteStreamState(event.streams[0]);
+      pc.ontrack = (event) => {
+        console.log("Remote track received:", event.track.kind);
+        if (event.streams && event.streams[0]) {
+          setRemoteStreamState(event.streams[0]);
+        } else {
+          setRemoteStreamState(new MediaStream([event.track]));
+        }
+      };
       pc.onicecandidate = (event) => {
         if (event.candidate && currentAppointment?._id) {
           socket.emit("ice-candidate", { roomId: currentAppointment._id, candidate: event.candidate });

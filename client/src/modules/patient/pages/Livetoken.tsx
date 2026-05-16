@@ -138,15 +138,32 @@ const Livetoken = () => {
 const handleStartCall = async () => {
     try {
         let stream: MediaStream;
+        const constraints = {
+            video: { 
+                facingMode: "user",
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
+            }
+        };
+
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
         } catch (e) {
-            console.warn("Could not get both video and audio, trying individual devices...", e);
+            console.warn("Could not get both video and audio with ideal constraints, falling back...", e);
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                // Fallback to basic constraints
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             } catch (e2) {
-                console.warn("Could not get video, trying audio only...", e2);
-                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                } catch (e3) {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                }
             }
         }
         localStream.current = stream;
@@ -167,9 +184,13 @@ const handleStartCall = async () => {
         });
 
         pc.ontrack = (event) => {
-            console.log("Remote track received:", event.streams[0]);
-            setRemoteStreamState(event.streams[0]);
-        };
+        console.log("Remote track received:", event.track.kind);
+        if (event.streams && event.streams[0]) {
+          setRemoteStreamState(event.streams[0]);
+        } else {
+          setRemoteStreamState(new MediaStream([event.track]));
+        }
+      };
 
         pc.onicecandidate = (event) => {
         if (event.candidate && selectedAppointment && selectedAppointment._id) {
@@ -182,9 +203,22 @@ const handleStartCall = async () => {
         setIsCallActive(true);
         console.log("Peer connection ready");
  if (!selectedAppointment) return;
+        const drainIceQueue = async () => {
+            while (iceCandidateQueue.current.length > 0) {
+                const candidate = iceCandidateQueue.current.shift();
+                if (candidate && peerConnection.current) {
+                    try {
+                        await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+                    } catch (e) {
+                        console.error("Error adding queued ICE candidate:", e);
+                    }
+                }
+            }
+        };
+
         if (pendingOffer.current) {
             console.log("Processing pending offer...");
-            await pc.setRemoteDescription(pendingOffer.current);
+            await pc.setRemoteDescription(new RTCSessionDescription(pendingOffer.current));
             const answer = await pc.createAnswer();
             await pc.setLocalDescription(answer);
 
@@ -193,6 +227,7 @@ const handleStartCall = async () => {
                 answer,
             });
             pendingOffer.current = null;
+            await drainIceQueue();
             console.log("Answer sent for pending offer");
         }
 
