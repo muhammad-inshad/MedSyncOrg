@@ -267,16 +267,15 @@ export class AppointmentRepository
     return appointment ? appointment.doctorId.toString() : null;
   }
 
-  async findPatientAppointmentsToday(
+ async findPatientAppointmentsToday(
     patientId: string,
   ): Promise<IAppointment[]> {
-    const now = new Date();
-    
-    // Create a range that covers the entire day in UTC
-    const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
-    const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
+    const today = new Date();
+    const startOfDay = new Date(today);
+    startOfDay.setHours(0, 0, 0, 0);
 
-    console.log(`[Repository] Searching for patient ${patientId} between ${startOfDay.toISOString()} and ${endOfDay.toISOString()}`);
+    const endOfDay = new Date(today);
+    endOfDay.setHours(23, 59, 59, 999);
 
     return await this.model
       .find({
@@ -291,7 +290,6 @@ export class AppointmentRepository
       .sort({ tokenNumber: 1 })
       .exec();
   }
-
   async findByPaymentId(paymentId: string): Promise<IAppointment | null> {
     return await this.model.findOne({ paymentId }).exec();
   }

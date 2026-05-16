@@ -18,7 +18,7 @@ export class LiveTokenController {
             }
 
             const liveToken = await this._liveTokenService.getPatientLiveToken(patientId, doctorId);
-
+console.log(liveToken)
             if (!liveToken) {
                 return ApiResponse.success(
                     res,

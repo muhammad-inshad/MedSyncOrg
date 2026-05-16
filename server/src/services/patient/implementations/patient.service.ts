@@ -461,6 +461,7 @@ console.log(result)
 
   async getTodayAppointments(patientId: string): Promise<AppointmentResponseDTO[]> {
     const result = await this._appointmentRepo.findPatientAppointmentsToday(patientId);
+   
     return result.map(a => this._appointmentMapper.toDTO(a));
   }
 
