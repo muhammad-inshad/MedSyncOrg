@@ -6,21 +6,47 @@ export const initSocket = (server: HTTPServer) => {
   const io = new Server(server, {
     cors: {
       origin: (origin, callback) => {
-        if (!origin || origin.includes('localhost') || origin.includes('vercel.app')) {
+        const allowedOrigins = [
+          process.env.FRONTEND_URL,
+          'http://localhost:5173',
+          'https://med-sync-org-72v5.vercel.app',
+          'https://med-sync-org.vercel.app',
+        ].filter(Boolean) as string[];
+
+        if (!origin) return callback(null, true);
+
+        const isAllowed = allowedOrigins.some(allowed => 
+          origin === allowed || (allowed && origin.startsWith(allowed))
+        ) || origin.endsWith('.vercel.app') || origin.includes('localhost');
+
+        if (isAllowed) {
           callback(null, true);
         } else {
+          console.warn(`[Socket.io] Origin ${origin} not allowed by CORS matching logic`);
           callback(null, true); // Fallback to true while debugging
         }
       },
       methods: ["GET", "POST"],
-      credentials: true
+      credentials: true,
+      allowedHeaders: ["content-type", "authorization", "cookie"]
     },
-    transports: ['polling', 'websocket'],
-    allowEIO3: true 
+    transports: ['websocket', 'polling'],
+    allowEIO3: true,
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    connectTimeout: 45000,
+  });
+
+  io.engine.on("connection_error", (err) => {
+    console.error("[Socket.io] Connection Error:", {
+      code: err.code,
+      message: err.message,
+      context: err.context
+    });
   });
 
   io.on("connection", (socket: Socket) => {
-    console.log("New client connected:", socket.id);
+    console.log(`[Socket.io] New client connected: ${socket.id} from ${socket.handshake.headers.origin}`);
 
     socket.on("join-room", (roomId: string) => {
       console.log(`Socket ${socket.id} joining room: ${roomId}`);

@@ -30,21 +30,23 @@ app.use((req, _res, next) => {
   next();
 });
 
-app.use(passport.initialize());
-
-app.use(cookieParser());
+// 1. CORS Configuration (placed as early as possible)
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
   'https://med-sync-org-72v5.vercel.app',
+  'https://med-sync-org.vercel.app',
 ].filter(Boolean) as string[];
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+    const isAllowed = allowedOrigins.some(allowed => 
+      origin === allowed || (allowed && origin.startsWith(allowed))
+    ) || origin.endsWith('.vercel.app');
+
+    if (isAllowed) {
       callback(null, true);
     } else {
       console.warn(`Origin ${origin} not allowed by CORS`);
@@ -52,10 +54,14 @@ app.use(cors({
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With', 'Accept'],
 }));
 
-
 app.use("/api/payment/webhook", express.raw({ type: 'application/json' }));
+
+
+// 2. Body parsers (with socket.io bypass)
 app.use((req, res, next) => {
   if (req.originalUrl.startsWith("/socket.io")) {
     return next();
@@ -69,6 +75,10 @@ app.use((req, res, next) => {
   }
   express.urlencoded({ limit: '10mb', extended: true })(req, res, next);
 });
+
+// 3. Other standard middleware
+app.use(passport.initialize());
+app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/payment", paymentRoutes);
