@@ -189,8 +189,9 @@ const handleStartCall = async () => {
             console.log("Answer sent for pending offer");
         }
 
-    } catch {
-        toast.error("Error accessing media devices:");
+    } catch (err) {
+        console.error("Media error:", err);
+        toast.error(`Error accessing media devices: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
 };
 

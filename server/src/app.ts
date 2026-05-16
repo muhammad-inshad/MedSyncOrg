@@ -41,11 +41,11 @@ const allowedOrigins = [
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl)
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app') || process.env.NODE_ENV === 'development') {
       callback(null, true);
     } else {
       console.error(`Origin ${origin} not allowed by CORS`);
-      callback(null, true); // Fallback to true but log the error during transition
+      callback(null, true); // Fallback to true but log the error
     }
   },
   credentials: true,
@@ -54,7 +54,7 @@ app.use(cors({
 
 app.use("/api/payment/webhook", express.raw({ type: 'application/json' }));
 app.use((req, res, next) => {
-  if (req.originalUrl === "/api/payment/webhook") {
+  if (req.originalUrl === "/api/payment/webhook" || req.originalUrl.startsWith("/socket.io")) {
     next();
   } else {
     express.json({ limit: '10mb' })(req, res, next);

@@ -5,15 +5,20 @@ export const initSocket = (server: HTTPServer) => {
   console.log("Initializing Socket.io...");
   const io = new Server(server, {
     cors: {
-      origin: [process.env.FRONTEND_URL || 'http://localhost:5173', "https://accounts.google.com"],
+      origin: [
+        process.env.FRONTEND_URL || 'http://localhost:5173',
+        "https://accounts.google.com",
+        /\.vercel\.app$/ // Allow all Vercel deployments
+      ],
       methods: ["GET", "POST"],
       credentials: true
     },
-    transports: ["websocket", "polling"],
+    path: "/socket.io/",
+    transports: ["polling", "websocket"],
     allowEIO3: true,
     pingTimeout: 60000,
     pingInterval: 25000,
-    cookie: false // Disable cookies to avoid potential conflicts
+    cookie: false
   });
 
   io.on("connection", (socket: Socket) => {
