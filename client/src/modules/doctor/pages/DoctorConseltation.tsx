@@ -154,6 +154,7 @@ const fetchConsultation = useCallback(async (page: number) => {
       await pc.setLocalDescription(offer);
       if (currentAppointment?._id) {
         socket.emit("offer", { roomId: currentAppointment._id, offer });
+        console.log(`Offer sent for roomId: ${currentAppointment._id}`);
       }
     } catch (error) {
       console.error("Error accessing media devices:", error);
@@ -179,10 +180,12 @@ const fetchConsultation = useCallback(async (page: number) => {
     const handleOffer = async (offer: RTCSessionDescriptionInit) => {
       try {
         if (!peerConnection.current) return;
+        console.log(`Offer received for roomId: ${currentAppointment._id}`);
         await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await peerConnection.current.createAnswer();
         await peerConnection.current.setLocalDescription(answer);
         socket.emit("answer", { roomId: currentAppointment._id, answer });
+        console.log(`Answer sent for roomId: ${currentAppointment._id}`);
 
         while (iceCandidateQueue.current.length > 0) {
           const candidate = iceCandidateQueue.current.shift();
@@ -194,6 +197,7 @@ const fetchConsultation = useCallback(async (page: number) => {
     };
 
     const handleAnswer = async (answer: RTCSessionDescriptionInit) => {
+      console.log(`Answer received for roomId: ${currentAppointment?._id}`);
       if (peerConnection.current) {
         try {
           await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
@@ -219,11 +223,23 @@ const fetchConsultation = useCallback(async (page: number) => {
       }
     };
 
-    const handleUserJoined = (socketId: string) => {
+    const handleUserJoined = async (socketId: string) => {
       console.log("User joined:", socketId);
-      // If we are already in a call, we could re-initiate if needed, 
-      // but usually the doctor starts the call manually.
       toast.success("Patient has joined the room");
+
+      // If doctor already started the call, send the offer to the new participant
+      if (isCallActive && peerConnection.current && currentAppointment?._id) {
+        try {
+          const offer = await peerConnection.current.createOffer({
+            iceRestart: true // Force fresh ICE gathering
+          });
+          await peerConnection.current.setLocalDescription(offer);
+          socket.emit("offer", { roomId: currentAppointment._id, offer });
+          console.log("Offer re-sent to new participant:", socketId);
+        } catch (err) {
+          console.error("Error re-sending offer:", err);
+        }
+      }
     };
 
     socket.on("offer", handleOffer);

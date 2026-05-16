@@ -259,7 +259,7 @@ const handleStartCall = async () => {
                     roomId: selectedAppointment._id,
                     answer,
                 });
-                console.log("Answer sent");
+                console.log(`Answer sent for roomId: ${selectedAppointment._id}`);
 
                 // Process queued ICE candidates
                 while (iceCandidateQueue.current.length > 0) {
@@ -287,7 +287,7 @@ const handleStartCall = async () => {
         };
 
         const handleAnswer = async (answer: RTCSessionDescriptionInit) => {
-            console.log("Answer received");
+            console.log(`Answer received for roomId: ${selectedAppointment._id}`);
             if (peerConnection.current) {
                 try {
                     await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));

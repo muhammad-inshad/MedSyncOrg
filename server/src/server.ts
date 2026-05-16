@@ -23,7 +23,11 @@ const PORT = process.env.PORT || 5000;
 
 const server = http.createServer(app);
 
-initSocket(server);
+try {
+  initSocket(server);
+} catch (error) {
+  logger.error("Failed to initialize Socket.io:", error);
+}
 
 server.listen(PORT, () => {
   logger.info(`Server running on http://localhost:${PORT}`);

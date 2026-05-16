@@ -5,11 +5,9 @@ export const initSocket = (server: HTTPServer) => {
   console.log("Initializing Socket.io...");
   const io = new Server(server, {
     cors: {
-      origin: [
-        process.env.FRONTEND_URL || 'http://localhost:5173',
-        "https://accounts.google.com",
-        /\.vercel\.app$/ // Allow all Vercel deployments
-      ],
+      origin: (origin, callback) => {
+        callback(null, true);
+      },
       methods: ["GET", "POST"],
       credentials: true
     },

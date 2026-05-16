@@ -282,7 +282,7 @@ export class AppointmentRepository
       const [year, month, day] = dateString.split("-").map(Number);
       startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
       startOfDay.setHours(startOfDay.getHours() - 12); 
-      
+       
       endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
     } else {
       const today = new Date();
