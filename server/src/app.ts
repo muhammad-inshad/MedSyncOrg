@@ -33,8 +33,21 @@ app.use((req, _res, next) => {
 app.use(passport.initialize());
 
 app.use(cookieParser());
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:5173',
+].filter(Boolean) as string[];
+
 app.use(cors({
-  origin: true,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      console.error(`Origin ${origin} not allowed by CORS`);
+      callback(null, true); // Fallback to true but log the error during transition
+    }
+  },
   credentials: true,
 }));
 
