@@ -190,6 +190,7 @@ class PatientController {
                     return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
                 }
                 const appointments = await this.patientService.getTodayAppointments(patientId);
+                console.log(appointments);
                 return ApiResponse.success(res, "Today's appointments fetched successfully", appointments);
             }
             catch (error) {

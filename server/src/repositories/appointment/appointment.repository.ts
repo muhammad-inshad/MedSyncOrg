@@ -267,15 +267,24 @@ export class AppointmentRepository
     return appointment ? appointment.doctorId.toString() : null;
   }
 
- async findPatientAppointmentsToday(
+  async findPatientAppointmentsToday(
     patientId: string,
+    dateString?: string,
   ): Promise<IAppointment[]> {
-    const today = new Date();
-    const startOfDay = new Date(today);
-    startOfDay.setHours(0, 0, 0, 0);
+    let startOfDay: Date;
+    let endOfDay: Date;
 
-    const endOfDay = new Date(today);
-    endOfDay.setHours(23, 59, 59, 999);
+    if (dateString) {
+      const [year, month, day] = dateString.split("-").map(Number);
+      startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
+      endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
+    } else {
+      const today = new Date();
+      startOfDay = new Date(today);
+      startOfDay.setHours(0, 0, 0, 0);
+      endOfDay = new Date(today);
+      endOfDay.setHours(23, 59, 59, 999);
+    }
 
     return await this.model
       .find({

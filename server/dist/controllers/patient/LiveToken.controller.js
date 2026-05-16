@@ -12,6 +12,7 @@ export class LiveTokenController {
                     return ApiResponse.unauthorized(res, "Patient not authenticated");
                 }
                 const liveToken = await this._liveTokenService.getPatientLiveToken(patientId, doctorId);
+                console.log(liveToken);
                 if (!liveToken) {
                     return ApiResponse.success(res, "No active consultation found for you today", null, HttpStatusCode.OK);
                 }

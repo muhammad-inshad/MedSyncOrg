@@ -22,7 +22,7 @@ export interface IPatientService {
   bookAppointment(patientId: string, data: Partial<IAppointment>): Promise<void>;
   checkDuplicateAppointment(doctorId: string, date: string, patient: { name: string; age: number; email?: string }): Promise<AppointmentResponseDTO | null>;
   getAppoimentHistory(patientId: string, query: { page: number; limit: number; search: string }): Promise<{ data: AppointmentResponseDTO[]; total: number }>;
-  getTodayAppointments(patientId: string): Promise<AppointmentResponseDTO[]>;
+  getTodayAppointments(patientId: string, date?: string): Promise<AppointmentResponseDTO[]>;
   cancelAppointment(data: { id: string; reason: string }): Promise<void>;
   checkAppointmentStatus(sessionId: string): Promise<boolean>;
   getPrescriptions(patientId: string, query: { page: number; limit: number; search: string }): Promise<{

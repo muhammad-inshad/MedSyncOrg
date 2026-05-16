@@ -200,7 +200,8 @@ class PatientController {
       if (!patientId) {
         return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
       }
-      const appointments = await this.patientService.getTodayAppointments(patientId);
+      const { date } = req.query;
+      const appointments = await this.patientService.getTodayAppointments(patientId, date as string);
       console.log(appointments)
       return ApiResponse.success(res, "Today's appointments fetched successfully", appointments);
     } catch (error) {

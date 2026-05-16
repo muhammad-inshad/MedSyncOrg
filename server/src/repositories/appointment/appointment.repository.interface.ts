@@ -31,7 +31,7 @@ export interface IAppointmentRepository extends IBaseRepository<IAppointment> {
     ): Promise<{ appointments: IAppointment[]; total: number }>;
         findLiveToken(doctorId: string): Promise<IAppointment | null>;
     findDoctorByPatientToday(patientId: string): Promise<string | null>;
-    findPatientAppointmentsToday(patientId: string): Promise<IAppointment[]>;
+    findPatientAppointmentsToday(patientId: string, date?: string): Promise<IAppointment[]>;
     findByPaymentId(paymentId: string): Promise<IAppointment | null>;
     getPatientEmail(appointmentId: string): Promise<string | null>;
     findtodayconseltation( doctorId: string,
