@@ -27,6 +27,7 @@ export const initSocket = (server: HTTPServer) => {
     socket.on("join-room", (roomId: string) => {
       console.log(`Socket ${socket.id} joining room: ${roomId}`);
       socket.join(roomId);
+      socket.to(roomId).emit("user-joined", socket.id);
     });
 
     socket.on("offer", ({ roomId, offer }) => {

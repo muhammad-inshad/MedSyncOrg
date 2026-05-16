@@ -137,25 +137,71 @@ const fetchConsultation = useCallback(async (page: number) => {
     }
   };
 
+  const iceCandidateQueue = useRef<RTCIceCandidateInit[]>([]);
+
   useEffect(() => {
     if (!currentAppointment) return;
 
-    const handleAnswer = async (answer: RTCSessionDescriptionInit) => {
-      if (peerConnection.current) await peerConnection.current.setRemoteDescription(answer);
-    };
+    const handleOffer = async (offer: RTCSessionDescriptionInit) => {
+      try {
+        if (!peerConnection.current) return;
+        await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await peerConnection.current.createAnswer();
+        await peerConnection.current.setLocalDescription(answer);
+        socket.emit("answer", { roomId: currentAppointment._id, answer });
 
-    const handleIceCandidate = async (candidate: RTCIceCandidateInit) => {
-      if (peerConnection.current) {
-        try { await peerConnection.current.addIceCandidate(candidate); }
-        catch (err) { console.error("ICE error:", err); }
+        while (iceCandidateQueue.current.length > 0) {
+          const candidate = iceCandidateQueue.current.shift();
+          if (candidate) await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+        }
+      } catch (err) {
+        console.error("Error handling offer:", err);
       }
     };
 
+    const handleAnswer = async (answer: RTCSessionDescriptionInit) => {
+      if (peerConnection.current) {
+        try {
+          await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
+          while (iceCandidateQueue.current.length > 0) {
+            const candidate = iceCandidateQueue.current.shift();
+            if (candidate) await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+          }
+        } catch (err) {
+          console.error("Error handling answer:", err);
+        }
+      }
+    };
+
+    const handleIceCandidate = async (candidate: RTCIceCandidateInit) => {
+      if (peerConnection.current && peerConnection.current.remoteDescription) {
+        try {
+          await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch (err) {
+          console.error("ICE error:", err);
+        }
+      } else {
+        iceCandidateQueue.current.push(candidate);
+      }
+    };
+
+    const handleUserJoined = (socketId: string) => {
+      console.log("User joined:", socketId);
+      // If we are already in a call, we could re-initiate if needed, 
+      // but usually the doctor starts the call manually.
+      toast.success("Patient has joined the room");
+    };
+
+    socket.on("offer", handleOffer);
     socket.on("answer", handleAnswer);
     socket.on("ice-candidate", handleIceCandidate);
+    socket.on("user-joined", handleUserJoined);
+
     return () => {
+      socket.off("offer", handleOffer);
       socket.off("answer", handleAnswer);
       socket.off("ice-candidate", handleIceCandidate);
+      socket.off("user-joined", handleUserJoined);
     };
   }, [currentAppointment]);
 

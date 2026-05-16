@@ -280,7 +280,6 @@ export class AppointmentRepository
 
     if (dateString) {
       const [year, month, day] = dateString.split("-").map(Number);
-      // We start 12 hours earlier to catch appointments stored as 18:30 UTC (which is 00:00 IST)
       startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
       startOfDay.setHours(startOfDay.getHours() - 12); 
       

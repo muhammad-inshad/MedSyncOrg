@@ -195,58 +195,85 @@ const handleStartCall = async () => {
     }
 };
 
-useEffect(() => {
-    if (!selectedAppointment) return;
+    const iceCandidateQueue = useRef<RTCIceCandidateInit[]>([]);
 
-    const handleOffer = async (offer: RTCSessionDescriptionInit) => {
-        if (!peerConnection.current) {
-            console.log("Offer received but no peer connection yet. Storing as pending.");
-            pendingOffer.current = offer;
-            return;
-        }
+    useEffect(() => {
+        if (!selectedAppointment) return;
 
-        await peerConnection.current.setRemoteDescription(offer);
-        const answer = await peerConnection.current.createAnswer();
-        await peerConnection.current.setLocalDescription(answer);
-
-        socket.emit("answer", {
-            roomId: selectedAppointment._id,
-            answer,
-        });
-        console.log("Answer sent");
-    };
-
-    const handleIceCandidate = async (candidate: RTCIceCandidateInit) => {
-        if (peerConnection.current) {
+        const handleOffer = async (offer: RTCSessionDescriptionInit) => {
+            console.log("Offer received");
             try {
-                await peerConnection.current.addIceCandidate(candidate);
+                if (!peerConnection.current) {
+                    console.log("Offer received but no peer connection yet. Storing as pending.");
+                    pendingOffer.current = offer;
+                    return;
+                }
+
+                await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
+                const answer = await peerConnection.current.createAnswer();
+                await peerConnection.current.setLocalDescription(answer);
+
+                socket.emit("answer", {
+                    roomId: selectedAppointment._id,
+                    answer,
+                });
+                console.log("Answer sent");
+
+                // Process queued ICE candidates
+                while (iceCandidateQueue.current.length > 0) {
+                    const candidate = iceCandidateQueue.current.shift();
+                    if (candidate) {
+                        await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+                    }
+                }
             } catch (err) {
-                console.error("ICE error:", err);
+                console.error("Error handling offer:", err);
             }
-        }
-    };
+        };
 
-    socket.on("offer", handleOffer);
-    socket.on("ice-candidate", handleIceCandidate);
+        const handleIceCandidate = async (candidate: RTCIceCandidateInit) => {
+            if (peerConnection.current && peerConnection.current.remoteDescription) {
+                try {
+                    await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+                } catch (err) {
+                    console.error("ICE error:", err);
+                }
+            } else {
+                console.log("Queueing ICE candidate");
+                iceCandidateQueue.current.push(candidate);
+            }
+        };
 
-    return () => {
-        socket.off("offer", handleOffer);
-        socket.off("ice-candidate", handleIceCandidate);
-    };
-}, [selectedAppointment]);
+        const handleAnswer = async (answer: RTCSessionDescriptionInit) => {
+            console.log("Answer received");
+            if (peerConnection.current) {
+                try {
+                    await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answer));
+                    console.log("Call connected");
+                    
+                    // Process queued ICE candidates
+                    while (iceCandidateQueue.current.length > 0) {
+                        const candidate = iceCandidateQueue.current.shift();
+                        if (candidate) {
+                            await peerConnection.current.addIceCandidate(new RTCIceCandidate(candidate));
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error handling answer:", err);
+                }
+            }
+        };
 
-useEffect(() => {
-    socket.on("answer", async (answer) => {
-        if (peerConnection.current) {
-            await peerConnection.current.setRemoteDescription(answer);
-            console.log("Call connected ");
-        }
-    });
+        socket.on("offer", handleOffer);
+        socket.on("answer", handleAnswer);
+        socket.on("ice-candidate", handleIceCandidate);
 
-    return () => {
-        socket.off("answer");
-    };
-}, []);
+        return () => {
+            socket.off("offer", handleOffer);
+            socket.off("answer", handleAnswer);
+            socket.off("ice-candidate", handleIceCandidate);
+        };
+    }, [selectedAppointment]);
     if (loading) {
         return (
             <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -326,6 +353,11 @@ useEffect(() => {
                                     <div className="absolute bottom-2 left-2 bg-emerald-600 text-[10px] text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
                                         Doctor
                                     </div>
+                                    {!remoteStreamState && (
+                                        <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-xs font-medium bg-slate-900/50 backdrop-blur-sm">
+                                            Waiting for doctor to join...
+                                        </div>
+                                    )}
                                 </div>
                                 <button
                                     onClick={() => {
