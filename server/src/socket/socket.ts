@@ -15,8 +15,8 @@ export const initSocket = (server: HTTPServer) => {
       methods: ["GET", "POST"],
       credentials: true
     },
-    transports: ['websocket', 'polling'],
-    allowEIO3: true // Support older clients if any
+    transports: ['polling', 'websocket'],
+    allowEIO3: true 
   });
 
   io.on("connection", (socket: Socket) => {
