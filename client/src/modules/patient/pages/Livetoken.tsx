@@ -46,7 +46,8 @@ const Livetoken = () => {
         const fetchInitialData = async () => {
             try {
                 setLoading(true);
-                const response = await patientApi.getTodayAppointments();
+                const todayStr = new Date().toISOString().split('T')[0];
+                const response = await patientApi.getTodayAppointments(todayStr);
                 const appointments = (response.data.data || []).map((app: {
                     id: string;
                     _id?: string;

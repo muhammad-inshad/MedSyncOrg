@@ -57,8 +57,8 @@ export const patientApi = {
     getliveToken: (doctorId?: string) => {
         return api.get(`${PATIENT_MANAGEMENT.LIVETOKEN}${doctorId ? `?doctorId=${doctorId}` : ""}`);
     },
-    getTodayAppointments: () => {
-        return api.get(PATIENT_MANAGEMENT.TODAY_APPOINTMENTS);
+    getTodayAppointments: (date?: string) => {
+        return api.get(`${PATIENT_MANAGEMENT.TODAY_APPOINTMENTS}${date ? `?date=${date}` : ""}`);
     },
       
     createAppointmentPaymentSession: (data: { bookingData: IBookingData }) =>

@@ -227,6 +227,7 @@ export class AppointmentRepository
     const today = new Date();
     const startOfDay = new Date(today);
     startOfDay.setHours(0, 0, 0, 0);
+    startOfDay.setHours(startOfDay.getHours() - 12); // Buffer for UTC/IST shift
 
     const endOfDay = new Date(today);
     endOfDay.setHours(23, 59, 59, 999);
@@ -248,6 +249,7 @@ export class AppointmentRepository
     const today = new Date();
     const startOfDay = new Date(today);
     startOfDay.setHours(0, 0, 0, 0);
+    startOfDay.setHours(startOfDay.getHours() - 12); // Buffer for UTC/IST shift
 
     const endOfDay = new Date(today);
     endOfDay.setHours(23, 59, 59, 999);
@@ -276,12 +278,17 @@ export class AppointmentRepository
 
     if (dateString) {
       const [year, month, day] = dateString.split("-").map(Number);
-      startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
-      endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
+      // We start 12 hours earlier to catch appointments stored as 18:30 UTC (which is 00:00 IST)
+      startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+      startOfDay.setHours(startOfDay.getHours() - 12); 
+      
+      endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
     } else {
       const today = new Date();
       startOfDay = new Date(today);
       startOfDay.setHours(0, 0, 0, 0);
+      startOfDay.setHours(startOfDay.getHours() - 12);
+
       endOfDay = new Date(today);
       endOfDay.setHours(23, 59, 59, 999);
     }
