@@ -1,4 +1,11 @@
 import winston from 'winston';
+import fs from 'fs';
+import path from 'path';
+
+const logDir = 'logs';
+if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir);
+}
 
 const levels = {
     error: 0,

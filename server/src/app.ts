@@ -36,10 +36,21 @@ app.use(cookieParser());
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
+  'https://med-sync-org-72v5.vercel.app',
 ].filter(Boolean) as string[];
 
 app.use(cors({
-  origin: true,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      callback(null, true);
+    } else {
+      console.warn(`Origin ${origin} not allowed by CORS`);
+      callback(null, true); // Still allowing but logging warning for now to debug
+    }
+  },
   credentials: true,
 }));
 

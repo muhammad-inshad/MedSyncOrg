@@ -5,10 +5,18 @@ export const initSocket = (server: HTTPServer) => {
   console.log("Initializing Socket.io...");
   const io = new Server(server, {
     cors: {
-      origin: true,
+      origin: (origin, callback) => {
+        if (!origin || origin.includes('localhost') || origin.includes('vercel.app')) {
+          callback(null, true);
+        } else {
+          callback(null, true); // Fallback to true while debugging
+        }
+      },
+      methods: ["GET", "POST"],
       credentials: true
     },
-    transports: ['polling', 'websocket']
+    transports: ['websocket', 'polling'],
+    allowEIO3: true // Support older clients if any
   });
 
   io.on("connection", (socket: Socket) => {
