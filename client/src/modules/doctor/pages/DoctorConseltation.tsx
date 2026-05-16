@@ -100,7 +100,18 @@ const fetchConsultation = useCallback(async (page: number) => {
 
   const handleStartCall = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      } catch (e) {
+        console.warn("Could not get both video and audio, trying individual devices...", e);
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        } catch (e2) {
+          console.warn("Could not get video, trying audio only...", e2);
+          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        }
+      }
       localStream.current = stream;
       if (localVideoRef.current) localVideoRef.current.srcObject = stream;
 
