@@ -5,18 +5,10 @@ export const initSocket = (server: HTTPServer) => {
   console.log("Initializing Socket.io...");
   const io = new Server(server, {
     cors: {
-      origin: (origin, callback) => {
-        callback(null, true);
-      },
-      methods: ["GET", "POST"],
+      origin: true,
       credentials: true
     },
-    path: "/socket.io/",
-    transports: ["polling", "websocket"],
-    allowEIO3: true,
-    pingTimeout: 60000,
-    pingInterval: 25000,
-    cookie: false
+    transports: ['polling', 'websocket']
   });
 
   io.on("connection", (socket: Socket) => {
@@ -29,14 +21,17 @@ export const initSocket = (server: HTTPServer) => {
     });
 
     socket.on("offer", ({ roomId, offer }) => {
+      console.log(`Relaying offer from ${socket.id} to room: ${roomId}`);
       socket.to(roomId).emit("offer", offer);
     });
 
     socket.on("answer", ({ roomId, answer }) => {
+      console.log(`Relaying answer from ${socket.id} to room: ${roomId}`);
       socket.to(roomId).emit("answer", answer);
     });
 
     socket.on("ice-candidate", ({ roomId, candidate }) => {
+      console.log(`Relaying ICE candidate from ${socket.id} to room: ${roomId}`);
       socket.to(roomId).emit("ice-candidate", candidate);
     });
 

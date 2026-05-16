@@ -46,13 +46,18 @@ app.use(cors({
 
 app.use("/api/payment/webhook", express.raw({ type: 'application/json' }));
 app.use((req, res, next) => {
-  if (req.originalUrl === "/api/payment/webhook" || req.originalUrl.startsWith("/socket.io")) {
-    next();
-  } else {
-    express.json({ limit: '10mb' })(req, res, next);
+  if (req.originalUrl.startsWith("/socket.io")) {
+    return next();
   }
+  express.json({ limit: '10mb' })(req, res, next);
 });
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+app.use((req, res, next) => {
+  if (req.originalUrl.startsWith("/socket.io")) {
+    return next();
+  }
+  express.urlencoded({ limit: '10mb', extended: true })(req, res, next);
+});
 
 app.use("/api/auth", authRoutes);
 app.use("/api/payment", paymentRoutes);

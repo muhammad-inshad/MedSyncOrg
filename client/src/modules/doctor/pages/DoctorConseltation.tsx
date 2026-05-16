@@ -224,21 +224,23 @@ const fetchConsultation = useCallback(async (page: number) => {
     };
 
     const handleUserJoined = async (socketId: string) => {
-      console.log("User joined:", socketId);
+      console.log("Patient joined room:", socketId);
       toast.success("Patient has joined the room");
 
-      // If doctor already started the call, send the offer to the new participant
       if (isCallActive && peerConnection.current && currentAppointment?._id) {
         try {
+          console.log("Doctor is already in a call, re-sending offer to patient...");
           const offer = await peerConnection.current.createOffer({
-            iceRestart: true // Force fresh ICE gathering
+            iceRestart: true
           });
           await peerConnection.current.setLocalDescription(offer);
           socket.emit("offer", { roomId: currentAppointment._id, offer });
-          console.log("Offer re-sent to new participant:", socketId);
+          console.log("Offer re-sent successfully");
         } catch (err) {
           console.error("Error re-sending offer:", err);
         }
+      } else {
+        console.log("Patient joined, but doctor call not active yet. Waiting for doctor to start call.");
       }
     };
 
@@ -253,7 +255,7 @@ const fetchConsultation = useCallback(async (page: number) => {
       socket.off("ice-candidate", handleIceCandidate);
       socket.off("user-joined", handleUserJoined);
     };
-  }, [currentAppointment]);
+  }, [currentAppointment, isCallActive]);
 
   const handleNext = () => currentIndex < totalTokens && setCurrentIndex(prev => prev + 1);
   const handlePrev = () => currentIndex > 1 && setCurrentIndex(prev => prev - 1);

@@ -248,8 +248,11 @@ const handleStartCall = async () => {
                 if (!peerConnection.current) {
                     console.log("Offer received but no peer connection yet. Storing as pending.");
                     pendingOffer.current = offer;
+                    toast("Doctor is calling...", { icon: '📞' });
                     return;
                 }
+
+                console.log("Handling offer...");
 
                 await peerConnection.current.setRemoteDescription(new RTCSessionDescription(offer));
                 const answer = await peerConnection.current.createAnswer();
@@ -315,7 +318,7 @@ const handleStartCall = async () => {
             socket.off("answer", handleAnswer);
             socket.off("ice-candidate", handleIceCandidate);
         };
-    }, [selectedAppointment]);
+    }, [selectedAppointment, isCallActive]);
     if (loading) {
         return (
             <div className="min-h-screen bg-slate-50 flex flex-col">
