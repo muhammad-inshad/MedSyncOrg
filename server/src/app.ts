@@ -58,7 +58,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With', 'Accept'],
 }));
 
-app.use("/api/payment/webhook", express.raw({ type: 'application/json' }));
+app.use("/api/payment/webhook", express.raw({ type: '*/*' }));
 
 
 // 2. Body parsers (with socket.io bypass)

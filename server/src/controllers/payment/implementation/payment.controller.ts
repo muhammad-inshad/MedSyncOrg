@@ -77,6 +77,7 @@ export class PaymentController implements IPaymentController {
             await this.paymentService.handleWebhook(sig, req.body);
             res.status(HttpStatusCode.OK).json({ received: true });
         } catch (error: unknown) {
+            logger.error(`[PaymentController.handleWebhook] Webhook handling failed:`, error);
             const statusCode = error instanceof AppError ? error.statusCode : HttpStatusCode.BAD_REQUEST;
             const message = error instanceof Error ? error.message : "Unknown error";
             res.status(statusCode).send(`Webhook Error: ${message}`);
