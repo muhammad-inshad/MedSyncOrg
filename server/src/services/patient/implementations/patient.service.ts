@@ -327,13 +327,17 @@ export class PatientService implements IPatientService {
     }
 
     const dateObj = new Date(appointmentDate);
+    // Shift the date to IST (+5:30) to get the correct calendar day of the week
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const istDate = new Date(dateObj.getTime() + istOffset);
+    const dayOfWeek = istDate.getUTCDay();
 
     const doctorSchedules = await this._slotreppo.findByDoctorId(doctorId.toString());
 
     const selectedSchedule = doctorSchedules.find(s =>
       s.session === session &&
       s.isActive &&
-      s.daysOfWeek.includes(dateObj.getDay())
+      s.daysOfWeek.includes(dayOfWeek)
     );
 
     if (!selectedSchedule) {
