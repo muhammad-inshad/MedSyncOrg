@@ -20,7 +20,7 @@ const AppRoutes = () => {
         <Route path={PATIENT_ROUTES.OTP} element={<OtpPage />} />
         <Route path={COMMON_ROUTES.FORGETPASSWORD} element={<Forgetpassword />} />
         <Route path={COMMON_ROUTES.RESETPASSWORD} element={<ResetPassword />} />
-        <Route path="/api/auth/google-success" element={<GoogleCallback />} />
+        <Route path="/google-success" element={<GoogleCallback />} />
       </Route>
       <Route path={COMMON_ROUTES.DOCTORSELECTHOSPITAL} element={<SelectHospitalDoctor />} />
       <Route path={COMMON_ROUTES.DOCTORREGISTRATIONFORM} element={<DoctorRegistration />} />
