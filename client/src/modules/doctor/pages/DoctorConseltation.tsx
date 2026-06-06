@@ -114,6 +114,10 @@ const fetchConsultation = useCallback(async (page: number) => {
         }
       };
 
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("Media devices not supported in this browser or requires a secure HTTPS connection.");
+      }
+
       try {
         stream = await navigator.mediaDevices.getUserMedia(constraints);
       } catch (e) {
