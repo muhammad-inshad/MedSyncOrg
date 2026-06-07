@@ -20,7 +20,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.AWS_SSH_KEY }}
           script: |
-            cd /home/ubuntu/MedSyncOrg/server
+            cd /home/ubuntu/MedSyncOrg
             git pull origin main
-            docker compose down
-            docker compose up --build -d
+            sudo docker compose down
+            sudo docker compose up --build -d
