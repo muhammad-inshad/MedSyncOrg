@@ -27,4 +27,5 @@ router.get("/doctors/:doctorId/fee", patientController.getDoctorFee.bind(patient
 router.get("/wallet", patientController.getWallet.bind(patientController));
 router.post("/wallet/add", patientController.addToWallet.bind(patientController));
 router.post("/wallet/withdraw", patientController.withdrawFromWallet.bind(patientController));
+router.get("/locations", patientController.getLocations.bind(patientController));
 export default router;

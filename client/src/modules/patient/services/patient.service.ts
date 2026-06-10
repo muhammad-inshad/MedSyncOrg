@@ -11,12 +11,13 @@ export const PatientService = {
         const response = await api.get(`/api/patient/profile/${id}`);
         return response.data;
     },
-   getHospitals: async (page: number, limit: number, search: string) => {
+   getHospitals: async (page: number, limit: number, search: string, location: string = "") => {
     const response = await api.get('/api/patient/hospitals', {
         params: {
             page,
             limit,
-            search
+            search,
+            location
         }
     });
 

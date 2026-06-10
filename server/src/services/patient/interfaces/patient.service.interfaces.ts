@@ -12,7 +12,7 @@ export interface IPatientService {
   getProfile(userId: string): Promise<PatientResponseDTO | null>;
   updateProfile(id: string, data: Partial<IPatient>): Promise<PatientResponseDTO | null>;
   getAllPatient(query: { page: number; limit: number; search: string }): Promise<{ data: PatientResponseDTO[]; total: number }>;
-  gethospitals(page: number, limit: number, search: string): Promise<IPaginationResult<HospitalResponseDTO>>;
+  gethospitals(page: number, limit: number, search: string, location?: string): Promise<IPaginationResult<HospitalResponseDTO>>;
   changePassword(id: string, current: string, newP: string): Promise<void>;
   selectedHospital(id: string, page: number, limit: number, search: string): Promise<selectedHospitalDto>;
   getDoctorDepartment(id: string, page: number, limit: number, search: string): Promise<IPaginationResult<DoctorResponseDTO>>;
@@ -38,4 +38,7 @@ export interface IPatientService {
 }>;
   addToWallet(patientId: string, amount: number): Promise<void>;
   withdrawFromWallet(patientId: string, amount: number): Promise<void>;
+
+  getLocations(): Promise<string[]>;
 }
+

@@ -63,7 +63,8 @@ class PatientController {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 6;
       const search = (req.query.search as string) || "";
-      const result = await this.patientService.gethospitals(page, limit, search);
+      const location = (req.query.location as string) || "";
+      const result = await this.patientService.gethospitals(page, limit, search, location);
       return ApiResponse.success(res, MESSAGES.ADMIN.FETCH_SUCCESS, {
         hospitals: result.data,
         totalPages: Math.ceil(result.total / limit),
@@ -305,5 +306,16 @@ withdrawFromWallet = async (req: Request, res: Response, next: NextFunction) => 
   }
 }
 
+getLocations = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const locations = await this.patientService.getLocations(); 
+    return ApiResponse.success(res, "Locations fetched successfully", locations); 
+  } catch (error) {
+    next(error);
+  }
+
 }
+}
+
+
 export default PatientController;

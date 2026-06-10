@@ -16,7 +16,11 @@ import { SUPERADMIN_ROUTES } from '@/constants/frontend/superAdmin/superAdmin.ro
 import { authApi } from '@/constants/backend/auth/auth.api';
 import toast from 'react-hot-toast';
 
-const SuperAdminSidebar = () => {
+interface SuperAdminSidebarProps {
+  onClose?: () => void;
+}
+
+const SuperAdminSidebar = ({ onClose }: SuperAdminSidebarProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -44,7 +48,7 @@ const SuperAdminSidebar = () => {
   ]
 
   return (
-    <div className="w-64 bg-white shadow-sm flex flex-col">
+    <div className="w-64 h-full bg-white shadow-sm flex flex-col overflow-y-auto">
       {/* Header */}
       <div className="p-6 border-b flex items-center gap-3">
         <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
@@ -62,6 +66,7 @@ const SuperAdminSidebar = () => {
           <NavLink
             key={item.label}
             to={item.path}
+            onClick={onClose}
             className={({ isActive }) =>
               `w-full flex items-center gap-3 px-4 py-3 rounded-lg mb-1 transition-colors
               ${isActive ? 'bg-gray-900 text-white' : 'text-gray-700 hover:bg-gray-50'}`

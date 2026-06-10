@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import logo from "../../../assets/images/logo.png";
-import { Phone, User, Menu, Bell, Search, X } from "lucide-react";
+import { Phone, User, Menu, Search, X } from "lucide-react";
 import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
 import { useDispatch } from "react-redux";
 import { setSearchQuery } from "@/store/search/searchSlice";
@@ -93,7 +93,7 @@ const handleSelectHospital = () => {
       aria-label="Notifications"
       className="text-gray-600 hover:text-blue-600 transition-colors"
     >
-      <Bell className="w-6 h-6" />
+   
     </button>
   </>
 )}
@@ -175,30 +175,24 @@ const handleSelectHospital = () => {
 
           {/* Menu Links */}
           <nav className="flex-1 flex flex-col items-center justify-center gap-10 text-2xl text-white font-medium">
-            <MobileNavLink to="/patient/dashboard" current={location.pathname} onClick={closeMobileMenu}>
+            <MobileNavLink  to={PATIENT_ROUTES.HOSPITAL_HOMEPAGE}  current={location.pathname}
+  onClick={closeMobileMenu}>
               Home
             </MobileNavLink>
             <MobileNavLink to="/about" current={location.pathname} onClick={closeMobileMenu}>
               About us
             </MobileNavLink>
-            <MobileNavLink to="/services" current={location.pathname} onClick={closeMobileMenu}>
-              Services
-            </MobileNavLink>
-            <MobileNavLink to="/doctors" current={location.pathname} onClick={closeMobileMenu}>
-              Doctors
-            </MobileNavLink>
+            <MobileNavLink
+  to={PATIENT_ROUTES.HOSPITAL_DEPaRTMENTS}
+  current={location.pathname} onClick={closeMobileMenu}
+>
+  Department
+</MobileNavLink>
             <MobileNavLink to="/contact" current={location.pathname} onClick={closeMobileMenu}>
               Contact
             </MobileNavLink>
 
-            {!isHiddenPath && (
-              <button
-                className="mt-8 bg-blue-400 hover:bg-blue-500 text-white px-10 py-4 rounded-full font-medium text-xl transition-colors"
-                onClick={closeMobileMenu}
-              >
-                Book Appointment
-              </button>
-            )}
+        
           </nav>
         </div>
       </div>

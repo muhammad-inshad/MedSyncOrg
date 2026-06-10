@@ -54,7 +54,8 @@ class PatientController {
                 const page = Number(req.query.page) || 1;
                 const limit = Number(req.query.limit) || 6;
                 const search = req.query.search || "";
-                const result = await this.patientService.gethospitals(page, limit, search);
+                const location = req.query.location || "";
+                const result = await this.patientService.gethospitals(page, limit, search, location);
                 return ApiResponse.success(res, MESSAGES.ADMIN.FETCH_SUCCESS, {
                     hospitals: result.data,
                     totalPages: Math.ceil(result.total / limit),
@@ -189,7 +190,8 @@ class PatientController {
                 if (!patientId) {
                     return ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.UNAUTHORIZED);
                 }
-                const appointments = await this.patientService.getTodayAppointments(patientId);
+                const { date } = req.query;
+                const appointments = await this.patientService.getTodayAppointments(patientId, date);
                 console.log(appointments);
                 return ApiResponse.success(res, "Today's appointments fetched successfully", appointments);
             }
@@ -289,6 +291,16 @@ class PatientController {
                 const { amount } = req.body;
                 await this.patientService.withdrawFromWallet(patientId, amount);
                 return ApiResponse.success(res, "Amount withdrawn from wallet successfully");
+            }
+            catch (error) {
+                next(error);
+            }
+        };
+        this.getLocations = async (req, res, next) => {
+            try {
+                console.log("Fetching locations in PatientController");
+                const locations = await this.patientService.getLocations();
+                return ApiResponse.success(res, "Locations fetched successfully", locations);
             }
             catch (error) {
                 next(error);

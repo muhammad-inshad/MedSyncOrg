@@ -231,7 +231,7 @@ const OtpPage = () => {
           )}
         </div>
 
-        <div className="flex justify-center gap-4 mb-8">
+        <div className="flex justify-center gap-2 sm:gap-4 mb-8">
           {otp.map((digit, index) => (
             <input
               key={index}
@@ -249,7 +249,7 @@ const OtpPage = () => {
               onFocus={handleFocus}
               {...(index === 0 ? { onPaste: handlePaste } : {})}
               disabled={isTimerExpired || isLoading}
-              className={`w-14 h-14 text-center text-2xl font-medium border-2 rounded-xl focus:outline-none bg-gray-50 transition-all ${isTimerExpired || isLoading
+              className={`w-10 h-12 sm:w-14 sm:h-14 text-center text-xl sm:text-2xl font-medium border-2 rounded-xl focus:outline-none bg-gray-50 transition-all ${isTimerExpired || isLoading
                 ? 'border-red-300 bg-red-50 cursor-not-allowed opacity-60'
                 : 'border-gray-300 focus:border-blue-600'
                 }`}

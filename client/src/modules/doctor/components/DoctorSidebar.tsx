@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   LayoutDashboard,
   CalendarCheck,
@@ -9,6 +9,8 @@ import {
   ChevronRight,
   Stethoscope,
   Ticket,
+  Menu,
+  X,
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { DOCTOR_ROUTES } from '@/constants/frontend/doctor/doctor.routes';
@@ -58,7 +60,13 @@ const sidebarItems: SidebarItem[] = [
 
 const DoctorSidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+
+  // Close sidebar on route change on mobile
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
    const handleLogout = async () => {
     try {
       await authApi.logout();
@@ -72,14 +80,32 @@ const DoctorSidebar = () => {
 
 
   return (
-    <aside
-      className={`
-        relative flex flex-col bg-white border-r border-gray-200 shadow-sm
-        transition-all duration-300 ease-in-out
-        ${collapsed ? 'w-16' : 'w-64'}
-        min-h-screen
-      `}
-    >
+    <>
+      {/* Mobile Hamburger Button */}
+      <button 
+        onClick={() => setMobileOpen(true)}
+        className="md:hidden fixed top-3 left-4 z-40 p-2 bg-white rounded-md shadow border border-gray-200 text-gray-600"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
+
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`
+          fixed md:relative top-0 left-0 flex flex-col bg-white border-r border-gray-200 shadow-sm
+          transition-all duration-300 ease-in-out z-50
+          ${collapsed ? 'md:w-16 w-64' : 'w-64'}
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          h-screen overflow-y-auto shrink-0
+        `}
+      >
       {/* Logo area */}
       <div className="flex items-center justify-between px-4 py-5 border-b border-gray-100">
         {!collapsed && (
@@ -91,10 +117,13 @@ const DoctorSidebar = () => {
           </div>
         )}
         {collapsed && (
-          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mx-auto">
+          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mx-auto hidden md:flex">
             <Stethoscope className="w-4 h-4 text-white" />
           </div>
         )}
+        <button className="md:hidden text-gray-500 hover:text-gray-700" onClick={() => setMobileOpen(false)}>
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Navigation Items */}
@@ -145,14 +174,15 @@ const DoctorSidebar = () => {
           : <ChevronLeft className="w-3 h-3 text-gray-500" />
         }
       </button>
- <button
+  <button
   onClick={handleLogout}
-  className="p-2 bg-red-500 text-white  hover:bg-red-600 transition-colors"
+  className="p-3 mx-4 mb-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex justify-center items-center font-medium"
   title="Logout"
 >
   LOGOUT
 </button>
     </aside>
+    </>
   );
 };
 

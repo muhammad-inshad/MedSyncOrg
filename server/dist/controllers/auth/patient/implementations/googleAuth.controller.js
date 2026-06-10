@@ -39,7 +39,7 @@ export class GoogleAuthController {
                 name: userPayload.name,
                 role: role
             }));
-            return res.redirect(`${frontendUrl}/api/auth/google-success?user=${userData}&role=${role}`);
+            return res.redirect(`${frontendUrl}/google-success?user=${userData}&role=${role}`);
         }
         catch (error) {
             logger.error("Google Auth Controller Error:", error);

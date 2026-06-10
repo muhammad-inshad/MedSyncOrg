@@ -36,11 +36,11 @@ const PageNotFound = () => {
         </div>
 
         {/* Quick links */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        <div className="flex justify-center mb-6">
         
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition"
+            className="flex items-center justify-center gap-2 px-6 py-3 w-full sm:w-auto bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition"
           >
             <span>↩️</span> Go Back
           </button>

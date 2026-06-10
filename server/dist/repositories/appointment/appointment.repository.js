@@ -6,11 +6,10 @@ export class AppointmentRepository extends BaseRepository {
         super(AppointmentModel);
     }
     async findByDoctorAndDate(doctorId, dateString) {
-        const year = parseInt(dateString.split("-")[0]);
-        const month = parseInt(dateString.split("-")[1]) - 1;
-        const day = parseInt(dateString.split("-")[2]);
-        const startOfDay = new Date(year, month, day, 0, 0, 0, 0);
-        const endOfDay = new Date(year, month, day, 23, 59, 59, 999);
+        const [year, month, day] = dateString.split("-").map(Number);
+        const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+        startOfDay.setHours(startOfDay.getHours() - 12); // Buffer for UTC/IST shift
+        const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
         const query = {
             doctorId,
             appointmentDate: {
@@ -29,11 +28,10 @@ export class AppointmentRepository extends BaseRepository {
         };
     }
     async findtodayconseltation(doctorId, dateString, options) {
-        const year = parseInt(dateString.split("-")[0]);
-        const month = parseInt(dateString.split("-")[1]) - 1;
-        const day = parseInt(dateString.split("-")[2]);
-        const startOfDay = new Date(year, month, day, 0, 0, 0, 0);
-        const endOfDay = new Date(year, month, day, 23, 59, 59, 999);
+        const [year, month, day] = dateString.split("-").map(Number);
+        const startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+        startOfDay.setHours(startOfDay.getHours() - 12);
+        const endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
         const baseQuery = {
             doctorId,
             appointmentDate: {
@@ -64,6 +62,7 @@ export class AppointmentRepository extends BaseRepository {
     async countByDoctorAndDate(doctorId, date) {
         const startOfDay = new Date(date);
         startOfDay.setHours(0, 0, 0, 0);
+        startOfDay.setHours(startOfDay.getHours() - 12);
         const endOfDay = new Date(date);
         endOfDay.setHours(23, 59, 59, 999);
         return await this.model
@@ -123,6 +122,7 @@ export class AppointmentRepository extends BaseRepository {
     async findDuplicate(doctorId, date, patient, session) {
         const startOfDay = new Date(date);
         startOfDay.setHours(0, 0, 0, 0);
+        startOfDay.setHours(startOfDay.getHours() - 12);
         const endOfDay = new Date(date);
         endOfDay.setHours(23, 59, 59, 999);
         return await this.model
@@ -172,6 +172,7 @@ export class AppointmentRepository extends BaseRepository {
         const today = new Date();
         const startOfDay = new Date(today);
         startOfDay.setHours(0, 0, 0, 0);
+        startOfDay.setHours(startOfDay.getHours() - 12); // Buffer for UTC/IST shift
         const endOfDay = new Date(today);
         endOfDay.setHours(23, 59, 59, 999);
         return await this.model
@@ -190,6 +191,7 @@ export class AppointmentRepository extends BaseRepository {
         const today = new Date();
         const startOfDay = new Date(today);
         startOfDay.setHours(0, 0, 0, 0);
+        startOfDay.setHours(startOfDay.getHours() - 12); // Buffer for UTC/IST shift
         const endOfDay = new Date(today);
         endOfDay.setHours(23, 59, 59, 999);
         const appointment = await this.model
@@ -205,12 +207,23 @@ export class AppointmentRepository extends BaseRepository {
             .exec();
         return appointment ? appointment.doctorId.toString() : null;
     }
-    async findPatientAppointmentsToday(patientId) {
-        const today = new Date();
-        const startOfDay = new Date(today);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(today);
-        endOfDay.setHours(23, 59, 59, 999);
+    async findPatientAppointmentsToday(patientId, dateString) {
+        let startOfDay;
+        let endOfDay;
+        if (dateString) {
+            const [year, month, day] = dateString.split("-").map(Number);
+            startOfDay = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+            startOfDay.setHours(startOfDay.getHours() - 12);
+            endOfDay = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+        }
+        else {
+            const today = new Date();
+            startOfDay = new Date(today);
+            startOfDay.setHours(0, 0, 0, 0);
+            startOfDay.setHours(startOfDay.getHours() - 12);
+            endOfDay = new Date(today);
+            endOfDay.setHours(23, 59, 59, 999);
+        }
         return await this.model
             .find({
             bookedBy: new Types.ObjectId(patientId),
@@ -237,6 +250,7 @@ export class AppointmentRepository extends BaseRepository {
     async countByDoctorDateAndSession(doctorId, date, session, mongoSession) {
         const startOfDay = new Date(date);
         startOfDay.setHours(0, 0, 0, 0);
+        startOfDay.setHours(startOfDay.getHours() - 12);
         const endOfDay = new Date(date);
         endOfDay.setHours(23, 59, 59, 999);
         return await this.model

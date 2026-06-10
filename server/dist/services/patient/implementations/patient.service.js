@@ -79,13 +79,17 @@ export class PatientService {
             total: result.total
         };
     }
-    async gethospitals(page, limit, search) {
+    async gethospitals(page, limit, search, location) {
+        const filter = { isActive: true, reviewStatus: "approved" };
+        if (location) {
+            filter.address = location;
+        }
         const result = await this._hospitalRepo.findWithPagination({
             page,
             limit,
             search,
             searchFields: ["hospitalName", "address", "email"],
-            filter: { isActive: true, reviewStatus: "approved" }
+            filter
         });
         return {
             ...result,
@@ -254,10 +258,14 @@ export class PatientService {
             await this._walletRepository.creditWallet(hospitalId.toString(), finalAmount);
         }
         const dateObj = new Date(appointmentDate);
+        // Shift the date to IST (+5:30) to get the correct calendar day of the week
+        const istOffset = 5.5 * 60 * 60 * 1000;
+        const istDate = new Date(dateObj.getTime() + istOffset);
+        const dayOfWeek = istDate.getUTCDay();
         const doctorSchedules = await this._slotreppo.findByDoctorId(doctorId.toString());
         const selectedSchedule = doctorSchedules.find(s => s.session === session &&
             s.isActive &&
-            s.daysOfWeek.includes(dateObj.getDay()));
+            s.daysOfWeek.includes(dayOfWeek));
         if (!selectedSchedule) {
             ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, `No ${session} session available`);
         }
@@ -341,8 +349,8 @@ export class PatientService {
             total: result.total
         };
     }
-    async getTodayAppointments(patientId) {
-        const result = await this._appointmentRepo.findPatientAppointmentsToday(patientId);
+    async getTodayAppointments(patientId, date) {
+        const result = await this._appointmentRepo.findPatientAppointmentsToday(patientId, date);
         return result.map(a => this._appointmentMapper.toDTO(a));
     }
     async cancelAppointment(data) {
@@ -391,5 +399,16 @@ export class PatientService {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, MESSAGES.WALLET.NOT_FOUND);
         }
         await this._walletRepository.debitWallet(patientId, amount);
+    }
+    async getLocations() {
+        const locations = await this._hospitalRepo.findWithPagination({
+            page: 1,
+            limit: 1000,
+            search: "",
+            searchFields: ["address"],
+            filter: { isActive: true, reviewStatus: "approved" }
+        });
+        const uniqueLocations = Array.from(new Set(locations.data.map(h => h.address).filter(Boolean)));
+        return uniqueLocations;
     }
 }

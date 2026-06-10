@@ -87,18 +87,19 @@ export class PatientService implements IPatientService {
     };
   }
 
-  async gethospitals(page: number, limit: number, search: string): Promise<IPaginationResult<HospitalResponseDTO>> {
+  async gethospitals(page: number, limit: number, search: string, location?: string): Promise<IPaginationResult<HospitalResponseDTO>> {
+    const filter: any = { isActive: true, reviewStatus: "approved" };
+    if (location) {
+      filter.address = location;
+    }
+
     const result = await this._hospitalRepo.findWithPagination({
       page,
       limit,
       search,
       searchFields: ["hospitalName", "address", "email"],
-      filter: { isActive: true, reviewStatus: "approved" }
-    });
-
-
-
-    return {
+      filter
+    });    return {
       ...result,
       data: result.data.map(h => this._hospitalMapper.toDTO(h))
     } as IPaginationResult<HospitalResponseDTO>;
@@ -567,5 +568,15 @@ console.log(result)
     await this._walletRepository.debitWallet(patientId, amount);
   }
 
-
+  async getLocations(): Promise<string[]> {
+    const locations = await this._hospitalRepo.findWithPagination({
+      page: 1,
+      limit: 1000,
+      search: "",
+      searchFields: ["address"],
+      filter: { isActive: true, reviewStatus: "approved" }
+    });
+    const uniqueLocations = Array.from(new Set(locations.data.map(h => h.address).filter(Boolean)));
+    return uniqueLocations as string[];
+  }
 }

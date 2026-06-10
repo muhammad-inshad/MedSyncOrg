@@ -8,7 +8,8 @@ import { useAppSelector, useAppDispatch } from "@/hooks/redux";
 import { loadHospitalData } from "@/store/selectedHospital/authThunk";
 import { useNavigate } from "react-router-dom";
 import { PATIENT_ROUTES } from "@/constants/frontend/patient/patient.routes";
-import type { HospitalResponseDTO } from "@/interfaces/HospitalResponse";
+import type { HospitalResponse } from "../../../interfaces/HospitalResponse";
+import {patientApi} from "@/constants/backend/patient/patient.api";
 import { setHospitalSession } from "@/utils/session";
 
 
@@ -17,7 +18,7 @@ const SelectHospital: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const [hospitals, setHospitals] = useState<HospitalResponseDTO[]>([]);
+  const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [selecting, setSelecting] = useState(false);
 
@@ -25,9 +26,11 @@ const SelectHospital: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
 
   const itemsPerPage = 6;
-
+  
   const searchQuery = useAppSelector((state) => state.search.query);
-
+  const [availableLocations, setAvailableLocations] = useState<string[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
+  
   useEffect(() => {
     const fetchHospitals = async () => {
       setLoading(true);
@@ -36,7 +39,8 @@ const SelectHospital: React.FC = () => {
         const response = await PatientService.getHospitals(
           currentPage,
           itemsPerPage,
-          searchQuery
+          searchQuery,
+          selectedLocation
         );
 
         if (response.success) {
@@ -51,8 +55,22 @@ const SelectHospital: React.FC = () => {
     };
 
     fetchHospitals();
-  }, [currentPage, searchQuery]);
+  }, [currentPage, searchQuery, selectedLocation]);
 
+  useEffect(() => {
+    const locations = async () => {
+      try {
+        console.log("Fetching locations...");
+        const response = await patientApi.getLocations();
+        if (response.data && response.data.success) {
+          setAvailableLocations(response.data.data || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch locations:", error);
+      }
+    };
+    locations();
+  }, []);
   const handleSelectHospital = async (hospitalId: string) => {
     if (selecting) return;
     setSelecting(true);
@@ -72,8 +90,29 @@ const SelectHospital: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-
+  
       <main className="grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 w-full">
+        {/* Filter Section */}
+        <div className="flex justify-end mb-6">
+          <div className="w-full sm:w-64">
+            <select
+              value={selectedLocation}
+              onChange={(e) => {
+                setSelectedLocation(e.target.value);
+                setCurrentPage(1); // Reset to first page when filter changes
+              }}
+              className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+            >
+              <option value="">All Locations</option>
+              {availableLocations.map((loc, index) => (
+                <option key={index} value={loc}>
+                  {loc}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-900"></div>
