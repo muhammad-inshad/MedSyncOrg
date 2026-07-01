@@ -113,6 +113,10 @@ const HospitalSchema = new Schema({
     },
     /* ---------------- Subscription ---------------- */
     subscription: {
+        planId: {
+            type: Schema.Types.ObjectId,
+            ref: "Subscription"
+        },
         plan: {
             type: String,
             default: "free",
@@ -133,6 +137,20 @@ const HospitalSchema = new Schema({
         endDate: {
             type: Date,
         },
+        pendingPlanId: {
+            type: Schema.Types.ObjectId,
+            ref: "Subscription"
+        },
+        pendingPlanName: {
+            type: String,
+        },
+        pendingActivationDate: {
+            type: Date,
+        },
+        upgradeType: {
+            type: String,
+            enum: ["upgrade", "downgrade", "new"]
+        }
     },
 }, {
     timestamps: true,

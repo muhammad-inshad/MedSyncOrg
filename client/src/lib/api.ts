@@ -69,6 +69,15 @@ api.interceptors.response.use(
       }
     }
 
+    if (error.response?.status === 413) {
+      error.message = "The uploaded file or data is too large. Please ensure the file size is within the allowed limit (e.g., under 4MB).";
+      if (!error.response.data) {
+        error.response.data = {};
+      }
+      error.response.data.message = error.message;
+      return Promise.reject(error);
+    }
+
     return Promise.reject(error);
   }
 );

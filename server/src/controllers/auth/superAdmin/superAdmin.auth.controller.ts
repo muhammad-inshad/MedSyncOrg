@@ -18,7 +18,6 @@ export class SuperAdminAuthController implements ISuperAdminAuthController {
             if (!email || !password) {
                 ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, MESSAGES.VALIDATION.REQUIRED_FIELD);
             }
-
             const result = await this._SuperadminAuthService.login(email, password);
 
             res.cookie("refreshToken", result.refreshToken, {

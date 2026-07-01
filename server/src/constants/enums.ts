@@ -14,6 +14,7 @@ export enum HttpStatusCode {
     NOT_IMPLEMENTED = 501,
     BAD_GATEWAY = 502,
     SERVICE_UNAVAILABLE = 503,
+    PAYLOAD_TOO_LARGE = 413,
 }
 
 

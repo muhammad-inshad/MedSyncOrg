@@ -56,7 +56,7 @@ export const doctorContainer = () => {
     const slotRepo = new SlotRepository(DoctorScheduleModel);
     const prescriptionRepo = new PrescriptionRepository(PrescriptionModel);
     const HospitalDoctorConfigRepo = new HospitalDoctorConfigRepository();
-    const slotservice = new SlotMangementService(slotRepo, slotmapper);
+    const slotservice = new SlotMangementService(slotRepo, slotmapper, appointmentRepo);
     const slotcontroller = new DoctorSlotManagementController(slotservice);
     const departmentMapper = new DepartmentMapper();
     const qualificationMapper = new QualificationMapper();

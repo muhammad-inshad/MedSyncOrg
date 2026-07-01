@@ -276,13 +276,13 @@ const renderPatientRow = (patient: IPatient) => (
               />
             </div>
 
-            <button
+            {/* <button
               onClick={handleAddPatient}
               className="flex items-center justify-center gap-2 bg-slate-900 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-black transition-all shadow-lg active:scale-95 whitespace-nowrap"
             >
               <Plus className="w-5 h-5" />
               Add New Patient
-            </button>
+            </button> */}
           </div>
         </div>
 

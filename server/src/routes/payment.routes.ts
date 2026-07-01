@@ -12,6 +12,8 @@ router.post("/checkout", hospitalAuthMiddleware.handle, paymentController.checko
 
 router.post("/appointment-checkout", patientAuthMiddleware.handle, paymentController.appointmentCheckout.bind(paymentController));
 
+router.post("/subscription/upgrade", hospitalAuthMiddleware.handle, paymentController.upgradeSubscription.bind(paymentController));
+
 router.post("/webhook", paymentController.handleWebhook.bind(paymentController));
 
 export default router;

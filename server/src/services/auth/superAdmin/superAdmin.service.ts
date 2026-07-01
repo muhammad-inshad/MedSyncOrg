@@ -23,6 +23,7 @@ export class SuperAdminAuthService implements ISuperAdminAuthService {
             ApiResponse.throwError(HttpStatusCode.UNAUTHORIZED, MESSAGES.AUTH.LOGIN_FAILED);
         }
         const isMatch = await bcrypt.compare(password, superAdmin!.password!);
+
         if (!isMatch) {
             ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, MESSAGES.AUTH.LOGIN_FAILED);
         }

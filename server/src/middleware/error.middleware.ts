@@ -22,6 +22,14 @@ export function errorHandler(
         return ApiResponse.validationError(res, MESSAGES.VALIDATION.INVALID_INPUT, err.issues);
     }
 
+    if (err.name === 'MulterError' && (err as any).code === 'LIMIT_FILE_SIZE') {
+        return ApiResponse.error(res, "The uploaded file is too large. Please ensure the file size is within the allowed limit.", null, HttpStatusCode.PAYLOAD_TOO_LARGE);
+    }
+
+    if ((err as any).type === 'entity.too.large') {
+        return ApiResponse.error(res, "The request payload is too large. Please ensure data size is within the allowed limit.", null, HttpStatusCode.PAYLOAD_TOO_LARGE);
+    }
+
     let statusCode = HttpStatusCode.INTERNAL_SERVER_ERROR;
     if ('statusCode' in err && typeof err.statusCode === 'number') {
         statusCode = err.statusCode;

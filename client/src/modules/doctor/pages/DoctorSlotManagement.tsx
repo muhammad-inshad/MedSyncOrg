@@ -9,6 +9,7 @@ import {
     Moon,
     Repeat,
     Timer,
+    Edit,
 } from 'lucide-react';
 import DoctorSidebar from '../components/DoctorSidebar';
 import { doctorApi } from '@/constants/backend/doctor/doctor.api';
@@ -140,11 +141,12 @@ export default function DoctorSlotManagement() {
     const [confirmDelete, setConfirmDelete] = useState<{ id: string; status: boolean } | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     const fetchSchedules = useCallback(async () => {
         try {
             setIsLoading(true);
-            const response = await doctorApi.getDoctorSchedules({ page: currentPage, limit: 5 });
+            const response = await doctorApi.getDoctorSchedules({ page: currentPage, limit: 3 });
             if (response.data.success) {
                 setSchedules(response.data.data || []);
                 const pagination = response.data.pagination;
@@ -168,6 +170,12 @@ export default function DoctorSlotManagement() {
             const exists = f.sessions.find(s => s.session === session);
             if (exists) return { ...f, sessions: f.sessions.filter(s => s.session !== session) };
             const cfg = SESSION_CONFIG[session];
+            if (editingId) {
+                return {
+                    ...f,
+                    sessions: [{ session, startTime: cfg.defaultStart, endTime: cfg.defaultEnd, slotDuration: '' }],
+                };
+            }
             return {
                 ...f,
                 sessions: [...f.sessions, { session, startTime: cfg.defaultStart, endTime: cfg.defaultEnd, slotDuration: '' }],
@@ -201,19 +209,32 @@ export default function DoctorSlotManagement() {
         if (!validate()) return;
         try {
             setSubmitting(true);
-            const promises = form.sessions.map(s =>
-                doctorApi.createDoctorSchedule({
+            if (editingId) {
+                const s = form.sessions[0];
+                await doctorApi.updateDoctorSchedule(editingId, {
                     daysOfWeek: form.daysOfWeek,
                     session: s.session,
                     startTime: s.startTime,
                     endTime: s.endTime,
                     slotDuration: Number(s.slotDuration),
-                })
-            );
-            await Promise.all(promises);
-            toast.success('Recurring schedule(s) created successfully');
+                });
+                toast.success('Recurring schedule updated successfully');
+            } else {
+                const promises = form.sessions.map(s =>
+                    doctorApi.createDoctorSchedule({
+                        daysOfWeek: form.daysOfWeek,
+                        session: s.session,
+                        startTime: s.startTime,
+                        endTime: s.endTime,
+                        slotDuration: Number(s.slotDuration),
+                    })
+                );
+                await Promise.all(promises);
+                toast.success('Recurring schedule(s) created successfully');
+            }
             setShowForm(false);
             setForm(EMPTY_FORM);
+            setEditingId(null);
             setErrors({});
             fetchSchedules();
         } catch(error:unknown){
@@ -235,6 +256,20 @@ export default function DoctorSlotManagement() {
 
     const handleDelete = (id: string, status: boolean) => {
         setConfirmDelete({ id, status });
+    };
+
+    const handleEdit = (schedule: ScheduleRecord) => {
+        setForm({
+            daysOfWeek: schedule.daysOfWeek,
+            sessions: [{
+                session: schedule.session,
+                startTime: schedule.startTime,
+                endTime: schedule.endTime,
+                slotDuration: String(schedule.slotDuration)
+            }]
+        });
+        setEditingId(schedule.id);
+        setShowForm(true);
     };
 
     const handleConfirmDelete = async () => {
@@ -298,7 +333,7 @@ export default function DoctorSlotManagement() {
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4">
                             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 relative max-h-[90vh] overflow-y-auto">
                                 <button
-                                    onClick={() => { setShowForm(false); setForm(EMPTY_FORM); setErrors({}); }}
+                                    onClick={() => { setShowForm(false); setForm(EMPTY_FORM); setErrors({}); setEditingId(null); }}
                                     className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-slate-100 text-slate-400"
                                 >
                                     <X className="w-5 h-5" />
@@ -309,7 +344,7 @@ export default function DoctorSlotManagement() {
                                         <Repeat className="w-5 h-5 text-blue-500" />
                                     </div>
                                     <div>
-                                        <h2 className="text-lg font-bold text-slate-800">Weekly Recurring Schedule</h2>
+                                        <h2 className="text-lg font-bold text-slate-800">{editingId ? 'Edit Recurring Schedule' : 'Weekly Recurring Schedule'}</h2>
                                         <p className="text-xs text-slate-500">Set availability that repeats every week</p>
                                     </div>
                                 </div>
@@ -449,9 +484,9 @@ export default function DoctorSlotManagement() {
                                         className="w-full py-3 bg-blue-500 text-white rounded-xl font-semibold text-sm hover:bg-blue-600 transition disabled:opacity-60 flex items-center justify-center gap-2"
                                     >
                                         {submitting ? (
-                                            <><Loader2 className="w-4 h-4 animate-spin" /> Creating Schedule...</>
+                                            <><Loader2 className="w-4 h-4 animate-spin" /> {editingId ? 'Updating' : 'Creating'} Schedule...</>
                                         ) : (
-                                            <><Repeat className="w-4 h-4" /> Save Recurring Schedule</>
+                                            <><Repeat className="w-4 h-4" /> Save {editingId ? 'Changes' : 'Recurring Schedule'}</>
                                         )}
                                     </button>
                                 </div>
@@ -500,18 +535,28 @@ export default function DoctorSlotManagement() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button
-                                                onClick={() => handleDelete(schedule.id, schedule.isActive)}
-                                                disabled={deletingId === schedule.id}
-                                                className={`px-4 py-2 rounded-xl text-sm flex items-center gap-2 border transition
-                                                    ${schedule.isActive
-                                                        ? 'text-red-500 border-red-100 hover:bg-red-50 hover:border-red-200'
-                                                        : 'text-green-600 border-green-100 hover:bg-green-50 hover:border-green-200'
-                                                    } disabled:opacity-50`}
-                                            >
-                                                {deletingId === schedule.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                                                {schedule.isActive ? 'Deactivate' : 'Activate'}
-                                            </button>
+                                            <div className="flex flex-col gap-2">
+                                                <button
+                                                    onClick={() => handleEdit(schedule)}
+                                                    disabled={deletingId === schedule.id}
+                                                    className="px-4 py-2 rounded-xl text-sm flex items-center justify-center gap-2 border transition text-blue-600 border-blue-100 hover:bg-blue-50 hover:border-blue-200 disabled:opacity-50"
+                                                >
+                                                    <Edit className="w-3.5 h-3.5" />
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(schedule.id, schedule.isActive)}
+                                                    disabled={deletingId === schedule.id}
+                                                    className={`px-4 py-2 rounded-xl text-sm flex items-center justify-center gap-2 border transition
+                                                        ${schedule.isActive
+                                                            ? 'text-red-500 border-red-100 hover:bg-red-50 hover:border-red-200'
+                                                            : 'text-green-600 border-green-100 hover:bg-green-50 hover:border-green-200'
+                                                        } disabled:opacity-50`}
+                                                >
+                                                    {deletingId === schedule.id && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                                                    {schedule.isActive ? 'Deactivate' : 'Activate'}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 );

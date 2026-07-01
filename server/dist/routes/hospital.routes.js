@@ -54,6 +54,8 @@ router.patch("/specializations/:id/toggle", specializationManagement.toggleStatu
 router.patch("/specializations/:id", upload.single("image"), specializationManagement.updateSpecialization.bind(specializationManagement));
 router.get("/subscription", hospitalSubscriptionController.getActiveSubscriptions.bind(hospitalSubscriptionController));
 router.get("/subscription/protection", hospitalSubscriptionController.protection.bind(hospitalSubscriptionController));
+router.get("/subscription/current", hospitalSubscriptionController.getCurrentSubscription.bind(hospitalSubscriptionController));
+router.post("/subscription/downgrade", hospitalSubscriptionController.downgradeSubscription.bind(hospitalSubscriptionController));
 router.get("/dashboard-stats", dashbordController.getstatus.bind(dashbordController));
 router.get("/getdoctorstatus", dashbordController.getDoctorStatus.bind(dashbordController));
 router.get("/kyc-stats", dashbordController.getKycStats.bind(dashbordController));

@@ -9,8 +9,8 @@ export class SuperAdminMapper implements IMapper<ISuperAdmin, SuperAdminResponse
             email: superAdmin.email,
             isActive: superAdmin.isActive,
             role: "superadmin" as const,
-            createdAt: superAdmin.createdAt,
-            updatedAt: superAdmin.updatedAt,
+            createdAt: superAdmin.createdAt || new Date(),
+            updatedAt: superAdmin.updatedAt || new Date(),
         };
 
         return SuperAdminResponseSchema.parse(dto);

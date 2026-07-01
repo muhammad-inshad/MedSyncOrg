@@ -58,6 +58,25 @@ export class DoctorSlotManagementController {
     };
 
 
+    updateDoctorSchedule = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const doctorId = req.user?.doctorID || req.user?.userId;
+            if (!doctorId) {
+                return ApiResponse.unauthorized(res, "Doctor ID not found in token");
+            }
+            const { id } = req.params;
+            const scheduleData = {
+                ...req.body,
+                doctorId,
+            };
+            await this.slotservice.updateSchedule(id, scheduleData);
+
+            return ApiResponse.success(res, "Recurring schedule updated successfully");
+        } catch (error) {
+            next(error);
+        }
+    };
+
     deleteDoctorSchedule = async (req: Request, res: Response, next: NextFunction) => {
         try {
          

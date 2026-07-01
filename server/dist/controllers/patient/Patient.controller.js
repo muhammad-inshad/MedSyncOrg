@@ -298,7 +298,6 @@ class PatientController {
         };
         this.getLocations = async (req, res, next) => {
             try {
-                console.log("Fetching locations in PatientController");
                 const locations = await this.patientService.getLocations();
                 return ApiResponse.success(res, "Locations fetched successfully", locations);
             }

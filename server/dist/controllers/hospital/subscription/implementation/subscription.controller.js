@@ -29,4 +29,37 @@ export class HospitalSubscriptionController {
             next(error);
         }
     }
+    async downgradeSubscription(req, res, next) {
+        try {
+            const hospitalId = req.user?.userId;
+            const { newPlanId } = req.body;
+            if (!hospitalId) {
+                ApiResponse.unauthorized(res, "Hospital ID not found");
+                return;
+            }
+            if (!newPlanId) {
+                ApiResponse.error(res, "New Plan ID is required", null, 400);
+                return;
+            }
+            await this.subscriptionService.downgradeSubscription(hospitalId, newPlanId);
+            ApiResponse.success(res, "Subscription downgrade scheduled successfully");
+        }
+        catch (error) {
+            next(error);
+        }
+    }
+    async getCurrentSubscription(req, res, next) {
+        try {
+            const hospitalId = req.user?.userId;
+            if (!hospitalId) {
+                ApiResponse.unauthorized(res, "Hospital ID not found");
+                return;
+            }
+            const subscription = await this.subscriptionService.getCurrentSubscription(hospitalId);
+            ApiResponse.success(res, "Current subscription retrieved", subscription);
+        }
+        catch (error) {
+            next(error);
+        }
+    }
 }

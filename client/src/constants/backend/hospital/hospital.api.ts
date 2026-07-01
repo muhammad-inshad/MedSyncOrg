@@ -145,6 +145,15 @@ export const hospitalApi = {
     createPaymentSession: (data: PaymentPayload) =>
     api.post("/api/payment/checkout", data),
     
+    upgradeSubscription: (newPlanId: string) =>
+        api.post(HOSPITAL_MANAGEMENT.SUBSCRIPTION_UPGRADE, { newPlanId }),
+        
+    downgradeSubscription: (newPlanId: string) =>
+        api.post(HOSPITAL_MANAGEMENT.SUBSCRIPTION_DOWNGRADE, { newPlanId }),
+        
+    getCurrentSubscription: () =>
+        api.get(HOSPITAL_MANAGEMENT.SUBSCRIPTION_CURRENT),
+    
     getSubscriptonForProtection:()=>{
        return api.get(HOSPITAL_MANAGEMENT.GETSUBCRITPIONPROTECTION)
     },

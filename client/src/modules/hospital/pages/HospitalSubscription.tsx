@@ -38,21 +38,62 @@ const getDurationDisplay = (plan: ISubscription) => {
   return 'year';
 };
 
-const BillingModal = ({ plan, onClose }: { plan: ISubscription; onClose: () => void }) => {
+const BillingModal = ({ plan, currentSub, onClose }: { plan: ISubscription; currentSub: any; onClose: () => void }) => {
+  const [loading, setLoading] = useState(false);
+  let baseAmount = plan.amount;
+  let upgradeType = "new";
+  let credit = 0;
+
+  if (currentSub?.status === "active" && currentSub.amount >= 0) {
+    if (plan.amount > currentSub.amount) {
+      upgradeType = "upgrade";
+      const start = new Date(currentSub.startDate).getTime();
+      const end = new Date(currentSub.endDate).getTime();
+      const now = new Date().getTime();
+      if (end > start && end > now) {
+        const totalDays = (end - start) / (1000 * 60 * 60 * 24);
+        const remainingDays = (end - now) / (1000 * 60 * 60 * 24);
+        credit = (currentSub.amount / totalDays) * remainingDays;
+        baseAmount = Math.max(0, baseAmount - credit);
+      }
+    } else if (plan.amount < currentSub.amount) {
+      upgradeType = "downgrade";
+      baseAmount = 0; // Downgrade doesn't cost anything right now
+    }
+  }
+
   const taxRate = 0.1;
-  const taxAmount = plan.amount * taxRate;
-  const totalAmount = plan.amount + taxAmount;
+  const taxAmount = baseAmount * taxRate;
+  const totalAmount = baseAmount + taxAmount;
+
   const handlePayment = async () => {
     try {
-      const res = await hospitalApi.createPaymentSession({ planId: plan.id });
-     if (res.data?.url) {
-  window.location.href = res.data.url;
-} else {
-  showToast.error("Payment session failed");
-}
+      setLoading(true);
+      if (upgradeType === "downgrade") {
+        await hospitalApi.downgradeSubscription(plan.id);
+        showToast.success(`Downgrade to ${plan.plan} scheduled successfully!`);
+        onClose();
+        // optionally trigger a reload of profile
+      } else if (upgradeType === "upgrade") {
+        const res = await hospitalApi.upgradeSubscription(plan.id);
+        if (res.data?.url) {
+          window.location.href = res.data.url;
+        } else {
+          showToast.error("Payment session failed");
+        }
+      } else {
+        const res = await hospitalApi.createPaymentSession({ planId: plan.id });
+        if (res.data?.url) {
+          window.location.href = res.data.url;
+        } else {
+          showToast.error("Payment session failed");
+        }
+      }
     } catch (error) {
       console.error(error);
-      showToast.error("Payment failed. Please try again.");
+      showToast.error("Failed to process request. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -60,7 +101,9 @@ const BillingModal = ({ plan, onClose }: { plan: ISubscription; onClose: () => v
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all animate-in zoom-in-95 duration-200">
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-          <h2 className="text-xl font-bold text-slate-800">Order Summary</h2>
+          <h2 className="text-xl font-bold text-slate-800">
+            {upgradeType === 'upgrade' ? 'Upgrade Plan' : upgradeType === 'downgrade' ? 'Downgrade Plan' : 'Order Summary'}
+          </h2>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -78,29 +121,50 @@ const BillingModal = ({ plan, onClose }: { plan: ISubscription; onClose: () => v
             <span className="capitalize">{getDurationDisplay(plan)}</span>
           </div>
           <div className="my-6 border-t border-dashed border-slate-200" />
-          <div className="flex justify-between text-slate-600">
-            <span>Base Amount</span>
-            <span>₹{plan.amount.toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between text-slate-500 text-sm">
-            <span>GST (18%)</span>
-            <span>₹{taxAmount.toLocaleString()}</span>
-          </div>
-          <div className="mt-6 bg-slate-900 rounded-2xl p-5 flex justify-between items-center shadow-lg shadow-slate-200">
-            <span className="text-white font-medium">Total Payable</span>
-            <span className="text-white text-2xl font-black">₹{totalAmount.toLocaleString()}</span>
-          </div>
+          
+          {upgradeType === 'downgrade' ? (
+            <div className="text-slate-600 text-sm text-center">
+              Downgrade will take effect automatically when your current plan expires. No payment is required today.
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-between text-slate-600">
+                <span>Plan Price</span>
+                <span>₹{plan.amount.toLocaleString()}</span>
+              </div>
+              {upgradeType === 'upgrade' && credit > 0 && (
+                <div className="flex justify-between text-emerald-600">
+                  <span>Current Plan Credit</span>
+                  <span>-₹{credit.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-slate-600">
+                <span>Base Amount</span>
+                <span>₹{baseAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="flex justify-between text-slate-500 text-sm">
+                <span>GST (18%)</span>
+                <span>₹{taxAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+              </div>
+              <div className="mt-6 bg-slate-900 rounded-2xl p-5 flex justify-between items-center shadow-lg shadow-slate-200">
+                <span className="text-white font-medium">Total Payable</span>
+                <span className="text-white text-2xl font-black">₹{totalAmount.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+              </div>
+            </>
+          )}
         </div>
 
-        <div className="p-8 pt-0 bg-white space-y-3">
+        <div className="p-8 pt-0 bg-white space-y-3 mt-4">
           <button
             onClick={handlePayment}
-            className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-2"
+            disabled={loading}
+            className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            Pay Securely
+            {loading ? 'Processing...' : upgradeType === 'downgrade' ? 'Confirm Downgrade' : 'Pay Securely'}
           </button>
           <button
             onClick={onClose}
+            disabled={loading}
             className="w-full text-slate-400 py-2 text-sm font-medium hover:text-slate-600 transition"
           >
             Cancel and Go Back
@@ -251,16 +315,18 @@ const fetchSubscriptions = useCallback(async () => {
 
                <button
   onClick={() => {
-    if (isSubscriptionActive()) {
-      showToast.error("You can subscribe only after current plan expires");
+    if (isSubscriptionActive() && subscription?.plan === plan.plan) {
+      showToast.error("You are already on this plan");
       return;
     }
-
+    
+    // We allow clicking if it's an active subscription but a different plan (upgrade/downgrade)
+    // or if subscription is expired/not active (new plan)
     setSelectedPlan(plan);
   }}
   className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-indigo-600 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-slate-200"
 >
-  Get Started
+  {subscription?.plan === plan.plan && isSubscriptionActive() ? 'Current Plan' : (isSubscriptionActive() ? (plan.amount > (subscription?.amount || 0) ? 'Upgrade' : 'Downgrade') : 'Get Started')}
 </button>
                 </div>
               ))
@@ -276,6 +342,7 @@ const fetchSubscriptions = useCallback(async () => {
         {selectedPlan && (
           <BillingModal
             plan={selectedPlan}
+            currentSub={subscription}
             onClose={() => setSelectedPlan(null)}
           />
         )}

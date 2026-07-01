@@ -61,6 +61,33 @@ export class PaymentController {
             });
         }
     }
+    async upgradeSubscription(req, res) {
+        try {
+            const { newPlanId } = req.body;
+            const { accessToken } = req.cookies;
+            const decoded = this._token.verifyAccessToken(accessToken);
+            const hospitalId = decoded.userId;
+            if (!newPlanId) {
+                ApiResponse.error(res, "New Plan ID is required", null, HttpStatusCode.BAD_REQUEST);
+                return;
+            }
+            console.log("Initiating upgrade checkout with newPlanId:", newPlanId, "and hospitalId:", hospitalId);
+            const result = await this.paymentService.createCheckoutSession(newPlanId, hospitalId, "upgrade");
+            res.status(HttpStatusCode.OK).json({
+                success: true,
+                url: result.url,
+            });
+        }
+        catch (error) {
+            logger.error("Upgrade checkout session creation failed:", error);
+            const statusCode = error instanceof AppError ? error.statusCode : HttpStatusCode.INTERNAL_SERVER_ERROR;
+            const message = error instanceof Error ? error.message : "Payment failed";
+            res.status(statusCode).json({
+                success: false,
+                message,
+            });
+        }
+    }
     async handleWebhook(req, res) {
         try {
             const sig = req.headers["stripe-signature"];

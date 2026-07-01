@@ -47,6 +47,9 @@ export const doctorApi = {
     createDoctorSchedule: (data: CreateDoctorSchedulePayload) =>
         api.post(DOCTOR_MANAGEMENT.CREATEDOCTORSCHEDULE, data),  
 
+    updateDoctorSchedule: (id: string, data: CreateDoctorSchedulePayload) =>
+        api.put(`${DOCTOR_MANAGEMENT.CREATEDOCTORSCHEDULE}/${id}`, data),
+
     getDoctorSchedules: (params?: { page?: number; limit?: number }) =>
         api.get(DOCTOR_MANAGEMENT.CREATEDOCTORSCHEDULE, { params }),  
 

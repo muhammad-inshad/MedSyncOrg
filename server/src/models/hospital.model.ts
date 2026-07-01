@@ -33,11 +33,16 @@ export interface IHospital extends Document {
   rejectionReason?: string;
 
   subscription: {
+    planId?: mongoose.Types.ObjectId;
     plan: string;
     amount: number;
     status: "active" | "expired" | "cancelled";
     startDate?: Date;
     endDate?: Date;
+    pendingPlanId?: mongoose.Types.ObjectId;
+    pendingPlanName?: string;
+    pendingActivationDate?: Date;
+    upgradeType?: "upgrade" | "downgrade" | "new";
   };
 
   createdAt: Date;
@@ -186,6 +191,11 @@ const HospitalSchema = new Schema<IHospital>(
     /* ---------------- Subscription ---------------- */
 
     subscription: {
+      planId: {
+        type: Schema.Types.ObjectId,
+        ref: "Subscription"
+      },
+
       plan: {
         type: String,
         default: "free",
@@ -210,6 +220,24 @@ const HospitalSchema = new Schema<IHospital>(
       endDate: {
         type: Date,
       },
+
+      pendingPlanId: {
+        type: Schema.Types.ObjectId,
+        ref: "Subscription"
+      },
+
+      pendingPlanName: {
+        type: String,
+      },
+
+      pendingActivationDate: {
+        type: Date,
+      },
+
+      upgradeType: {
+        type: String,
+        enum: ["upgrade", "downgrade", "new"]
+      }
     },
   },
   {

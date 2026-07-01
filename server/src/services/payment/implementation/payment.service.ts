@@ -25,14 +25,33 @@ export class PaymentService implements IPaymentService {
         private readonly _WalletRepository: IWalletRepository
     ) { }
 
-    async createCheckoutSession(planId: string, hospitalId: string): Promise<CheckoutResponseDTO> {
+    async createCheckoutSession(planId: string, hospitalId: string, upgradeType?: "upgrade"): Promise<CheckoutResponseDTO> {
         const plan = await this.subscriptionRepository.findById(planId);
 
         if (!plan) {
             ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Subscription plan not found");
         }
 
-        const baseAmount = plan.amount;
+        const hospital = await this.hospitalRepository.findById(hospitalId);
+        if (!hospital) {
+            ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Hospital not found");
+        }
+
+        let baseAmount = plan.amount;
+
+        // Prorated calculation for upgrades
+        if (upgradeType === "upgrade" && hospital.subscription?.status === "active") {
+            const currentSub = hospital.subscription;
+            if (currentSub.startDate && currentSub.endDate && currentSub.amount > 0) {
+                const totalDays = Math.max(1, (currentSub.endDate.getTime() - currentSub.startDate.getTime()) / (1000 * 60 * 60 * 24));
+                const remainingDays = Math.max(0, (currentSub.endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+                
+                const remainingCredit = (currentSub.amount / totalDays) * remainingDays;
+                
+                baseAmount = Math.max(0, baseAmount - remainingCredit);
+            }
+        }
+
         const taxRate = 0.1;
         const taxAmount = baseAmount * taxRate;
         const totalAmount = baseAmount + taxAmount;
@@ -80,6 +99,7 @@ export class PaymentService implements IPaymentService {
                 metadata: {
                     planId: planId,
                     hospitalId: hospitalId,
+                    upgradeType: upgradeType || "new"
                 },
                 success_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/hospital/payment-success?session_id={CHECKOUT_SESSION_ID}`,
                 cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/hospital/subscription`,
@@ -174,7 +194,7 @@ export class PaymentService implements IPaymentService {
             if (metadata.type === "appointment") {
                 logger.info(`[PaymentService.handleWebhook] Processing appointment for patient: ${metadata.patientId}`);
                 try {
-                    // CRITICAL FIX: Reconstructing the exact object required by AppointmentModel
+
                     const appointmentData: Partial<IAppointment> = {
                         bookedBy: new Types.ObjectId(metadata.patientId),
                         doctorId: new Types.ObjectId(metadata.doctorId),
@@ -183,7 +203,6 @@ export class PaymentService implements IPaymentService {
                         mode: metadata.mode as AppointmentMode,
                         status: AppointmentStatus.PENDING,
 
-                        // Mapping the required strings/numbers back
                         slotStartTime: metadata.slotStartTime,
                         slotEndTime: metadata.slotEndTime,
                         tokenNumber: Number(metadata.tokenNumber),
@@ -211,8 +230,7 @@ export class PaymentService implements IPaymentService {
                 return;
             }
 
-            // Subscription Logic...
-            const { planId, hospitalId } = metadata;
+            const { planId, hospitalId, upgradeType } = metadata;
             if (planId && hospitalId) {
                 const plan = await this.subscriptionRepository.findById(planId);
                 const hospital = await this.hospitalRepository.findById(hospitalId);
@@ -226,27 +244,28 @@ export class PaymentService implements IPaymentService {
                     if (unit === "months") endDate.setMonth(endDate.getMonth() + duration);
                     else if (unit === "years") endDate.setFullYear(endDate.getFullYear() + duration);
 
+        
+                    const newSubscription = {
+                        planId: new Types.ObjectId(planId),
+                        plan: plan.planName,
+                        amount: plan.amount, 
+                        status: "active" as "active" | "expired" | "cancelled",
+                        startDate,
+                        endDate,
+                    };
+
                     await this.hospitalRepository.update(hospitalId, {
                         subscription: {
-                            plan: plan.planName,
-                            amount: plan.amount,
-                            status: "active",
-                            startDate,
-                            endDate,
+                            ...hospital.subscription,
+                            ...newSubscription,
+                            upgradeType: upgradeType as "upgrade" | "downgrade" | "new" || "new",
+                       
+                            ...(upgradeType === 'upgrade' ? { pendingPlanId: undefined, pendingPlanName: undefined, pendingActivationDate: undefined } : {})
                         }
                     });
 
-                   const superAdminId = process.env.SUPER_ADMIN_ID!;
-
-await this._WalletRepository.creditWallet(superAdminId, plan.amount);
-
-                    await this.subscriptionRepository.create({
-                        planName: plan.planName,
-                        amount: plan.amount,
-                        status: "active",
-                        startDate,
-                        endDate,
-                    } as Partial<ISubscription>);
+                    const superAdminId = process.env.SUPER_ADMIN_ID!;
+                    await this._WalletRepository.creditWallet(superAdminId, plan.amount); 
                 }
             }
         }

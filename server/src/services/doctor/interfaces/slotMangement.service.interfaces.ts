@@ -9,4 +9,5 @@ export interface ISlotMangement {
         limit: number
     ): Promise<{ data: SlotResponseDTO[]; total: number }>;
     deleteSchedule(scheduleId: string, doctorId: string,status:boolean): Promise<void>;
+    updateSchedule(scheduleId: string, data: CreateDoctorSchedulePayload): Promise<void>;
 }

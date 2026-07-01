@@ -22,6 +22,7 @@ router.post("/prescription",consultation.prescription.bind(consultation))
 
 router.post("/schedules", slotcontroller.createDoctorSchedule.bind(slotcontroller));
 router.get("/schedules", slotcontroller.getDoctorSchedules.bind(slotcontroller));   
+router.put("/schedules/:id", slotcontroller.updateDoctorSchedule.bind(slotcontroller));
 router.patch("/schedules/:id", slotcontroller.deleteDoctorSchedule.bind(slotcontroller)); 
 
 router.post("/salary-increase-request",doctorDashboard.SALARY_INCREASE_REQUEST .bind(doctorDashboard))

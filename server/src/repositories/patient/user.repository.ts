@@ -18,4 +18,5 @@ export class UserRepository extends BaseRepository<IPatient> implements IUserRep
              { new: true, session }
          );
      }
+
 }

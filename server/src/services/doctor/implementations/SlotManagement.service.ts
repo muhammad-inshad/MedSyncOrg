@@ -6,11 +6,13 @@ import { ISlotMangement } from "../interfaces/slotMangement.service.interfaces.j
 import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.js";
 import { ApiResponse } from "../../../utils/apiResponse.utils.js";
 import { HttpStatusCode } from "../../../constants/enums.js";
+import { IAppointmentRepository } from "../../../repositories/appointment/appointment.repository.interface.js";
 
 export class SlotMangementService implements ISlotMangement {
     constructor(
         private readonly _slotrepo: ISlotRepository,
-        private readonly _slotmapper:SlotMapper
+        private readonly _slotmapper:SlotMapper,
+        private readonly _appointementrepo: IAppointmentRepository
     ) {}
 
 async createSchedule(data: CreateDoctorSchedulePayload): Promise<void> {
@@ -69,15 +71,60 @@ async createSchedule(data: CreateDoctorSchedulePayload): Promise<void> {
   };
 }
 
-    async deleteSchedule(scheduleId: string, doctorId: string,status:boolean): Promise<void> {
-       const isActive=!status
-       console.log(scheduleId)
-         const updated = await this._slotrepo.update(scheduleId, {
-    isActive,
-  });
+    async updateSchedule(scheduleId: string, data: CreateDoctorSchedulePayload): Promise<void> {
+        if (!data.doctorId || !data.daysOfWeek?.length || !data.session) {
+            ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Missing required fields");
+        }
 
-  if (!updated) {
-    throw new Error("Update failed");
-  }
+        const [startH, startM] = data.startTime.split(":").map(Number);
+        const [endH, endM] = data.endTime.split(":").map(Number);
+        const startTotal = startH * 60 + startM;
+        const endTotal = endH * 60 + endM;
+        const totalMinutes = endTotal - startTotal;
+
+        if (totalMinutes <= 0) {
+            ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Invalid time range");
+        }
+
+        const tokenPerDay = Math.floor(totalMinutes / data.slotDuration);
+
+        const payload = {
+            ...data,
+            doctorId: new mongoose.Types.ObjectId(data.doctorId),
+            tokenPerDay,
+        };
+
+        const updated = await this._slotrepo.update(scheduleId, payload);
+        if (!updated) {
+            throw new Error("Update failed");
+        }
+    }
+
+    async deleteSchedule(scheduleId: string, doctorId: string, status: boolean): Promise<void> {
+        const isActive = !status;
+        
+        if (!isActive) {
+            const schedule = await this._slotrepo.findById(scheduleId);
+            if (schedule) {
+                const { appointments } = await this._appointementrepo.findUpcomingAppointments(doctorId, { page: 1, limit: 1000 });
+                
+                const hasExistingAppointments = appointments.some(app => {
+                    const appDay = new Date(app.appointmentDate).getUTCDay();
+                    return app.session === schedule.session && schedule.daysOfWeek.includes(appDay) && app.status !== "cancelled" && app.status !== "completed";
+                });
+                
+                if (hasExistingAppointments) {
+                    ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Cannot deactivate schedule with existing appointments");
+                }
+            }
+        }
+
+        const updated = await this._slotrepo.update(scheduleId, {
+            isActive,
+        });
+
+        if (!updated) {
+            throw new Error("Update failed");
+        }
     }
 }

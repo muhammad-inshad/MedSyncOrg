@@ -48,7 +48,7 @@ const SuperAdminSidebar = ({ onClose }: SuperAdminSidebarProps) => {
   ]
 
   return (
-    <div className="w-64 h-full bg-white shadow-sm flex flex-col overflow-y-auto">
+    <div className="w-64 h-screen sticky top-0 bg-white shadow-sm flex flex-col overflow-y-auto">
       {/* Header */}
       <div className="p-6 border-b flex items-center gap-3">
         <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">

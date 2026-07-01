@@ -1,3 +1,4 @@
+import { Types } from "mongoose";
 import { ISubscriptionRepository } from "../../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.js";
 import { IHospitalSubscriptionService } from "../interfaces/subscription.service.interface.js";
 import { ISubscription } from "../../../../models/subscription.js";
@@ -84,5 +85,51 @@ export class HospitalSubscriptionService implements IHospitalSubscriptionService
 
   return true;
 }
+
+  async getCurrentSubscription(hospitalId: string): Promise<any> {
+      const hospital = await this.hospitalRepository.findById(hospitalId);
+      if (!hospital) {
+          ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Hospital not found");
+      }
+
+      const subscription = hospital.subscription;
+      if (!subscription) {
+          return null;
+      }
+
+      // Check if dynamically expired
+      if (subscription.endDate && new Date() > new Date(subscription.endDate) && subscription.status === "active") {
+          subscription.status = "expired";
+      }
+
+      return subscription;
+  }
+
+  async downgradeSubscription(hospitalId: string, newPlanId: string): Promise<void> {
+      const hospital = await this.hospitalRepository.findById(hospitalId);
+      if (!hospital) {
+          ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Hospital not found");
+      }
+
+      const newPlan = await this.subscriptionRepository.findById(newPlanId);
+      if (!newPlan) {
+          ApiResponse.throwError(HttpStatusCode.NOT_FOUND, "Subscription plan not found");
+      }
+
+      if (!hospital.subscription || hospital.subscription.status !== "active") {
+          ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Cannot downgrade inactive subscription");
+      }
+
+      // Mark as pending downgrade
+      await this.hospitalRepository.update(hospitalId, {
+          subscription: {
+              ...hospital.subscription,
+              pendingPlanId: new Types.ObjectId(newPlanId),
+              pendingPlanName: newPlan.planName,
+              pendingActivationDate: hospital.subscription.endDate,
+              upgradeType: "downgrade"
+          }
+      });
+  }
 
 }
