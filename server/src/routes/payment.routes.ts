@@ -1,7 +1,7 @@
 import express from "express";
-import { paymentContainer } from "../di/payment.di.js";
-import { hospitalContainer } from "../di/hospital.di.js";
-import { patientContainer } from "../di/patient.di.js";
+import { paymentContainer } from "../di/payment.di.ts";
+import { hospitalContainer } from "../di/hospital.di.ts";
+import { patientContainer } from "../di/patient.di.ts";
 
 const router = express.Router();
 const { paymentController } = paymentContainer();
@@ -13,6 +13,7 @@ router.post("/checkout", hospitalAuthMiddleware.handle, paymentController.checko
 router.post("/appointment-checkout", patientAuthMiddleware.handle, paymentController.appointmentCheckout.bind(paymentController));
 
 router.post("/subscription/upgrade", hospitalAuthMiddleware.handle, paymentController.upgradeSubscription.bind(paymentController));
+router.post("/subscription/activate-downgrade", hospitalAuthMiddleware.handle, paymentController.activateDowngradeSubscription.bind(paymentController));
 
 router.post("/webhook", paymentController.handleWebhook.bind(paymentController));
 

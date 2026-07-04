@@ -148,6 +148,10 @@ export const hospitalApi = {
     upgradeSubscription: (newPlanId: string) =>
         api.post(HOSPITAL_MANAGEMENT.SUBSCRIPTION_UPGRADE, { newPlanId }),
         
+    activatePendingDowngrade: (planId: string) =>
+        api.post(HOSPITAL_MANAGEMENT.SUBSCRIPTION_ACTIVATE_DOWNGRADE, { planId }),
+
+        
     downgradeSubscription: (newPlanId: string) =>
         api.post(HOSPITAL_MANAGEMENT.SUBSCRIPTION_DOWNGRADE, { newPlanId }),
         

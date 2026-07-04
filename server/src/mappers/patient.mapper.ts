@@ -1,6 +1,6 @@
-import { IMapper } from "../interfaces/mapper.interface.js";
-import { IPatient } from "../models/Patient.model.js";
-import { PatientResponseDTO, PatientResponseSchema } from "../dto/patient/patient-response.dto.js";
+import { IMapper } from "../interfaces/mapper.interface.ts";
+import { IPatient } from "../models/Patient.model.ts";
+import { PatientResponseDTO, PatientResponseSchema } from "../dto/patient/patient-response.dto.ts";
 export class PatientMapper implements IMapper<IPatient, PatientResponseDTO> {
     toDTO(patient: IPatient): PatientResponseDTO {
         // 1. Define the object FIRST

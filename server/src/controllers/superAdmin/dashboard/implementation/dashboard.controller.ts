@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { ISuperAdminDashboardController } from "../interfaces/dashboard.controller.interface.js";
-import { ISuperAdminDashboardService } from "../../../../services/superAdmin/dashboard/interfaces/dashboard.service.interface.js";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
-import { HttpStatusCode } from "../../../../constants/enums.js";
-import { ITokenPayload } from "../../../../services/token/token.service.interface.js";
+import { ISuperAdminDashboardController } from "../interfaces/dashboard.controller.interface.ts";
+import { ISuperAdminDashboardService } from "../../../../services/superAdmin/dashboard/interfaces/dashboard.service.interface.ts";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
+import { ITokenPayload } from "../../../../services/token/token.service.interface.ts";
 
 export class SuperAdminDashboardController implements ISuperAdminDashboardController {
     constructor(private readonly service: ISuperAdminDashboardService) { }

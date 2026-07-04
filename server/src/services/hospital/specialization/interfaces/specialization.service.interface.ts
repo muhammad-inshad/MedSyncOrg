@@ -1,5 +1,5 @@
-import { ISpecialization } from "../../../../models/specialization.model.js";
-import { SpecializationResponseDTO } from "../../../../dto/hospital/specialization-response.dto.js";
+import { ISpecialization } from "../../../../models/specialization.model.ts";
+import { SpecializationResponseDTO } from "../../../../dto/hospital/specialization-response.dto.ts";
 
 export interface ISpecializationService {
     getSpecializations(

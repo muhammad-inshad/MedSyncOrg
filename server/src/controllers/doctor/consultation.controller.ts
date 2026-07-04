@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { IAppointments } from "../../services/doctor/interfaces/appointment.service.interfaces.js";
-import { ApiResponse } from "../../utils/apiResponse.utils.js";
-import { HttpStatusCode } from "../../constants/enums.js";
-import logger from "../../utils/logger.js";
+import { IAppointments } from "../../services/doctor/interfaces/appointment.service.interfaces.ts";
+import { ApiResponse } from "../../utils/apiResponse.utils.ts";
+import { HttpStatusCode } from "../../constants/enums.ts";
+import logger from "../../utils/logger.ts";
 
-import { AppointmentStatus } from "../../models/appointment.js";
+import { AppointmentStatus } from "../../models/appointment.ts";
 
 export class Consultation {
     constructor(private readonly _appointmentService: IAppointments) { }

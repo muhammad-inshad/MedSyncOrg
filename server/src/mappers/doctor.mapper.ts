@@ -1,6 +1,6 @@
-import { IMapper } from "../interfaces/mapper.interface.js";
-import { IDoctor } from "../models/doctor.model.js";
-import { DoctorResponseDTO, DoctorResponseSchema } from "../dto/doctor/doctor-response.dto.js";
+import { IMapper } from "../interfaces/mapper.interface.ts";
+import { IDoctor } from "../models/doctor.model.ts";
+import { DoctorResponseDTO, DoctorResponseSchema } from "../dto/doctor/doctor-response.dto.ts";
 export class DoctorMapper implements IMapper<IDoctor, DoctorResponseDTO> {
     toDTO(doctor: IDoctor): DoctorResponseDTO {
         // Explicitly extract and convert values to match the DTO expectations

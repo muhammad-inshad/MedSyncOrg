@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 
-import { ISlotMangement } from "../../services/doctor/interfaces/slotMangement.service.interfaces.js";
-import { ApiResponse } from "../../utils/apiResponse.utils.js";
-import { PaginationMeta } from "../../interfaces/pagination.js";
+import { ISlotMangement } from "../../services/doctor/interfaces/slotMangement.service.interfaces.ts";
+import { ApiResponse } from "../../utils/apiResponse.utils.ts";
+import { PaginationMeta } from "../../interfaces/pagination.ts";
 
 export class DoctorSlotManagementController {
     constructor(private readonly slotservice: ISlotMangement) {}

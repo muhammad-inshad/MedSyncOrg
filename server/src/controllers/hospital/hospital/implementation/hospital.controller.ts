@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
-import { MESSAGES } from "../../../../constants/messages.js";
-import { ITokenPayload } from "../../../../services/token/token.service.interface.js";
-import { IHospitalController } from "../interfaces/hospital.controller.interface.js";
-import { IHospitalService } from "../../../../services/hospital/hospital/interfaces/hospital.services.interfaces.js";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
+import { MESSAGES } from "../../../../constants/messages.ts";
+import { ITokenPayload } from "../../../../services/token/token.service.interface.ts";
+import { IHospitalController } from "../interfaces/hospital.controller.interface.ts";
+import { IHospitalService } from "../../../../services/hospital/hospital/interfaces/hospital.services.interfaces.ts";
 
 export class HospitalController implements IHospitalController {
     constructor(private readonly _hospitalService: IHospitalService) { }

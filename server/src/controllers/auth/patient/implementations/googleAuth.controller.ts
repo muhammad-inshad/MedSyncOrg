@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { ITokenService } from '../../../../services/token/token.service.interface.js';
-import { IPatient } from '../../../../models/Patient.model.js';
-import logger from '../../../../utils/logger.js';
+import { ITokenService } from '../../../../services/token/token.service.interface.ts';
+import { IPatient } from '../../../../models/Patient.model.ts';
+import logger from '../../../../utils/logger.ts';
 
 export class GoogleAuthController {
   private tokenService: ITokenService;
@@ -19,7 +19,6 @@ export class GoogleAuthController {
 
       const userPayload = user.toObject ? user.toObject() : user;
 
-      // Get role from state, default to 'patient'
       const role = (req.query.state as string) || 'patient';
 
       const cleanPayload = {

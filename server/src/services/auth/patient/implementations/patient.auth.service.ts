@@ -1,22 +1,22 @@
 import bcrypt from "bcryptjs";
-import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.js";
-import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.js";
-import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.js";
-import { LoginDTO, SignupDTO } from "../../../../dto/auth/signup.dto.js";
-import { PatientResponseDTO } from "../../../../dto/patient/patient-response.dto.js";
-import { IPatientAuthService } from "../interfaces/patient.auth.service.interface.js";
-import { ITokenService } from "../../../token/token.service.interface.js";
-import { AuthResponse } from "../../../../interfaces/auth.types.js";
-import { IPatient } from "../../../../models/Patient.model.js";
-import { HttpStatusCode } from "../../../../constants/enums.js";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
-import { MESSAGES } from "../../../../constants/messages.js";
-import { PatientMapper } from "../../../../mappers/patient.mapper.js";
+import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
+import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.ts";
+import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
+import { LoginDTO, SignupDTO } from "../../../../dto/auth/signup.dto.ts";
+import { PatientResponseDTO } from "../../../../dto/patient/patient-response.dto.ts";
+import { IPatientAuthService } from "../interfaces/patient.auth.service.interface.ts";
+import { ITokenService } from "../../../token/token.service.interface.ts";
+import { AuthResponse } from "../../../../interfaces/auth.types.ts";
+import { IPatient } from "../../../../models/Patient.model.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
+import { MESSAGES } from "../../../../constants/messages.ts";
+import { PatientMapper } from "../../../../mappers/patient.mapper.ts";
 
-import { SuccessResponseDTO, SuccessResponseSchema } from "../../../../dto/auth/success-response.dto.js";
-import { TokenResponseDTO, TokenResponseSchema } from "../../../../dto/auth/token-response.dto.js";
+import { SuccessResponseDTO, SuccessResponseSchema } from "../../../../dto/auth/success-response.dto.ts";
+import { TokenResponseDTO, TokenResponseSchema } from "../../../../dto/auth/token-response.dto.ts";
 
-import { Role } from "../../../../constants/enums.js";
+import { Role } from "../../../../constants/enums.ts";
 
 export class PatientAuthService implements IPatientAuthService {
   constructor(
@@ -28,6 +28,18 @@ export class PatientAuthService implements IPatientAuthService {
   ) { }
 
   async signup(signupData: SignupDTO): Promise<PatientResponseDTO> {
+    if(signupData.name.trim()===""||signupData.name.trim().length<3){
+      ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "invalide name");
+    }
+    if(signupData.password.trim()===""||signupData.password.trim().length<6){
+      ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "invalide password");
+    }
+    if(signupData.phone.toString().trim()===""||signupData.phone.toString().trim().length<10){
+      ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "invalide phone number");
+    }
+    if(signupData.email.trim()===""||!signupData.email.includes("@")){
+      ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "invalide email");
+    } 
     const existingUser = await this._userRepository.findByEmail(signupData.email);
     if (existingUser) {
       ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, MESSAGES.AUTH.ALREADY_EXISTS);

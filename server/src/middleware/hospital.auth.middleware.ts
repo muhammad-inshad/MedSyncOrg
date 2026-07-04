@@ -1,11 +1,11 @@
 // middlewares/hospital.auth.middleware.ts
 import { Request, Response, NextFunction } from "express";
-import { HttpStatusCode } from "../constants/enums.js";
+import { HttpStatusCode } from "../constants/enums.ts";
 
 
-import logger from "../utils/logger.js";
-import { IHospitalRepository } from "../repositories/hospital/hospital.repository.interface.js";
-import { ITokenService } from "../services/token/token.service.interface.js";
+import logger from "../utils/logger.ts";
+import { IHospitalRepository } from "../repositories/hospital/hospital.repository.interface.ts";
+import { ITokenService } from "../services/token/token.service.interface.ts";
 
 export class HospitalAuthMiddleware {
   constructor(

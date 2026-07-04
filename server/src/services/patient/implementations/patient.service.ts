@@ -1,38 +1,38 @@
-import { IPatient } from "../../../models/Patient.model.js";
-import { IPatientService } from "../interfaces/patient.service.interfaces.js";
-import { IUserRepository } from "../../../repositories/patient/user.repository.interface.js";
-import { IHospitalRepository } from "../../../repositories/hospital/hospital.repository.interface.js";
-import { IDepartmentRepository } from "../../../repositories/hospital/department.repository.interface.js";
-import { IDoctorRepository } from "../../../repositories/doctor/doctor.repository.interface.js";
-import { IAppointmentRepository } from "../../../repositories/appointment/appointment.repository.interface.js";
-import { IQualificationRepository } from "../../../repositories/hospital/qualification.repository.interface.js";
-import { ISpecializationRepository } from "../../../repositories/hospital/specialization.repository.interface.js";
-import { ISubscriptionRepository } from "../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.js";
-import { HttpStatusCode } from "../../../constants/enums.js";
-import { MESSAGES } from "../../../constants/messages.js";
-import { ApiResponse } from "../../../utils/apiResponse.utils.js";
-import { IAppointment, AppointmentStatus } from "../../../models/appointment.js";
-import { IPaginationResult } from "../../../types/hospital.types.js";
+import { IPatient } from "../../../models/Patient.model.ts";
+import { IPatientService } from "../interfaces/patient.service.interfaces.ts";
+import { IUserRepository } from "../../../repositories/patient/user.repository.interface.ts";
+import { IHospitalRepository } from "../../../repositories/hospital/hospital.repository.interface.ts";
+import { IDepartmentRepository } from "../../../repositories/hospital/department.repository.interface.ts";
+import { IDoctorRepository } from "../../../repositories/doctor/doctor.repository.interface.ts";
+import { IAppointmentRepository } from "../../../repositories/appointment/appointment.repository.interface.ts";
+import { IQualificationRepository } from "../../../repositories/hospital/qualification.repository.interface.ts";
+import { ISpecializationRepository } from "../../../repositories/hospital/specialization.repository.interface.ts";
+import { ISubscriptionRepository } from "../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
+import { MESSAGES } from "../../../constants/messages.ts";
+import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
+import { IAppointment, AppointmentStatus } from "../../../models/appointment.ts";
+import { IPaginationResult } from "../../../types/hospital.types.ts";
 import { MongoServerError } from "mongodb";
 import bcrypt from "bcryptjs";
-import { selectedHospitalDto, HospitalResponseDTO, SelectedHospitalSchema } from "../../../dto/hospital/hospital-response.dto.js";
-import { PatientResponseDTO } from "../../../dto/patient/patient-response.dto.js";
-import { DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.js";
-import { AppointmentResponseDTO } from "../../../dto/appointment/appointment-response.dto.js";
-import { PatientMapper } from "../../../mappers/patient.mapper.js";
-import { HospitalMapper } from "../../../mappers/hospital.mapper.js";
-import { DoctorMapper } from "../../../mappers/doctor.mapper.js";
-import { AppointmentMapper } from "../../../mappers/appointment.mapper.js";
+import { selectedHospitalDto, HospitalResponseDTO, SelectedHospitalSchema } from "../../../dto/hospital/hospital-response.dto.ts";
+import { PatientResponseDTO } from "../../../dto/patient/patient-response.dto.ts";
+import { DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.ts";
+import { AppointmentResponseDTO } from "../../../dto/appointment/appointment-response.dto.ts";
+import { PatientMapper } from "../../../mappers/patient.mapper.ts";
+import { HospitalMapper } from "../../../mappers/hospital.mapper.ts";
+import { DoctorMapper } from "../../../mappers/doctor.mapper.ts";
+import { AppointmentMapper } from "../../../mappers/appointment.mapper.ts";
 import mongoose, { Types } from "mongoose";
-import { IPrescriptionRepository } from "../../../repositories/Prescription/prescription.repository.interface.js";
-import { PrescriptionMapper } from "../../../mappers/prescription.mapper.js";
-import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-response.dto.js";
-import { ISlotRepository } from "../../../repositories/slot/slot.repository.interface.js";
-import { SlotMapper } from "../../../mappers/slot.mapper.js";
-import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.js";
-import { HospitalDoctorConfigRepository } from "../../../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.js";
-import { IWalletRepository } from "../../../repositories/wallet/wallet.repository.interface.js";
-import logger from "../../../utils/logger.js";
+import { IPrescriptionRepository } from "../../../repositories/Prescription/prescription.repository.interface.ts";
+import { PrescriptionMapper } from "../../../mappers/prescription.mapper.ts";
+import { PrescriptionResponseDTO } from "../../../dto/patient/prescription-response.dto.ts";
+import { ISlotRepository } from "../../../repositories/slot/slot.repository.interface.ts";
+import { SlotMapper } from "../../../mappers/slot.mapper.ts";
+import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.ts";
+import { HospitalDoctorConfigRepository } from "../../../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.ts";
+import { IWalletRepository } from "../../../repositories/wallet/wallet.repository.interface.ts";
+import logger from "../../../utils/logger.ts";
 
 
 export class PatientService implements IPatientService {
@@ -280,7 +280,7 @@ export class PatientService implements IPatientService {
     if (!doctorId || !appointmentDate || !patientDetails || !hospitalId || !session) {
       ApiResponse.throwError(HttpStatusCode.BAD_REQUEST, "Missing required appointment details");
     }
-
+  
     if (totalAmount !== undefined && totalAmount > 0) {
       logger.info(`[PatientService] Processing payment-related wallet updates for amount: ${totalAmount}`);
 
@@ -418,8 +418,6 @@ export class PatientService implements IPatientService {
             },
             mongoSession
           );
-console.log(result)
-
           await this._userRepo.addHospital(
             patientId,
             hospitalId.toString(),

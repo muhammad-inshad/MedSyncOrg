@@ -1,8 +1,8 @@
 
-import { IOtp } from "../../models/Otp.model.js";
-import { OtpModel } from "../../models/Otp.model.js";
-import { BaseRepository } from "../IBase/BaseRepository.js";
-import { IOtpRepository } from "./otp.repository.interface.js";
+import { IOtp } from "../../models/Otp.model.ts";
+import { OtpModel } from "../../models/Otp.model.ts";
+import { BaseRepository } from "../IBase/BaseRepository.ts";
+import { IOtpRepository } from "./otp.repository.interface.ts";
 
 export class OtpRepository extends BaseRepository<IOtp> implements IOtpRepository {
   constructor() {

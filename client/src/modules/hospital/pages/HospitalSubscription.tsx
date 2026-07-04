@@ -38,10 +38,10 @@ const getDurationDisplay = (plan: ISubscription) => {
   return 'year';
 };
 
-const BillingModal = ({ plan, currentSub, onClose }: { plan: ISubscription; currentSub: any; onClose: () => void }) => {
+const BillingModal = ({ plan, currentSub, isActivateDowngrade, onClose }: { plan: ISubscription; currentSub: any; isActivateDowngrade?: boolean; onClose: () => void }) => {
   const [loading, setLoading] = useState(false);
   let baseAmount = plan.amount;
-  let upgradeType = "new";
+  let upgradeType = isActivateDowngrade ? "activate_downgrade" : "new";
   let credit = 0;
 
   if (currentSub?.status === "active" && currentSub.amount >= 0) {
@@ -81,6 +81,13 @@ const BillingModal = ({ plan, currentSub, onClose }: { plan: ISubscription; curr
         } else {
           showToast.error("Payment session failed");
         }
+      } else if (upgradeType === "activate_downgrade") {
+        const res = await hospitalApi.activatePendingDowngrade(plan.id);
+        if (res.data?.url) {
+          window.location.href = res.data.url;
+        } else {
+          showToast.error("Payment session failed");
+        }
       } else {
         const res = await hospitalApi.createPaymentSession({ planId: plan.id });
         if (res.data?.url) {
@@ -102,7 +109,7 @@ const BillingModal = ({ plan, currentSub, onClose }: { plan: ISubscription; curr
       <div className="rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all animate-in zoom-in-95 duration-200">
         <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
           <h2 className="text-xl font-bold text-slate-800">
-            {upgradeType === 'upgrade' ? 'Upgrade Plan' : upgradeType === 'downgrade' ? 'Downgrade Plan' : 'Order Summary'}
+            {upgradeType === 'upgrade' ? 'Upgrade Plan' : upgradeType === 'downgrade' ? 'Downgrade Plan' : upgradeType === 'activate_downgrade' ? 'Activate Downgrade' : 'Order Summary'}
           </h2>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-200 transition">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,7 +167,7 @@ const BillingModal = ({ plan, currentSub, onClose }: { plan: ISubscription; curr
             disabled={loading}
             className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            {loading ? 'Processing...' : upgradeType === 'downgrade' ? 'Confirm Downgrade' : 'Pay Securely'}
+            {loading ? 'Processing...' : upgradeType === 'downgrade' ? 'Confirm Downgrade' : upgradeType === 'activate_downgrade' ? 'Pay & Activate' : 'Pay Securely'}
           </button>
           <button
             onClick={onClose}
@@ -180,6 +187,7 @@ const HospitalSubscription = () => {
   const [subscriptionPlans, setSubscriptionPlans] = useState<ISubscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPlan, setSelectedPlan] = useState<ISubscription | null>(null);
+  const [isActivateDowngradeMode, setIsActivateDowngradeMode] = useState(false);
   const hospital = useAppSelector((state) => state.auth.profileData);
   const subscription = (hospital as HospitalProfile)?.subscription ?? null;
 
@@ -241,6 +249,31 @@ const fetchSubscriptions = useCallback(async () => {
   return (
     <div className="min-h-screen bg-slate-50 p-6 md:p-12">
       <div className="max-w-7xl mx-auto">
+        {!isSubscriptionActive() && subscription?.pendingPlanId && (
+          <div className="mb-8 bg-amber-50 border border-amber-200 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+            <div>
+              <h3 className="text-lg font-bold text-amber-800 flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                Action Required: Plan Expired
+              </h3>
+              <p className="text-amber-700 mt-1">
+                Your previous plan has expired. You requested a downgrade to <strong>{subscription.pendingPlanName}</strong>. Please activate it now to continue using MedSync.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                const pendingPlan = subscriptionPlans.find(p => p.id === subscription.pendingPlanId);
+                if (pendingPlan) {
+                  setIsActivateDowngradeMode(true);
+                  setSelectedPlan(pendingPlan);
+                }
+              }}
+              className="px-6 py-3 bg-amber-600 text-white font-bold rounded-xl hover:bg-amber-700 transition whitespace-nowrap"
+            >
+              Activate Downgrade
+            </button>
+          </div>
+        )}
 
         {/* Header Section */}
         <div className="text-center mb-12">
@@ -343,7 +376,11 @@ const fetchSubscriptions = useCallback(async () => {
           <BillingModal
             plan={selectedPlan}
             currentSub={subscription}
-            onClose={() => setSelectedPlan(null)}
+            isActivateDowngrade={isActivateDowngradeMode}
+            onClose={() => {
+              setSelectedPlan(null);
+              setIsActivateDowngradeMode(false);
+            }}
           />
         )}
       </div>

@@ -1,10 +1,18 @@
 import { Router } from 'express';
-import { userContainer } from '../di/auth.di.js';
-import { doctorContainer } from '../di/doctor.di.js';
-import { hospitalContainer } from "../di/hospital.di.js";
-import { upload } from "../middleware/multer.middleware.js";
-import { superAdminContainer } from "../di/superAdmin.di.js";
+import { userContainer } from '../di/auth.di.ts';
+import { doctorContainer } from '../di/doctor.di.ts';
+import { hospitalContainer } from "../di/hospital.di.ts";
+import { upload } from "../middleware/multer.middleware.ts";
+import { superAdminContainer } from "../di/superAdmin.di.ts";
 import passport from 'passport';
+import { validate } from '../middleware/validate.middleware.ts';
+import { 
+  loginSchema, 
+  patientSignupSchema, 
+  doctorSignupSchema, 
+  hospitalSignupSchema,
+  resetPasswordSchema
+} from '../validators/auth.validator.ts';
 
 
 const { superAdminAuthController } = superAdminContainer();
@@ -18,17 +26,17 @@ router.post('/send-otp', otpController.sendOtp.bind(otpController));
 router.post("/RegistorDoctor", upload.fields([
   { name: "profileImage", maxCount: 1 },
   { name: "license", maxCount: 1 }
-]), doctorAuthController.registerDoctor.bind(doctorAuthController));
-router.post("/superadmin/login", superAdminAuthController.login.bind(superAdminAuthController));
-router.post('/hospital/login', hospitalAuthController.loginHospital.bind(hospitalAuthController))
-router.post("/hospital/signup", upload.fields([{ name: "logo", maxCount: 1 }, { name: "licence", maxCount: 1 },]), hospitalAuthController.signup.bind(hospitalAuthController));
+]), validate(doctorSignupSchema), doctorAuthController.registerDoctor.bind(doctorAuthController));
+router.post("/superadmin/login", validate(loginSchema), superAdminAuthController.login.bind(superAdminAuthController));
+router.post('/hospital/login', validate(loginSchema), hospitalAuthController.loginHospital.bind(hospitalAuthController))
+router.post("/hospital/signup", upload.fields([{ name: "logo", maxCount: 1 }, { name: "licence", maxCount: 1 },]), validate(hospitalSignupSchema), hospitalAuthController.signup.bind(hospitalAuthController));
 router.post('/verify-otp', otpController.verifyOtp.bind(otpController));
-router.post('/signup', authController.signup.bind(authController));
-router.post('/login', authController.login.bind(authController));
+router.post('/signup', validate(patientSignupSchema), authController.signup.bind(authController));
+router.post('/login', validate(loginSchema), authController.login.bind(authController));
 router.post('/refresh', authController.refresh.bind(authController));
-router.post('/reset-password', authController.resetPassword.bind(authController))
+router.post('/reset-password', validate(resetPasswordSchema), authController.resetPassword.bind(authController))
 router.post('/logout', authController.logout.bind(authController))
-router.post("/doctor/login", doctorAuthController.loginDoctor.bind(doctorAuthController))
+router.post("/doctor/login", validate(loginSchema), doctorAuthController.loginDoctor.bind(doctorAuthController))
 router.get('/google', (req, res, next) => {
   const { role } = req.query;
   passport.authenticate('google', {

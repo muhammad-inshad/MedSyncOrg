@@ -1,12 +1,12 @@
 import "dotenv/config";
 
-import { connectDB } from "./config/db.js";
-import app from "./app.js";
-import { initSocket } from "./socket/socket.js";
+import { connectDB } from "./config/db.ts";
+import app from "./app.ts";
+import { initSocket } from "./socket/socket.ts";
 
 import http from "http";
 
-import logger from "./utils/logger.js";
+import logger from "./utils/logger.ts";
 
 process.on("unhandledRejection", (reason, promise) => {
   logger.error("Unhandled Rejection at:", promise, "reason:", reason);

@@ -1,9 +1,9 @@
 import { FilterQuery, UpdateQuery, Types } from "mongoose";
-import { BaseRepository } from "../IBase/BaseRepository.js";
-import { IDoctorLeave } from "../../models/doctorLeave.model.js";
-import { ILeaveRepository } from "./leave.repository.interface.js";
-import DoctorLeaveModel from "../../models/doctorLeave.model.js";
-import { DoctorModel, IDoctor } from "../../models/doctor.model.js";
+import { BaseRepository } from "../IBase/BaseRepository.ts";
+import { IDoctorLeave } from "../../models/doctorLeave.model.ts";
+import { ILeaveRepository } from "./leave.repository.interface.ts";
+import DoctorLeaveModel from "../../models/doctorLeave.model.ts";
+import { DoctorModel, IDoctor } from "../../models/doctor.model.ts";
 
 export class LeaveRepository extends BaseRepository<IDoctorLeave> implements ILeaveRepository {
     constructor() {
@@ -103,4 +103,6 @@ export class LeaveRepository extends BaseRepository<IDoctorLeave> implements ILe
         }
         return await this.model.findByIdAndUpdate(id, update, { new: true }).exec();
     }
+
+
 }

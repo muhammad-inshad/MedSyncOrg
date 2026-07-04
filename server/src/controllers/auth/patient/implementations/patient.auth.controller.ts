@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { IPatientAuthService } from "../../../../services/auth/patient/interfaces/patient.auth.service.interface.js";
-import { LoginDTO, SignupDTO } from "../../../../dto/auth/signup.dto.js";
-import { IPatientAuthController } from "../interfaces/patient.auth.controller.interface.js";
-import { MESSAGES } from "../../../../constants/messages.js";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
+import { IPatientAuthService } from "../../../../services/auth/patient/interfaces/patient.auth.service.interface.ts";
+import { LoginDTO, SignupDTO } from "../../../../dto/auth/signup.dto.ts";
+import { IPatientAuthController } from "../interfaces/patient.auth.controller.interface.ts";
+import { MESSAGES } from "../../../../constants/messages.ts";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 
 class patientAuthController implements IPatientAuthController {
 

@@ -1,7 +1,7 @@
-import { IAccessTokenPayload } from "../services/token/token.service.interface.js";
-import { IPatient } from "../models/Patient.model.js";
-import { IHospital } from "../models/hospital.model.js";
-import { IDoctor } from "../models/doctor.model.js";
+import { IAccessTokenPayload } from "../services/token/token.service.interface.ts";
+import { IPatient } from "../models/Patient.model.ts";
+import { IHospital } from "../models/hospital.model.ts";
+import { IDoctor } from "../models/doctor.model.ts";
 
 declare global {
     namespace Express {

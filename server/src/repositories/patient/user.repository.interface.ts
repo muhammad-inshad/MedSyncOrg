@@ -1,7 +1,7 @@
 
 import { ClientSession } from "mongoose";
-import { IPatient } from "../../models/Patient.model.js";
-import { IBaseRepository } from "../IBase/IBaseRepository.interface.js";
+import { IPatient } from "../../models/Patient.model.ts";
+import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
 
 export interface IUserRepository extends IBaseRepository<IPatient>{
     getCount(email:string):Promise<number>

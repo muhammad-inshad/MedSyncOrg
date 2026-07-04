@@ -1,4 +1,4 @@
-import { HospitalResponseDTO, UpdateHospitalDTO, selectedHospitalDto } from "../../../../dto/hospital/hospital-response.dto.js";
+import { HospitalResponseDTO, UpdateHospitalDTO, selectedHospitalDto } from "../../../../dto/hospital/hospital-response.dto.ts";
 
 export interface IHospitalService {
     getHospitalProfile(hospitalId: string): Promise<HospitalResponseDTO>;

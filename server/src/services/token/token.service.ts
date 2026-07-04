@@ -1,9 +1,9 @@
 import { randomUUID } from "crypto";
 import jwt, { SignOptions } from "jsonwebtoken";
-import Logger from "../../utils/logger.js";
-import { ApiResponse } from "../../utils/apiResponse.utils.js";
-import { HttpStatusCode } from "../../constants/enums.js";
-import { IAccessTokenPayload, IRefreshTokenPayload, ITokenPayload, ITokenService } from "./token.service.interface.js";
+import Logger from "../../utils/logger.ts";
+import { ApiResponse } from "../../utils/apiResponse.utils.ts";
+import { HttpStatusCode } from "../../constants/enums.ts";
+import { IAccessTokenPayload, IRefreshTokenPayload, ITokenPayload, ITokenService } from "./token.service.interface.ts";
 
 const { JsonWebTokenError, TokenExpiredError } = jwt;
 

@@ -1,8 +1,8 @@
-import { LoginDTO } from "../../../dto/auth/signup.dto.js";
-import { HospitalUploadFiles } from "../../../types/hospital.type.js";
-import { AuthResponse } from "../../../interfaces/auth.types.js";
-import { HospitalResponseDTO } from "../../../dto/hospital/hospital-response.dto.js";
-import { IHospital } from "../../../models/hospital.model.js";
+import { LoginDTO } from "../../../dto/auth/signup.dto.ts";
+import { HospitalUploadFiles } from "../../../types/hospital.type.ts";
+import { AuthResponse } from "../../../interfaces/auth.types.ts";
+import { HospitalResponseDTO } from "../../../dto/hospital/hospital-response.dto.ts";
+import { IHospital } from "../../../models/hospital.model.ts";
 
 export interface IHospitalAuthService {
     signup(hospitalData: Partial<IHospital>, files: HospitalUploadFiles): Promise<{ hospital: HospitalResponseDTO }>;

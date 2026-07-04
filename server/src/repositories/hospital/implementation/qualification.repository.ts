@@ -1,7 +1,7 @@
 import { Model } from "mongoose";
-import { IQualification } from "../../../models/qualification.model.js";
-import { BaseRepository } from "../../IBase/BaseRepository.js";
-import { IQualificationRepository } from "../qualification.repository.interface.js";
+import { IQualification } from "../../../models/qualification.model.ts";
+import { BaseRepository } from "../../IBase/BaseRepository.ts";
+import { IQualificationRepository } from "../qualification.repository.interface.ts";
 
 export class QualificationRepository extends BaseRepository<IQualification> implements IQualificationRepository {
     constructor(model: Model<IQualification>) {

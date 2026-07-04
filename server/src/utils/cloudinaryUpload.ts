@@ -1,4 +1,4 @@
-import cloudinary from "../config/cloudinary.js";
+import cloudinary from "../config/cloudinary.ts";
 import { Readable } from "stream";
 
 export const uploadBufferToCloudinary = (

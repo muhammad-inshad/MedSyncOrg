@@ -1,12 +1,12 @@
-import { IDepartment } from "../../../../models/department.model.js";
-import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.js";
-import { IDepartmentService } from "../interfaces/department.service.interface.js";
-import { ICloudinaryImageService } from "../../../image/interfaces/cloudinary.service.interface.js";
+import { IDepartment } from "../../../../models/department.model.ts";
+import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.ts";
+import { IDepartmentService } from "../interfaces/department.service.interface.ts";
+import { ICloudinaryImageService } from "../../../image/interfaces/cloudinary.service.interface.ts";
 import { Types } from "mongoose";
-import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.js";
-import { DepartmentResponseDTO } from "../../../../dto/hospital/department-response.dto.js";
-import { DepartmentMapper } from "../../../../mappers/department.mapper.js";
-import { IDepartmentFilter } from "../../../../types/hospital.types.js";
+import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.ts";
+import { DepartmentResponseDTO } from "../../../../dto/hospital/department-response.dto.ts";
+import { DepartmentMapper } from "../../../../mappers/department.mapper.ts";
+import { IDepartmentFilter } from "../../../../types/hospital.types.ts";
 
 export class DepartmentService implements IDepartmentService {
     constructor(

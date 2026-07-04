@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { AppointmentMode, AppointmentStatus } from '../../models/appointment.js';
+import { AppointmentMode, AppointmentStatus } from '../../models/appointment.ts';
 
 export const AppointmentResponseSchema = z.object({
     id: z.string(),

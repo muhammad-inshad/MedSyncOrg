@@ -1,10 +1,10 @@
-import { BaseRepository } from "../../../IBase/BaseRepository.js";
+import { BaseRepository } from "../../../IBase/BaseRepository.ts";
 import { FilterQuery } from "mongoose";
-import { ISubscription } from "../../../../models/subscription.js";
-import { ISubscriptionRepository } from "../interfaces/subscription.repository.interface.js";
-import { SubscriptionModel } from "../../../../models/subscription.js";
-import { HospitalModel, IHospital } from "../../../../models/hospital.model.js";
-import { IsubscriptionFilter } from "../../../../types/hospital.types.js";
+import { ISubscription } from "../../../../models/subscription.ts";
+import { ISubscriptionRepository } from "../interfaces/subscription.repository.interface.ts";
+import { SubscriptionModel } from "../../../../models/subscription.ts";
+import { HospitalModel, IHospital } from "../../../../models/hospital.model.ts";
+import { IsubscriptionFilter } from "../../../../types/hospital.types.ts";
 
 export class SubscriptionRepository
   extends BaseRepository<ISubscription>

@@ -1,22 +1,22 @@
 import bcrypt from "bcryptjs";
-import { uploadBufferToCloudinary } from "../../../utils/cloudinaryUpload.js";
-import { ApiResponse } from "../../../utils/apiResponse.utils.js";
-import cloudinary from "../../../config/cloudinary.js";
-import { extractPublicId } from "../../../utils/cloudinaryUpload.js";
-import { ITokenService } from "../../token/token.service.interface.js";
-import { HttpStatusCode } from "../../../constants/enums.js";
-import { MESSAGES } from "../../../constants/messages.js";
-import { UpdateDoctorDTO, DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.js";
-import { DoctorLeaveResponseDTO } from "../../../dto/doctor/doctor-leave-response.dto.js";
-import { IDoctor } from "../../../models/doctor.model.js";
-import { IDoctorRepository } from "../../../repositories/doctor/doctor.repository.interface.js";
-import { IAppointmentRepository } from "../../../repositories/appointment/appointment.repository.interface.js";
-import { ILeaveRepository } from "../../../repositories/leave/leave.repository.interface.js";
-import { IDoctorService } from "../interfaces/doctor.service.interfaces.js";
+import { uploadBufferToCloudinary } from "../../../utils/cloudinaryUpload.ts";
+import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
+import cloudinary from "../../../config/cloudinary.ts";
+import { extractPublicId } from "../../../utils/cloudinaryUpload.ts";
+import { ITokenService } from "../../token/token.service.interface.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
+import { MESSAGES } from "../../../constants/messages.ts";
+import { UpdateDoctorDTO, DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.ts";
+import { DoctorLeaveResponseDTO } from "../../../dto/doctor/doctor-leave-response.dto.ts";
+import { IDoctor } from "../../../models/doctor.model.ts";
+import { IDoctorRepository } from "../../../repositories/doctor/doctor.repository.interface.ts";
+import { IAppointmentRepository } from "../../../repositories/appointment/appointment.repository.interface.ts";
+import { ILeaveRepository } from "../../../repositories/leave/leave.repository.interface.ts";
+import { IDoctorService } from "../interfaces/doctor.service.interfaces.ts";
 import { Types } from "mongoose";
-import { DoctorMapper } from "../../../mappers/doctor.mapper.js";
-import { DoctorLeaveMapper } from "../../../mappers/doctor-leave.mapper.js";
-import { IDoctorLeave } from "../../../models/doctorLeave.model.js";
+import { DoctorMapper } from "../../../mappers/doctor.mapper.ts";
+import { DoctorLeaveMapper } from "../../../mappers/doctor-leave.mapper.ts";
+import { IDoctorLeave } from "../../../models/doctorLeave.model.ts";
 
 export class DoctorService implements IDoctorService {
     constructor(

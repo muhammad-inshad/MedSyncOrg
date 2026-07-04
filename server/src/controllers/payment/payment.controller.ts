@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { createCheckoutSession } from "../../services/payment/payment.service.js";
-import { ApiResponse } from "../../utils/apiResponse.utils.js";
+import { createCheckoutSession } from "../../services/payment/payment.service.ts";
+import { ApiResponse } from "../../utils/apiResponse.utils.ts";
 
-import logger from "../../utils/logger.js";
+import logger from "../../utils/logger.ts";
 
 export const checkoutPayment = async (req: Request, res: Response) => {
   try {

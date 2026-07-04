@@ -1,4 +1,4 @@
-import { IAccessTokenPayload, IRefreshTokenPayload, ITokenPayload } from "../../dto/auth/token-payload.dto.js";
+import { IAccessTokenPayload, IRefreshTokenPayload, ITokenPayload } from "../../dto/auth/token-payload.dto.ts";
 export { IAccessTokenPayload, IRefreshTokenPayload, ITokenPayload };
 
 export interface ITokenService {

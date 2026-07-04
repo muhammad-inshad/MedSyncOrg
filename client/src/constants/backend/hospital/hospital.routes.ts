@@ -41,6 +41,7 @@ export const HOSPITAL_MANAGEMENT = {
     GETSUBCRITPIONPROTECTION:"/api/hospital/subscription/protection",
     SUBSCRIPTION_CURRENT: "/api/hospital/subscription/current",
     SUBSCRIPTION_UPGRADE: "/api/payment/subscription/upgrade",
+    SUBSCRIPTION_ACTIVATE_DOWNGRADE: "/api/payment/subscription/activate-downgrade",
     SUBSCRIPTION_DOWNGRADE: "/api/hospital/subscription/downgrade",
     GETDASHBOARDSTATS:"/api/hospital/dashboard-stats",
     GET_DOCTOR_STATUS:"/api/hospital/getdoctorstatus",

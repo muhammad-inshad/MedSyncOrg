@@ -1,6 +1,8 @@
 import { Router } from "express";
-import { doctorContainer } from "../di/doctor.di.js";
-import { upload } from "../middleware/multer.middleware.js";
+import { doctorContainer } from "../di/doctor.di.ts";
+import { upload } from "../middleware/multer.middleware.ts";
+import { validate } from '../middleware/validate.middleware.ts';
+import { doctorUpdateSchema, leaveSchema, prescriptionSchema } from '../validators/doctor.validator.ts';
 
 const { doctorcontroller, appoimentController,consultation,slotcontroller,doctorDashboard} = doctorContainer()
 const router = Router()
@@ -11,14 +13,14 @@ router.patch("/reapply/:id", doctorcontroller.reapplyDoctor.bind(doctorcontrolle
 router.patch("/profile", upload.fields([
     { name: "profileImage", maxCount: 1 },
     { name: "license", maxCount: 1 }
-]), doctorcontroller.updateDoctor.bind(doctorcontroller));
-router.post("/leaves", upload.single("photo"), doctorcontroller.applyLeave.bind(doctorcontroller))
+]), validate(doctorUpdateSchema), doctorcontroller.updateDoctor.bind(doctorcontroller));
+router.post("/leaves", upload.single("photo"), validate(leaveSchema), doctorcontroller.applyLeave.bind(doctorcontroller))
 router.get("/leaves", doctorcontroller.getDoctorLeaves.bind(doctorcontroller))
 router.get("/appointments/upcoming", appoimentController.getUpcomingAppointments.bind(appoimentController))
 
 router.get("/consultation", consultation.getConsultation.bind(consultation))
 router.patch("/consultation/:id/status", consultation.markAsCompleted.bind(consultation))
-router.post("/prescription",consultation.prescription.bind(consultation))
+router.post("/prescription", validate(prescriptionSchema), consultation.prescription.bind(consultation))
 
 router.post("/schedules", slotcontroller.createDoctorSchedule.bind(slotcontroller));
 router.get("/schedules", slotcontroller.getDoctorSchedules.bind(slotcontroller));   

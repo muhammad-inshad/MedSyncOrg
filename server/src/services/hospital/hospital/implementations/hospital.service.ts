@@ -1,20 +1,20 @@
-import { MESSAGES } from "../../../../constants/messages.js";
-import { HttpStatusCode } from "../../../../constants/enums.js";
-import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.js";
-import { HospitalResponseDTO, UpdateHospitalDTO, selectedHospitalDto, SelectedHospitalSchema } from "../../../../dto/hospital/hospital-response.dto.js";
-import { IHospitalService } from "../interfaces/hospital.services.interfaces.js";
-import { IPatientService } from "../../../../services/patient/interfaces/patient.service.interfaces.js"
-import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
-import { HospitalMapper } from "../../../../mappers/hospital.mapper.js";
-import { IHospital } from "../../../../models/hospital.model.js";
-import Logger from "../../../../utils/logger.js";
+import { MESSAGES } from "../../../../constants/messages.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
+import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.ts";
+import { HospitalResponseDTO, UpdateHospitalDTO, selectedHospitalDto, SelectedHospitalSchema } from "../../../../dto/hospital/hospital-response.dto.ts";
+import { IHospitalService } from "../interfaces/hospital.services.interfaces.ts";
+import { IPatientService } from "../../../../services/patient/interfaces/patient.service.interfaces.ts"
+import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
+import { HospitalMapper } from "../../../../mappers/hospital.mapper.ts";
+import { IHospital } from "../../../../models/hospital.model.ts";
+import Logger from "../../../../utils/logger.ts";
 import bcrypt from "bcryptjs";
-import { ICloudinaryImageService } from "../../../image/interfaces/cloudinary.service.interface.js";
+import { ICloudinaryImageService } from "../../../image/interfaces/cloudinary.service.interface.ts";
 
-import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.js";
-import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.js";
-import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.js";
-import { ISubscriptionRepository } from "../../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.js";
+import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
+import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.ts";
+import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
+import { ISubscriptionRepository } from "../../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.ts";
 
 export class HospitalService implements IHospitalService {
     constructor(

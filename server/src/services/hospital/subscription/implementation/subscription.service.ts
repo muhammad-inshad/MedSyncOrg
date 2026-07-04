@@ -1,15 +1,15 @@
 import { Types } from "mongoose";
-import { ISubscriptionRepository } from "../../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.js";
-import { IHospitalSubscriptionService } from "../interfaces/subscription.service.interface.js";
-import { ISubscription } from "../../../../models/subscription.js";
-import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.js";
-import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.js";
-import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.js";
-import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.js";
-import { SubscriptionResponseDTO } from "../../../../dto/subscription/subscription-response.dto.js";
-import { SubscriptionMapper } from "../../../../mappers/subscription.mapper.js";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
-import { HttpStatusCode } from "../../../../constants/enums.js";
+import { ISubscriptionRepository } from "../../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.ts";
+import { IHospitalSubscriptionService } from "../interfaces/subscription.service.interface.ts";
+import { ISubscription } from "../../../../models/subscription.ts";
+import { IHospitalRepository } from "../../../../repositories/hospital/hospital.repository.interface.ts";
+import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
+import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.ts";
+import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
+import { SubscriptionResponseDTO } from "../../../../dto/subscription/subscription-response.dto.ts";
+import { SubscriptionMapper } from "../../../../mappers/subscription.mapper.ts";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
 
 
 export class HospitalSubscriptionService implements IHospitalSubscriptionService {

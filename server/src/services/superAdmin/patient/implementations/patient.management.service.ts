@@ -1,13 +1,13 @@
-import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.js";
+import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
 import bcrypt from "bcryptjs";
-import { PatientMapper } from "../../../../mappers/patient.mapper.js";
-import { IPaginationResult, IPatientFilter } from "../../../../types/hospital.types.js";
-import { PatientResponseDTO, CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.js";
-import { ISuperAdminPatientManagementService } from "../interfaces/patient.management.service.interface.js";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
-import { HttpStatusCode } from "../../../../constants/enums.js";
-import { uploadBufferToCloudinary, deleteFromCloudinary } from "../../../../utils/cloudinaryUpload.js";
-import { IPatient } from "../../../../models/Patient.model.js";
+import { PatientMapper } from "../../../../mappers/patient.mapper.ts";
+import { IPaginationResult, IPatientFilter } from "../../../../types/hospital.types.ts";
+import { PatientResponseDTO, CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.ts";
+import { ISuperAdminPatientManagementService } from "../interfaces/patient.management.service.interface.ts";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
+import { uploadBufferToCloudinary, deleteFromCloudinary } from "../../../../utils/cloudinaryUpload.ts";
+import { IPatient } from "../../../../models/Patient.model.ts";
 import { Types } from "mongoose";
 
 export class SuperAdminPatientManagementService implements ISuperAdminPatientManagementService {

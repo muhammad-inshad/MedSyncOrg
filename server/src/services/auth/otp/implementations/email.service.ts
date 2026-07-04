@@ -1,6 +1,6 @@
-import { transporter } from "../../../../utils/otp/mail.util.js";
-import { IEmailService } from "../interfaces/email.otp.interface.js";
-import { SuccessResponseDTO, SuccessResponseSchema } from "../../../../dto/auth/success-response.dto.js";
+import { transporter } from "../../../../utils/otp/mail.util.ts";
+import { IEmailService } from "../interfaces/email.otp.interface.ts";
+import { SuccessResponseDTO, SuccessResponseSchema } from "../../../../dto/auth/success-response.dto.ts";
 
 export class EmailService implements IEmailService {
   async sendOtpEmail(to: string, otp: string): Promise<SuccessResponseDTO> {

@@ -1,5 +1,5 @@
-import { HospitalResponseDTO } from "../../../../dto/hospital/hospital-response.dto.js";
-import { CreateSubscription, SubscriptionResponseDTO, UpdateSubscriptionDTO } from "../../../../dto/subscription/subscription-response.dto.js";
+import { HospitalResponseDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
+import { CreateSubscription, SubscriptionResponseDTO, UpdateSubscriptionDTO } from "../../../../dto/subscription/subscription-response.dto.ts";
 
 export interface ISubscriptionResult {
     data: SubscriptionResponseDTO[];

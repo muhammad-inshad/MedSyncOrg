@@ -1,6 +1,6 @@
-import { BaseRepository } from "../IBase/BaseRepository.js";
-import { IHospital } from "../../models/hospital.model.js";
-import { IHospitalRepository } from "./hospital.repository.interface.js";
+import { BaseRepository } from "../IBase/BaseRepository.ts";
+import { IHospital } from "../../models/hospital.model.ts";
+import { IHospitalRepository } from "./hospital.repository.interface.ts";
 
 export class HospitalRepository extends BaseRepository<IHospital> implements IHospitalRepository {
     async startSession(hospitalId: string): Promise<Date> {

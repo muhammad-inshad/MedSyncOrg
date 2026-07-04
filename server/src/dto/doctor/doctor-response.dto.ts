@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { Types } from 'mongoose';
-import { IDepartment } from '../../models/department.model.js';
-import { ISpecialization } from '../../models/specialization.model.js';
-import { IQualification } from '../../models/qualification.model.js';
+import { IDepartment } from '../../models/department.model.ts';
+import { ISpecialization } from '../../models/specialization.model.ts';
+import { IQualification } from '../../models/qualification.model.ts';
 
 export const DoctorResponseSchema = z.object({
     id: z.string(),

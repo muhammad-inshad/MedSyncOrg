@@ -1,5 +1,7 @@
 import { Router } from "express";
-import { patientContainer } from "../di/patient.di.js";
+import { patientContainer } from "../di/patient.di.ts";
+import { validate } from '../middleware/validate.middleware.ts';
+import { patientProfileSchema } from '../validators/patient.validator.ts';
 
 const { patientController,liveToken} = patientContainer();
 const router = Router();
@@ -8,7 +10,7 @@ router.get("/me", patientController.getMe.bind(patientController));
 
 router.get("/hospitals", patientController.getHospitals.bind(patientController));
 router.get("/patients", patientController.getAllPatient.bind(patientController))
-router.patch("/patients", patientController.updatePatient.bind(patientController));
+router.patch("/patients", validate(patientProfileSchema), patientController.updatePatient.bind(patientController));
 router.patch("/patients/password", patientController.changePassword.bind(patientController));
 router.get("/hospitals/:id", patientController.selectedHospital.bind(patientController));
 router.get("/departments", patientController.getdepartments.bind(patientController))

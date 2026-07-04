@@ -1,5 +1,5 @@
-import { CreateDoctorSchedulePayload } from "../../../dto/doctor/doctor-response.dto.js";
-import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.js";
+import { CreateDoctorSchedulePayload } from "../../../dto/doctor/doctor-response.dto.ts";
+import { SlotResponseDTO } from "../../../dto/doctor/slot-response.dto.ts";
 
 export interface ISlotMangement {
     createSchedule(data: CreateDoctorSchedulePayload): Promise<void>;                    

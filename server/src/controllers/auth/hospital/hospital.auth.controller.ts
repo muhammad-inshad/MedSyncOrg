@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { IHospitalAuthService } from "../../../services/auth/hospital/hospital.auth.service.interface.js";
-import { HttpStatusCode } from "../../../constants/enums.js";
-import { MESSAGES } from "../../../constants/messages.js";
-import { IHospitalAuthController } from "./hospital.auth.controller.interface.js";
-import { HospitalUploadFiles } from "../../../types/hospital.type.js";
-import { ApiResponse } from "../../../utils/apiResponse.utils.js";
+import { IHospitalAuthService } from "../../../services/auth/hospital/hospital.auth.service.interface.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
+import { MESSAGES } from "../../../constants/messages.ts";
+import { IHospitalAuthController } from "./hospital.auth.controller.interface.ts";
+import { HospitalUploadFiles } from "../../../types/hospital.type.ts";
+import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 
 
 export class HospitalAuthController implements IHospitalAuthController {

@@ -1,5 +1,5 @@
-import { UpdateDoctorDTO, DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.js";
-import { DoctorLeaveResponseDTO } from "../../../dto/doctor/doctor-leave-response.dto.js";
+import { UpdateDoctorDTO, DoctorResponseDTO } from "../../../dto/doctor/doctor-response.dto.ts";
+import { DoctorLeaveResponseDTO } from "../../../dto/doctor/doctor-leave-response.dto.ts";
 
 export interface IDoctorService {
     getDoctorProfile(doctorId: string): Promise<DoctorResponseDTO>;

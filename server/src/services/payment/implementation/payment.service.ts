@@ -1,20 +1,20 @@
 import Stripe from "stripe";
 import { Types } from "mongoose";
-import stripe from "../../../config/stripe.js";
-import { IPaymentService } from "../interfaces/payment.service.interface.js";
-import { ISubscriptionRepository } from "../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.js";
-import { IHospitalRepository } from "../../../repositories/hospital/hospital.repository.interface.js";
-import { ApiResponse } from "../../../utils/apiResponse.utils.js";
-import { HttpStatusCode } from "../../../constants/enums.js";
-import { ISubscription } from "../../../models/subscription.js";
+import stripe from "../../../config/stripe.ts";
+import { IPaymentService } from "../interfaces/payment.service.interface.ts";
+import { ISubscriptionRepository } from "../../../repositories/superAdmin/subscription/interfaces/subscription.repository.interface.ts";
+import { IHospitalRepository } from "../../../repositories/hospital/hospital.repository.interface.ts";
+import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
+import { ISubscription } from "../../../models/subscription.ts";
 
-import { IPatientService } from "../../patient/interfaces/patient.service.interfaces.js";
-import { IAppointmentCheckoutData } from "../../../dto/appointment/appointment.dto.js";
-import { IAppointment, AppointmentMode, AppointmentStatus } from "../../../models/appointment.js";
-import { CheckoutResponseDTO } from "../../../dto/payment/checkout-response.dto.js";
-import { PaymentMapper } from "../../../mappers/payment.mapper.js";
-import logger from "../../../utils/logger.js";
-import { IWalletRepository } from "../../../repositories/wallet/wallet.repository.interface.js";
+import { IPatientService } from "../../patient/interfaces/patient.service.interfaces.ts";
+import { IAppointmentCheckoutData } from "../../../dto/appointment/appointment.dto.ts";
+import { IAppointment, AppointmentMode, AppointmentStatus } from "../../../models/appointment.ts";
+import { CheckoutResponseDTO } from "../../../dto/payment/checkout-response.dto.ts";
+import { PaymentMapper } from "../../../mappers/payment.mapper.ts";
+import logger from "../../../utils/logger.ts";
+import { IWalletRepository } from "../../../repositories/wallet/wallet.repository.interface.ts";
 
 export class PaymentService implements IPaymentService {
     constructor(
@@ -258,14 +258,17 @@ export class PaymentService implements IPaymentService {
                         subscription: {
                             ...hospital.subscription,
                             ...newSubscription,
-                            upgradeType: upgradeType as "upgrade" | "downgrade" | "new" || "new",
+                            upgradeType: upgradeType as "upgrade" | "downgrade" | "new" | "activate_downgrade" || "new",
                        
-                            ...(upgradeType === 'upgrade' ? { pendingPlanId: undefined, pendingPlanName: undefined, pendingActivationDate: undefined } : {})
+                            ...(upgradeType === 'upgrade' || upgradeType === 'new' || upgradeType === 'activate_downgrade' ? { pendingPlanId: undefined, pendingPlanName: undefined, pendingActivationDate: undefined } : {})
                         }
                     });
 
-                    const superAdminId = process.env.SUPER_ADMIN_ID!;
-                    await this._WalletRepository.creditWallet(superAdminId, plan.amount); 
+                    const amountPaid = (session.amount_total || 0) / 100;
+                    if (amountPaid > 0) {
+                        const superAdminId = process.env.SUPER_ADMIN_ID!;
+                        await this._WalletRepository.creditWallet(superAdminId, amountPaid); 
+                    }
                 }
             }
         }

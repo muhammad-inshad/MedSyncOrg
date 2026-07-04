@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { Igettoken } from "../../services/patient/interfaces/livetoken.service.interfaces.js";
-import { ApiResponse } from "../../utils/apiResponse.utils.js";
-import { HttpStatusCode } from "../../constants/enums.js";
-import { ITokenPayload } from "../../services/token/token.service.interface.js";
+import { Igettoken } from "../../services/patient/interfaces/livetoken.service.interfaces.ts";
+import { ApiResponse } from "../../utils/apiResponse.utils.ts";
+import { HttpStatusCode } from "../../constants/enums.ts";
+import { ITokenPayload } from "../../services/token/token.service.interface.ts";
 
 export class LiveTokenController {
     constructor(private readonly _liveTokenService: Igettoken) {}

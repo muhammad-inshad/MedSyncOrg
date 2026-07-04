@@ -1,8 +1,8 @@
-import { BaseRepository } from "../IBase/BaseRepository.js";
+import { BaseRepository } from "../IBase/BaseRepository.ts";
 import mongoose, { Types, FilterQuery, UpdateQuery } from "mongoose";
-import { ISalaryRequest } from "../../models/SalaryRequest.model.js";
-import { IsalaryRepository } from "./salaryhike.repository.interface.js";
-import { IDoctor } from "../../models/doctor.model.js";
+import { ISalaryRequest } from "../../models/SalaryRequest.model.ts";
+import { IsalaryRepository } from "./salaryhike.repository.interface.ts";
+import { IDoctor } from "../../models/doctor.model.ts";
 
 export class SalaryrequestRepository extends BaseRepository<ISalaryRequest> implements IsalaryRepository {
 

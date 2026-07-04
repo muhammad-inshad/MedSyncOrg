@@ -1,4 +1,4 @@
-import { SuccessResponseDTO } from "../../../../dto/auth/success-response.dto.js";
+import { SuccessResponseDTO } from "../../../../dto/auth/success-response.dto.ts";
 
 export interface IPatientOtpAuthService {
   sendOtp(email: string, purpose: string, role: string): Promise<SuccessResponseDTO>;

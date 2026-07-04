@@ -1,6 +1,6 @@
-import { BaseRepository } from "../IBase/BaseRepository.js";
-import { IDoctor } from "../../models/doctor.model.js";
-import { IDoctorRepository } from "./doctor.repository.interface.js";
+import { BaseRepository } from "../IBase/BaseRepository.ts";
+import { IDoctor } from "../../models/doctor.model.ts";
+import { IDoctorRepository } from "./doctor.repository.interface.ts";
 import mongoose, { Types } from "mongoose";
 
 

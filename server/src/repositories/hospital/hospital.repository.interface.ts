@@ -1,5 +1,5 @@
-import { IHospital } from "../../models/hospital.model.js";
-import { IBaseRepository } from "../IBase/IBaseRepository.interface.js";
+import { IHospital } from "../../models/hospital.model.ts";
+import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
 
 export interface IHospitalRepository extends IBaseRepository<IHospital>{
     startSession(hospitalId: string): Promise<Date>;

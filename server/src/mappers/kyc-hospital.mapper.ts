@@ -1,5 +1,5 @@
-import { IHospital } from "../models/hospital.model.js";
-import { KycHospitalResponseDTO, KycHospitalResponseSchema } from "../dto/superAdmin/kyc/kyc-hospital-response.dto.js";
+import { IHospital } from "../models/hospital.model.ts";
+import { KycHospitalResponseDTO, KycHospitalResponseSchema } from "../dto/superAdmin/kyc/kyc-hospital-response.dto.ts";
 
 export class KycHospitalMapper {
     toDTO(hospital: IHospital): KycHospitalResponseDTO {

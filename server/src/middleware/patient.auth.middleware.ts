@@ -1,11 +1,11 @@
 // middleware/patient.auth.middleware.ts
 import { Request, Response, NextFunction } from "express";
-import { HttpStatusCode } from "../constants/enums.js";
+import { HttpStatusCode } from "../constants/enums.ts";
 
-import { ITokenService } from "../services/token/token.service.interface.js";
+import { ITokenService } from "../services/token/token.service.interface.ts";
 
-import { IUserRepository } from "../repositories/patient/user.repository.interface.js";
-import logger from "../utils/logger.js";
+import { IUserRepository } from "../repositories/patient/user.repository.interface.ts";
+import logger from "../utils/logger.ts";
 
 export class PatientAuthMiddleware {
   constructor(

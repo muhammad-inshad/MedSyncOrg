@@ -1,8 +1,8 @@
-import { IMapper } from "../interfaces/mapper.interface.js";
-import { IPrescription } from "../models/prescription.model.js";
-import { PrescriptionResponseDTO, PrescriptionResponseSchema } from "../dto/patient/prescription-response.dto.js";
-import { IDoctor } from "../models/doctor.model.js";
-import { IHospital } from "../models/hospital.model.js";
+import { IMapper } from "../interfaces/mapper.interface.ts";
+import { IPrescription } from "../models/prescription.model.ts";
+import { PrescriptionResponseDTO, PrescriptionResponseSchema } from "../dto/patient/prescription-response.dto.ts";
+import { IDoctor } from "../models/doctor.model.ts";
+import { IHospital } from "../models/hospital.model.ts";
 
 export class PrescriptionMapper implements IMapper<IPrescription, PrescriptionResponseDTO> {
     toDTO(prescription: IPrescription): PrescriptionResponseDTO {

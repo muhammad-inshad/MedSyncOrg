@@ -1,17 +1,17 @@
 import { Types } from "mongoose";
-import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.js";
-import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.js";
-import { IDashbord } from "../interfaces/dashbord.services.interfaces.js";
-import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.js";
-import { ISpecializationRepository } from "../../../../repositories/hospital/specialization.repository.interface.js";
-import { IQualificationRepository } from "../../../../repositories/hospital/qualification.repository.interface.js";
-import { COMMENT_TYPES } from "../../../../constants/Comments/Comment.js";
-import { IWalletRepository } from "../../../../repositories/wallet/wallet.repository.interface.js";
-import { IAppointmentRepository } from "../../../../repositories/appointment/appointment.repository.interface.js";
-import { AppointmentMapper } from "../../../../mappers/appointment.mapper.js";
-import { AppointmentResponseDTO } from "../../../../dto/appointment/appointment-response.dto.js";
-import { AppointmentStatus } from "../../../../models/appointment.js";
-import { IHospitalDoctorConfigRepository } from "../../../../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.interface.js";
+import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
+import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
+import { IDashbord } from "../interfaces/dashbord.services.interfaces.ts";
+import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.ts";
+import { ISpecializationRepository } from "../../../../repositories/hospital/specialization.repository.interface.ts";
+import { IQualificationRepository } from "../../../../repositories/hospital/qualification.repository.interface.ts";
+import { COMMENT_TYPES } from "../../../../constants/Comments/Comment.ts";
+import { IWalletRepository } from "../../../../repositories/wallet/wallet.repository.interface.ts";
+import { IAppointmentRepository } from "../../../../repositories/appointment/appointment.repository.interface.ts";
+import { AppointmentMapper } from "../../../../mappers/appointment.mapper.ts";
+import { AppointmentResponseDTO } from "../../../../dto/appointment/appointment-response.dto.ts";
+import { AppointmentStatus } from "../../../../models/appointment.ts";
+import { IHospitalDoctorConfigRepository } from "../../../../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.interface.ts";
 
 export class DashbordService implements IDashbord {
 

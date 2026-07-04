@@ -1,8 +1,8 @@
-import { BaseRepository } from "../IBase/BaseRepository.js";
-import { IPrescription } from "../../models/prescription.model.js";
+import { BaseRepository } from "../IBase/BaseRepository.ts";
+import { IPrescription } from "../../models/prescription.model.ts";
 import { Model, FilterQuery } from "mongoose";
-import { DoctorModel } from "../../models/doctor.model.js";
-import { HospitalModel } from "../../models/hospital.model.js";
+import { DoctorModel } from "../../models/doctor.model.ts";
+import { HospitalModel } from "../../models/hospital.model.ts";
 
 export class PrescriptionRepository extends BaseRepository<IPrescription> {
   constructor(model: Model<IPrescription>) {

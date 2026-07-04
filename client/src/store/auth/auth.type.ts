@@ -54,6 +54,8 @@ export interface HospitalProfile extends BaseUser {
     startDate: string;
     endDate: string;
     status: string;
+    pendingPlanId?: string;
+    pendingPlanName?: string;
   };
 }
 

@@ -1,5 +1,5 @@
-import { IDoctorLeave } from "../../models/doctorLeave.model.js";
-import { IBaseRepository } from "../IBase/IBaseRepository.interface.js";
+import { IDoctorLeave } from "../../models/doctorLeave.model.ts";
+import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
 
 export interface ILeaveRepository extends IBaseRepository<IDoctorLeave> {
     findDoctorLeaves(options: {
@@ -19,4 +19,5 @@ export interface ILeaveRepository extends IBaseRepository<IDoctorLeave> {
     }): Promise<{ data: IDoctorLeave[]; total: number; page: number; limit: number }>;
 
     updateStatus(id: string, status: 'approved' | 'rejected', rejectedReason?: string): Promise<IDoctorLeave | null>;
+    
 }

@@ -1,18 +1,18 @@
 import bcrypt from "bcryptjs";
-import { MESSAGES } from "../../../constants/messages.js";
-import { HttpStatusCode } from "../../../constants/enums.js";
-import Logger from "../../../utils/logger.js";
-import { IHospital } from "../../../models/hospital.model.js";
-import { IHospitalRepository } from "../../../repositories/hospital/hospital.repository.interface.js";
-import { ITokenService } from "../../token/token.service.interface.js";
-import { UnifiedUser, AuthResponse } from "../../../interfaces/auth.types.js";
-import { LoginDTO } from "../../../dto/auth/signup.dto.js";
-import { uploadBufferToCloudinary } from "../../../utils/cloudinaryUpload.js";
-import { HospitalUploadFiles } from "../../../types/hospital.type.js";
-import { IHospitalAuthService } from "./hospital.auth.service.interface.js";
-import { ApiResponse } from "../../../utils/apiResponse.utils.js";
-import { HospitalMapper } from "../../../mappers/hospital.mapper.js";
-import { HospitalResponseDTO } from "../../../dto/hospital/hospital-response.dto.js";
+import { MESSAGES } from "../../../constants/messages.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
+import Logger from "../../../utils/logger.ts";
+import { IHospital } from "../../../models/hospital.model.ts";
+import { IHospitalRepository } from "../../../repositories/hospital/hospital.repository.interface.ts";
+import { ITokenService } from "../../token/token.service.interface.ts";
+import { UnifiedUser, AuthResponse } from "../../../interfaces/auth.types.ts";
+import { LoginDTO } from "../../../dto/auth/signup.dto.ts";
+import { uploadBufferToCloudinary } from "../../../utils/cloudinaryUpload.ts";
+import { HospitalUploadFiles } from "../../../types/hospital.type.ts";
+import { IHospitalAuthService } from "./hospital.auth.service.interface.ts";
+import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
+import { HospitalMapper } from "../../../mappers/hospital.mapper.ts";
+import { HospitalResponseDTO } from "../../../dto/hospital/hospital-response.dto.ts";
 
 export class HospitalAuthService implements IHospitalAuthService {
     constructor(

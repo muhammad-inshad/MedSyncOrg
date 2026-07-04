@@ -3,17 +3,17 @@ import cors from 'cors';
 import cookieParser from "cookie-parser";
 import "dotenv/config";
 import passport from "passport";
-import authRoutes from './routes/auth.routes.js';
-import patientRoutes from './routes/patient.routes.js';
-import doctorRoutes from './routes/doctor.routes.js';
-import hospitalRoutes from './routes/hospital.routes.js';
-import superAdminRoutes from './routes/superAdmin.routes.js';
-import { superAdminAuthMiddleware } from "./middleware/superAdmin.auth.middleware.js";
-import errorHandler from "./middleware/error.middleware.js";
-import { hospitalContainer } from "./di/hospital.di.js";
-import { patientContainer } from "./di/patient.di.js";
-import { doctorContainer } from "./di/doctor.di.js";
-import paymentRoutes from "./routes/payment.routes.js";
+import authRoutes from './routes/auth.routes.ts';
+import patientRoutes from './routes/patient.routes.ts';
+import doctorRoutes from './routes/doctor.routes.ts';
+import hospitalRoutes from './routes/hospital.routes.ts';
+import superAdminRoutes from './routes/superAdmin.routes.ts';
+import { superAdminAuthMiddleware } from "./middleware/superAdmin.auth.middleware.ts";
+import errorHandler from "./middleware/error.middleware.ts";
+import { hospitalContainer } from "./di/hospital.di.ts";
+import { patientContainer } from "./di/patient.di.ts";
+import { doctorContainer } from "./di/doctor.di.ts";
+import paymentRoutes from "./routes/payment.routes.ts";
 import "./config/google.strategy.js";
 
 

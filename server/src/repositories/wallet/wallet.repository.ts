@@ -1,13 +1,16 @@
 
-import { IWallet } from "../../models/wallet.model.js";
-import { IWalletRepository } from "./wallet.repository.interface.js";
-import { BaseRepository } from "../IBase/BaseRepository.js";
+import { IWallet } from "../../models/wallet.model.ts";
+import { IWalletRepository } from "./wallet.repository.interface.ts";
+import { BaseRepository } from "../IBase/BaseRepository.ts";
 
 export class WalletRepository
   extends BaseRepository<IWallet>
   implements IWalletRepository {
 
   async creditWallet(ownerId: string, amount: number): Promise<IWallet | null> {
+    console.log("WalletRepository creditWallet", ownerId, amount);
+    let owner=await this.model.findById(ownerId)
+    console.log("i am owner",owner)
     return await this.model.findOneAndUpdate(
       { ownerId },
       {

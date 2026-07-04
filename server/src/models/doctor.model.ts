@@ -1,5 +1,5 @@
 import { Schema, model, Document, Types } from "mongoose";
-import { Role } from "../constants/enums.js";
+import { Role } from "../constants/enums.ts";
 
 
 

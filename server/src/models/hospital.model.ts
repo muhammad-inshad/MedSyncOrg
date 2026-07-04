@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { Role } from "../constants/enums.js";
+import { Role } from "../constants/enums.ts";
 
 export interface IHospital extends Document {
   hospitalName: string;
@@ -42,7 +42,7 @@ export interface IHospital extends Document {
     pendingPlanId?: mongoose.Types.ObjectId;
     pendingPlanName?: string;
     pendingActivationDate?: Date;
-    upgradeType?: "upgrade" | "downgrade" | "new";
+    upgradeType?: "upgrade" | "downgrade" | "new" | "activate_downgrade";
   };
 
   createdAt: Date;
@@ -236,7 +236,7 @@ const HospitalSchema = new Schema<IHospital>(
 
       upgradeType: {
         type: String,
-        enum: ["upgrade", "downgrade", "new"]
+        enum: ["upgrade", "downgrade", "new", "activate_downgrade"]
       }
     },
   },

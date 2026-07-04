@@ -1,8 +1,8 @@
-import { ISalaryRequest } from "../../../../models/SalaryRequest.model.js";
-import { IsalaryRepository } from "../../../../repositories/salaryhike/salaryhike.repository.interface.js";
-import { IDoctorSalaryService } from "../interfaces/doctor.salary.service.interface.js";
-import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.js";
-import { IHospitalDoctorConfigRepository } from "../../../../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.interface.js";
+import { ISalaryRequest } from "../../../../models/SalaryRequest.model.ts";
+import { IsalaryRepository } from "../../../../repositories/salaryhike/salaryhike.repository.interface.ts";
+import { IDoctorSalaryService } from "../interfaces/doctor.salary.service.interface.ts";
+import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
+import { IHospitalDoctorConfigRepository } from "../../../../repositories/HospitalDoctorConfig/HospitalDoctorConfigRepository.interface.ts";
 import { Types } from "mongoose";
 
 export class DoctorSalaryservice implements IDoctorSalaryService {

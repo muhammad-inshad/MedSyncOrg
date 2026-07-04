@@ -1,19 +1,19 @@
-import { DepartmentManagementController } from "../controllers/hospital/department/implementation/department.controller.js";
-import { DepartmentService } from "../services/hospital/department/implementations/department.service.js";
-import { DepartmentRepository } from "../repositories/hospital/implementation/department.repository.js";
-import DepartmentModel from "../models/department.model.js";
-import { CloudinaryImageService } from "../services/image/implementation/cloudinary.image.service.js";
+import { DepartmentManagementController } from "../controllers/hospital/department/implementation/department.controller.ts";
+import { DepartmentService } from "../services/hospital/department/implementations/department.service.ts";
+import { DepartmentRepository } from "../repositories/hospital/implementation/department.repository.ts";
+import DepartmentModel from "../models/department.model.ts";
+import { CloudinaryImageService } from "../services/image/implementation/cloudinary.image.service.ts";
 
-import { SubscriptionRepository } from "../repositories/superAdmin/subscription/implements/subscription.repository.js";
-import { HospitalRepository } from "../repositories/hospital/hospital.repository.js";
-import { HospitalModel } from "../models/hospital.model.js";
-import { DoctorRepository } from "../repositories/doctor/doctor.repository.js";
-import { DoctorModel } from "../models/doctor.model.js";
-import { UserRepository } from "../repositories/patient/user.repository.js";
-import { Patient } from "../models/Patient.model.js";
-import { HospitalSubscriptionService } from "../services/hospital/subscription/implementation/subscription.service.js";
-import { DepartmentMapper } from "../mappers/department.mapper.js";
-import { SubscriptionMapper } from "../mappers/subscription.mapper.js";
+import { SubscriptionRepository } from "../repositories/superAdmin/subscription/implements/subscription.repository.ts";
+import { HospitalRepository } from "../repositories/hospital/hospital.repository.ts";
+import { HospitalModel } from "../models/hospital.model.ts";
+import { DoctorRepository } from "../repositories/doctor/doctor.repository.ts";
+import { DoctorModel } from "../models/doctor.model.ts";
+import { UserRepository } from "../repositories/patient/user.repository.ts";
+import { Patient } from "../models/Patient.model.ts";
+import { HospitalSubscriptionService } from "../services/hospital/subscription/implementation/subscription.service.ts";
+import { DepartmentMapper } from "../mappers/department.mapper.ts";
+import { SubscriptionMapper } from "../mappers/subscription.mapper.ts";
 
 export const departmentContiner = () => {
     const departmentRepo = new DepartmentRepository(DepartmentModel);

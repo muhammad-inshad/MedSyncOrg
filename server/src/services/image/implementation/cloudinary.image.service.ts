@@ -1,7 +1,7 @@
-import { ICloudinaryImageService } from "../interfaces/cloudinary.service.interface.js";
-import cloudinary from "../../../config/cloudinary.js";
-import { uploadBufferToCloudinary, extractPublicId } from "../../../utils/cloudinaryUpload.js";
-import Logger from "../../../utils/logger.js";
+import { ICloudinaryImageService } from "../interfaces/cloudinary.service.interface.ts";
+import cloudinary from "../../../config/cloudinary.ts";
+import { uploadBufferToCloudinary, extractPublicId } from "../../../utils/cloudinaryUpload.ts";
+import Logger from "../../../utils/logger.ts";
 
 export class CloudinaryImageService implements ICloudinaryImageService {
     async uploadImage(source: string | Buffer, folder: string): Promise<string> {

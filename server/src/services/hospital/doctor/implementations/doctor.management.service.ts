@@ -1,35 +1,35 @@
 import { Types } from "mongoose";
-import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.js";
-import Logger from "../../../../utils/logger.js";
-import { HttpStatusCode } from "../../../../constants/enums.js";
-import { IDoctor } from "../../../../models/doctor.model.js";
+import { IDoctorRepository } from "../../../../repositories/doctor/doctor.repository.interface.ts";
+import Logger from "../../../../utils/logger.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
+import { IDoctor } from "../../../../models/doctor.model.ts";
 import {
   IPaginationResult,
   IDoctorListOptions,
   IDoctorFilter,
-} from "../../../../types/hospital.types.js";
-import { IDoctorManagementService } from "../interfaces/IDoctorManagementService.js";
+} from "../../../../types/hospital.types.ts";
+import { IDoctorManagementService } from "../interfaces/IDoctorManagementService.ts";
 import bcrypt from "bcryptjs";
-import { MESSAGES } from "../../../../constants/messages.js";
-import { uploadBufferToCloudinary } from "../../../../utils/cloudinaryUpload.js";
-import { DoctorUploadFiles } from "../../../../types/doctor.types.js";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
+import { MESSAGES } from "../../../../constants/messages.ts";
+import { uploadBufferToCloudinary } from "../../../../utils/cloudinaryUpload.ts";
+import { DoctorUploadFiles } from "../../../../types/doctor.types.ts";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 import {
   DeptSpecQualResponse,
   DoctorResponseDTO,
   UpdateDoctorDTO,
-} from "../../../../dto/doctor/doctor-response.dto.js";
-import { DoctorMapper } from "../../../../mappers/doctor.mapper.js";
-import { DoctorLeaveMapper } from "../../../../mappers/doctor-leave.mapper.js";
-import { DoctorLeaveResponseDTO } from "../../../../dto/doctor/doctor-leave-response.dto.js";
-import { DoctorDTO } from "../../../../dto/auth/signup.dto.js";
-import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.js";
-import { CloudinaryImageService } from "../../../image/implementation/cloudinary.image.service.js";
-import { ILeaveRepository } from "../../../../repositories/leave/leave.repository.interface.js";
-import { IDoctorLeave } from "../../../../models/doctorLeave.model.js";
-import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.js";
-import { ISpecializationRepository } from "../../../../repositories/hospital/specialization.repository.interface.js";
-import { IQualificationRepository } from "../../../../repositories/hospital/qualification.repository.interface.js";
+} from "../../../../dto/doctor/doctor-response.dto.ts";
+import { DoctorMapper } from "../../../../mappers/doctor.mapper.ts";
+import { DoctorLeaveMapper } from "../../../../mappers/doctor-leave.mapper.ts";
+import { DoctorLeaveResponseDTO } from "../../../../dto/doctor/doctor-leave-response.dto.ts";
+import { DoctorDTO } from "../../../../dto/auth/signup.dto.ts";
+import { IDepartmentRepository } from "../../../../repositories/hospital/department.repository.interface.ts";
+import { CloudinaryImageService } from "../../../image/implementation/cloudinary.image.service.ts";
+import { ILeaveRepository } from "../../../../repositories/leave/leave.repository.interface.ts";
+import { IDoctorLeave } from "../../../../models/doctorLeave.model.ts";
+import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.ts";
+import { ISpecializationRepository } from "../../../../repositories/hospital/specialization.repository.interface.ts";
+import { IQualificationRepository } from "../../../../repositories/hospital/qualification.repository.interface.ts";
 
 export class DoctorManagementService implements IDoctorManagementService {
   private readonly _cloudinary: CloudinaryImageService;

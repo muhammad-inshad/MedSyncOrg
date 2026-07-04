@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { IPaymentController } from "../interfaces/payment.controller.interface.js";
-import { IPaymentService } from "../../../services/payment/interfaces/payment.service.interface.js";
-import { ApiResponse } from "../../../utils/apiResponse.utils.js";
-import { HttpStatusCode } from "../../../constants/enums.js";
-import { AppError } from "../../../errors/app.error.js";
-import { ITokenService } from "../../../services/token/token.service.interface.js";
-import logger from "../../../utils/logger.js";
+import { IPaymentController } from "../interfaces/payment.controller.interface.ts";
+import { IPaymentService } from "../../../services/payment/interfaces/payment.service.interface.ts";
+import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
+import { AppError } from "../../../errors/app.error.ts";
+import { ITokenService } from "../../../services/token/token.service.interface.ts";
+import logger from "../../../utils/logger.ts";
 
 
 export class PaymentController implements IPaymentController {
@@ -98,6 +98,34 @@ export class PaymentController implements IPaymentController {
         }
     }
 
+    async activateDowngradeSubscription(req: Request, res: Response): Promise<void> {
+        try {
+            const { planId } = req.body;
+            const { accessToken } = req.cookies;
+            const decoded = this._token.verifyAccessToken(accessToken);
+            const hospitalId = decoded.userId;
+
+            if (!planId) {
+                ApiResponse.error(res, "Plan ID is required", null, HttpStatusCode.BAD_REQUEST);
+                return;
+            }
+
+            console.log("Initiating activate_downgrade checkout with planId:", planId, "and hospitalId:", hospitalId);
+            const result = await this.paymentService.createCheckoutSession(planId, hospitalId, "activate_downgrade" as any);
+            res.status(HttpStatusCode.OK).json({
+                success: true,
+                url: result.url,
+            });
+        } catch (error: unknown) {
+            logger.error("Activate downgrade checkout session creation failed:", error);
+            const statusCode = error instanceof AppError ? error.statusCode : HttpStatusCode.INTERNAL_SERVER_ERROR;
+            const message = error instanceof Error ? error.message : "Payment failed";
+            res.status(statusCode).json({
+                success: false,
+                message,
+            });
+        }
+    }
     async handleWebhook(req: Request, res: Response): Promise<void> {
         try {
             const sig = req.headers["stripe-signature"] as string;

@@ -1,8 +1,8 @@
 import { Response } from "express";
-import { HttpStatusCode } from "../constants/enums.js";
-import { MESSAGES } from "../constants/messages.js";
-import { PaginationMeta } from "../interfaces/pagination.js";
-import { AppError } from "../errors/app.error.js";
+import { HttpStatusCode } from "../constants/enums.ts";
+import { MESSAGES } from "../constants/messages.ts";
+import { PaginationMeta } from "../interfaces/pagination.ts";
+import { AppError } from "../errors/app.error.ts";
 
 
 export class ApiResponse {

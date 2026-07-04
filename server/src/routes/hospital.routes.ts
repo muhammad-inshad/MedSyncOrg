@@ -1,9 +1,12 @@
 import express from "express";
-import { upload } from "../middleware/multer.middleware.js";
-import { hospitalContainer } from "../di/hospital.di.js";
-import { departmentContiner } from "../di/department.di.js";
-import { qualificationContainer } from "../di/qualification.di.js";
-import { specializationContainer } from "../di/specialization.di.js";
+import { upload } from "../middleware/multer.middleware.ts";
+import { hospitalContainer } from "../di/hospital.di.ts";
+import { departmentContiner } from "../di/department.di.ts";
+import { qualificationContainer } from "../di/qualification.di.ts";
+import { specializationContainer } from "../di/specialization.di.ts";
+import { validate } from '../middleware/validate.middleware.ts';
+import { hospitalEditSchema, addPatientSchema, addDoctorSchema } from '../validators/hospital.validator.ts';
+import { doctorUpdateSchema } from '../validators/doctor.validator.ts';
 const router = express.Router();
 const { specializationManagement } = specializationContainer()
 const { qualificationManagement } = qualificationContainer()
@@ -19,13 +22,13 @@ router.patch("/hospitals", upload.fields([{ name: "logo", maxCount: 1 },
 { name: "landscape", maxCount: 3 },
 { name: "medicalTeam", maxCount: 3 },
 { name: "patientCare", maxCount: 3 },
-{ name: "services", maxCount: 3 },]), hospitalController.updateHospital.bind(hospitalController));
+{ name: "services", maxCount: 3 },]), validate(hospitalEditSchema), hospitalController.updateHospital.bind(hospitalController));
 
 router.get("/doctors", doctorManagement.getAllDoctors.bind(doctorManagement));
 router.patch("/doctors/:id", upload.fields([
     { name: "profileImage", maxCount: 1 },
     { name: "license", maxCount: 1 }
-]), doctorManagement.updateDoctor.bind(doctorManagement));
+]), validate(doctorUpdateSchema), doctorManagement.updateDoctor.bind(doctorManagement));
 router.get("/doctors/kyc", doctorManagement.getAllKycDoctors.bind(doctorManagement));
 router.get("/doctors/leaves", doctorManagement.getLeaveDoctors.bind(doctorManagement));
 router.get("/doctors/:id",doctorManagement.getDoctorDetails.bind(doctorManagement))
@@ -39,12 +42,12 @@ router.get("/getdepsepquly",doctorManagement.getDeptSpecs.bind(doctorManagement)
 router.post("/doctors", upload.fields([
     { name: "profileImage", maxCount: 1 },
     { name: "license", maxCount: 1 }
-]), doctorManagement.registerDoctor.bind(doctorManagement));
+]), validate(addDoctorSchema), doctorManagement.registerDoctor.bind(doctorManagement));
 
 router.patch("/patients/:id/toggle", patientManagement.patientsToggle.bind(patientManagement));
 router.get("/patients", patientManagement.getAllPatient.bind(patientManagement));
-router.post("/patients", upload.single('image'), patientManagement.addPatient.bind(patientManagement));
-router.patch("/patients/:id", upload.single('image'), patientManagement.updatePatient.bind(patientManagement));
+router.post("/patients", upload.single('image'), validate(addPatientSchema), patientManagement.addPatient.bind(patientManagement));
+router.patch("/patients/:id", upload.single('image'), validate(addPatientSchema), patientManagement.updatePatient.bind(patientManagement));
 
 
 router.post("/departments", upload.single("image"), departmentManagement.createDepartment.bind(departmentManagement));

@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from "express";
-import { ISuperAdminAuthService } from "../../../services/auth/superAdmin/superAdmin.auth.service.interface.js";
-import { HttpStatusCode } from "../../../constants/enums.js";
-import { MESSAGES } from "../../../constants/messages.js";
-import { ISuperAdminAuthController } from "./superAdmin.auth.controller.interface.js";
-import { ApiResponse } from "../../../utils/apiResponse.utils.js";
+import { ISuperAdminAuthService } from "../../../services/auth/superAdmin/superAdmin.auth.service.interface.ts";
+import { HttpStatusCode } from "../../../constants/enums.ts";
+import { MESSAGES } from "../../../constants/messages.ts";
+import { ISuperAdminAuthController } from "./superAdmin.auth.controller.interface.ts";
+import { ApiResponse } from "../../../utils/apiResponse.utils.ts";
 
 
-import logger from "../../../utils/logger.js";
+import logger from "../../../utils/logger.ts";
 
 export class SuperAdminAuthController implements ISuperAdminAuthController {
     constructor(private readonly _SuperadminAuthService: ISuperAdminAuthService) { }

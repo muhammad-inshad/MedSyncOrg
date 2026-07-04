@@ -1,4 +1,4 @@
-import { LiveTokenResponseDTO, LiveTokenResponseSchema } from "../dto/patient/livetoken-response.dto.js";
+import { LiveTokenResponseDTO, LiveTokenResponseSchema } from "../dto/patient/livetoken-response.dto.ts";
 
 export class LiveTokenMapper {
     toDTO(data: {

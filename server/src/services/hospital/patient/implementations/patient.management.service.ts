@@ -1,14 +1,14 @@
-import { IPatient } from "../../../../models/Patient.model.js";
-import { IPatientManagementService } from "../interfaces/patient.management.service.interface.js";
-import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.js";
-import { PatientMapper } from "../../../../mappers/patient.mapper.js";
-import { IAppointmentRepository } from "../../../../repositories/appointment/appointment.repository.interface.js";
-import { PatientResponseDTO, CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.js";
-import { HttpStatusCode } from "../../../../constants/enums.js";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
-import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.js";
+import { IPatient } from "../../../../models/Patient.model.ts";
+import { IPatientManagementService } from "../interfaces/patient.management.service.interface.ts";
+import { IUserRepository } from "../../../../repositories/patient/user.repository.interface.ts";
+import { PatientMapper } from "../../../../mappers/patient.mapper.ts";
+import { IAppointmentRepository } from "../../../../repositories/appointment/appointment.repository.interface.ts";
+import { PatientResponseDTO, CreatePatientDTO, UpdatePatientDTO } from "../../../../dto/patient/patient-response.dto.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
+import { IHospitalSubscriptionService } from "../../subscription/interfaces/subscription.service.interface.ts";
 import { Types } from "mongoose";
-import { IPatientFilter } from "../../../../types/hospital.types.js";
+import { IPatientFilter } from "../../../../types/hospital.types.ts";
 
 export class PatientManagementService implements IPatientManagementService {
     constructor(

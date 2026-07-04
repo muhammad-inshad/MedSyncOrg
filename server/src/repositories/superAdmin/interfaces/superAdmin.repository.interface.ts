@@ -1,4 +1,4 @@
-import { ISuperAdmin } from "../../../models/superAdmin.model.js";
-import { IBaseRepository } from "../../IBase/IBaseRepository.interface.js";
+import { ISuperAdmin } from "../../../models/superAdmin.model.ts";
+import { IBaseRepository } from "../../IBase/IBaseRepository.interface.ts";
 
 export type ISuperAdminRepository = IBaseRepository<ISuperAdmin>

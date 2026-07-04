@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
-import { ISuperAdminKycController } from "../interfaces/kyc.controller.interface.js";
-import { ISuperAdminKycService } from "../../../../services/superAdmin/kycManagement/interfaces/kyc.service.interface.js";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
-import { HttpStatusCode } from "../../../../constants/enums.js";
+import { ISuperAdminKycController } from "../interfaces/kyc.controller.interface.ts";
+import { ISuperAdminKycService } from "../../../../services/superAdmin/kycManagement/interfaces/kyc.service.interface.ts";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
+import { HttpStatusCode } from "../../../../constants/enums.ts";
 
 
 

@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { ISubscriptionController } from "../interfaces/subscription.controller.interface.js";
-import { ISubscriptionService } from "../../../../services/superAdmin/subscription/interfaces/subscription.service.interface.js";
-import {  UpdateSubscriptionDTO } from "../../../../dto/subscription/subscription-response.dto.js";
-import { MESSAGES } from "../../../../constants/messages.js";
-import { ApiResponse } from "../../../../utils/apiResponse.utils.js";
+import { ISubscriptionController } from "../interfaces/subscription.controller.interface.ts";
+import { ISubscriptionService } from "../../../../services/superAdmin/subscription/interfaces/subscription.service.interface.ts";
+import {  UpdateSubscriptionDTO } from "../../../../dto/subscription/subscription-response.dto.ts";
+import { MESSAGES } from "../../../../constants/messages.ts";
+import { ApiResponse } from "../../../../utils/apiResponse.utils.ts";
 
 export class SubscriptionController implements ISubscriptionController {
     constructor(private readonly subscriptionService: ISubscriptionService) {}

@@ -1,6 +1,6 @@
 import { ClientSession } from "mongoose";
-import { IAppointment } from "../../models/appointment.js";
-import { IBaseRepository } from "../IBase/IBaseRepository.interface.js";
+import { IAppointment } from "../../models/appointment.ts";
+import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
 
 export interface IAppointmentRepository extends IBaseRepository<IAppointment> {
     findByDoctorAndDate(doctorId: string, date: string | Date , options?: { page: number; limit: number }): Promise<{ appointments: IAppointment[]; total: number }>;

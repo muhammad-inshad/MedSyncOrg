@@ -1,4 +1,4 @@
-import { HospitalResponseDTO, HospitalStatusUpdateResponseDTO, CreateHospitalDTO, UpdateHospitalDTO } from "../../../../dto/hospital/hospital-response.dto.js";
+import { HospitalResponseDTO, HospitalStatusUpdateResponseDTO, CreateHospitalDTO, UpdateHospitalDTO } from "../../../../dto/hospital/hospital-response.dto.ts";
 
 export interface IHospitalManagementResult {
     data: HospitalResponseDTO[];

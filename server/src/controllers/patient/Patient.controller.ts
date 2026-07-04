@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { ApiResponse } from "../../utils/apiResponse.utils.js";
-import { HttpStatusCode } from "../../constants/enums.js";
-import { MESSAGES } from "../../constants/messages.js";
+import { ApiResponse } from "../../utils/apiResponse.utils.ts";
+import { HttpStatusCode } from "../../constants/enums.ts";
+import { MESSAGES } from "../../constants/messages.ts";
 
-import { IPatientService } from "../../services/patient/interfaces/patient.service.interfaces.js";
-import { ITokenPayload } from "../../services/token/token.service.interface.js";
-import logger from "../../utils/logger.js";
+import { IPatientService } from "../../services/patient/interfaces/patient.service.interfaces.ts";
+import { ITokenPayload } from "../../services/token/token.service.interface.ts";
+import logger from "../../utils/logger.ts";
 
 
 class PatientController {
