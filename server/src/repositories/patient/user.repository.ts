@@ -1,7 +1,7 @@
 import { BaseRepository } from "../IBase/BaseRepository.ts";
 import { IPatient } from "../../models/Patient.model.ts";
 import { IUserRepository } from "./user.repository.interface.ts";
-import { ClientSession, Model } from "mongoose";
+import { ClientSession, FilterQuery, Model } from "mongoose";
 
 export class UserRepository extends BaseRepository<IPatient> implements IUserRepository {
      constructor(model:Model<IPatient>){
@@ -17,6 +17,14 @@ export class UserRepository extends BaseRepository<IPatient> implements IUserRep
              { $addToSet: { hospital_id: hospitalId } },
              { new: true, session }
          );
+     }
+
+     async findByEmail(email: string): Promise<IPatient | null> {
+         return await this.model.findOne({ email } as FilterQuery<IPatient>).exec();
+     }
+
+     async findByIdWithPassword(id: string): Promise<IPatient | null> {
+         return await this.model.findById(id).select('+password').exec();
      }
 
 }

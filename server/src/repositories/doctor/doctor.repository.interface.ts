@@ -10,4 +10,7 @@ export interface IDoctorRepository extends IBaseRepository<IDoctor> {
     countPendingDoctor(hospitalId: string): Promise<number>;
     updateDoctorSalary(doctorId: string | Types.ObjectId, salary: number): Promise<void>;
     findDoctorFromHospitalCount():Promise <void>
-}
+    findByEmail(email: string): Promise<IDoctor | null>;
+    findByEmailWithPassword(email: string): Promise<IDoctor | null>;
+    findByIdWithPassword(id: string): Promise<IDoctor | null>;
+}

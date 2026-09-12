@@ -3,4 +3,6 @@ import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
 
 export interface IHospitalRepository extends IBaseRepository<IHospital>{
     startSession(hospitalId: string): Promise<Date>;
+    findByEmail(email: string): Promise<IHospital | null>;
+    findByEmailWithPassword(email: string): Promise<IHospital | null>;
 };

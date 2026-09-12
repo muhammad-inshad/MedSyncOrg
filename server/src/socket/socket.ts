@@ -69,8 +69,19 @@ export const initSocket = (server: HTTPServer) => {
       socket.to(roomId).emit("ice-candidate", candidate);
     });
 
+    socket.on("call-ended", ({ roomId }) => {
+      console.log(`Call ended by ${socket.id} in room: ${roomId}`);
+      socket.to(roomId).emit("call-ended");
+    });
+
     socket.on("disconnect", (reason) => {
       console.log(`Client disconnected (${socket.id}):`, reason);
+      // Notify all rooms this socket was in
+      for (const room of socket.rooms) {
+        if (room !== socket.id) {
+          socket.to(room).emit("user-left", socket.id);
+        }
+      }
     });
   });
 };

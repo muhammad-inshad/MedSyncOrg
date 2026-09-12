@@ -6,4 +6,6 @@ import { IBaseRepository } from "../IBase/IBaseRepository.interface.ts";
 export interface IUserRepository extends IBaseRepository<IPatient>{
     getCount(email:string):Promise<number>
     addHospital(patientId: string, hospitalId: string,session?: ClientSession ): Promise<IPatient | null>;
-};
+    findByEmail(email: string): Promise<IPatient | null>;
+    findByIdWithPassword(id: string): Promise<IPatient | null>;
+};

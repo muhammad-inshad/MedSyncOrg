@@ -313,14 +313,40 @@ const handleStartCall = async () => {
             }
         };
 
+        const handleCallEnded = () => {
+            console.log("Remote peer ended the call");
+            toast("Doctor ended the call", { icon: '📞' });
+            setIsCallActive(false);
+            setRemoteStreamState(null);
+            if (localStream.current) {
+                localStream.current.getTracks().forEach(track => track.stop());
+            }
+            if (peerConnection.current) {
+                peerConnection.current.close();
+                peerConnection.current = null;
+            }
+        };
+
+        const handleUserLeft = () => {
+            console.log("Remote peer disconnected");
+            if (isCallActive) {
+                toast("Doctor disconnected", { icon: '⚠️' });
+                setRemoteStreamState(null);
+            }
+        };
+
         socket.on("offer", handleOffer);
         socket.on("answer", handleAnswer);
         socket.on("ice-candidate", handleIceCandidate);
+        socket.on("call-ended", handleCallEnded);
+        socket.on("user-left", handleUserLeft);
 
         return () => {
             socket.off("offer", handleOffer);
             socket.off("answer", handleAnswer);
             socket.off("ice-candidate", handleIceCandidate);
+            socket.off("call-ended", handleCallEnded);
+            socket.off("user-left", handleUserLeft);
         };
     }, [selectedAppointment, isCallActive]);
     if (loading) {
@@ -410,6 +436,9 @@ const handleStartCall = async () => {
                                 </div>
                                 <button
                                     onClick={() => {
+                                        if (selectedAppointment?._id) {
+                                            socket.emit("call-ended", { roomId: selectedAppointment._id });
+                                        }
                                         setIsCallActive(false);
                                         setRemoteStreamState(null);
                                         if (localStream.current) {
@@ -417,6 +446,7 @@ const handleStartCall = async () => {
                                         }
                                         if (peerConnection.current) {
                                             peerConnection.current.close();
+                                            peerConnection.current = null;
                                         }
                                     }}
                                     className="w-full py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold text-sm transition-colors  shadow-rose-200"

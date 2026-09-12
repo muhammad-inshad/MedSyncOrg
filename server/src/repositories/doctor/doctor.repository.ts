@@ -1,7 +1,7 @@
 import { BaseRepository } from "../IBase/BaseRepository.ts";
 import { IDoctor } from "../../models/doctor.model.ts";
 import { IDoctorRepository } from "./doctor.repository.interface.ts";
-import mongoose, { Types } from "mongoose";
+import mongoose, { FilterQuery, Types } from "mongoose";
 
 
 export class DoctorRepository extends BaseRepository<IDoctor> implements IDoctorRepository {
@@ -51,4 +51,16 @@ async updateDoctorSalary(doctorId: string | Types.ObjectId, salary: number): Pro
 async findDoctorFromHospitalCount():Promise<void>{
   
 }
+
+async findByEmail(email: string): Promise<IDoctor | null> {
+    return await this.model.findOne({ email } as FilterQuery<IDoctor>).exec();
 }
+
+async findByEmailWithPassword(email: string): Promise<IDoctor | null> {
+    return await this.model.findOne({ email } as FilterQuery<IDoctor>).select('+password').exec();
+}
+
+async findByIdWithPassword(id: string): Promise<IDoctor | null> {
+    return await this.model.findById(id).select('+password').exec();
+}
+}

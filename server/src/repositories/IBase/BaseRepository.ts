@@ -35,18 +35,6 @@
             return await this.model.countDocuments(filter).exec();
         }
 
-        async findByEmail(email: string): Promise<T | null> {
-            return await this.model.findOne({ email } as FilterQuery<T>).exec();
-        }
-
-        async findByEmailWithPassword(email: string): Promise<T | null> {
-            return await this.model.findOne({ email } as FilterQuery<T>).select('+password').exec();
-        }
-
-        async findByIdWithPassword(id: string): Promise<T | null> {
-            return await this.model.findById(id).select('+password').exec();
-        }
-
         async findWithPagination(options: { page: number; limit: number; search?: string; searchFields?: string[]; filter?: object }): Promise<{ data: T[]; total: number; page: number; limit: number }> {
             const { page, limit, search, searchFields, filter } = options;
             const skip = (page - 1) * limit;

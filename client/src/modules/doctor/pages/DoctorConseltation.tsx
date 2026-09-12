@@ -167,6 +167,9 @@ const fetchConsultation = useCallback(async (page: number) => {
   };
 
   const handleEndCall = () => {
+    if (currentAppointment?._id) {
+      socket.emit("call-ended", { roomId: currentAppointment._id });
+    }
     setIsCallActive(false);
     setRemoteStreamState(null);
     if (localStream.current) localStream.current.getTracks().forEach(track => track.stop());
@@ -248,16 +251,40 @@ const fetchConsultation = useCallback(async (page: number) => {
       }
     };
 
+    const handleCallEnded = () => {
+      console.log("Remote peer ended the call");
+      toast("Patient ended the call", { icon: '📞' });
+      setIsCallActive(false);
+      setRemoteStreamState(null);
+      if (localStream.current) localStream.current.getTracks().forEach(track => track.stop());
+      if (peerConnection.current) {
+        peerConnection.current.close();
+        peerConnection.current = null;
+      }
+    };
+
+    const handleUserLeft = () => {
+      console.log("Remote peer disconnected");
+      if (isCallActive) {
+        toast("Patient disconnected", { icon: '⚠️' });
+        setRemoteStreamState(null);
+      }
+    };
+
     socket.on("offer", handleOffer);
     socket.on("answer", handleAnswer);
     socket.on("ice-candidate", handleIceCandidate);
     socket.on("user-joined", handleUserJoined);
+    socket.on("call-ended", handleCallEnded);
+    socket.on("user-left", handleUserLeft);
 
     return () => {
       socket.off("offer", handleOffer);
       socket.off("answer", handleAnswer);
       socket.off("ice-candidate", handleIceCandidate);
       socket.off("user-joined", handleUserJoined);
+      socket.off("call-ended", handleCallEnded);
+      socket.off("user-left", handleUserLeft);
     };
   }, [currentAppointment, isCallActive]);
 
