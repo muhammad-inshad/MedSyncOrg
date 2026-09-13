@@ -124,7 +124,7 @@ const handleSelectHospital = () => {
       Home
     </NavLink>
 
-    <NavLink to="/about" current={location.pathname} onClick={closeMobileMenu}>
+    <NavLink to={PATIENT_ROUTES.HOSPITAL_ABOUT} current={location.pathname} onClick={closeMobileMenu}>
       About us
     </NavLink>
 
@@ -138,7 +138,7 @@ const handleSelectHospital = () => {
 
    
 
-    <NavLink to="/contact" current={location.pathname} onClick={closeMobileMenu}>
+    <NavLink to={PATIENT_ROUTES.HOSPITAL_CONTACT} current={location.pathname} onClick={closeMobileMenu}>
       Contact
     </NavLink>
   </>
@@ -179,7 +179,7 @@ const handleSelectHospital = () => {
   onClick={closeMobileMenu}>
               Home
             </MobileNavLink>
-            <MobileNavLink to="/about" current={location.pathname} onClick={closeMobileMenu}>
+            <MobileNavLink to={PATIENT_ROUTES.HOSPITAL_ABOUT} current={location.pathname} onClick={closeMobileMenu}>
               About us
             </MobileNavLink>
             <MobileNavLink
@@ -188,7 +188,7 @@ const handleSelectHospital = () => {
 >
   Department
 </MobileNavLink>
-            <MobileNavLink to="/contact" current={location.pathname} onClick={closeMobileMenu}>
+            <MobileNavLink to={PATIENT_ROUTES.HOSPITAL_CONTACT} current={location.pathname} onClick={closeMobileMenu}>
               Contact
             </MobileNavLink>
 

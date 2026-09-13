@@ -17,6 +17,8 @@ import PaymentFailed from "../../shared/pages/PaymentFailed";
 import { patientApi } from "@/constants/backend/patient/patient.api";
 import Prescriptions from "../pages/Prescriptions";
 import PatientWallet from "../pages/PatientWallet";
+import HospitalAbout from "../pages/HospitalAbout";
+import HospitalContact from "../pages/HospitalContact";
 
 
 const PatientRouts = () => {
@@ -51,6 +53,8 @@ const PatientRouts = () => {
           <Route path={PATIENT_ROUTES.HOSPITAL_DOCTOR} element={<PatientDoctor />} />
           <Route path={PATIENT_ROUTES.PATIENT_APPOIMENT} element={<PatientAppointment />} />
           <Route path={PATIENT_ROUTES.HOSPITAL_DEPaRTMENTS} element={<HospitalDepartments />} />
+          <Route path={PATIENT_ROUTES.HOSPITAL_ABOUT} element={<HospitalAbout />} />
+          <Route path={PATIENT_ROUTES.HOSPITAL_CONTACT} element={<HospitalContact />} />
           <Route path={PATIENT_ROUTES.DOCTOR_PROFILE} element={<DoctorProfile />} />
         </Route>
       </Route>
